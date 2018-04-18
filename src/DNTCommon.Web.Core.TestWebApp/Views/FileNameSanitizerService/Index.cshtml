@@ -1,0 +1,15 @@
+﻿@{
+    ViewData["Title"] = "FileName Sanitizer Service";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<a class="btn btn-primary"
+   asp-action="Download"
+   asp-controller="FileNameSanitizerService"
+   asp-route-fileName="banner1.svg">Download banner1.svg File!</a>
+
+<a class="btn btn-warning"
+   asp-action="Download"
+   asp-controller="FileNameSanitizerService"
+   asp-route-fileName="../web.config">Download ../web.config File!</a>

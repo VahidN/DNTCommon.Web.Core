@@ -1,0 +1,29 @@
+﻿@using DNTCommon.Web.Core
+
+@{
+    ViewData["Title"] = "Domain Helper Extensions";
+    var url1 = "http://www1.site.com/";
+    var url2 = "http://www2.site.com";
+    var haveTheSameDomain = url1.HaveTheSameDomain(url2);
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">Samples</h3>
+    </div>
+    <div class="panel-body">
+        <div>
+            Url 1: @url1 <br/>
+            Url 2: @url2
+        </div>
+        <ul>
+            <li>url1.HaveTheSameDomain(url2): @haveTheSameDomain</li>
+            <li>url1.IsMvcPage(): @url1.IsMvcPage()</li>
+            <li>url1.GetSubDomain(): @url1.GetSubDomain()</li>
+            <li>url1.GetHostWithoutSubDomain(): @url1.GetHostWithoutSubDomain()</li>
+            <li>url1.GetUrlDomain(): @url1.GetUrlDomain()</li>
+        </ul>
+    </div>
+</div>

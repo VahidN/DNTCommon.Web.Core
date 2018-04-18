@@ -1,0 +1,23 @@
+﻿@{
+    ViewData["Title"] = "Ajax Extensions";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<button class="btn btn-primary" onclick="doCallApi()">Call AjaxOnlyRequest Action Method</button>
+
+@section Scripts {
+   <script type="text/javascript">
+        function doCallApi() {
+            $.ajax({
+                url: "@Url.Action("AjaxOnlyRequest","AjaxExtensions")",
+                type: 'GET'
+            }).then(function (response) {
+                console.log("response", response);
+                alert(JSON.stringify(response, null, ' '));
+            }, function (xhr, status, error) {
+                console.log({ xhr: xhr, status: status, error: error });
+            });
+        }
+   </script>
+}

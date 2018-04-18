@@ -1,0 +1,54 @@
+﻿@using DNTCommon.Web.Core
+
+@{
+    ViewData["Title"] = "Http Request Info";
+    var url = Url.Action("Index", "Home", null, ViewContext.HttpContext.Request.Scheme);
+}
+
+@inject IHttpRequestInfoService HttpRequestInfoService
+@inject IHtmlHelperService HtmlHelperService
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">Samples</h3>
+    </div>
+    <div class="panel-body">
+        <ul>
+            <li>HttpRequestInfoService.GetIP(): @HttpRequestInfoService.GetIP()</li>
+            <li>HttpRequestInfoService.GetHeaderValue("Accept-Language"): @HttpRequestInfoService.GetHeaderValue("Accept-Language")</li>
+            <li>HttpRequestInfoService.GetUserAgent(): @HttpRequestInfoService.GetUserAgent()</li>
+            <li>HttpRequestInfoService.AbsoluteContent("~/"): @HttpRequestInfoService.AbsoluteContent("~/")</li>
+            <li>HttpRequestInfoService.GetBaseUrl(): @HttpRequestInfoService.GetBaseUrl()</li>
+            <li>HttpRequestInfoService.GetRawUrl(): @HttpRequestInfoService.GetRawUrl()</li>
+            <li>HtmlHelperService.GetUrlTitleAsync("@url"): @{ @await HtmlHelperService.GetUrlTitleAsync(url); }</li>
+            <li>HttpRequestInfoService.GetUrlHelper().Content("~/"): @HttpRequestInfoService.GetUrlHelper().Content("~/")</li>
+        </ul>
+
+        <button type="submit" onclick="postData()" class="btn btn-info">
+             HttpRequestInfoService.ReadRequestBodyAsStringAsync()
+        </button>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script type="text/javascript">
+        function postData() {
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("Index","HttpRequestInfo")',
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({
+                    Id: 1,
+                    Name: 'Name1'
+                }),
+                success: function (result) {
+                    alert(result);
+                }
+            });
+        }
+    </script>
+}

@@ -1,0 +1,9 @@
+﻿@model DateTime
+@{
+    ViewData["Title"] = "Cache Service";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+Cached Data from _cacheService.GetOrAdd(): @Model
+<a asp-controller="CacheService" asp-action="Index" class="btn btn-primary">Refresh</a>

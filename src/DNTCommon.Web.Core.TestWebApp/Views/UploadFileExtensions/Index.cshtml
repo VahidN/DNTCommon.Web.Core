@@ -1,0 +1,19 @@
+﻿@using DNTCommon.Web.Core.TestWebApp.Models
+@model UserFileViewModel
+
+@{
+    ViewData["Title"] = "Upload File Extensions";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<form method="post"
+      asp-action="UploadPhoto"
+      asp-controller="UploadFileExtensions"
+      enctype="multipart/form-data">
+    <input asp-for="Photo" class="form-control" />
+    <span asp-validation-for="Photo" class="text-danger"></span>
+    <input type="submit" value="Upload [.png,.jpg,.jpeg,.gif only]" class="btn btn-primary"/>
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+</form>

@@ -1,0 +1,29 @@
+﻿@using DNTCommon.Web.Core
+
+@{
+    ViewData["Title"] = "Ye Ke Model Binder";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<button type="submit" onclick="postData()" class="btn btn-primary">Post Arabic Ye Ke</button>
+
+@section Scripts
+{
+    <script type="text/javascript">
+        function postData() {
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("Index","YeKeModelBinder")',
+                dataType: 'json',
+                contentType: 'application/x-www-form-urlencoded; charset=utf-8', //'application/json; charset=utf-8', doesn't work here
+                data: {
+                        Data: "ي ك مي‌شود"
+                },
+                success: function (response) {
+                    alert(JSON.stringify(response, null, ' '));
+                }
+            });
+        }
+    </script>
+}

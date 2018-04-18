@@ -1,0 +1,13 @@
+﻿@{
+    ViewData["Title"] = "Web Mail Service";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<form asp-action="SendEmail" asp-controller="WebMailService" method="GET">
+  <button class="btn btn-primary" type="submit">SendEmail()</button>
+</form>
+
+<form asp-action="SendRazorTemplateEmail" asp-controller="WebMailService" method="GET">
+  <button class="btn btn-success" type="submit">SendRazorTemplateEmail()</button>
+</form>

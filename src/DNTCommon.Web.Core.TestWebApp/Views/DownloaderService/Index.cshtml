@@ -1,0 +1,9 @@
+﻿@{
+    ViewData["Title"] = "Downloader Service";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<form asp-action="DownloadFile" asp-controller="DownloaderService">
+  <button class="btn btn-primary" type="submit">Call DownloadFile Action Method</button>
+</form>

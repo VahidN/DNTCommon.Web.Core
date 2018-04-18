@@ -1,0 +1,63 @@
+﻿@using DNTCommon.Web.Core
+@model ICollection<MvcControllerViewModel>
+@{
+    ViewData["Title"] = "MVC Actions Discovery";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<form method="post"
+          asp-controller="MvcActionsDiscovery"
+          asp-action="Index"
+          role="form"
+          data-ajax="true">
+   @foreach (var controller in Model.OrderBy(x => x.ControllerDisplayName))
+   {
+            <div class="panel panel-default top30">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        @{
+                            var displayName = controller.ControllerDisplayName;
+                            if(string.IsNullOrWhiteSpace(displayName))
+                            {
+                                displayName = controller.ToString();
+                            }
+                        }
+                        @displayName
+                    </h3>
+                </div>
+                <ul class="list-group">
+                    @foreach (var action in controller.MvcActions.OrderBy(x => x.ActionDisplayName))
+                    {
+                        var actionDisplayName = action.ActionDisplayName;
+                        if(string.IsNullOrWhiteSpace(actionDisplayName))
+                        {
+                            actionDisplayName = $"{action}::{action.ActionId}";
+                        }
+                        <li class="list-group-item" role="presentation">
+                            <input type="checkbox" name="actionIds" value="@action.ActionId" />
+                            @actionDisplayName
+                        </li>
+                    }
+                </ul>
+            </div>
+    }
+
+    <button type="submit" class="btn btn-primary top15">Submit selected items</button>
+</form>
+
+
+@section Scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('input[name="actionIds"]').click(function () {
+                if ($(this).is(':checked')) {
+                    $(this).parent().addClass('list-group-item-success');
+                } else {
+                    $(this).parent().removeClass('list-group-item-success');
+                }
+            });
+        });
+    </script>
+}

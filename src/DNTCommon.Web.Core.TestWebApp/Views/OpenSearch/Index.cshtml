@@ -1,0 +1,15 @@
+﻿@{
+    ViewData["Title"] = "OpenSearch Result";
+}
+
+@section SiteHeader
+{
+  <!--Autodiscovery of search plugins-->
+  <link rel="search" type="application/opensearchdescription+xml" title="DNTCommon.Web.Core" href="@Url.Action("RenderOpenSearch","OpenSearch")" />
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<form asp-action="RenderOpenSearch" asp-controller="OpenSearch" method="GET">
+  <button class="btn btn-primary" type="submit">Render an OpenSearch Info</button>
+</form>

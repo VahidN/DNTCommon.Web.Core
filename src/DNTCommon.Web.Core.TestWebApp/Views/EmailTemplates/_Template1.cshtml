@@ -1,0 +1,7 @@
+﻿@using DNTCommon.Web.Core.TestWebApp.Models
+@model EmailTemplateViewModel
+@{
+    Layout = null; //"~/Areas/Identity/Views/EmailTemplates/_EmailsLayout.cshtml";
+}
+Hello!<br/>
+This is an email from <a style="direction:ltr" href="@Url.Action("Index", "Home" , values: new { area="" }, protocol: this.Context.Request.Scheme)">@Model.EmailSignature</a>

@@ -1,0 +1,12 @@
+﻿@{
+    ViewData["Title"] = "SitemapResult";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<form asp-action="Sitemap" asp-controller="SitemapResult" method="GET">
+  <button class="btn btn-primary" type="submit">Render a Sitemap</button>
+</form>
+
+<h2>Autodiscovery of Sitemap</h2>
+<a class="btn btn-success" asp-action="RobotsTxt" asp-controller="SitemapResult">Show /robots.txt</a>
