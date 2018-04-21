@@ -60,7 +60,7 @@ Features
   - [IUrlNormalizationService](/src/DNTCommon.Web.Core.Tests/UrlNormalizationServiceTests.cs) transforms a URL into a normalized URL so it is possible to determine if two syntactically different URLs may be equivalent.
 
 - Mail
-  - [IWebMailService](/src/DNTCommon.Web.Core.TestWebApp/Controllers/WebMailServiceController.cs) simplifies sending an email using the `MailKit` library. Its able to use razor based email templates.
+  - [IWebMailService](/src/DNTCommon.Web.Core.TestWebApp/Controllers/WebMailServiceController.cs) simplifies sending an email using the `MailKit` library. It's able to use razor based email templates.
 
 - ModelBinders
   - [PersianDateModelBinderProvider](/src/DNTCommon.Web.Core.TestWebApp/Views/PersianDateModelBinder/Index.cshtml) parses an incoming Persian date and then binds it to a DateTime property automatically. To use it globally (assuming your app only sends Persian dates to the server), Add it to MvcOptions: `services.AddMvc(options => options.UsePersianDateModelBinder())` or just apply it to an specific view-model `[ModelBinder(BinderType = typeof(PersianDateModelBinder))]`.
@@ -70,9 +70,11 @@ Features
   - [ControllerExtensions](/src/DNTCommon.Web.Core.TestWebApp/Controllers/ControllerExtensionsController.cs) provides useful extension methods to work with MVC Controllers.
   - [IMvcActionsDiscoveryService](/src/DNTCommon.Web.Core.TestWebApp/Controllers/MvcActionsDiscoveryController.cs) provides a way to list all of the controllers and action methods of an MVC application.
   - [IViewRendererService](/src/DNTCommon.Web.Core.TestWebApp/Controllers/ViewRendererServiceController.cs) helps rendering a .cshtml file as an string. It's useful for creating razor based email templates.
+  - [UploadFileService](/src/DNTCommon.Web.Core.TestWebApp/Controllers/AllowUploadSafeFilesController.cs) saves the posted IFormFile to the specified directory asynchronously.
 
 - Security
   - [[AjaxOnly]](/src/DNTCommon.Web.Core.TestWebApp/Controllers/AjaxExtensionsController.cs) action filter determines whether the HttpRequest's `X-Requested-With` header has `XMLHttpRequest` value.
   - [IProtectionProviderService](/src/DNTCommon.Web.Core.TestWebApp/Controllers/ProtectionProviderServiceController.cs) is an encryption provider based on `Microsoft.AspNetCore.DataProtection.IDataProtector`. It's only useful for short-term encryption scenarios such as creating encrypted HTTP cookies.
   - [IFileNameSanitizerService](/src/DNTCommon.Web.Core.TestWebApp/Controllers/FileNameSanitizerServiceController.cs) determines whether the requested file is safe to download to avoid `Directory Traversal` & `File Inclusion` attacks.
   - [UploadFileExtensions](/src/DNTCommon.Web.Core.TestWebApp/Models/UserFileViewModel.cs) attribute determines only selected file extensions are safe [to be uploaded](/src/DNTCommon.Web.Core.TestWebApp/Controllers/UploadFileExtensionsController.cs).
+  - [AllowUploadSafeFiles](/src/DNTCommon.Web.Core.TestWebApp/Models/UserFileViewModel.cs) attribute disallows uploading dangerous files such as .aspx, web.config and .asp files.

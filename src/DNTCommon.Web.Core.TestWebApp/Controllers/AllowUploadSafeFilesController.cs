@@ -4,11 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DNTCommon.Web.Core.TestWebApp.Controllers
 {
-    public class UploadFileExtensionsController : Controller
+    public class AllowUploadSafeFilesController : Controller
     {
         private readonly IUploadFileService _uploadFileService;
 
-        public UploadFileExtensionsController(IUploadFileService uploadFileService)
+        public AllowUploadSafeFilesController(IUploadFileService uploadFileService)
         {
             _uploadFileService = uploadFileService;
         }
@@ -20,12 +20,12 @@ namespace DNTCommon.Web.Core.TestWebApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UploadPhoto(UserFileViewModel userViewModel)
+        public async Task<IActionResult> UploadGeneralFile(GeneralFileViewModel userViewModel)
         {
             if (ModelState.IsValid)
             {
-                var formFile = userViewModel.Photo;
-                if (!await _uploadFileService.SavePostedFileAsync(formFile, destinationDirectoryName: "images", allowOverwrite: false))
+                var formFile = userViewModel.UserFile;
+                if (!await _uploadFileService.SavePostedFileAsync(formFile, destinationDirectoryName: "files", allowOverwrite: false))
                 {
                     ModelState.AddModelError("", "Uploaded file is null or empty.");
                     return View(viewName: "Index");

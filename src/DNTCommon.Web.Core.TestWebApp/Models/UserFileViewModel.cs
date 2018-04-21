@@ -12,4 +12,12 @@ namespace DNTCommon.Web.Core.TestWebApp.Models
         [DataType(DataType.Upload)]
         public IFormFile Photo { get; set; }
     }
+
+    public class GeneralFileViewModel
+    {
+        [Required(ErrorMessage = "Please select a file.")]
+        [AllowUploadSafeFiles(ErrorMessage = "You are not allowed to upload these types of files.")]
+        [DataType(DataType.Upload)]
+        public IFormFile UserFile { get; set; }
+    }
 }

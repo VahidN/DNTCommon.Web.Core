@@ -1,0 +1,19 @@
+﻿@using DNTCommon.Web.Core.TestWebApp.Models
+@model GeneralFileViewModel
+
+@{
+    ViewData["Title"] = "Allow Upload Safe Files";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<form method="post"
+      asp-action="UploadGeneralFile"
+      asp-controller="AllowUploadSafeFiles"
+      enctype="multipart/form-data">
+    <input asp-for="UserFile" class="form-control" />
+    <span asp-validation-for="UserFile" class="text-danger"></span>
+    <input type="submit" value="Upload safe files only" class="btn btn-primary"/>
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+</form>
