@@ -1,18 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Primitives;
-using Newtonsoft.Json;
 
 namespace DNTCommon.Web.Core
 {
@@ -59,6 +53,16 @@ namespace DNTCommon.Web.Core
         /// Gets the current HttpContext.Request's UserAgent.
         /// </summary>
         string GetUserAgent();
+
+        /// <summary>
+        /// Gets the current HttpContext.Request's Referrer.
+        /// </summary>
+        string GetReferrerUrl();
+
+        /// <summary>
+        /// Gets the current HttpContext.Request's Referrer.
+        /// </summary>
+        Uri GetReferrerUri();
 
         /// <summary>
         /// Gets the current HttpContext.Request content's absolute path.
@@ -133,37 +137,27 @@ namespace DNTCommon.Web.Core
         }
 
         /// <summary>
+        /// Gets the current HttpContext.Request's Referrer.
+        /// </summary>
+        public string GetReferrerUrl()
+        {
+            return _httpContextAccessor.HttpContext.GetReferrerUrl();
+        }
+
+        /// <summary>
+        /// Gets the current HttpContext.Request's Referrer.
+        /// </summary>
+        public Uri GetReferrerUri()
+        {
+            return _httpContextAccessor.HttpContext.GetReferrerUri();
+        }
+
+        /// <summary>
         /// Gets the current HttpContext.Request's IP.
         /// </summary>
         public string GetIP(bool tryUseXForwardHeader = true)
         {
-            string ip = string.Empty;
-
-            // todo support new "Forwarded" header (2014) https://en.wikipedia.org/wiki/X-Forwarded-For
-
-            // X-Forwarded-For (csv list):  Using the First entry in the list seems to work
-            // for 99% of cases however it has been suggested that a better (although tedious)
-            // approach might be to read each IP from right to left and use the first public IP.
-            // http://stackoverflow.com/a/43554000/538763
-            //
-            if (tryUseXForwardHeader)
-            {
-                ip = SplitCsv(GetHeaderValue("X-Forwarded-For")).FirstOrDefault();
-            }
-
-            // RemoteIpAddress is always null in DNX RC1 Update1 (bug).
-            if (string.IsNullOrWhiteSpace(ip) &&
-                _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress != null)
-            {
-                ip = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString();
-            }
-
-            if (string.IsNullOrWhiteSpace(ip))
-            {
-                ip = GetHeaderValue("REMOTE_ADDR");
-            }
-
-            return ip;
+            return _httpContextAccessor.HttpContext.GetIP(tryUseXForwardHeader);
         }
 
         /// <summary>
@@ -171,26 +165,7 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public string GetHeaderValue(string headerName)
         {
-            if (_httpContextAccessor.HttpContext.Request?.Headers?.TryGetValue(headerName, out var values) ?? false)
-            {
-                return values.ToString();
-            }
-            return string.Empty;
-        }
-
-        private static List<string> SplitCsv(string csvList, bool nullOrWhitespaceInputReturnsNull = false)
-        {
-            if (string.IsNullOrWhiteSpace(csvList))
-            {
-                return nullOrWhitespaceInputReturnsNull ? null : new List<string>();
-            }
-
-            return csvList
-                .TrimEnd(',')
-                .Split(',')
-                .AsEnumerable()
-                .Select(s => s.Trim())
-                .ToList();
+            return _httpContextAccessor.HttpContext.GetHeaderValue(headerName);
         }
 
         /// <summary>
@@ -216,9 +191,7 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public string GetBaseUrl()
         {
-            requestSanityCheck();
-            var request = _httpContextAccessor.HttpContext.Request;
-            return $"{request.Scheme}://{request.Host.ToUriComponent()}";
+            return _httpContextAccessor.HttpContext.GetBaseUrl();
         }
 
         /// <summary>
@@ -226,8 +199,7 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public string GetRawUrl()
         {
-            requestSanityCheck();
-            return _httpContextAccessor.HttpContext.Request.GetDisplayUrl();
+            return _httpContextAccessor.HttpContext.GetRawUrl();
         }
 
         /// <summary>
@@ -246,67 +218,28 @@ namespace DNTCommon.Web.Core
             return _urlHelper ?? throw new NullReferenceException(nameof(_urlHelper));
         }
 
-        private void requestSanityCheck()
-        {
-            if (_httpContextAccessor == null)
-            {
-                throw new NullReferenceException("httpContextAccessor is null.");
-            }
-
-            if (_httpContextAccessor.HttpContext == null)
-            {
-                throw new NullReferenceException("HttpContext is null.");
-            }
-
-            if (_httpContextAccessor.HttpContext.Request == null)
-            {
-                throw new NullReferenceException("HttpContext.Request is null.");
-            }
-        }
-
         /// <summary>
         /// Deserialize `request.Body` as a JSON content.
         /// </summary>
-        public async Task<T> DeserializeRequestJsonBodyAsAsync<T>()
+        public Task<T> DeserializeRequestJsonBodyAsAsync<T>()
         {
-            requestSanityCheck();
-            var request = _httpContextAccessor.HttpContext.Request;
-            using (var bodyReader = new StreamReader(request.Body, Encoding.UTF8))
-            {
-                var body = await bodyReader.ReadToEndAsync();
-                request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
-                return JsonConvert.DeserializeObject<T>(body);
-            }
+            return _httpContextAccessor.HttpContext.DeserializeRequestJsonBodyAsAsync<T>();
         }
 
         /// <summary>
         /// Reads `request.Body` as string.
         /// </summary>
-        public async Task<string> ReadRequestBodyAsStringAsync()
+        public Task<string> ReadRequestBodyAsStringAsync()
         {
-            requestSanityCheck();
-            var request = _httpContextAccessor.HttpContext.Request;
-            using (var bodyReader = new StreamReader(request.Body, Encoding.UTF8))
-            {
-                var body = await bodyReader.ReadToEndAsync();
-                request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
-                return body;
-            }
+            return _httpContextAccessor.HttpContext.ReadRequestBodyAsStringAsync();
         }
 
         /// <summary>
         /// Deserialize `request.Body` as a JSON content.
         /// </summary>
-        public async Task<Dictionary<string, string>> DeserializeRequestJsonBodyAsDictionaryAsync()
+        public Task<Dictionary<string, string>> DeserializeRequestJsonBodyAsDictionaryAsync()
         {
-            requestSanityCheck();
-            var request = _httpContextAccessor.HttpContext.Request;
-            using (var bodyReader = new StreamReader(request.Body, Encoding.UTF8))
-            {
-                var body = await bodyReader.ReadToEndAsync();
-                request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
-                return JsonConvert.DeserializeObject<Dictionary<string, string>>(body);
-            }
+            return _httpContextAccessor.HttpContext.DeserializeRequestJsonBodyAsDictionaryAsync();
         }
     }
 }

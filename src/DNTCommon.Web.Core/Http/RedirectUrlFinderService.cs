@@ -154,11 +154,10 @@ namespace DNTCommon.Web.Core
             return cacheReturn(siteUri, redirectUri);
         }
 
-
         private Uri cacheReturn(Uri originalUrl, Uri redirectUrl)
         {
             _cacheService.Add($"{CachePrefix}{originalUrl}", redirectUrl,
-                DateTimeOffset.UtcNow.AddMinutes(15)); // todo: check this
+                DateTimeOffset.UtcNow.AddMinutes(15));
             return redirectUrl;
         }
     }

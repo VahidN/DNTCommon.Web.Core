@@ -53,6 +53,11 @@ namespace DNTCommon.Web.Core
         void Add<T>(string cacheKey, Func<T> factory, DateTimeOffset absoluteExpiration);
 
         /// <summary>
+        /// Adds a key-value to the cache.
+        /// </summary>
+        void Add<T>(string cacheKey, T value);
+
+        /// <summary>
         /// Removes the object associated with the given key.
         /// </summary>
         void Remove(string cacheKey);
@@ -104,6 +109,14 @@ namespace DNTCommon.Web.Core
         public void Add<T>(string cacheKey, T value, DateTimeOffset absoluteExpiration)
         {
             _memoryCache.Set(cacheKey, value, absoluteExpiration);
+        }
+
+        /// <summary>
+        /// Adds a key-value to the cache.
+        /// </summary>
+        public void Add<T>(string cacheKey, T value)
+        {
+            _memoryCache.Set(cacheKey, value);
         }
 
         /// <summary>

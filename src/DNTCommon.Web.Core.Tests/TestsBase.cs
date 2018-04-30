@@ -19,15 +19,16 @@ namespace DNTCommon.Web.Core.Tests
         {
             var services = new ServiceCollection();
 
-            services.AddSingleton<IConfigurationRoot>(provider =>
-            {
-                return new Microsoft.Extensions.Configuration.ConfigurationBuilder()
-                                .AddInMemoryCollection(new[]
-                                {
-                                    new KeyValuePair<string,string>("UseInMemoryDatabase", "true"),
-                                })
-                                .Build();
-            });
+            var configuration = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
+                                            .AddJsonFile("appsettings.json", reloadOnChange: true, optional: false)
+                                            .AddInMemoryCollection(new[]
+                                            {
+                                                new KeyValuePair<string,string>("UseInMemoryDatabase", "true"),
+                                            })
+                                            .Build();
+            services.AddSingleton<IConfigurationRoot>(provider => configuration);
+            services.Configure<SmtpConfig>(options => configuration.GetSection("SmtpConfig").Bind(options));
+            services.Configure<AntiDosConfig>(options => configuration.GetSection("AntiDosConfig").Bind(options));
 
             services.AddSingleton<ILoggerFactory, LoggerFactory>();
             services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));

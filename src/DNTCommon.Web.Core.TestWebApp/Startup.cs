@@ -20,6 +20,8 @@ namespace DNTCommon.Web.Core.TestWebApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<SmtpConfig>(options => Configuration.GetSection("SmtpConfig").Bind(options));
+            services.Configure<AntiDosConfig>(options => Configuration.GetSection("AntiDosConfig").Bind(options));
+
             services.AddDNTCommonWeb();
             services.Configure<CookiePolicyOptions>(options =>
             {
@@ -47,6 +49,8 @@ namespace DNTCommon.Web.Core.TestWebApp
                 app.UseExceptionHandler("/Home/Error");
                 app.UseHsts();
             }
+
+            app.UseAntiDos();
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>DNTCommon.Web.Core provides common scenarios' solutions for ASP.NET Core applications.</Description>
-    <VersionPrefix>1.1.0</VersionPrefix>
+    <VersionPrefix>1.2.0</VersionPrefix>
     <Authors>Vahid Nasiri</Authors>
     <TargetFrameworks>netstandard1.6;netstandard2.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -26,9 +26,10 @@
     <PackageReference Include="Microsoft.SyndicationFeed.ReaderWriter" Version="1.0.2" />
     <PackageReference Include="DNTPersianUtils.Core" Version="2.3.0" />
     <PackageReference Include="MailKit" Version="2.0.1" />
-    <PackageReference Include="HtmlAgilityPack " Version="1.7.2" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.7.2" />
     <PackageReference Include="System.ValueTuple" Version="4.4.0" />
     <PackageReference Include="System.Net.Requests" Version="4.3.0" />
+    <PackageReference Include="IPAddressRange" Version="3.1.1" />
   </ItemGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.6'">
     <DefineConstants>NETSTANDARD1_6</DefineConstants>
@@ -41,7 +42,8 @@
     <PackageReference Include="Microsoft.SyndicationFeed.ReaderWriter" Version="1.0.2" />
     <PackageReference Include="DNTPersianUtils.Core" Version="2.3.0" />
     <PackageReference Include="MailKit" Version="2.0.1" />
-    <PackageReference Include="HtmlAgilityPack " Version="1.7.2" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.7.2" />
+    <PackageReference Include="IPAddressRange" Version="3.1.1" />
   </ItemGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <DefineConstants>NETSTANDARD2_0</DefineConstants>
