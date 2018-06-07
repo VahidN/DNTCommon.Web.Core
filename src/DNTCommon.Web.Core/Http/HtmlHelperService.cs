@@ -74,6 +74,7 @@ namespace DNTCommon.Web.Core
         private readonly ILogger<HtmlHelperService> _logger;
         private readonly IDownloaderService _downloaderService;
         private readonly IHttpRequestInfoService _httpRequestInfoService;
+        private readonly IHtmlReaderService _htmlReaderService;
 
         /// <summary>
         /// Html Helper Service
@@ -81,33 +82,13 @@ namespace DNTCommon.Web.Core
         public HtmlHelperService(
             ILogger<HtmlHelperService> logger,
             IDownloaderService downloaderService,
-            IHttpRequestInfoService httpRequestInfoService)
+            IHttpRequestInfoService httpRequestInfoService,
+            IHtmlReaderService htmlReaderService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _downloaderService = downloaderService ?? throw new ArgumentNullException(nameof(downloaderService));
             _httpRequestInfoService = httpRequestInfoService ?? throw new ArgumentNullException(nameof(httpRequestInfoService));
-        }
-
-        private HtmlDocument createHtmlDocument(string html)
-        {
-            var doc = new HtmlDocument
-            {
-                OptionCheckSyntax = true,
-                OptionFixNestedTags = true,
-                OptionAutoCloseOnEnd = true,
-                OptionDefaultStreamEncoding = Encoding.UTF8
-            };
-            doc.LoadHtml(html);
-
-            if (doc.ParseErrors != null && doc.ParseErrors.Any())
-            {
-                foreach (var error in doc.ParseErrors)
-                {
-                    _logger.LogWarning($"LoadHtml Error. SourceText: {error.SourceText} -> Code: {error.Code} -> Reason: {error.Reason}");
-                }
-            }
-
-            return doc;
+            _htmlReaderService = htmlReaderService ?? throw new ArgumentNullException(nameof(htmlReaderService));
         }
 
         /// <summary>
@@ -115,7 +96,7 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public IEnumerable<string> ExtractImagesLinks(string html)
         {
-            var doc = createHtmlDocument(html);
+            var doc = _htmlReaderService.CreateHtmlDocument(html);
             foreach (HtmlNode image in doc.DocumentNode.SelectNodes("//img[@src]"))
             {
                 foreach (HtmlAttribute attribute in image.Attributes.Where(attr => attr.Name.Equals("src", StringComparison.OrdinalIgnoreCase)))
@@ -130,7 +111,7 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public IEnumerable<string> ExtractLinks(string html)
         {
-            var doc = createHtmlDocument(html);
+            var doc = _htmlReaderService.CreateHtmlDocument(html);
             foreach (var image in doc.DocumentNode.SelectNodes("//a[@href]"))
             {
                 foreach (var attribute in image.Attributes.Where(attr => attr.Name.Equals("href", StringComparison.OrdinalIgnoreCase)))
@@ -145,7 +126,7 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public string FixRelativeUrls(string html, string imageNotFoundPath, string siteBaseUrl)
         {
-            var doc = createHtmlDocument(html);
+            var doc = _htmlReaderService.CreateHtmlDocument(html);
             foreach (var image in doc.DocumentNode.SelectNodes("//@background|//@lowsrc|//@src|//@href"))
             {
                 foreach (var attribute in image.Attributes.Where(attr =>
@@ -245,7 +226,7 @@ namespace DNTCommon.Web.Core
                 return string.Empty;
             }
 
-            var doc = createHtmlDocument(html);
+            var doc = _htmlReaderService.CreateHtmlDocument(html);
             var title = doc.DocumentNode.SelectSingleNode("//head/title");
             if (title == null)
             {

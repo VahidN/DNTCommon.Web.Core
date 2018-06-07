@@ -29,6 +29,7 @@ namespace DNTCommon.Web.Core.Tests
             services.AddSingleton<IConfigurationRoot>(provider => configuration);
             services.Configure<SmtpConfig>(options => configuration.GetSection("SmtpConfig").Bind(options));
             services.Configure<AntiDosConfig>(options => configuration.GetSection("AntiDosConfig").Bind(options));
+            services.Configure<AntiXssConfig>(options => configuration.GetSection("AntiXssConfig").Bind(options));
 
             services.AddSingleton<ILoggerFactory, LoggerFactory>();
             services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));

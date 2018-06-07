@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DNTCommon.Web.Core.TestWebApp.Models;
@@ -18,6 +19,12 @@ namespace DNTCommon.Web.Core.TestWebApp.Controllers
         {
             _webMailService = webMailService;
             _smtpConfig = smtpConfig;
+
+            _smtpConfig = smtpConfig ?? throw new ArgumentNullException(nameof(smtpConfig));
+            if (_smtpConfig.Value == null)
+            {
+                throw new ArgumentNullException(nameof(smtpConfig), "Please add SmtpConfig to your appsettings.json file.");
+            }
         }
 
         public IActionResult Index()

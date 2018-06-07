@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace DNTCommon.Web.Core
 {
@@ -50,7 +52,13 @@ namespace DNTCommon.Web.Core
             {
                 return new YeKeModelBinder();
             }
+
+#if !NETSTANDARD1_6
+            var loggerFactory = context.Services.GetRequiredService<ILoggerFactory>();
+            return new SimpleTypeModelBinder(context.Metadata.ModelType, loggerFactory);
+#else
             return new SimpleTypeModelBinder(context.Metadata.ModelType);
+#endif
         }
     }
 
@@ -70,7 +78,12 @@ namespace DNTCommon.Web.Core
                 throw new ArgumentNullException(nameof(bindingContext));
             }
 
+#if !NETSTANDARD1_6
+            var logger = bindingContext.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>();
+            var fallbackBinder = new SimpleTypeModelBinder(bindingContext.ModelType, logger);
+#else
             var fallbackBinder = new SimpleTypeModelBinder(bindingContext.ModelType);
+#endif
 
             var valueProviderResult = bindingContext.ValueProvider.GetValue(bindingContext.ModelName);
             if (valueProviderResult == ValueProviderResult.None)

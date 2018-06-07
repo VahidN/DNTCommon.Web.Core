@@ -26,6 +26,8 @@ namespace DNTCommon.Web.Core
             services.AddCommonHttpClientFactory();
             services.AddUploadFileService();
             services.AddAntiDosFirewall();
+            services.AddHtmlReaderService();
+            services.AddAntiXssService();
             return services;
         }
     }

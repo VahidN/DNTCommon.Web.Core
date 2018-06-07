@@ -21,6 +21,7 @@ namespace DNTCommon.Web.Core.TestWebApp
         {
             services.Configure<SmtpConfig>(options => Configuration.GetSection("SmtpConfig").Bind(options));
             services.Configure<AntiDosConfig>(options => Configuration.GetSection("AntiDosConfig").Bind(options));
+            services.Configure<AntiXssConfig>(options => Configuration.GetSection("AntiXssConfig").Bind(options));
 
             services.AddDNTCommonWeb();
             services.Configure<CookiePolicyOptions>(options =>

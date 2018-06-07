@@ -7,7 +7,7 @@ namespace DNTCommon.Web.Core.Tests
     [TestClass]
     public class HtmlHelperServiceTests : TestsBase
     {
-        private const string Html = @"
+        public const string Html = @"
         <html>
         <head>
            <title>.NET Core Applications &#8211; DNT</title>

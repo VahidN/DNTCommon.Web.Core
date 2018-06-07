@@ -58,6 +58,7 @@ Features
   - [IHttpRequestInfoService](/src/DNTCommon.Web.Core.TestWebApp/Views/HttpRequestInfo/Index.cshtml) provides useful methods to work with current HttpContext.Request.
   - [IRedirectUrlFinderService](/src/DNTCommon.Web.Core.TestWebApp/Controllers/RedirectUrlFinderServiceController.cs) finds the actual hidden URL after multiple redirects.
   - [IUrlNormalizationService](/src/DNTCommon.Web.Core.Tests/UrlNormalizationServiceTests.cs) transforms a URL into a normalized URL so it is possible to determine if two syntactically different URLs may be equivalent.
+  - [IHtmlReaderService](/src/DNTCommon.Web.Core.Tests/HtmlReaderServiceTests.cs) reads the HTML document's nodes recursively.
 
 - Mail
   - [IWebMailService](/src/DNTCommon.Web.Core.TestWebApp/Controllers/WebMailServiceController.cs) simplifies sending an email using the `MailKit` library. It's able to use razor based email templates.
@@ -79,3 +80,4 @@ Features
   - [UploadFileExtensions](/src/DNTCommon.Web.Core.TestWebApp/Models/UserFileViewModel.cs) attribute determines only selected file extensions are safe [to be uploaded](/src/DNTCommon.Web.Core.TestWebApp/Controllers/UploadFileExtensionsController.cs).
   - [AllowUploadSafeFiles](/src/DNTCommon.Web.Core.TestWebApp/Models/UserFileViewModel.cs) attribute disallows uploading dangerous files such as .aspx, web.config and .asp files.
   - [AntiDosMiddleware](/src/DNTCommon.Web.Core.TestWebApp/Startup.cs) is a rate limiter and throttling middleware for ASP.NET Core apps. To use it first add `app.UseAntiDos()` and `services.Configure<AntiDosConfig>` to [Startup.cs](/src/DNTCommon.Web.Core.TestWebApp/Startup.cs) file. Then complete the `AntiDosConfig` section of the [appsettings.json](/src/DNTCommon.Web.Core.TestWebApp/appsettings.json) file.
+  - [IAntiXssService](/src/DNTCommon.Web.Core.TestWebApp/Controllers/AntiXssController.cs) provides a cleaning service for unsafe HTML fragments that can lead to XSS attacks based on a whitelist of allowed tags and attributes. To use it add `services.Configure<AntiXssConfig>` to [Startup.cs](/src/DNTCommon.Web.Core.TestWebApp/Startup.cs) file. Then complete the `AntiXssConfig` section of the [appsettings.json](/src/DNTCommon.Web.Core.TestWebApp/appsettings.json) file.
