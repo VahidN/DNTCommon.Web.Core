@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using HtmlAgilityPack;
@@ -21,7 +22,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// If an attribute's value contains one of these characters, it will be removed.
         /// </summary>
-        public string[] UnsafeAttributeValueCharacters { set; get; }
+        public ISet<string> UnsafeAttributeValueCharacters { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -37,7 +38,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Valid tag's attributes
         /// </summary>
-        public string[] Attributes { set; get; }
+        public ISet<string> Attributes { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -107,7 +108,7 @@ namespace DNTCommon.Web.Core
         public string GetSanitizedHtml(string html, bool allowDataAttributes)
         {
             var parser = _htmlReaderService.ParseHtml(html);
-            var whitelistTags = _antiXssConfig.Value.ValidHtmlTags.Select(x => x.Tag.ToLowerInvariant()).ToArray();
+            var whitelistTags = new HashSet<string>(_antiXssConfig.Value.ValidHtmlTags.Select(x => x.Tag.ToLowerInvariant()).ToArray(), StringComparer.OrdinalIgnoreCase);
             foreach (var node in parser.HtmlNodes.ToList())
             {
                 fixCodeTag(node);
@@ -222,7 +223,7 @@ namespace DNTCommon.Web.Core
             return false;
         }
 
-        private bool cleanTags(string[] whitelistTags, HtmlNode node)
+        private bool cleanTags(HashSet<string> whitelistTags, HtmlNode node)
         {
             if (node.NodeType == HtmlNodeType.Element && !whitelistTags.Contains(node.Name))
             {

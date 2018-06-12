@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 namespace DNTCommon.Web.Core
 {
     /// <summary>
@@ -8,27 +11,27 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Such as looking for `etc/passwd` in the requested URL.
         /// </summary>
-        public string[] UrlAttackVectors { set; get; }
+        public ISet<string> UrlAttackVectors { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Such as `google` or `bing`.
         /// </summary>
-        public string[] GoodBotsUserAgents { set; get; }
+        public ISet<string> GoodBotsUserAgents { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Such as `asafaweb`.
         /// </summary>
-        public string[] BadBotsUserAgents { set; get; }
+        public ISet<string> BadBotsUserAgents { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Such as `HTTP_ACUNETIX_PRODUCT`.
         /// </summary>
-        public string[] BadBotsRequestHeaders { set; get; }
+        public ISet<string> BadBotsRequestHeaders { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// List of the permanent banned IPs.
         /// </summary>
-        public string[] BannedIPAddressRanges { set; get; }
+        public ISet<string> BannedIPAddressRanges { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// How long a client should be banned in minutes?
