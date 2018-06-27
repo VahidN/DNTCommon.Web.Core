@@ -117,7 +117,7 @@ namespace DNTCommon.Web.Core
             var xws = new XmlWriterSettings { Indent = true, Encoding = Encoding.UTF8 };
             using (var xmlWriter = XmlWriter.Create(response.Body, xws))
             {
-                xmlWriter.WriteStartElement("urlset", "http://www.sitemaps.org/schemas/sitemap/0.9");
+                xmlWriter.WriteStartElement("urlset", "https://www.sitemaps.org/schemas/sitemap/0.9");
                 xmlWriter.WriteStartElement("url");
                 xmlWriter.WriteElementString("loc", httpContextInfo.GetBaseUrl());
                 xmlWriter.WriteElementString("lastmod", DateTime.Now.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));

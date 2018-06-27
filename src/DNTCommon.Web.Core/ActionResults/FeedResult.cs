@@ -21,7 +21,7 @@ namespace DNTCommon.Web.Core
     /// </summary>
     public class FeedResult : ActionResult
     {
-        private const string Atom10Namespace = "http://www.w3.org/2005/Atom";
+        private const string Atom10Namespace = "https://www.w3.org/2005/Atom";
         private readonly List<SyndicationAttribute> _attributes = new List<SyndicationAttribute>
                 {
                    new SyndicationAttribute("xmlns:atom", Atom10Namespace)

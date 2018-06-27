@@ -8,6 +8,7 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <IsPackable>false</IsPackable>
+	<LangVersion>latest</LangVersion>
   </PropertyGroup>
   <Target Name="CopyConfig" AfterTargets="AfterBuild">
     <Copy SourceFiles="..\DNTCommon.Web.Core.TestWebApp\appsettings.json" DestinationFolder="$(OutDir)" />
