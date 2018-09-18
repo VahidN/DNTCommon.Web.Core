@@ -415,7 +415,7 @@ namespace DNTCommon.Web.Core
                 return;
             }
 
-            _logger.LogWarning($"Banned IP: ${requestInfo.IP}, UserAgent: {requestInfo.UserAgent}. {throttleInfo}");
+            _logger.LogWarning($"Banned IP: {requestInfo.IP}, UserAgent: {requestInfo.UserAgent}. {throttleInfo}");
             throttleInfo.IsLogged = true;
             _cacheService.Add(GetCacheKey(requestInfo), throttleInfo, GetCacheExpiresAt());
         }

@@ -28,7 +28,8 @@ namespace DNTCommon.Web.Core
                    ip.IsInSubnet("10.0.0.0/8") ||
                    ip.IsInSubnet("172.16.0.0/12") ||
                    ip.IsInSubnet("192.168.0.0/16") ||
-                   ip.IsInSubnet("169.254.0.0/16 ");
+                   ip.IsInSubnet("169.254.0.0/16 ") ||
+				   ip == NullIPv6;
         }
 
         /// <summary>
