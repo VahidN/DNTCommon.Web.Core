@@ -376,8 +376,7 @@ namespace DNTCommon.Web.Core
                 return (false, clientThrottleInfo);
             }
 
-            if (clientThrottleInfo.RequestsCount > _antiDosConfig.Value.AllowedRequests ||
-                clientThrottleInfo.ExpiresAt <= DateTimeOffset.UtcNow)
+            if (clientThrottleInfo.RequestsCount > _antiDosConfig.Value.AllowedRequests)
             {
                 clientThrottleInfo.BanReason = "IsDosAttack";
                 _cacheService.Add(key, clientThrottleInfo, expiresAt);
