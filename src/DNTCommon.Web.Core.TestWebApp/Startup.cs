@@ -35,7 +35,7 @@ namespace DNTCommon.Web.Core.TestWebApp
             {
                 // options.UsePersianDateModelBinder(); // To use it globally (assuming your app only sends Persian dates to the server)
                 options.UseYeKeModelBinder();
-            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
