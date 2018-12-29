@@ -14,8 +14,13 @@ namespace DNTCommon.Web.Core.TestWebApp.Controllers
         public IActionResult Index()
         {
             ViewBag.Msg = "This is a test";
-            ViewBag.EncryptedMsg = _protectionProviderService.Encrypt(ViewBag.Msg);
-            ViewBag.DecryptMsg = _protectionProviderService.Decrypt(ViewBag.EncryptedMsg);
+
+            ViewBag.EncryptedMsg1 = _protectionProviderService.Encrypt(ViewBag.Msg);
+            ViewBag.DecryptMsg1 = _protectionProviderService.Decrypt(ViewBag.EncryptedMsg1);
+
+            ViewBag.EncryptedMsg2 = _protectionProviderService.Encrypt(ViewBag.Msg);
+            ViewBag.DecryptMsg2 = _protectionProviderService.Decrypt(ViewBag.EncryptedMsg2);
+
             return View();
         }
     }
