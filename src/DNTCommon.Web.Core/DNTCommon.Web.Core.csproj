@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>DNTCommon.Web.Core provides common scenarios' solutions for ASP.NET Core applications.</Description>
-    <VersionPrefix>1.3.3</VersionPrefix>
+    <VersionPrefix>1.4.0</VersionPrefix>
     <Authors>Vahid Nasiri</Authors>
     <TargetFrameworks>netstandard1.6;netstandard2.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -25,9 +25,9 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor" Version="1.1.8" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="1.1.8" />
     <PackageReference Include="Microsoft.SyndicationFeed.ReaderWriter" Version="1.0.2" />
-    <PackageReference Include="DNTPersianUtils.Core" Version="3.1.0" />
-    <PackageReference Include="MailKit" Version="2.1.0.2" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.8.11" />
+    <PackageReference Include="DNTPersianUtils.Core" Version="3.2.0" />
+    <PackageReference Include="MailKit" Version="2.1.3" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.0" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
     <PackageReference Include="System.Net.Requests" Version="4.3.0" />
     <PackageReference Include="IPAddressRange" Version="3.2.0" />
@@ -41,9 +41,9 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.2.0" />
     <PackageReference Include="Microsoft.SyndicationFeed.ReaderWriter" Version="1.0.2" />
-    <PackageReference Include="DNTPersianUtils.Core" Version="3.1.0" />
-    <PackageReference Include="MailKit" Version="2.1.0.2" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.8.11" />
+    <PackageReference Include="DNTPersianUtils.Core" Version="3.2.0" />
+    <PackageReference Include="MailKit" Version="2.1.3" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.0" />
     <PackageReference Include="IPAddressRange" Version="3.2.0" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
   </ItemGroup>

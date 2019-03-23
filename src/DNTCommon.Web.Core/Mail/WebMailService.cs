@@ -39,6 +39,9 @@ namespace DNTCommon.Web.Core
             IEnumerable<MailAddress> emails,
             string subject,
             string message,
+            IEnumerable<MailAddress> blindCarpbonCopies = null,
+            IEnumerable<MailAddress> carpbonCopies = null,
+            IEnumerable<MailAddress> replyTos = null,
             DelayDelivery delayDelivery = null,
             IEnumerable<string> attachmentFiles = null,
             MailHeaders headers = null);
@@ -53,6 +56,9 @@ namespace DNTCommon.Web.Core
             string subject,
             string viewNameOrPath,
             T viewModel,
+            IEnumerable<MailAddress> blindCarpbonCopies = null,
+            IEnumerable<MailAddress> carpbonCopies = null,
+            IEnumerable<MailAddress> replyTos = null,
             DelayDelivery delayDelivery = null,
             IEnumerable<string> attachmentFiles = null,
             MailHeaders headers = null);
@@ -196,12 +202,16 @@ namespace DNTCommon.Web.Core
             string subject,
             string viewNameOrPath,
             T viewModel,
+            IEnumerable<MailAddress> blindCarpbonCopies = null,
+            IEnumerable<MailAddress> carpbonCopies = null,
+            IEnumerable<MailAddress> replyTos = null,
             DelayDelivery delayDelivery = null,
             IEnumerable<string> attachmentFiles = null,
             MailHeaders headers = null)
         {
             var message = await _viewRendererService.RenderViewToStringAsync(viewNameOrPath, viewModel);
-            await SendEmailAsync(smtpConfig, emails, subject, message, delayDelivery, attachmentFiles, headers);
+            await SendEmailAsync(smtpConfig, emails, subject, message,
+              blindCarpbonCopies, carpbonCopies, replyTos, delayDelivery, attachmentFiles, headers);
         }
 
         /// <summary>
@@ -212,6 +222,9 @@ namespace DNTCommon.Web.Core
             IEnumerable<MailAddress> emails,
             string subject,
             string message,
+            IEnumerable<MailAddress> blindCarpbonCopies = null,
+            IEnumerable<MailAddress> carpbonCopies = null,
+            IEnumerable<MailAddress> replyTos = null,
             DelayDelivery delayDelivery = null,
             IEnumerable<string> attachmentFiles = null,
             MailHeaders headers = null)
@@ -227,7 +240,8 @@ namespace DNTCommon.Web.Core
                         FileMode.CreateNew, FileAccess.Write, FileShare.None,
                         maxBufferSize, useAsync: true))
                     {
-                        var emailMessage = getEmailMessage(email.ToName, email.ToAddress, subject, message, attachmentFiles, smtpConfig, headers);
+                        var emailMessage = getEmailMessage(email.ToName, email.ToAddress, subject,
+                        message, attachmentFiles, smtpConfig, headers, blindCarpbonCopies, carpbonCopies, replyTos);
                         await emailMessage.WriteToAsync(stream);
                     }
                 }
@@ -250,7 +264,8 @@ namespace DNTCommon.Web.Core
                     var count = 0;
                     foreach (var email in emails)
                     {
-                        var emailMessage = getEmailMessage(email.ToName, email.ToAddress, subject, message, attachmentFiles, smtpConfig, headers);
+                        var emailMessage = getEmailMessage(email.ToName, email.ToAddress, subject,
+                        message, attachmentFiles, smtpConfig, headers, blindCarpbonCopies, carpbonCopies, replyTos);
                         await client.SendAsync(emailMessage);
                         count++;
 
@@ -270,12 +285,39 @@ namespace DNTCommon.Web.Core
 
         private static MimeMessage getEmailMessage(
             string toName, string toAddress, string subject, string message,
-            IEnumerable<string> attachmentFiles, SmtpConfig smtpConfig, MailHeaders headers)
+            IEnumerable<string> attachmentFiles, SmtpConfig smtpConfig, MailHeaders headers,
+            IEnumerable<MailAddress> blindCarpbonCopies, IEnumerable<MailAddress> carpbonCopies,
+            IEnumerable<MailAddress> replyTos)
         {
             var emailMessage = new MimeMessage();
             emailMessage.From.Add(new MailboxAddress(smtpConfig.FromName, smtpConfig.FromAddress));
             emailMessage.Subject = subject.ApplyRle();
             emailMessage.To.Add(new MailboxAddress(toName ?? string.Empty, toAddress));
+
+            if (blindCarpbonCopies != null && blindCarpbonCopies.Any())
+            {
+                foreach (var bcc in blindCarpbonCopies)
+                {
+                    emailMessage.Bcc.Add(new MailboxAddress(bcc.ToName ?? string.Empty, bcc.ToAddress));
+                }
+            }
+
+            if (carpbonCopies != null && carpbonCopies.Any())
+            {
+                foreach (var cc in carpbonCopies)
+                {
+                    emailMessage.Cc.Add(new MailboxAddress(cc.ToName ?? string.Empty, cc.ToAddress));
+                }
+            }
+
+            if (replyTos != null && replyTos.Any())
+            {
+                foreach (var rt in replyTos)
+                {
+                    emailMessage.ReplyTo.Add(new MailboxAddress(rt.ToName ?? string.Empty, rt.ToAddress));
+                }
+            }
+
             emailMessage.Body = getMessageBody(message, attachmentFiles);
             addHeaders(emailMessage, headers, smtpConfig.FromAddress);
 
