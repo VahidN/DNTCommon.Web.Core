@@ -7,10 +7,10 @@ namespace DNTCommon.Web.Core.TestWebApp.Controllers
     public class FileNameSanitizerServiceController : Controller
     {
         private readonly IFileNameSanitizerService _fileNameSanitizerService;
-        private readonly IHostingEnvironment _hostingEnvironment;
+        private readonly IWebHostEnvironment _hostingEnvironment;
 
         public FileNameSanitizerServiceController(
-            IHostingEnvironment hostingEnvironment,
+            IWebHostEnvironment hostingEnvironment,
             IFileNameSanitizerService fileNameSanitizerService)
         {
             _fileNameSanitizerService = fileNameSanitizerService;
