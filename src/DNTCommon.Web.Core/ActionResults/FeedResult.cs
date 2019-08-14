@@ -49,9 +49,7 @@ namespace DNTCommon.Web.Core
                 throw new ArgumentNullException(nameof(context));
             }
 
-            _httpContextInfo = context.HttpContext.RequestServices.GetService<IHttpRequestInfoService>() ??
-                               throw new NullReferenceException("Please register IHttpRequestInfoService.");
-
+            _httpContextInfo = context.HttpContext.RequestServices.GetRequiredService<IHttpRequestInfoService>();
             await writeSyndicationFeedToResponseAsync(context);
         }
 

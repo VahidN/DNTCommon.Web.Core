@@ -163,8 +163,7 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public static IUrlHelper GetUrlHelper(this HttpContext httpContext)
         {
-            var urlHelper = httpContext.RequestServices.GetService<IUrlHelper>();
-            return urlHelper ?? throw new NullReferenceException(nameof(urlHelper));
+            return httpContext.RequestServices.GetRequiredService<IUrlHelper>();
         }
 
         private static void requestSanityCheck(this HttpContext httpContext)

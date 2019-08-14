@@ -6,6 +6,8 @@ using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
 using Microsoft.Extensions.DependencyInjection;
+using System.Threading.Tasks;
+using System.IO;
 
 namespace DNTCommon.Web.Core
 {
@@ -92,50 +94,55 @@ namespace DNTCommon.Web.Core
         }
 
         /// <summary>
-        /// Executes the result operation of the action method synchronously.
+        /// Executes the result operation of the action method asynchronously.
         /// </summary>
-        public override void ExecuteResult(ActionContext context)
+        public override async Task ExecuteResultAsync(ActionContext context)
         {
             if (context == null)
             {
-                throw new ArgumentNullException("context");
+                throw new ArgumentNullException(nameof(context));
             }
-            writeToResponse(context);
-        }
 
-        private void writeToResponse(ActionContext context)
-        {
-            var httpContextInfo = context.HttpContext.RequestServices.GetService<IHttpRequestInfoService>() ??
-                   throw new NullReferenceException("Please register IHttpRequestInfoService.");
-
+            var httpContextInfo = context.HttpContext.RequestServices.GetRequiredService<IHttpRequestInfoService>();
             var response = context.HttpContext.Response;
             var mediaType = new MediaTypeHeaderValue("application/xml")
             {
                 CharSet = Encoding.UTF8.WebName
             };
             response.ContentType = mediaType.ToString();
-            var xws = new XmlWriterSettings { Indent = true, Encoding = Encoding.UTF8 };
-            using (var xmlWriter = XmlWriter.Create(response.Body, xws))
-            {
-                xmlWriter.WriteStartElement("urlset", "https://www.sitemaps.org/schemas/sitemap/0.9");
-                xmlWriter.WriteStartElement("url");
-                xmlWriter.WriteElementString("loc", httpContextInfo.GetBaseUrl());
-                xmlWriter.WriteElementString("lastmod", DateTime.Now.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
-                xmlWriter.WriteElementString("changefreq", "daily");
-                xmlWriter.WriteElementString("priority", "1.0");
-                xmlWriter.WriteEndElement();
 
-                foreach (var item in _allItems)
+            var data = getSitemapData(httpContextInfo.GetBaseUrl());
+            await response.Body.WriteAsync(data, 0, data.Length);
+        }
+
+        private byte[] getSitemapData(string baseUrl)
+        {
+            using (var memoryStream = new MemoryStream())
+            {
+                var xws = new XmlWriterSettings { Indent = true, Encoding = Encoding.UTF8 };
+                using (var xmlWriter = XmlWriter.Create(memoryStream, xws))
                 {
+                    xmlWriter.WriteStartElement("urlset", "https://www.sitemaps.org/schemas/sitemap/0.9");
                     xmlWriter.WriteStartElement("url");
-                    xmlWriter.WriteElementString("loc", item.Url);
-                    xmlWriter.WriteElementString("lastmod", item.LastUpdatedTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
-                    xmlWriter.WriteElementString("changefreq", item.ChangeFrequency.ToString().ToLower());
-                    xmlWriter.WriteElementString("priority", item.Priority.ToString(CultureInfo.InvariantCulture));
+                    xmlWriter.WriteElementString("loc", baseUrl);
+                    xmlWriter.WriteElementString("lastmod", DateTime.Now.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
+                    xmlWriter.WriteElementString("changefreq", "daily");
+                    xmlWriter.WriteElementString("priority", "1.0");
+                    xmlWriter.WriteEndElement();
+
+                    foreach (var item in _allItems)
+                    {
+                        xmlWriter.WriteStartElement("url");
+                        xmlWriter.WriteElementString("loc", item.Url);
+                        xmlWriter.WriteElementString("lastmod", item.LastUpdatedTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
+                        xmlWriter.WriteElementString("changefreq", item.ChangeFrequency.ToString().ToLower());
+                        xmlWriter.WriteElementString("priority", item.Priority.ToString(CultureInfo.InvariantCulture));
+                        xmlWriter.WriteEndElement();
+                    }
+
                     xmlWriter.WriteEndElement();
                 }
-
-                xmlWriter.WriteEndElement();
+                return memoryStream.ToArray();
             }
         }
     }

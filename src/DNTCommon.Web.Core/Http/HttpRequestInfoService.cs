@@ -25,9 +25,9 @@ namespace DNTCommon.Web.Core
             // Allows injecting IUrlHelper as a dependency
             services.AddScoped(serviceProvider =>
             {
-                var actionContext = serviceProvider.GetService<IActionContextAccessor>().ActionContext;
-                var urlHelperFactory = serviceProvider.GetService<IUrlHelperFactory>();
-                return urlHelperFactory?.GetUrlHelper(actionContext);
+                var actionContext = serviceProvider.GetRequiredService<IActionContextAccessor>().ActionContext;
+                var urlHelperFactory = serviceProvider.GetRequiredService<IUrlHelperFactory>();
+                return urlHelperFactory.GetUrlHelper(actionContext);
             });
             services.AddScoped<IHttpRequestInfoService, HttpRequestInfoService>();
             return services;

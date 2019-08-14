@@ -1,6 +1,8 @@
 using System;
+using System.IO;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -46,7 +48,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Executes the result operation of the action method synchronously.
         /// </summary>
-        public override void ExecuteResult(ActionContext context)
+        public override async Task ExecuteResultAsync(ActionContext context)
         {
             if (context == null)
             {
@@ -54,38 +56,44 @@ namespace DNTCommon.Web.Core
             }
 
             var response = context.HttpContext.Response;
-            writeToResponse(response);
-        }
-
-        private void writeToResponse(HttpResponse response)
-        {
             var mediaType = new MediaTypeHeaderValue("application/opensearchdescription+xml")
             {
                 CharSet = Encoding.UTF8.WebName
             };
             response.ContentType = mediaType.ToString();
-            var xws = new XmlWriterSettings { Indent = true, Encoding = Encoding.UTF8 };
-            using (var xmlWriter = XmlWriter.Create(response.Body, xws))
+
+            var data = getOpenSearchData();
+            await response.Body.WriteAsync(data, 0, data.Length);
+        }
+
+        private byte[] getOpenSearchData()
+        {
+            using (var memoryStream = new MemoryStream())
             {
-                xmlWriter.WriteStartElement("OpenSearchDescription", "http://a9.com/-/spec/opensearch/1.1/");
+                var xws = new XmlWriterSettings { Indent = true, Encoding = Encoding.UTF8 };
+                using (var xmlWriter = XmlWriter.Create(memoryStream, xws))
+                {
+                    xmlWriter.WriteStartElement("OpenSearchDescription", "http://a9.com/-/spec/opensearch/1.1/");
 
-                xmlWriter.WriteElementString("ShortName", ShortName);
-                xmlWriter.WriteElementString("Description", Description);
-                xmlWriter.WriteElementString("InputEncoding", "UTF-8");
-                xmlWriter.WriteElementString("SearchForm", SearchForm);
+                    xmlWriter.WriteElementString("ShortName", ShortName);
+                    xmlWriter.WriteElementString("Description", Description);
+                    xmlWriter.WriteElementString("InputEncoding", "UTF-8");
+                    xmlWriter.WriteElementString("SearchForm", SearchForm);
 
-                xmlWriter.WriteStartElement("Url");
-                xmlWriter.WriteAttributeString("type", "text/html");
-                xmlWriter.WriteAttributeString("template", SearchUrlTemplate);
-                xmlWriter.WriteEndElement();
+                    xmlWriter.WriteStartElement("Url");
+                    xmlWriter.WriteAttributeString("type", "text/html");
+                    xmlWriter.WriteAttributeString("template", SearchUrlTemplate);
+                    xmlWriter.WriteEndElement();
 
-                xmlWriter.WriteStartElement("Image");
-                xmlWriter.WriteAttributeString("width", "16");
-                xmlWriter.WriteAttributeString("height", "16");
-                xmlWriter.WriteString(FavIconUrl);
-                xmlWriter.WriteEndElement();
+                    xmlWriter.WriteStartElement("Image");
+                    xmlWriter.WriteAttributeString("width", "16");
+                    xmlWriter.WriteAttributeString("height", "16");
+                    xmlWriter.WriteString(FavIconUrl);
+                    xmlWriter.WriteEndElement();
 
-                xmlWriter.WriteEndElement();
+                    xmlWriter.WriteEndElement();
+                }
+                return memoryStream.ToArray();
             }
         }
     }
