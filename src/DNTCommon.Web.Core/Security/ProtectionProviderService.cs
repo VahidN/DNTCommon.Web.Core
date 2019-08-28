@@ -2,6 +2,7 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -37,6 +38,16 @@ namespace DNTCommon.Web.Core
         /// Encrypts the message
         /// </summary>
         string Encrypt(string inputText);
+
+        /// <summary>
+        /// It will serialize an object as a JSON string and then encrypt it as a Base64UrlEncode string.
+        /// </summary>
+        string EncryptObject(object data);
+
+        /// <summary>
+        /// It will decrypt a Base64UrlEncode encrypted JSON string and then deserialize it as an object.
+        /// </summary>
+        T DecryptObject<T>(string data);
     }
 
     /// <summary>
@@ -46,13 +57,15 @@ namespace DNTCommon.Web.Core
     {
         private readonly ILogger<ProtectionProviderService> _logger;
         private readonly IDataProtector _dataProtector;
+        private readonly ISerializationProvider _serializationProvider;
 
         /// <summary>
         /// The default protection provider
         /// </summary>
         public ProtectionProviderService(
             IDataProtectionProvider dataProtectionProvider,
-            ILogger<ProtectionProviderService> logger)
+            ILogger<ProtectionProviderService> logger,
+            ISerializationProvider serializationProvider)
         {
             if (dataProtectionProvider == null)
             {
@@ -60,6 +73,7 @@ namespace DNTCommon.Web.Core
             }
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _dataProtector = dataProtectionProvider.CreateProtector(typeof(ProtectionProviderService).FullName);
+            _serializationProvider = serializationProvider ?? throw new ArgumentNullException(nameof(serializationProvider));
         }
 
         /// <summary>
@@ -74,7 +88,7 @@ namespace DNTCommon.Web.Core
 
             try
             {
-                var inputBytes = Convert.FromBase64String(inputText);
+                var inputBytes = WebEncoders.Base64UrlDecode(inputText);
                 var bytes = _dataProtector.Unprotect(inputBytes);
                 return Encoding.UTF8.GetString(bytes);
             }
@@ -102,7 +116,23 @@ namespace DNTCommon.Web.Core
 
             var inputBytes = Encoding.UTF8.GetBytes(inputText);
             var bytes = _dataProtector.Protect(inputBytes);
-            return Convert.ToBase64String(bytes);
+            return WebEncoders.Base64UrlEncode(bytes);
+        }
+
+        /// <summary>
+        /// It will serialize an object as a JSON string and then encrypt it as a Base64UrlEncode string.
+        /// </summary>
+        public string EncryptObject(object data)
+        {
+            return Encrypt(_serializationProvider.Serialize(data));
+        }
+
+        /// <summary>
+        /// It will decrypt a Base64UrlEncode encrypted JSON string and then deserialize it as an object.
+        /// </summary>
+        public T DecryptObject<T>(string data)
+        {
+            return _serializationProvider.Deserialize<T>(Decrypt(data));
         }
     }
 }

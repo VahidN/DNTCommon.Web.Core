@@ -28,6 +28,7 @@ namespace DNTCommon.Web.Core
             services.AddAntiDosFirewall();
             services.AddHtmlReaderService();
             services.AddAntiXssService();
+            services.AddSerializationProvider();
             return services;
         }
     }
