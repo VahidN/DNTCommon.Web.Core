@@ -1,6 +1,12 @@
 DNTCommon.Web.Core
 ===========
-[![Build status](https://ci.appveyor.com/api/projects/status/1pycp4k6at6a1ho8?svg=true)](https://ci.appveyor.com/project/VahidN/dntcommon-web-core)
+
+<p align="left">
+  <a href="https://github.com/VahidN/DNTCommon.Web.Core">
+     <img alt="GitHub Actions status" src="https://github.com/VahidN/DNTCommon.Web.Core/workflows/.NET%20Core%20Build/badge.svg">
+  </a>
+</p>
+
 
 `DNTCommon.Web.Core` provides common scenarios' solutions for ASP.NET Core 1.1.x, 2.x and 3.x applications.
 
