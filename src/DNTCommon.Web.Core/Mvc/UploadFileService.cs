@@ -34,7 +34,13 @@ namespace DNTCommon.Web.Core
         /// <param name="destinationDirectoryName">A directory name in the wwwroot directory.</param>
         /// <param name="allowOverwrite">Creates a unique file name if the file already exists.</param>
         /// <returns></returns>
-        Task<bool> SavePostedFileAsync(IFormFile formFile, string destinationDirectoryName, bool allowOverwrite);
+        Task<(bool IsSaved, string SavedFilePath)> SavePostedFileAsync(IFormFile formFile, string destinationDirectoryName, bool allowOverwrite);
+
+        /// <summary>
+        /// Saves the posted IFormFile to a byte array.
+        /// </summary>
+        /// <param name="formFile">The posted file.</param>
+        Task<byte[]> GetPostedFileDataAsync(IFormFile formFile);
     }
 
     /// <summary>
@@ -73,11 +79,11 @@ namespace DNTCommon.Web.Core
         /// <param name="destinationDirectoryName">A directory name in the wwwroot directory.</param>
         /// <param name="allowOverwrite">Creates a unique file name if the file already exists.</param>
         /// <returns></returns>
-        public async Task<bool> SavePostedFileAsync(IFormFile formFile, string destinationDirectoryName, bool allowOverwrite)
+        public async Task<(bool IsSaved, string SavedFilePath)> SavePostedFileAsync(IFormFile formFile, string destinationDirectoryName, bool allowOverwrite)
         {
             if (formFile == null || formFile.Length == 0)
             {
-                return false;
+                return (false, string.Empty);
             }
 
             var uploadsRootFolder = Path.Combine(_environment.WebRootPath, destinationDirectoryName);
@@ -102,7 +108,25 @@ namespace DNTCommon.Web.Core
                 await formFile.CopyToAsync(fileStream);
             }
 
-            return true;
+            return (true, filePath);
+        }
+
+        /// <summary>
+        /// Saves the posted IFormFile to a byte array.
+        /// </summary>
+        /// <param name="formFile">The posted file.</param>
+        public async Task<byte[]> GetPostedFileDataAsync(IFormFile formFile)
+        {
+            if (formFile == null || formFile.Length == 0)
+            {
+                return null;
+            }
+
+            using (var memoryStream = new MemoryStream())
+            {
+                await formFile.CopyToAsync(memoryStream);
+                return memoryStream.ToArray();
+            }
         }
 
         private static string getUniqueFilePath(IFormFile formFile, string uploadsRootFolder)

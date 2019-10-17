@@ -25,7 +25,8 @@ namespace DNTCommon.Web.Core.TestWebApp.Controllers
             if (ModelState.IsValid)
             {
                 var formFile = userViewModel.Photo;
-                if (!await _uploadFileService.SavePostedFileAsync(formFile, destinationDirectoryName: "images", allowOverwrite: false))
+                var (isSaved, savedFilePath) = await _uploadFileService.SavePostedFileAsync(formFile, destinationDirectoryName: "images", allowOverwrite: false);
+                if (!isSaved)
                 {
                     ModelState.AddModelError("", "Uploaded file is null or empty.");
                     return View(viewName: "Index");
