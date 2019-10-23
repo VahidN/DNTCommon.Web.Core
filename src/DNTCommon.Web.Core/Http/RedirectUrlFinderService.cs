@@ -157,7 +157,7 @@ namespace DNTCommon.Web.Core
         private Uri cacheReturn(Uri originalUrl, Uri redirectUrl)
         {
             _cacheService.Add($"{CachePrefix}{originalUrl}", redirectUrl,
-                DateTimeOffset.UtcNow.AddMinutes(15));
+                DateTimeOffset.UtcNow.AddMinutes(15), size: 1);
             return redirectUrl;
         }
     }

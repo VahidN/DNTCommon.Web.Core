@@ -372,19 +372,19 @@ namespace DNTCommon.Web.Core
             if (!_cacheService.TryGetValue<ThrottleInfo>(key, out var clientThrottleInfo))
             {
                 clientThrottleInfo = new ThrottleInfo { RequestsCount = 1, ExpiresAt = expiresAt };
-                _cacheService.Add(key, clientThrottleInfo, expiresAt);
+                _cacheService.Add(key, clientThrottleInfo, expiresAt, size: 1);
                 return (false, clientThrottleInfo);
             }
 
             if (clientThrottleInfo.RequestsCount > _antiDosConfig.Value.AllowedRequests)
             {
                 clientThrottleInfo.BanReason = "IsDosAttack";
-                _cacheService.Add(key, clientThrottleInfo, expiresAt);
+                _cacheService.Add(key, clientThrottleInfo, expiresAt, size: 1);
                 return (true, clientThrottleInfo);
             }
 
             clientThrottleInfo.RequestsCount++;
-            _cacheService.Add(key, clientThrottleInfo, expiresAt);
+            _cacheService.Add(key, clientThrottleInfo, expiresAt, size: 1);
             return (false, clientThrottleInfo);
         }
 
@@ -416,7 +416,7 @@ namespace DNTCommon.Web.Core
 
             _logger.LogWarning($"Banned IP: {requestInfo.IP}, UserAgent: {requestInfo.UserAgent}. {throttleInfo}");
             throttleInfo.IsLogged = true;
-            _cacheService.Add(GetCacheKey(requestInfo), throttleInfo, GetCacheExpiresAt());
+            _cacheService.Add(GetCacheKey(requestInfo), throttleInfo, GetCacheExpiresAt(), size: 1);
         }
     }
 }
