@@ -8,10 +8,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
-#if !NETCOREAPP3_0
-using Newtonsoft.Json;
-#else
+#if NETCOREAPP3_0 || NETCOREAPP3_1
 using System.Text.Json;
+#else
+using Newtonsoft.Json;
 #endif
 
 namespace DNTCommon.Web.Core
@@ -190,10 +190,10 @@ namespace DNTCommon.Web.Core
             {
                 var body = await bodyReader.ReadToEndAsync();
                 request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
-#if !NETCOREAPP3_0
-                return JsonConvert.DeserializeObject<T>(body);
-#else
+#if NETCOREAPP3_0 || NETCOREAPP3_1
                 return JsonSerializer.Deserialize<T>(body);
+#else
+                return JsonConvert.DeserializeObject<T>(body);
 #endif
             }
         }
@@ -224,10 +224,10 @@ namespace DNTCommon.Web.Core
             {
                 var body = await bodyReader.ReadToEndAsync();
                 request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
-#if !NETCOREAPP3_0
-                return JsonConvert.DeserializeObject<Dictionary<string, string>>(body);
-#else
+#if NETCOREAPP3_0 || NETCOREAPP3_1
                 return JsonSerializer.Deserialize<Dictionary<string, string>>(body);
+#else
+                return JsonConvert.DeserializeObject<Dictionary<string, string>>(body);
 #endif
             }
         }

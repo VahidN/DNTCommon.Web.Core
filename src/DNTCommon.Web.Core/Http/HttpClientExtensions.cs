@@ -1,4 +1,4 @@
-#if NETSTANDARD2_0 || NETCOREAPP3_0
+#if NETSTANDARD2_0 || NETCOREAPP3_0 || NETCOREAPP3_1
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -9,7 +9,7 @@ using System.Net;
 using System.Net.Http.Formatting;
 #endif
 
-#if NETCOREAPP3_0
+#if NETCOREAPP3_0 || NETCOREAPP3_1
 using System.Text.Json;
 using System.Text;
 #endif
@@ -53,7 +53,7 @@ namespace DNTCommon.Web.Core.Http
         }
 #endif
 
-#if NETCOREAPP3_0
+#if NETCOREAPP3_0 || NETCOREAPP3_1
         /// <summary>
         /// Allows manipulation of the request headers before it is sent, when you are using a signelton httpClient.
         /// </summary>

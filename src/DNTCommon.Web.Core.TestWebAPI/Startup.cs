@@ -1,11 +1,17 @@
-﻿using Microsoft.AspNetCore.Builder;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
-namespace DNTCommon.Web.Core.TestWebApp
+namespace DNTCommon.Web.Core.TestWebAPI
 {
     public class Startup
     {
@@ -25,13 +31,7 @@ namespace DNTCommon.Web.Core.TestWebApp
 
             services.AddDNTCommonWeb();
 
-            services.AddMvc(options =>
-            {
-                // options.UsePersianDateModelBinder(); // To use it globally (assuming your app only sends Persian dates to the server)
-                options.UseYeKeModelBinder();
-            }).SetCompatibilityVersion(CompatibilityVersion.Latest);
-            services.AddControllersWithViews();
-            services.AddRazorPages();
+            services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -41,25 +41,16 @@ namespace DNTCommon.Web.Core.TestWebApp
             {
                 app.UseDeveloperExceptionPage();
             }
-            else
-            {
-                app.UseExceptionHandler("/Home/Error");
-                app.UseHsts();
-            }
-
-            app.UseAntiDos();
 
             app.UseHttpsRedirection();
-            app.UseStaticFiles();
 
             app.UseRouting();
 
+            app.UseAuthorization();
+
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
-                endpoints.MapRazorPages();
+                endpoints.MapControllers();
             });
         }
     }

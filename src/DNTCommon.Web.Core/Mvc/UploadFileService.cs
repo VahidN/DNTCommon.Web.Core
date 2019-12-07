@@ -50,23 +50,23 @@ namespace DNTCommon.Web.Core
     {
         private const int MaxBufferSize = 0x10000; // 64K. The artificial constraint due to win32 api limitations. Increasing the buffer size beyond 64k will not help in any circumstance, as the underlying SMB protocol does not support buffer lengths beyond 64k.
 
-#if !NETCOREAPP3_0
-        private readonly IHostingEnvironment _environment;
-
-        /// <summary>
-        /// Upload File Service
-        /// </summary>
-        public UploadFileService(IHostingEnvironment environment)
-        {
-            _environment = environment ?? throw new ArgumentNullException(nameof(environment));
-        }
-#else
+#if NETCOREAPP3_0 || NETCOREAPP3_1
         private readonly IWebHostEnvironment _environment;
 
         /// <summary>
         /// Upload File Service
         /// </summary>
         public UploadFileService(IWebHostEnvironment environment)
+        {
+            _environment = environment ?? throw new ArgumentNullException(nameof(environment));
+        }
+#else
+        private readonly IHostingEnvironment _environment;
+
+        /// <summary>
+        /// Upload File Service
+        /// </summary>
+        public UploadFileService(IHostingEnvironment environment)
         {
             _environment = environment ?? throw new ArgumentNullException(nameof(environment));
         }

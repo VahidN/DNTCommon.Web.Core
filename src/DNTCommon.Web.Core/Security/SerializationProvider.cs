@@ -1,5 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
-#if NETCOREAPP3_0
+#if NETCOREAPP3_0 || NETCOREAPP3_1
 using System.Text.Json;
 #else
 using Newtonsoft.Json;
@@ -37,7 +37,7 @@ namespace DNTCommon.Web.Core
         /// </summary>
         T Deserialize<T>(string data);
 
-#if NETCOREAPP3_0
+#if NETCOREAPP3_0 || NETCOREAPP3_1
         /// <summary>
         /// Serialize the given data to an string.
         /// </summary>
@@ -65,7 +65,7 @@ namespace DNTCommon.Web.Core
     /// </summary>
     public class SerializationProvider : ISerializationProvider
     {
-#if NETCOREAPP3_0
+#if NETCOREAPP3_0 || NETCOREAPP3_1
         /// <summary>
         /// Serialize the given data to an string.
         /// </summary>
@@ -110,7 +110,7 @@ namespace DNTCommon.Web.Core
         }
 #endif
 
-#if NETCOREAPP3_0
+#if NETCOREAPP3_0 || NETCOREAPP3_1
         /// <summary>
         /// Deserialize the given string to an object.
         /// </summary>

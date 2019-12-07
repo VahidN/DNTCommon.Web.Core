@@ -11,6 +11,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace DNTCommon.Web.Core
 {
@@ -88,7 +89,9 @@ namespace DNTCommon.Web.Core
                     {
                         AreaName = controllerTypeInfo.GetCustomAttribute<AreaAttribute>()?.RouteValue,
                         ControllerAttributes = getAttributes(controllerTypeInfo),
-                        ControllerDisplayName = controllerTypeInfo.GetCustomAttribute<DisplayNameAttribute>()?.DisplayName,
+                        ControllerDisplayName =
+                           controllerTypeInfo.GetCustomAttribute<DisplayNameAttribute>()?.DisplayName ??
+                           controllerTypeInfo.GetCustomAttribute<DisplayAttribute>()?.Name,
                         ControllerName = descriptor.ControllerName,
                     };
                     MvcControllers.Add(currentController);
@@ -100,7 +103,9 @@ namespace DNTCommon.Web.Core
                 {
                     ControllerId = currentController.ControllerId,
                     ActionName = descriptor.ActionName,
-                    ActionDisplayName = actionMethodInfo.GetCustomAttribute<DisplayNameAttribute>()?.DisplayName,
+                    ActionDisplayName =
+                      actionMethodInfo.GetCustomAttribute<DisplayNameAttribute>()?.DisplayName ??
+                      actionMethodInfo.GetCustomAttribute<DisplayAttribute>()?.Name,
                     ActionAttributes = getAttributes(actionMethodInfo),
                     IsSecuredAction = isSecuredAction(controllerTypeInfo, actionMethodInfo)
                 });
