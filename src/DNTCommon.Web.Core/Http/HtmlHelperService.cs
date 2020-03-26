@@ -97,7 +97,13 @@ namespace DNTCommon.Web.Core
         public IEnumerable<string> ExtractImagesLinks(string html)
         {
             var doc = _htmlReaderService.CreateHtmlDocument(html);
-            foreach (HtmlNode image in doc.DocumentNode.SelectNodes("//img[@src]"))
+			var nodes = doc.DocumentNode.SelectNodes("//img[@src]");
+			if(nodes == null)
+			{
+				yield break;				
+			}
+			
+            foreach (HtmlNode image in nodes)
             {
                 foreach (HtmlAttribute attribute in image.Attributes.Where(attr => attr.Name.Equals("src", StringComparison.OrdinalIgnoreCase)))
                 {
@@ -107,12 +113,36 @@ namespace DNTCommon.Web.Core
         }
 
         /// <summary>
+        /// Returns HtmlAttribute's of the selected nodes.
+        /// </summary>		
+        public IEnumerable<HtmlAttributeCollection> SelectNodes(string html, string xpath)
+        {
+            var doc = _htmlReaderService.CreateHtmlDocument(html);
+            var nodes = doc.DocumentNode.SelectNodes(xpath);
+            if (nodes == null)
+            {
+                yield break;
+            }
+
+            foreach (var item in nodes)
+            {
+                yield return item.Attributes;
+            }
+        }		
+
+        /// <summary>
         /// Returns the href list of anchor tags.
         /// </summary>
         public IEnumerable<string> ExtractLinks(string html)
         {
             var doc = _htmlReaderService.CreateHtmlDocument(html);
-            foreach (var image in doc.DocumentNode.SelectNodes("//a[@href]"))
+			var nodes = doc.DocumentNode.SelectNodes("//a[@href]");
+			if(nodes == null)
+			{
+				yield break;				
+			}
+			
+            foreach (var image in nodes)
             {
                 foreach (var attribute in image.Attributes.Where(attr => attr.Name.Equals("href", StringComparison.OrdinalIgnoreCase)))
                 {
@@ -127,7 +157,13 @@ namespace DNTCommon.Web.Core
         public string FixRelativeUrls(string html, string imageNotFoundPath, string siteBaseUrl)
         {
             var doc = _htmlReaderService.CreateHtmlDocument(html);
-            foreach (var image in doc.DocumentNode.SelectNodes("//@background|//@lowsrc|//@src|//@href"))
+			var nodes = doc.DocumentNode.SelectNodes("//@background|//@lowsrc|//@src|//@href");
+			if(nodes == null)
+			{
+				return doc.DocumentNode.OuterHtml;	
+			}
+			
+            foreach (var image in nodes)
             {
                 foreach (var attribute in image.Attributes.Where(attr =>
                     attr.Name.Equals("background", StringComparison.OrdinalIgnoreCase) ||
