@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 using Microsoft.Extensions.DependencyInjection;
@@ -97,12 +96,12 @@ namespace DNTCommon.Web.Core
         public IEnumerable<string> ExtractImagesLinks(string html)
         {
             var doc = _htmlReaderService.CreateHtmlDocument(html);
-			var nodes = doc.DocumentNode.SelectNodes("//img[@src]");
-			if(nodes == null)
-			{
-				yield break;				
-			}
-			
+            var nodes = doc.DocumentNode.SelectNodes("//img[@src]");
+            if (nodes == null)
+            {
+                yield break;
+            }
+
             foreach (HtmlNode image in nodes)
             {
                 foreach (HtmlAttribute attribute in image.Attributes.Where(attr => attr.Name.Equals("src", StringComparison.OrdinalIgnoreCase)))
@@ -114,7 +113,7 @@ namespace DNTCommon.Web.Core
 
         /// <summary>
         /// Returns HtmlAttribute's of the selected nodes.
-        /// </summary>		
+        /// </summary>
         public IEnumerable<HtmlAttributeCollection> SelectNodes(string html, string xpath)
         {
             var doc = _htmlReaderService.CreateHtmlDocument(html);
@@ -128,7 +127,7 @@ namespace DNTCommon.Web.Core
             {
                 yield return item.Attributes;
             }
-        }		
+        }
 
         /// <summary>
         /// Returns the href list of anchor tags.
@@ -136,12 +135,12 @@ namespace DNTCommon.Web.Core
         public IEnumerable<string> ExtractLinks(string html)
         {
             var doc = _htmlReaderService.CreateHtmlDocument(html);
-			var nodes = doc.DocumentNode.SelectNodes("//a[@href]");
-			if(nodes == null)
-			{
-				yield break;				
-			}
-			
+            var nodes = doc.DocumentNode.SelectNodes("//a[@href]");
+            if (nodes == null)
+            {
+                yield break;
+            }
+
             foreach (var image in nodes)
             {
                 foreach (var attribute in image.Attributes.Where(attr => attr.Name.Equals("href", StringComparison.OrdinalIgnoreCase)))
@@ -157,12 +156,12 @@ namespace DNTCommon.Web.Core
         public string FixRelativeUrls(string html, string imageNotFoundPath, string siteBaseUrl)
         {
             var doc = _htmlReaderService.CreateHtmlDocument(html);
-			var nodes = doc.DocumentNode.SelectNodes("//@background|//@lowsrc|//@src|//@href");
-			if(nodes == null)
-			{
-				return doc.DocumentNode.OuterHtml;	
-			}
-			
+            var nodes = doc.DocumentNode.SelectNodes("//@background|//@lowsrc|//@src|//@href");
+            if (nodes == null)
+            {
+                return doc.DocumentNode.OuterHtml;
+            }
+
             foreach (var image in nodes)
             {
                 foreach (var attribute in image.Attributes.Where(attr =>
@@ -182,8 +181,8 @@ namespace DNTCommon.Web.Core
 
                     originalUrl = originalUrl.Trim();
 
-                    if (originalUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase) ||
-                       originalUrl.StartsWith("https", StringComparison.OrdinalIgnoreCase))
+                    if (originalUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+                        || originalUrl.StartsWith("https", StringComparison.OrdinalIgnoreCase))
                     {
                         if (attribute.Value != originalUrl)
                         {

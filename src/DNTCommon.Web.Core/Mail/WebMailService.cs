@@ -233,6 +233,11 @@ namespace DNTCommon.Web.Core
             {
                 const int maxBufferSize = 0x10000; // 64K.
 
+                if (!Directory.Exists(smtpConfig.PickupFolder))
+                {
+                    Directory.CreateDirectory(smtpConfig.PickupFolder);
+                }
+
                 foreach (var email in emails)
                 {
                     using (var stream = new FileStream(
