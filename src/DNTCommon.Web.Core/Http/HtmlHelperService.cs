@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 using Microsoft.Extensions.DependencyInjection;
@@ -63,6 +64,11 @@ namespace DNTCommon.Web.Core
         /// Download the given uri and then extracts its title.
         /// </summary>
         Task<string> GetUrlTitleAsync(string url);
+
+        /// <summary>
+        /// Removes all of the HTML tags.
+        /// </summary>
+        string RemoveHtmlTags(string html);
     }
 
     /// <summary>
@@ -70,6 +76,9 @@ namespace DNTCommon.Web.Core
     /// </summary>
     public class HtmlHelperService : IHtmlHelperService
     {
+        private static readonly Regex _htmlSpacesPattern =
+                    new Regex(@"&nbsp;|&zwnj;|(\n)\s*", RegexOptions.Compiled);
+
         private readonly ILogger<HtmlHelperService> _logger;
         private readonly IDownloaderService _downloaderService;
         private readonly IHttpRequestInfoService _httpRequestInfoService;
@@ -287,6 +296,23 @@ namespace DNTCommon.Web.Core
         public Task<string> GetUrlTitleAsync(string url)
         {
             return GetUrlTitleAsync(new Uri(url));
+        }
+
+        /// <summary>
+        /// Removes all of the HTML tags.
+        /// </summary>
+        public string RemoveHtmlTags(string html)
+        {
+            if (string.IsNullOrWhiteSpace(html))
+            {
+                return string.Empty;
+            }
+
+            var doc = _htmlReaderService.CreateHtmlDocument(html);
+            var innerText = doc.DocumentNode.InnerText;
+            return string.IsNullOrWhiteSpace(innerText) ?
+                        string.Empty :
+                        _htmlSpacesPattern.Replace(innerText, " ").Trim();
         }
     }
 }
