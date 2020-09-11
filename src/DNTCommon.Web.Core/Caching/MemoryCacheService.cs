@@ -121,11 +121,8 @@ namespace DNTCommon.Web.Core
         {
             _memoryCache.Set(cacheKey, factory(), new MemoryCacheEntryOptions
             {
-                AbsoluteExpiration = absoluteExpiration
-#if !NETSTANDARD1_6
-                ,
+                AbsoluteExpiration = absoluteExpiration,
                 Size = size // the size limit is the count of entries
-#endif
             });
         }
 
@@ -136,11 +133,8 @@ namespace DNTCommon.Web.Core
         {
             _memoryCache.Set(cacheKey, value, new MemoryCacheEntryOptions
             {
-                AbsoluteExpiration = absoluteExpiration
-#if !NETSTANDARD1_6
-                ,
+                AbsoluteExpiration = absoluteExpiration,
                 Size = size // the size limit is the count of entries
-#endif
             });
         }
 
@@ -151,9 +145,7 @@ namespace DNTCommon.Web.Core
         {
             _memoryCache.Set(cacheKey, value, new MemoryCacheEntryOptions
             {
-#if !NETSTANDARD1_6
                 Size = size // the size limit is the count of entries
-#endif
             });
         }
 
@@ -179,11 +171,8 @@ namespace DNTCommon.Web.Core
                 result = factory();
                 _memoryCache.Set(cacheKey, result, new MemoryCacheEntryOptions
                 {
-                    AbsoluteExpiration = absoluteExpiration
-#if !NETSTANDARD1_6
-                ,
+                    AbsoluteExpiration = absoluteExpiration,
                     Size = size // the size limit is the count of entries
-#endif
                 });
 
                 return result;

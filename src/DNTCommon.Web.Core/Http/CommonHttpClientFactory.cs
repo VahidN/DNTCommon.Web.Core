@@ -56,12 +56,10 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public CommonHttpClientFactory()
         {
-#if !NETSTANDARD1_6
             // Default is 2 minutes: https://msdn.microsoft.com/en-us/library/system.net.servicepointmanager.dnsrefreshtimeout(v=vs.110).aspx
             ServicePointManager.DnsRefreshTimeout = (int)TimeSpan.FromMinutes(1).TotalMilliseconds;
             // Increases the concurrent outbound connections
             ServicePointManager.DefaultConnectionLimit = 1024;
-#endif
         }
 
         /// <summary>
@@ -108,9 +106,7 @@ namespace DNTCommon.Web.Core
         {
             // This ensures connections are used efficiently but not indefinitely.
             client.DefaultRequestHeaders.ConnectionClose = false; // keeps the connection open -> more efficient use of the client
-#if !NETSTANDARD1_6
             ServicePointManager.FindServicePoint(baseAddress).ConnectionLeaseTimeout = ConnectionLeaseTimeout; // ensures connections are not used indefinitely.
-#endif
         }
 
         private static void setDefaultHeaders(IDictionary<string, string> defaultRequestHeaders, HttpClient client)

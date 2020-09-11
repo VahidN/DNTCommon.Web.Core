@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Security.Claims;
 using System.Security.Principal;
 
-namespace DNTCommon.Web.Core.Security
+namespace DNTCommon.Web.Core
 {
     /// <summary>
     /// ClaimsIdentity extensions

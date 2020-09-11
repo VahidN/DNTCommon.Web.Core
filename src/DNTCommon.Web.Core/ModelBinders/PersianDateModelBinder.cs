@@ -57,12 +57,8 @@ namespace DNTCommon.Web.Core
                 return new PersianDateModelBinder();
             }
 
-#if !NETSTANDARD1_6
             var loggerFactory = context.Services.GetRequiredService<ILoggerFactory>();
             return new SimpleTypeModelBinder(context.Metadata.ModelType, loggerFactory);
-#else
-            return new SimpleTypeModelBinder(context.Metadata.ModelType);
-#endif
         }
     }
 
@@ -82,11 +78,7 @@ namespace DNTCommon.Web.Core
             }
 
             var logger = bindingContext.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>();
-#if !NETSTANDARD1_6
             var fallbackBinder = new SimpleTypeModelBinder(bindingContext.ModelType, logger);
-#else
-            var fallbackBinder = new SimpleTypeModelBinder(bindingContext.ModelType);
-#endif
 
             var valueProviderResult = bindingContext.ValueProvider.GetValue(bindingContext.ModelName);
             if (valueProviderResult == ValueProviderResult.None)

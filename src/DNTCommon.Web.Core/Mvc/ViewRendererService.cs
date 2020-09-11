@@ -24,9 +24,7 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public static IServiceCollection AddRazorViewRenderer(this IServiceCollection services)
         {
-#if NETCOREAPP3_0 || NETCOREAPP3_1
             services.AddMvcCore().AddRazorViewEngine();
-#endif
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddScoped<IViewRendererService, ViewRendererService>();
             return services;

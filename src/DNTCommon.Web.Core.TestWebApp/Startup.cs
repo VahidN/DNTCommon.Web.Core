@@ -22,6 +22,7 @@ namespace DNTCommon.Web.Core.TestWebApp
             services.Configure<SmtpConfig>(options => Configuration.GetSection("SmtpConfig").Bind(options));
             services.Configure<AntiDosConfig>(options => Configuration.GetSection("AntiDosConfig").Bind(options));
             services.Configure<AntiXssConfig>(options => Configuration.GetSection("AntiXssConfig").Bind(options));
+            services.Configure<ContentSecurityPolicyConfig>(options => Configuration.GetSection("ContentSecurityPolicyConfig").Bind(options));
 
             services.AddDNTCommonWeb();
 
@@ -50,6 +51,9 @@ namespace DNTCommon.Web.Core.TestWebApp
             app.UseAntiDos();
 
             app.UseHttpsRedirection();
+
+            app.UseContentSecurityPolicy();
+
             app.UseStaticFiles();
 
             app.UseRouting();

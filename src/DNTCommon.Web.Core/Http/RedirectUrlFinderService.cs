@@ -60,12 +60,10 @@ namespace DNTCommon.Web.Core
 
         static RedirectUrlFinderService()
         {
-#if !NETSTANDARD1_6
             // Default is 2 minutes: https://msdn.microsoft.com/en-us/library/system.net.servicepointmanager.dnsrefreshtimeout(v=vs.110).aspx
             ServicePointManager.DnsRefreshTimeout = (int)TimeSpan.FromMinutes(1).TotalMilliseconds;
             // Increases the concurrent outbound connections
             ServicePointManager.DefaultConnectionLimit = 1024;
-#endif
         }
 
         /// <summary>
