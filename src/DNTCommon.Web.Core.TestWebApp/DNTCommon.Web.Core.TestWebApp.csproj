@@ -6,7 +6,7 @@
     <ProjectReference Include="..\DNTCommon.Web.Core\DNTCommon.Web.Core.csproj" />
   </ItemGroup>
   <Target Name="PrecompileScript" BeforeTargets="BeforeBuild">
-    <Exec Command="dotnet bundle" />
+    <!--<Exec Command="dotnet bundle" />-->
   </Target>
   <ItemGroup>
     <DotNetCliToolReference Include="BundlerMinifier.Core" Version="2.9.406" />

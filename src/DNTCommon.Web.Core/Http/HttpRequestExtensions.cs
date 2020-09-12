@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json;
+using Microsoft.AspNetCore.Routing;
 
 namespace DNTCommon.Web.Core
 {
@@ -129,6 +130,15 @@ namespace DNTCommon.Web.Core
         }
 
         /// <summary>
+        /// Creates the action's URL, even outside of the MVC's pipeline
+        /// </summary>
+        public static string GetGenericActionUrl(this HttpContext httpContext, string action, string controller)
+        {
+            var generator = httpContext.GetLinkGenerator();
+            return generator.GetPathByAction(action, controller);
+        }
+
+        /// <summary>
         /// Gets the current HttpContext.Request's root address.
         /// </summary>
         public static Uri GetBaseUri(this HttpContext httpContext)
@@ -169,6 +179,14 @@ namespace DNTCommon.Web.Core
         public static IUrlHelper GetUrlHelper(this HttpContext httpContext)
         {
             return httpContext.RequestServices.GetRequiredService<IUrlHelper>();
+        }
+
+        /// <summary>
+        /// Gets the current HttpContext.Request's LinkGenerator.
+        /// </summary>
+        public static LinkGenerator GetLinkGenerator(this HttpContext httpContext)
+        {
+            return httpContext.RequestServices.GetRequiredService<LinkGenerator>();
         }
 
         private static void requestSanityCheck(this HttpContext httpContext)

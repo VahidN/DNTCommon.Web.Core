@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -102,6 +103,7 @@ namespace DNTCommon.Web.Core
     /// Logs the ContentSecurityPolicy errors
     /// </summary>
     [ApiController]
+    [AllowAnonymous]
     [Route("api/[controller]")]
     public class CspReportController : ControllerBase
     {

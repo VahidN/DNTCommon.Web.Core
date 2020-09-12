@@ -43,8 +43,8 @@ namespace DNTCommon.Web.Core
             {
                 throw new NullReferenceException("Please set the `ContentSecurityPolicyConfig:Options` value in `appsettings.json` file.");
             }
-
-            return string.Join("; ", config.Options, $"report-uri {errorLogUri}");
+            var options = string.Join("; ", config.Options);
+            return $"{options}; report-uri {errorLogUri}";
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace DNTCommon.Web.Core
 
             if (!context.Response.Headers.ContainsKey(ContentSecurityPolicy))
             {
-                var errorLogUri = context.GetActionUrl(
+                var errorLogUri = context.GetGenericActionUrl(
                         action: nameof(CspReportController.Log),
                         controller: nameof(CspReportController).Replace("Controller", string.Empty));
                 context.Response.Headers.Add(

@@ -27,6 +27,10 @@ namespace DNTCommon.Web.Core
             {
                 var actionContext = serviceProvider.GetRequiredService<IActionContextAccessor>().ActionContext;
                 var urlHelperFactory = serviceProvider.GetRequiredService<IUrlHelperFactory>();
+                if (actionContext == null)
+                {
+                    throw new InvalidOperationException("actionContext is nul. This code should be called within the MVC pipeline.");
+                }
                 return urlHelperFactory.GetUrlHelper(actionContext);
             });
             services.AddScoped<IHttpRequestInfoService, HttpRequestInfoService>();
