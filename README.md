@@ -8,7 +8,7 @@ DNTCommon.Web.Core
 </p>
 
 
-`DNTCommon.Web.Core` provides common scenarios' solutions for ASP.NET Core 1.1.x, 2.x and 3.x applications.
+`DNTCommon.Web.Core` provides common scenarios' solutions for ASP.NET Core 3.x applications.
 
 Install via NuGet
 -----------------
