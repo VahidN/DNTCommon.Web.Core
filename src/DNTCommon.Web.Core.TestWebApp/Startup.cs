@@ -26,12 +26,11 @@ namespace DNTCommon.Web.Core.TestWebApp
 
             services.AddDNTCommonWeb();
 
-            services.AddMvc(options =>
+            services.AddControllersWithViews(options =>
             {
                 // options.UsePersianDateModelBinder(); // To use it globally (assuming your app only sends Persian dates to the server)
                 options.UseYeKeModelBinder();
-            }).SetCompatibilityVersion(CompatibilityVersion.Latest);
-            services.AddControllersWithViews();
+            });
             services.AddRazorPages();
         }
 
