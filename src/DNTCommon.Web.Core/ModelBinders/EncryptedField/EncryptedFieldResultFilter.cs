@@ -39,6 +39,7 @@ namespace DNTCommon.Web.Core
             {
                 PageResult pageResult => pageResult.Model, // For Razor pages
                 ViewResult viewResult => viewResult.Model, // For MVC Views
+                PartialViewResult partialViewResult => partialViewResult.Model, // For `return PartialView`
                 ObjectResult objectResult => objectResult.Value, // For Web API results
                 _ => null
             };

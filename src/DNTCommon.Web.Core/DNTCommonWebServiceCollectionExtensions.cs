@@ -14,6 +14,7 @@ namespace DNTCommon.Web.Core
         {
             services.AddHttpRequestInfoService();
             services.AddWebMailService();
+            services.AddSharedResourceService();
             services.AddDownloaderService();
             services.AddRedirectUrlFinderService();
             services.AddMemoryCacheService();
