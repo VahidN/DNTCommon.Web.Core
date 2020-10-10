@@ -16,8 +16,10 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Adds ISharedResourceService to IServiceCollection.
         /// </summary>
-        public static IServiceCollection AddSharedResourceService(this IServiceCollection services)
+        public static IServiceCollection AddSharedResourceService<T>(
+                this IServiceCollection services) where T : IStringLocalizer<T>
         {
+            services.AddScoped<IStringLocalizer>(provider => provider.GetRequiredService<T>());
             services.TryAddScoped<ISharedResourceService, SharedResourceService>();
             return services;
         }
