@@ -121,6 +121,7 @@ namespace DNTCommon.Web.Core
         /// Logs the ContentSecurityPolicy errors
         /// </summary>
         [HttpPost("[action]")]
+        [EnableReadableBodyStream]
         public async Task<IActionResult> Log()
         {
             /* a sample payload:

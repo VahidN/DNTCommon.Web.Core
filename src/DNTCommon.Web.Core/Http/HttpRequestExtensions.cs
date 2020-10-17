@@ -10,9 +10,26 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace DNTCommon.Web.Core
 {
+
+    /// <summary>
+    /// To read request body in an asp.net core webapi controller
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+    public class EnableReadableBodyStreamAttribute : Attribute, IAuthorizationFilter
+    {
+        /// <summary>
+        /// To read request body in an asp.net core webapi controller
+        /// </summary>
+        public void OnAuthorization(AuthorizationFilterContext context)
+        {
+            context.HttpContext.Request.EnableBuffering();
+        }
+    }
+
     /// <summary>
     /// Http Request Extensions
     /// </summary>
@@ -204,47 +221,47 @@ namespace DNTCommon.Web.Core
 
         /// <summary>
         /// Deserialize `request.Body` as a JSON content.
+        /// This method needs [EnableReadableBodyStream] attribute to be added to a given action method.
         /// </summary>
         public static async Task<T> DeserializeRequestJsonBodyAsAsync<T>(this HttpContext httpContext)
         {
-            requestSanityCheck(httpContext);
-            var request = httpContext.Request;
-            using (var bodyReader = new StreamReader(request.Body, Encoding.UTF8))
-            {
-                var body = await bodyReader.ReadToEndAsync();
-                request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
-                return JsonSerializer.Deserialize<T>(body);
-            }
+            var body = await httpContext.ReadRequestBodyAsStringAsync();
+            return JsonSerializer.Deserialize<T>(body);
         }
 
         /// <summary>
         /// Reads `request.Body` as string.
+        /// This method needs [EnableReadableBodyStream] attribute to be added to a given action method.
         /// </summary>
         public static async Task<string> ReadRequestBodyAsStringAsync(this HttpContext httpContext)
         {
             requestSanityCheck(httpContext);
             var request = httpContext.Request;
+            if (request.Body.CanSeek)
+            {
+                request.Body.Position = 0;
+            }
+            else
+            {
+                throw new InvalidOperationException("To read the request stream's body, please apply [EnableReadableBodyStream] attribute to the current action method.");
+            }
+
             using (var bodyReader = new StreamReader(request.Body, Encoding.UTF8))
             {
                 var body = await bodyReader.ReadToEndAsync();
-                request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
+                request.Body.Seek(0, SeekOrigin.Begin); // this is required, otherwise model binding will return null
                 return body;
             }
         }
 
         /// <summary>
         /// Deserialize `request.Body` as a JSON content.
+        /// This method needs [EnableReadableBodyStream] attribute to be added to a given action method.
         /// </summary>
         public static async Task<Dictionary<string, string>> DeserializeRequestJsonBodyAsDictionaryAsync(this HttpContext httpContext)
         {
-            requestSanityCheck(httpContext);
-            var request = httpContext.Request;
-            using (var bodyReader = new StreamReader(request.Body, Encoding.UTF8))
-            {
-                var body = await bodyReader.ReadToEndAsync();
-                request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
-                return JsonSerializer.Deserialize<Dictionary<string, string>>(body);
-            }
+            var body = await httpContext.ReadRequestBodyAsStringAsync();
+            return JsonSerializer.Deserialize<Dictionary<string, string>>(body);
         }
     }
 }

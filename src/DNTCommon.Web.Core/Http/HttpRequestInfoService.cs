@@ -101,16 +101,19 @@ namespace DNTCommon.Web.Core
 
         /// <summary>
         /// Deserialize `request.Body` as a JSON content.
+        /// This method needs [EnableReadableBodyStream] attribute to be added to a given action method.
         /// </summary>
         Task<T> DeserializeRequestJsonBodyAsAsync<T>();
 
         /// <summary>
         /// Reads `request.Body` as string.
+        /// This method needs [EnableReadableBodyStream] attribute to be added to a given action method.
         /// </summary>
         Task<string> ReadRequestBodyAsStringAsync();
 
         /// <summary>
         /// Deserialize `request.Body` as a JSON content.
+        /// This method needs [EnableReadableBodyStream] attribute to be added to a given action method.
         /// </summary>
         Task<Dictionary<string, string>> DeserializeRequestJsonBodyAsDictionaryAsync();
     }

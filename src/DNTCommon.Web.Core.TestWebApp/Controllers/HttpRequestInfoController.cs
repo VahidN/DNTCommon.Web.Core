@@ -19,7 +19,8 @@ namespace DNTCommon.Web.Core.TestWebApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Index([FromBody]RoleViewModel model)
+        [EnableReadableBodyStream]
+        public async Task<IActionResult> Index([FromBody] RoleViewModel model)
         {
             var requestBody = string.Empty;
             if (Request.IsAjaxRequest() && Request.ContentType.Contains("application/json"))
