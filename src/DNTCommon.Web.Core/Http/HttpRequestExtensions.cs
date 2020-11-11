@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Primitives;
 
 namespace DNTCommon.Web.Core
 {
@@ -105,7 +106,8 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public static string GetHeaderValue(this HttpContext httpContext, string headerName)
         {
-            if (httpContext.Request?.Headers?.TryGetValue(headerName, out var values) ?? false)
+            StringValues values = string.Empty;
+            if (httpContext.Request?.Headers?.TryGetValue(headerName, out values) ?? false)
             {
                 return values.ToString();
             }
