@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Text.Json;
 
 namespace DNTCommon.Web.Core
@@ -42,6 +43,26 @@ namespace DNTCommon.Web.Core
         /// Deserialize the given string to an object.
         /// </summary>
         T Deserialize<T>(string data, JsonSerializerOptions options);
+
+        /// <summary>
+        /// Serialize the given data to a byte array.
+        /// </summary>
+        byte[] SerializeToUtf8Bytes(object data, JsonSerializerOptions options);
+
+        /// <summary>
+        /// Serialize the given data to a byte array.
+        /// </summary>
+        byte[] SerializeToUtf8Bytes(object data);
+
+        /// <summary>
+        /// Deserialize the given byte array to an object.
+        /// </summary>
+        T DeserializeFromUtf8Bytes<T>(byte[] data);
+
+        /// <summary>
+        /// Deserialize the given byte array to an object.
+        /// </summary>
+        T DeserializeFromUtf8Bytes<T>(byte[] data, JsonSerializerOptions options);
     }
 
     /// <summary>
@@ -62,12 +83,7 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public string Serialize(object data)
         {
-            return JsonSerializer.Serialize(data,
-                                             new JsonSerializerOptions
-                                             {
-                                                 WriteIndented = false,
-                                                 IgnoreNullValues = true
-                                             });
+            return JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = false, IgnoreNullValues = true });
         }
 
         /// <summary>
@@ -84,6 +100,38 @@ namespace DNTCommon.Web.Core
         public T Deserialize<T>(string data, JsonSerializerOptions options)
         {
             return JsonSerializer.Deserialize<T>(data, options);
+        }
+
+        /// <summary>
+        /// Serialize the given data to a byte array.
+        /// </summary>
+        public byte[] SerializeToUtf8Bytes(object data, JsonSerializerOptions options)
+        {
+            return JsonSerializer.SerializeToUtf8Bytes(data, options);
+        }
+
+        /// <summary>
+        /// Serialize the given data to a byte array.
+        /// </summary>
+        public byte[] SerializeToUtf8Bytes(object data)
+        {
+            return JsonSerializer.SerializeToUtf8Bytes(data, new JsonSerializerOptions { WriteIndented = false, IgnoreNullValues = true });
+        }
+
+        /// <summary>
+        /// Deserialize the given byte array to an object.
+        /// </summary>
+        public T DeserializeFromUtf8Bytes<T>(byte[] data)
+        {
+            return JsonSerializer.Deserialize<T>(new ReadOnlySpan<byte>(data));
+        }
+
+        /// <summary>
+        /// Deserialize the given byte array to an object.
+        /// </summary>
+        public T DeserializeFromUtf8Bytes<T>(byte[] data, JsonSerializerOptions options)
+        {
+            return JsonSerializer.Deserialize<T>(new ReadOnlySpan<byte>(data), options);
         }
     }
 }

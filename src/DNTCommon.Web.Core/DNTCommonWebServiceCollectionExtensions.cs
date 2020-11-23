@@ -18,6 +18,7 @@ namespace DNTCommon.Web.Core
             services.AddRedirectUrlFinderService();
             services.AddMemoryCacheService();
             services.AddMvcActionsDiscoveryService();
+            services.AddDesProviderService();
             services.AddProtectionProviderService();
             services.AddHtmlHelperService();
             services.AddFileNameSanitizerService();
