@@ -1,5 +1,4 @@
-﻿using DNTCommon.Web.Core;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
@@ -13,11 +12,23 @@ namespace DNTCommon.Web.Core
     /// <summary>
     /// This filter encrypts the outgoing Models of action methods, before sending them to the client.
     /// </summary>
-    public class EncryptedFieldResultFilter : ResultFilterAttribute
+    public sealed class EncryptedFieldResultFilter : ResultFilterAttribute
     {
         private readonly IProtectionProviderService _protectionProviderService;
         private readonly ILogger<EncryptedFieldResultFilter> _logger;
         private readonly ConcurrentDictionary<Type, bool> _modelsWithEncryptedFieldAttributes = new ConcurrentDictionary<Type, bool>();
+
+        /// <summary>
+        /// An IProtectionProvider
+        /// </summary>
+        /// <value></value>
+        public IProtectionProviderService ProtectionProviderService { get; }
+
+        /// <summary>
+        /// The current ILogger
+        /// </summary>
+        /// <value></value>
+        public ILogger<EncryptedFieldResultFilter> Logger { get; }
 
         /// <summary>
         /// This filter encrypts the outgoing Models of action methods, before sending them to the client.
@@ -26,8 +37,10 @@ namespace DNTCommon.Web.Core
             IProtectionProviderService protectionProviderService,
             ILogger<EncryptedFieldResultFilter> logger)
         {
-            _protectionProviderService = protectionProviderService;
-            _logger = logger;
+            _protectionProviderService = protectionProviderService ?? throw new ArgumentNullException(nameof(protectionProviderService));
+            ProtectionProviderService = protectionProviderService;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            Logger = logger;
         }
 
         /// <summary>
@@ -35,6 +48,11 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public override void OnResultExecuting(ResultExecutingContext context)
         {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
             var model = context.Result switch
             {
                 PageResult pageResult => pageResult.Model, // For Razor pages
@@ -51,9 +69,12 @@ namespace DNTCommon.Web.Core
 
             if (typeof(IEnumerable).IsAssignableFrom(model.GetType()))
             {
-                foreach (var item in model as IEnumerable)
+                if (model is IEnumerable items)
                 {
-                    encryptProperties(item);
+                    foreach (var item in items)
+                    {
+                        encryptProperties(item);
+                    }
                 }
             }
             else
@@ -62,8 +83,13 @@ namespace DNTCommon.Web.Core
             }
         }
 
-        private void encryptProperties(object model)
+        private void encryptProperties(object? model)
         {
+            if (model == null)
+            {
+                return;
+            }
+
             var modelType = model.GetType();
             if (_modelsWithEncryptedFieldAttributes.TryGetValue(modelType, out var hasEncryptedFieldAttribute)
                 && !hasEncryptedFieldAttribute)
@@ -82,7 +108,7 @@ namespace DNTCommon.Web.Core
                 hasEncryptedFieldAttribute = true;
 
                 var value = property.GetValue(model);
-                if (value is null)
+                if (value == null)
                 {
                     continue;
                 }
@@ -93,7 +119,13 @@ namespace DNTCommon.Web.Core
                     continue;
                 }
 
-                var encryptedData = _protectionProviderService.Encrypt(value.ToString());
+                var inputText = value.ToString();
+                if (inputText == null)
+                {
+                    continue;
+                }
+
+                var encryptedData = _protectionProviderService.Encrypt(inputText);
                 property.SetValue(model, encryptedData);
             }
 

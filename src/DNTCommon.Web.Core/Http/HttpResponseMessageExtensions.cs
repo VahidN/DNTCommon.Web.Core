@@ -1,3 +1,4 @@
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -13,6 +14,11 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public static async Task EnsureSuccessStatusCodeAsync(this HttpResponseMessage response)
         {
+            if (response == null)
+            {
+                throw new ArgumentNullException(nameof(response));
+            }
+
             if (response.IsSuccessStatusCode)
             {
                 return;

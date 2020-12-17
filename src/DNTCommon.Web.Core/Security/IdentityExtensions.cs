@@ -13,7 +13,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Finds the first claimType's value of the given ClaimsIdentity.
         /// </summary>
-        public static string FindFirstValue(this ClaimsIdentity identity, string claimType)
+        public static string? FindFirstValue(this ClaimsIdentity identity, string claimType)
         {
             return identity?.FindFirst(claimType)?.Value;
         }
@@ -21,7 +21,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Finds the first claimType's value of the given IIdentity.
         /// </summary>
-        public static string GetUserClaimValue(this IIdentity identity, string claimType)
+        public static string? GetUserClaimValue(this IIdentity identity, string claimType)
         {
             var identity1 = identity as ClaimsIdentity;
             return identity1?.FindFirstValue(claimType);
@@ -30,7 +30,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Extracts the `ClaimTypes.GivenName`'s value of the given IIdentity.
         /// </summary>
-        public static string GetUserFirstName(this IIdentity identity)
+        public static string? GetUserFirstName(this IIdentity identity)
         {
             return identity?.GetUserClaimValue(ClaimTypes.GivenName);
         }
@@ -38,7 +38,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Extracts the `ClaimTypes.NameIdentifier`'s value of the given IIdentity.
         /// </summary>
-        public static T GetUserId<T>(this IIdentity identity) where T : IConvertible
+        public static T? GetUserId<T>(this IIdentity identity) where T : IConvertible
         {
             var firstValue = identity?.GetUserClaimValue(ClaimTypes.NameIdentifier);
             return firstValue != null
@@ -49,7 +49,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Extracts the `ClaimTypes.NameIdentifier`'s value of the given IIdentity.
         /// </summary>
-        public static string GetUserId(this IIdentity identity)
+        public static string? GetUserId(this IIdentity identity)
         {
             return identity?.GetUserClaimValue(ClaimTypes.NameIdentifier);
         }
@@ -75,7 +75,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Extracts the `ClaimTypes.Surname`'s value of the given IIdentity.
         /// </summary>
-        public static string GetUserLastName(this IIdentity identity)
+        public static string? GetUserLastName(this IIdentity identity)
         {
             return identity?.GetUserClaimValue(ClaimTypes.Surname);
         }
@@ -91,7 +91,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Return the GetUserFullName, otherwise the `ClaimTypes.Name`'s value.
         /// </summary>
-        public static string GetUserDisplayName(this IIdentity identity)
+        public static string? GetUserDisplayName(this IIdentity identity)
         {
             var fullName = GetUserFullName(identity);
             return string.IsNullOrWhiteSpace(fullName) ? GetUserName(identity) : fullName;
@@ -100,7 +100,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Extracts the `ClaimTypes.Name`'s value of the given IIdentity.
         /// </summary>
-        public static string GetUserName(this IIdentity identity)
+        public static string? GetUserName(this IIdentity identity)
         {
             return identity?.GetUserClaimValue(ClaimTypes.Name);
         }

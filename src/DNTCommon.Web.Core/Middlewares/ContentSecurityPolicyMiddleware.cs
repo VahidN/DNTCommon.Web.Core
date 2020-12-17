@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -14,7 +15,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// CSP options. Each options should be specified in one line.
         /// </summary>
-        public string[] Options { set; get; }
+        public IList<string> Options { get; } = new List<string>();
     }
 
     /// <summary>
@@ -37,11 +38,11 @@ namespace DNTCommon.Web.Core
             _next = next;
         }
 
-        private string getContentSecurityPolicyValue(ContentSecurityPolicyConfig config, string errorLogUri)
+        private static string getContentSecurityPolicyValue(ContentSecurityPolicyConfig config, string errorLogUri)
         {
-            if (config.Options == null || config.Options.Length == 0)
+            if (config.Options == null || config.Options.Count == 0)
             {
-                throw new NullReferenceException("Please set the `ContentSecurityPolicyConfig:Options` value in `appsettings.json` file.");
+                throw new InvalidOperationException("Please set the `ContentSecurityPolicyConfig:Options` value in `appsettings.json` file.");
             }
             var options = string.Join("; ", config.Options);
             return $"{options}; report-uri {errorLogUri}";
@@ -55,6 +56,11 @@ namespace DNTCommon.Web.Core
             if (config == null || config.Value == null || config.Value.Options == null)
             {
                 throw new ArgumentNullException(nameof(config), "Please add ContentSecurityPolicyConfig to your appsettings.json file.");
+            }
+
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
             }
 
             if (!context.Response.Headers.ContainsKey(XFrameOptions))
@@ -76,7 +82,7 @@ namespace DNTCommon.Web.Core
             {
                 var errorLogUri = context.GetGenericActionUrl(
                         action: nameof(CspReportController.Log),
-                        controller: nameof(CspReportController).Replace("Controller", string.Empty));
+                        controller: nameof(CspReportController).Replace("Controller", string.Empty, StringComparison.Ordinal));
                 context.Response.Headers.Add(
                     ContentSecurityPolicy,
                     getContentSecurityPolicyValue(config.Value, errorLogUri));

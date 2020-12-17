@@ -25,13 +25,25 @@ namespace DNTCommon.Web.Core
         };
 
         /// <summary>
+        /// Disallowed file extensions such as .asp
+        /// </summary>
+        /// <value></value>
+        public string[]? ExtensionsToFilter { get; }
+
+        /// <summary>
+        /// Disallowed names such as web.config
+        /// </summary>
+        /// <value></value>
+        public string[]? NamesToFilter { get; }
+
+        /// <summary>
         /// Disallows uploading dangerous files such as .aspx, web.config and .asp files.
         /// </summary>
         /// <param name="extensionsToFilter">Disallowed file extensions such as .asp</param>
         /// <param name="namesToFilter">Disallowed names such as web.config</param>
         public AllowUploadSafeFilesAttribute(
-            string[] extensionsToFilter = null,
-            string[] namesToFilter = null)
+            string[]? extensionsToFilter = null,
+            string[]? namesToFilter = null)
         {
             if (extensionsToFilter != null)
             {
@@ -48,12 +60,15 @@ namespace DNTCommon.Web.Core
                     _namesToFilter.Add(item);
                 }
             }
+
+            ExtensionsToFilter = extensionsToFilter;
+            NamesToFilter = namesToFilter;
         }
 
         /// <summary>
         /// Determines whether the specified value of the object is valid.
         /// </summary>
-        public override bool IsValid(object value)
+        public override bool IsValid(object? value)
         {
             if (value == null)
             {
@@ -65,7 +80,7 @@ namespace DNTCommon.Web.Core
                 return isValidFile(file);
             }
 
-            if (!(value is IList<IFormFile> files))
+            if (value is not IList<IFormFile> files)
             {
                 return false;
             }
@@ -104,7 +119,7 @@ namespace DNTCommon.Web.Core
                    !_namesToFilter.Contains(name) &&
                    !_namesToFilter.Contains(ext) &&
                    //for "file.asp;.jpg" files --> run as an ASP file
-                   _extensionsToFilter.All(item => !name.Contains(item));
+                   _extensionsToFilter.All(item => !name.Contains(item, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

@@ -68,9 +68,9 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public async Task<bool> AreTheSameUrlsAsync(string url1, string url2, bool findRedirectUrl)
         {
-            url1 = await NormalizeUrlAsync(url1, findRedirectUrl);
-            url2 = await NormalizeUrlAsync(url2, findRedirectUrl);
-            return url1.Equals(url2);
+            url1 = await NormalizeUrlAsync(new Uri(url1), findRedirectUrl);
+            url2 = await NormalizeUrlAsync(new Uri(url2), findRedirectUrl);
+            return url1.Equals(url2, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace DNTCommon.Web.Core
         {
             var url1 = await NormalizeUrlAsync(uri1, findRedirectUrl);
             var url2 = await NormalizeUrlAsync(uri2, findRedirectUrl);
-            return url1.Equals(url2);
+            return url1.Equals(url2, StringComparison.OrdinalIgnoreCase);
         }
 
         private static readonly string[] DefaultDirectoryIndexes =
@@ -100,7 +100,7 @@ namespace DNTCommon.Web.Core
         {
             if (findRedirectUrl)
             {
-                uri = await _locationFinder.GetRedirectUrlAsync(uri);
+                uri = await _locationFinder.GetRedirectUrlAsync(uri) ?? uri;
             }
             var url = urlToLower(uri);
             url = limitProtocols(url);
@@ -136,9 +136,9 @@ namespace DNTCommon.Web.Core
 
         private static string addWww(string url)
         {
-            if (new Uri(url).Host.Split('.').Length == 2 && !url.Contains("://www."))
+            if (new Uri(url).Host.Split('.').Length == 2 && !url.Contains("://www.", StringComparison.OrdinalIgnoreCase))
             {
-                return url.Replace("://", "://www.");
+                return url.Replace("://", "://www.", StringComparison.OrdinalIgnoreCase);
             }
             return url;
         }
@@ -146,18 +146,19 @@ namespace DNTCommon.Web.Core
         private static string removeDuplicateSlashes(string url)
         {
             var path = new Uri(url).AbsolutePath;
-            return path.Contains("//") ? url.Replace(path, path.Replace("//", "/")) : url;
+            return path.Contains("//", StringComparison.OrdinalIgnoreCase) ?
+                url.Replace(path, path.Replace("//", "/", StringComparison.OrdinalIgnoreCase), StringComparison.OrdinalIgnoreCase) : url;
         }
 
         private static string limitProtocols(string url)
         {
-            return new Uri(url).Scheme == "https" ? url.Replace("https://", "http://") : url;
+            return new Uri(url).Scheme == "https" ? url.Replace("https://", "http://", StringComparison.OrdinalIgnoreCase) : url;
         }
 
         private static string removeTheFragment(string url)
         {
             var fragment = new Uri(url).Fragment;
-            return string.IsNullOrWhiteSpace(fragment) ? url : url.Replace(fragment, string.Empty);
+            return string.IsNullOrWhiteSpace(fragment) ? url : url.Replace(fragment, string.Empty, StringComparison.OrdinalIgnoreCase);
         }
 
         private static string urlToLower(Uri uri)
@@ -176,7 +177,7 @@ namespace DNTCommon.Web.Core
         {
             foreach (var index in DefaultDirectoryIndexes)
             {
-                if (url.EndsWith(index))
+                if (url.EndsWith(index, StringComparison.OrdinalIgnoreCase))
                 {
                     url = url.TrimEnd(index.ToCharArray());
                     break;

@@ -20,13 +20,18 @@ namespace DNTCommon.Web.Core
     /// To read request body in an asp.net core webapi controller
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-    public class EnableReadableBodyStreamAttribute : Attribute, IAuthorizationFilter
+    public sealed class EnableReadableBodyStreamAttribute : Attribute, IAuthorizationFilter
     {
         /// <summary>
         /// To read request body in an asp.net core webapi controller
         /// </summary>
         public void OnAuthorization(AuthorizationFilterContext context)
         {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
             context.HttpContext.Request.EnableBuffering();
         }
     }
@@ -55,7 +60,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Gets the current HttpContext.Request's Referrer.
         /// </summary>
-        public static Uri GetReferrerUri(this HttpContext httpContext)
+        public static Uri? GetReferrerUri(this HttpContext httpContext)
         {
             var referrer = httpContext.GetReferrerUrl();
             if (string.IsNullOrWhiteSpace(referrer))
@@ -63,16 +68,20 @@ namespace DNTCommon.Web.Core
                 return null;
             }
 
-            Uri result;
-            return Uri.TryCreate(referrer, UriKind.Absolute, out result) ? result : null;
+            return Uri.TryCreate(referrer, UriKind.Absolute, out Uri? result) ? result : null;
         }
 
         /// <summary>
         /// Gets the current HttpContext.Request's IP.
         /// </summary>
-        public static string GetIP(this HttpContext httpContext, bool tryUseXForwardHeader = true)
+        public static string? GetIP(this HttpContext httpContext, bool tryUseXForwardHeader = true)
         {
-            string ip = string.Empty;
+            if (httpContext == null)
+            {
+                throw new ArgumentNullException(nameof(httpContext));
+            }
+
+            string? ip = string.Empty;
 
             // todo support new "Forwarded" header (2014) https://en.wikipedia.org/wiki/X-Forwarded-For
 
@@ -88,7 +97,7 @@ namespace DNTCommon.Web.Core
 
             // RemoteIpAddress is always null in DNX RC1 Update1 (bug).
             if (string.IsNullOrWhiteSpace(ip) &&
-                httpContext?.Connection?.RemoteIpAddress != null)
+                httpContext.Connection?.RemoteIpAddress != null)
             {
                 ip = httpContext.Connection.RemoteIpAddress.ToString();
             }
@@ -106,6 +115,11 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public static string GetHeaderValue(this HttpContext httpContext, string headerName)
         {
+            if (httpContext == null)
+            {
+                throw new ArgumentNullException(nameof(httpContext));
+            }
+
             StringValues values = string.Empty;
             if (httpContext.Request?.Headers?.TryGetValue(headerName, out values) ?? false)
             {
@@ -114,11 +128,11 @@ namespace DNTCommon.Web.Core
             return string.Empty;
         }
 
-        private static List<string> SplitCsv(string csvList, bool nullOrWhitespaceInputReturnsNull = false)
+        private static List<string> SplitCsv(string csvList)
         {
             if (string.IsNullOrWhiteSpace(csvList))
             {
-                return nullOrWhitespaceInputReturnsNull ? null : new List<string>();
+                return new List<string>();
             }
 
             return csvList
@@ -197,6 +211,11 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public static IUrlHelper GetUrlHelper(this HttpContext httpContext)
         {
+            if (httpContext == null)
+            {
+                throw new ArgumentNullException(nameof(httpContext));
+            }
+
             return httpContext.RequestServices.GetRequiredService<IUrlHelper>();
         }
 
@@ -205,6 +224,11 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public static LinkGenerator GetLinkGenerator(this HttpContext httpContext)
         {
+            if (httpContext == null)
+            {
+                throw new ArgumentNullException(nameof(httpContext));
+            }
+
             return httpContext.RequestServices.GetRequiredService<LinkGenerator>();
         }
 
@@ -212,12 +236,12 @@ namespace DNTCommon.Web.Core
         {
             if (httpContext == null)
             {
-                throw new NullReferenceException("HttpContext is null.");
+                throw new ArgumentNullException(nameof(httpContext));
             }
 
             if (httpContext.Request == null)
             {
-                throw new NullReferenceException("HttpContext.Request is null.");
+                throw new InvalidOperationException("HttpContext.Request is null.");
             }
         }
 
@@ -225,7 +249,7 @@ namespace DNTCommon.Web.Core
         /// Deserialize `request.Body` as a JSON content.
         /// This method needs [EnableReadableBodyStream] attribute to be added to a given action method.
         /// </summary>
-        public static async Task<T> DeserializeRequestJsonBodyAsAsync<T>(this HttpContext httpContext)
+        public static async Task<T?> DeserializeRequestJsonBodyAsAsync<T>(this HttpContext httpContext)
         {
             var body = await httpContext.ReadRequestBodyAsStringAsync();
             return JsonSerializer.Deserialize<T>(body);
@@ -260,7 +284,7 @@ namespace DNTCommon.Web.Core
         /// Deserialize `request.Body` as a JSON content.
         /// This method needs [EnableReadableBodyStream] attribute to be added to a given action method.
         /// </summary>
-        public static async Task<Dictionary<string, string>> DeserializeRequestJsonBodyAsDictionaryAsync(this HttpContext httpContext)
+        public static async Task<Dictionary<string, string>?> DeserializeRequestJsonBodyAsDictionaryAsync(this HttpContext httpContext)
         {
             var body = await httpContext.ReadRequestBodyAsStringAsync();
             return JsonSerializer.Deserialize<Dictionary<string, string>>(body);

@@ -28,7 +28,7 @@ namespace DNTCommon.Web.Core
                 };
 
         private readonly FeedChannel _feedChannel;
-        private IHttpRequestInfoService _httpContextInfo;
+        private IHttpRequestInfoService? _httpContextInfo;
 
         /// <summary>
         /// An ASP.NET Core RSS Feed Renderer.
@@ -104,6 +104,11 @@ namespace DNTCommon.Web.Core
 
         private async Task addChannelIdentityAsync(RssFeedWriter rssFeedWriter)
         {
+            if (_httpContextInfo == null)
+            {
+                throw new InvalidOperationException("_httpContextInfo is null.");
+            }
+
             await rssFeedWriter.WriteDescription(_feedChannel.FeedDescription.ApplyRle().RemoveHexadecimalSymbols());
             await rssFeedWriter.WriteCopyright(_feedChannel.FeedCopyright.ApplyRle().RemoveHexadecimalSymbols());
             await rssFeedWriter.WriteTitle(_feedChannel.FeedTitle.ApplyRle().RemoveHexadecimalSymbols());
@@ -119,6 +124,11 @@ namespace DNTCommon.Web.Core
                 return;
             }
 
+            if (_httpContextInfo == null)
+            {
+                throw new InvalidOperationException("_httpContextInfo is null.");
+            }
+
             var syndicationImage = new SyndicationImage(_httpContextInfo.AbsoluteContent(_feedChannel.FeedImageContentPath))
             {
                 Title = _feedChannel.FeedImageTitle,
@@ -132,7 +142,7 @@ namespace DNTCommon.Web.Core
             foreach (var item in _feedChannel.RssItems)
             {
                 var uri = new Uri(QueryHelpers.AddQueryString(item.Url,
-                                new Dictionary<string, string>
+                                new Dictionary<string, string?>
                                 {
                                     { "utm_source", "feed" },
                                     { "utm_medium", "rss" },
@@ -160,9 +170,9 @@ namespace DNTCommon.Web.Core
         private static string getUpdatedStamp(FeedItem item)
         {
             return item.LastUpdatedTime.ToShortPersianDateTimeString()
-                                       .Replace("/", "-")
-                                       .Replace(" ", "-")
-                                       .Replace(":", "-");
+                                       .Replace("/", "-", StringComparison.Ordinal)
+                                       .Replace(" ", "-", StringComparison.Ordinal)
+                                       .Replace(":", "-", StringComparison.Ordinal);
         }
     }
 }

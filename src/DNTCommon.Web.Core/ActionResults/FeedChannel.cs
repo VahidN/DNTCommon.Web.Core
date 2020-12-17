@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DNTCommon.Web.Core
 {
@@ -10,36 +11,36 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Feed's Title
         /// </summary>
-        public string FeedTitle { set; get; }
+        public string FeedTitle { set; get; } = default!;
 
         /// <summary>
         /// Feed's Description
         /// </summary>
-        public string FeedDescription { set; get; }
+        public string FeedDescription { set; get; } = default!;
 
         /// <summary>
         /// Feed's Copyright
         /// </summary>
-        public string FeedCopyright { set; get; }
+        public string FeedCopyright { set; get; } = default!;
 
         /// <summary>
         /// An optional feed's image path
         /// </summary>
-        public string FeedImageContentPath { set; get; }
+        public string FeedImageContentPath { set; get; } = default!;
 
         /// <summary>
         /// An optional feed's image title
         /// </summary>
-        public string FeedImageTitle { set; get; }
+        public string FeedImageTitle { set; get; } = default!;
 
         /// <summary>
         /// Feed's RSS Items
         /// </summary>
-        public IList<FeedItem> RssItems { set; get; }
+        public IEnumerable<FeedItem> RssItems { set; get; } = Enumerable.Empty<FeedItem>();
 
         /// <summary>
         /// Feed language's culture name such as en-US or fa-IR
         /// </summary>
-        public string CultureName { set; get; }
+        public string CultureName { set; get; } = default!;
     }
 }

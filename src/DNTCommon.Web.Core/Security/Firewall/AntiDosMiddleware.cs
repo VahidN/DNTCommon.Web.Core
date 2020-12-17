@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -12,7 +13,7 @@ namespace DNTCommon.Web.Core
     public class AntiDosMiddleware
     {
         private readonly RequestDelegate _next;
-        private IOptionsSnapshot<AntiDosConfig> _antiDosConfig;
+        private IOptionsSnapshot<AntiDosConfig>? _antiDosConfig;
 
         /// <summary>
         /// AntiDos Middleware
@@ -30,6 +31,16 @@ namespace DNTCommon.Web.Core
              IOptionsSnapshot<AntiDosConfig> antiDosConfig,
              IAntiDosFirewall antiDosFirewall)
         {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            if (antiDosFirewall == null)
+            {
+                throw new ArgumentNullException(nameof(antiDosFirewall));
+            }
+
             _antiDosConfig = antiDosConfig ?? throw new ArgumentNullException(nameof(antiDosConfig));
             if (_antiDosConfig.Value == null)
             {
@@ -49,16 +60,15 @@ namespace DNTCommon.Web.Core
             await _next(context);
         }
 
-        private AntiDosFirewallRequestInfo getHeadersInfo(HttpContext context)
+        private static AntiDosFirewallRequestInfo getHeadersInfo(HttpContext context)
         {
-            return new AntiDosFirewallRequestInfo
+            return new AntiDosFirewallRequestInfo(context.Request.Headers)
             {
                 IP = context.GetIP(),
                 UserAgent = context.GetUserAgent(),
                 UrlReferrer = context.GetReferrerUri(),
                 RawUrl = context.GetRawUrl(),
-                IsLocal = context.IsLocal(),
-                RequestHeaders = context.Request.Headers
+                IsLocal = context.IsLocal()
             };
         }
 
@@ -66,19 +76,19 @@ namespace DNTCommon.Web.Core
         {
             // see 409 - http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
             context.Response.StatusCode = (int)HttpStatusCode.Conflict;
-            return context.Response.WriteAsync(_antiDosConfig.Value.ErrorMessage);
+            return context.Response.WriteAsync(_antiDosConfig?.Value?.ErrorMessage ?? "The server is busy!");
         }
 
-        private void addResetHeaders(HttpContext context, ThrottleInfo throttleInfo)
+        private void addResetHeaders(HttpContext context, ThrottleInfo? throttleInfo)
         {
-            if (throttleInfo == null)
+            if (throttleInfo == null || _antiDosConfig == null)
             {
                 return;
             }
-            context.Response.Headers["X-RateLimit-Limit"] = _antiDosConfig.Value.AllowedRequests.ToString();
+            context.Response.Headers["X-RateLimit-Limit"] = _antiDosConfig.Value.AllowedRequests.ToString(CultureInfo.InvariantCulture);
             var requestsRemaining = Math.Max(_antiDosConfig.Value.AllowedRequests - throttleInfo.RequestsCount, 0);
-            context.Response.Headers["X-RateLimit-Remaining"] = requestsRemaining.ToString();
-            context.Response.Headers["X-RateLimit-Reset"] = throttleInfo.ExpiresAt.ToUnixTimeSeconds().ToString();
+            context.Response.Headers["X-RateLimit-Remaining"] = requestsRemaining.ToString(CultureInfo.InvariantCulture);
+            context.Response.Headers["X-RateLimit-Reset"] = throttleInfo.ExpiresAt.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture);
             context.Response.Headers["Retry-After"] = context.Response.Headers["X-RateLimit-Reset"];
         }
     }

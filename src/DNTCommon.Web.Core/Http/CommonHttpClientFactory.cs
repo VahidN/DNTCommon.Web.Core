@@ -33,10 +33,10 @@ namespace DNTCommon.Web.Core
         /// </summary>
         HttpClient GetOrCreate(
             Uri baseAddress,
-            IDictionary<string, string> defaultRequestHeaders = null,
+            IDictionary<string, string>? defaultRequestHeaders = null,
             TimeSpan? timeout = null,
             long? maxResponseContentBufferSize = null,
-            HttpMessageHandler handler = null);
+            HttpMessageHandler? handler = null);
     }
 
     /// <summary>
@@ -50,6 +50,7 @@ namespace DNTCommon.Web.Core
         private readonly ConcurrentDictionary<Uri, Lazy<HttpClient>> _httpClients =
                          new ConcurrentDictionary<Uri, Lazy<HttpClient>>();
         private const int ConnectionLeaseTimeout = 60 * 1000; // 1 minute
+        private bool _isDisposed;
 
         /// <summary>
         /// Reusing a single HttpClient instance across a multi-threaded application
@@ -67,10 +68,10 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public HttpClient GetOrCreate(
            Uri baseAddress,
-           IDictionary<string, string> defaultRequestHeaders = null,
+           IDictionary<string, string>? defaultRequestHeaders = null,
            TimeSpan? timeout = null,
            long? maxResponseContentBufferSize = null,
-           HttpMessageHandler handler = null)
+           HttpMessageHandler? handler = null)
         {
             return _httpClients.GetOrAdd(baseAddress,
                              uri => new Lazy<HttpClient>(() =>
@@ -96,9 +97,31 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public void Dispose()
         {
-            foreach (var httpClient in _httpClients.Values)
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Dispose all of the httpClients
+        /// </summary>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_isDisposed)
             {
-                httpClient.Value.Dispose();
+                try
+                {
+                    if (disposing)
+                    {
+                        foreach (var httpClient in _httpClients.Values)
+                        {
+                            httpClient.Value.Dispose();
+                        }
+                    }
+                }
+                finally
+                {
+                    _isDisposed = true;
+                }
             }
         }
 
@@ -109,7 +132,7 @@ namespace DNTCommon.Web.Core
             ServicePointManager.FindServicePoint(baseAddress).ConnectionLeaseTimeout = ConnectionLeaseTimeout; // ensures connections are not used indefinitely.
         }
 
-        private static void setDefaultHeaders(IDictionary<string, string> defaultRequestHeaders, HttpClient client)
+        private static void setDefaultHeaders(IDictionary<string, string>? defaultRequestHeaders, HttpClient client)
         {
             if (defaultRequestHeaders == null)
             {

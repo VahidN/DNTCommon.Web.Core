@@ -29,7 +29,7 @@ namespace DNTCommon.Web.Core
         {
             if (context == null)
             {
-                throw new ArgumentNullException("context");
+                throw new ArgumentNullException(nameof(context));
             }
             await writeToResponse(context);
         }
@@ -40,7 +40,7 @@ namespace DNTCommon.Web.Core
             response.ContentType = new MediaTypeHeaderValue("image/png").ToString();
             context.HttpContext.DisableBrowserCache();
             var data = _text.TextToImage(_options);
-            await response.Body.WriteAsync(data, 0, data.Length);
+            await response.Body.WriteAsync(data.AsMemory(0, data.Length));
         }
     }
 }

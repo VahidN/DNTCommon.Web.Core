@@ -46,7 +46,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// An HTML error message for the banned users.
         /// </summary>
-        public string ErrorMessage { set; get; }
+        public string ErrorMessage { set; get; } = default!;
 
         /// <summary>
         /// Should we apply this middleware to the localhost requests?

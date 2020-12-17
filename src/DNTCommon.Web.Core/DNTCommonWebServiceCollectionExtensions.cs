@@ -15,11 +15,13 @@ namespace DNTCommon.Web.Core
             services.AddHttpRequestInfoService();
             services.AddWebMailService();
             services.AddDownloaderService();
+            services.AddBaseHttpClient();
             services.AddRedirectUrlFinderService();
             services.AddMemoryCacheService();
             services.AddMvcActionsDiscoveryService();
             services.AddDesProviderService();
             services.AddProtectionProviderService();
+            services.AddPasswordHasherService();
             services.AddHtmlHelperService();
             services.AddFileNameSanitizerService();
             services.AddUrlNormalizationService();

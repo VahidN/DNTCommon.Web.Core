@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 
@@ -14,6 +15,11 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public static void DisableBrowserCache(this HttpContext httpContext)
         {
+            if (httpContext == null)
+            {
+                throw new ArgumentNullException(nameof(httpContext));
+            }
+
             // Note: https://docs.microsoft.com/en-us/aspnet/core/performance/caching/middleware
             // The Antiforgery system for generating secure tokens to prevent Cross-Site Request Forgery (CSRF)
             // attacks sets the Cache-Control and Pragma headers to no-cache so that responses aren't cached.

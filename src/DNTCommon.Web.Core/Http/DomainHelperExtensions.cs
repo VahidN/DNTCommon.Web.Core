@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Threading;
 
@@ -50,14 +51,24 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Returns the extension of the uri.
         /// </summary>
-        public static string GetUriExtension(this Uri uri)
+        public static string GetUriExtension(this Uri uri, bool throwOnException = false)
         {
             try
             {
+                if (uri == null)
+                {
+                    throw new ArgumentNullException(nameof(uri));
+                }
+
                 return Path.GetExtension(uri.PathAndQuery);
             }
             catch
             {
+                if (throwOnException)
+                {
+                    throw;
+                }
+
                 return string.Empty;
             }
         }
@@ -73,8 +84,13 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Returns the SubDomain of the uri.
         /// </summary>
-        public static string GetSubDomain(this Uri url)
+        public static string? GetSubDomain(this Uri url)
         {
+            if (url == null)
+            {
+                throw new ArgumentNullException(nameof(url));
+            }
+
             if (url.HostNameType != UriHostNameType.Dns)
                 return null;
 
@@ -90,8 +106,13 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Returns the SubDomain of the uri.
         /// </summary>
-        public static string GetSubDomain(this string url)
+        public static string? GetSubDomain(this string url)
         {
+            if (url == null)
+            {
+                throw new ArgumentNullException(nameof(url));
+            }
+
             return GetSubDomain(new Uri(url));
         }
 
@@ -104,7 +125,10 @@ namespace DNTCommon.Web.Core
             var host = url.Host.TrimEnd(new[] { '.' });
             if (subdomain != null)
             {
-                host = host.Replace(string.Format("{0}.", subdomain), string.Empty);
+                host = host.Replace(
+                        string.Format(CultureInfo.InvariantCulture, "{0}.", subdomain),
+                        string.Empty,
+                        StringComparison.OrdinalIgnoreCase);
             }
             return host;
         }
@@ -166,7 +190,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Tld Patterns
         /// </summary>
-        public static List<string> Tlds
+        public static IReadOnlyCollection<string> Tlds
         {
             get { return _tldsBuilder.Value; }
         }
@@ -176,6 +200,16 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public static bool IsLocalReferrer(this Uri referrer, Uri url)
         {
+            if (referrer == null)
+            {
+                throw new ArgumentNullException(nameof(referrer));
+            }
+
+            if (url == null)
+            {
+                throw new ArgumentNullException(nameof(url));
+            }
+
             return referrer.Host.TrimEnd('.').Equals(url.Host.TrimEnd('.'), StringComparison.OrdinalIgnoreCase)
                 || HaveTheSameDomain(referrer, url);
         }
@@ -198,7 +232,7 @@ namespace DNTCommon.Web.Core
                 return false;
             }
 
-            var siteDomain = GetUrlDomain(siteRootUrl).Domain;
+            var siteDomain = siteRootUrl.GetUrlDomain().Domain;
             var destDomain = GetUrlDomain(destUri).Domain;
             return destDomain.Equals(siteDomain, StringComparison.OrdinalIgnoreCase);
         }

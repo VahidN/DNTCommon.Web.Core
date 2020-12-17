@@ -39,7 +39,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Gets the key's value from the cache.
         /// </summary>
-        T Get<T>(string cacheKey);
+        T GetValue<T>(string cacheKey);
 
         /// <summary>
         /// Tries to get the key's value from the cache.
@@ -100,7 +100,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Gets the key's value from the cache.
         /// </summary>
-        public T Get<T>(string cacheKey)
+        public T GetValue<T>(string cacheKey)
         {
             return _memoryCache.Get<T>(cacheKey);
         }
@@ -119,6 +119,11 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public void Add<T>(string cacheKey, Func<T> factory, DateTimeOffset absoluteExpiration, int size = 1)
         {
+            if (factory == null)
+            {
+                throw new ArgumentNullException(nameof(factory));
+            }
+
             _memoryCache.Set(cacheKey, factory(), new MemoryCacheEntryOptions
             {
                 AbsoluteExpiration = absoluteExpiration,
@@ -155,6 +160,11 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public T GetOrAdd<T>(string cacheKey, Func<T> factory, DateTimeOffset absoluteExpiration, int size = 1)
         {
+            if (factory == null)
+            {
+                throw new ArgumentNullException(nameof(factory));
+            }
+
             // locks get and set internally
             if (_memoryCache.TryGetValue<T>(cacheKey, out var result))
             {

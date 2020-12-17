@@ -23,7 +23,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Error message
         /// </summary>
-        public string Message { get; set; }
+        public string Message { get; set; } = default!;
     }
 
     /// <summary>

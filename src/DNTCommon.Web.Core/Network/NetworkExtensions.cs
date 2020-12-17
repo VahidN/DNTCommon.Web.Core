@@ -14,9 +14,14 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public static bool IsNetworkError(this Exception ex)
         {
+            if (ex == null)
+            {
+                return false;
+            }
+
             return ex is SocketException ||
                    ex is WebException ||
-                   ex.InnerException != null && ex.InnerException.IsNetworkError();
+                   ex.InnerException?.IsNetworkError() == true;
         }
     }
 }

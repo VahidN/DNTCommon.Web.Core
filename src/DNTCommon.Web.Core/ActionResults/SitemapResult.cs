@@ -60,7 +60,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Item's absolute URL
         /// </summary>
-        public string Url { set; get; }
+        public string Url { set; get; } = default!;
 
         /// <summary>
         /// Item's Last Updated Time
@@ -111,8 +111,13 @@ namespace DNTCommon.Web.Core
             };
             response.ContentType = mediaType.ToString();
 
-            var data = getSitemapData(httpContextInfo.GetBaseUrl());
-            await response.Body.WriteAsync(data, 0, data.Length);
+            var baseUrl = httpContextInfo.GetBaseUrl();
+            if (string.IsNullOrWhiteSpace(baseUrl))
+            {
+                throw new InvalidOperationException("baseUrl is null.");
+            }
+            var data = getSitemapData(baseUrl);
+            await response.Body.WriteAsync(data.AsMemory(0, data.Length));
         }
 
         private byte[] getSitemapData(string baseUrl)
@@ -135,7 +140,7 @@ namespace DNTCommon.Web.Core
                         xmlWriter.WriteStartElement("url");
                         xmlWriter.WriteElementString("loc", item.Url);
                         xmlWriter.WriteElementString("lastmod", item.LastUpdatedTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
-                        xmlWriter.WriteElementString("changefreq", item.ChangeFrequency.ToString().ToLower());
+                        xmlWriter.WriteElementString("changefreq", item.ChangeFrequency.ToString().ToLowerInvariant());
                         xmlWriter.WriteElementString("priority", item.Priority.ToString(CultureInfo.InvariantCulture));
                         xmlWriter.WriteEndElement();
                     }

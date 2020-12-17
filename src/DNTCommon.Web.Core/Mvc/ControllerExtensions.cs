@@ -14,6 +14,11 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public static string ControllerName(this Type controllerType)
         {
+            if (controllerType == null)
+            {
+                throw new ArgumentNullException(nameof(controllerType));
+            }
+
             var baseType = typeof(Controller);
             if (!baseType.GetTypeInfo().IsAssignableFrom(controllerType))
             {

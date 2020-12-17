@@ -32,7 +32,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Deserialize the given string to an object.
         /// </summary>
-        T Deserialize<T>(string data);
+        T? Deserialize<T>(string data);
 
         /// <summary>
         /// Serialize the given data to an string.
@@ -42,7 +42,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Deserialize the given string to an object.
         /// </summary>
-        T Deserialize<T>(string data, JsonSerializerOptions options);
+        T? Deserialize<T>(string data, JsonSerializerOptions options);
 
         /// <summary>
         /// Serialize the given data to a byte array.
@@ -57,12 +57,12 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Deserialize the given byte array to an object.
         /// </summary>
-        T DeserializeFromUtf8Bytes<T>(byte[] data);
+        T? DeserializeFromUtf8Bytes<T>(byte[] data);
 
         /// <summary>
         /// Deserialize the given byte array to an object.
         /// </summary>
-        T DeserializeFromUtf8Bytes<T>(byte[] data, JsonSerializerOptions options);
+        T? DeserializeFromUtf8Bytes<T>(byte[] data, JsonSerializerOptions options);
     }
 
     /// <summary>
@@ -89,7 +89,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Deserialize the given string to an object.
         /// </summary>
-        public T Deserialize<T>(string data)
+        public T? Deserialize<T>(string data)
         {
             return JsonSerializer.Deserialize<T>(data);
         }
@@ -97,7 +97,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Deserialize the given string to an object.
         /// </summary>
-        public T Deserialize<T>(string data, JsonSerializerOptions options)
+        public T? Deserialize<T>(string data, JsonSerializerOptions options)
         {
             return JsonSerializer.Deserialize<T>(data, options);
         }
@@ -121,7 +121,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Deserialize the given byte array to an object.
         /// </summary>
-        public T DeserializeFromUtf8Bytes<T>(byte[] data)
+        public T? DeserializeFromUtf8Bytes<T>(byte[] data)
         {
             return JsonSerializer.Deserialize<T>(new ReadOnlySpan<byte>(data));
         }
@@ -129,7 +129,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Deserialize the given byte array to an object.
         /// </summary>
-        public T DeserializeFromUtf8Bytes<T>(byte[] data, JsonSerializerOptions options)
+        public T? DeserializeFromUtf8Bytes<T>(byte[] data, JsonSerializerOptions options)
         {
             return JsonSerializer.Deserialize<T>(new ReadOnlySpan<byte>(data), options);
         }

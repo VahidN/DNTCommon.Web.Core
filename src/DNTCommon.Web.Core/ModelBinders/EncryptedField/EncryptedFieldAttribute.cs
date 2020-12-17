@@ -8,5 +8,5 @@ namespace DNTCommon.Web.Core
     /// decrypted using the `EncryptedFieldModelBinderProvider`.
     /// </summary>
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-    public class EncryptedFieldAttribute : Attribute { }
+    public sealed class EncryptedFieldAttribute : Attribute { }
 }

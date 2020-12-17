@@ -20,9 +20,14 @@ namespace DNTCommon.Web.Core
             this HttpClient httpClient,
             string uri,
             bool ensureSuccess = true,
-            Action<HttpRequestMessage> configRequest = null)
+            Action<HttpRequestMessage>? configRequest = null)
         {
-            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
+            if (httpClient == null)
+            {
+                throw new ArgumentNullException(nameof(httpClient));
+            }
+
+            using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
             configRequest?.Invoke(httpRequestMessage);
             var response = await httpClient.SendAsync(httpRequestMessage);
             if (ensureSuccess)
@@ -41,9 +46,14 @@ namespace DNTCommon.Web.Core
             string uri,
             T value,
             bool ensureSuccess = true,
-            Action<HttpRequestMessage> configRequest = null)
+            Action<HttpRequestMessage>? configRequest = null)
         {
-            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri)
+            if (httpClient == null)
+            {
+                throw new ArgumentNullException(nameof(httpClient));
+            }
+
+            using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri)
             {
                 Content = new StringContent(JsonSerializer.Serialize(value), Encoding.UTF8, "application/json")
             };
@@ -62,12 +72,17 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public static async Task<HttpResponseMessage> PostFormUrlEncodedContent(
             this HttpClient httpClient,
-            Dictionary<string, string> formKeyValues,
+            IEnumerable<KeyValuePair<string?, string?>> formKeyValues,
             string path,
             bool ensureSuccess = true,
-            Action<HttpRequestMessage> configRequest = null)
+            Action<HttpRequestMessage>? configRequest = null)
         {
-            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, path)
+            if (httpClient == null)
+            {
+                throw new ArgumentNullException(nameof(httpClient));
+            }
+
+            using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, path)
             {
                 Content = new FormUrlEncodedContent(formKeyValues)
             };
@@ -88,9 +103,14 @@ namespace DNTCommon.Web.Core
             this HttpClient httpClient,
             string path,
             bool ensureSuccess = true,
-            Action<HttpRequestMessage> configRequest = null)
+            Action<HttpRequestMessage>? configRequest = null)
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, path);
+            if (httpClient == null)
+            {
+                throw new ArgumentNullException(nameof(httpClient));
+            }
+
+            using var request = new HttpRequestMessage(HttpMethod.Get, path);
             configRequest?.Invoke(request);
             var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             if (ensureSuccess)
@@ -98,13 +118,9 @@ namespace DNTCommon.Web.Core
                 await response.EnsureSuccessStatusCodeAsync();
             }
 
-            using (var responseStream = await response.Content.ReadAsStreamAsync())
-            {
-                using (var streamReader = new StreamReader(responseStream))
-                {
-                    return await streamReader.ReadToEndAsync();
-                }
-            }
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            using var streamReader = new StreamReader(responseStream);
+            return await streamReader.ReadToEndAsync();
         }
 
         /// <summary>
@@ -115,10 +131,15 @@ namespace DNTCommon.Web.Core
             string url,
             string outputFileNamePath,
             bool ensureSuccess = true,
-            Action<string> logger = null,
-            Action<HttpRequestMessage> configRequest = null)
+            Action<string>? logger = null,
+            Action<HttpRequestMessage>? configRequest = null)
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            if (httpClient == null)
+            {
+                throw new ArgumentNullException(nameof(httpClient));
+            }
+
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
             configRequest?.Invoke(request);
             var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             if (ensureSuccess)
@@ -147,6 +168,11 @@ namespace DNTCommon.Web.Core
                 File.Delete(tempFilePath);
             }
 
+            if (response.Content == null)
+            {
+                throw new InvalidOperationException($"`response.Content` of `{url}` is null!");
+            }
+
             const int maxBufferSize = 0x10000;
             using (var inputStream = await response.Content.ReadAsStreamAsync())
             {
@@ -160,7 +186,7 @@ namespace DNTCommon.Web.Core
                     int read;
                     var bytesTransferred = 0;
                     var readCount = 0L;
-                    while ((read = await inputStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                    while ((read = await inputStream.ReadAsync(buffer.AsMemory(0, buffer.Length))) > 0)
                     {
                         bytesTransferred += read;
                         readCount++;
@@ -174,7 +200,7 @@ namespace DNTCommon.Web.Core
                             }
                         }
 
-                        await fileStream.WriteAsync(buffer, 0, read);
+                        await fileStream.WriteAsync(buffer.AsMemory(0, read));
                     }
                     logger?.Invoke("\rProgress: 100%   \n");
                 }

@@ -16,18 +16,30 @@ namespace DNTCommon.Web.Core
         private readonly IList<string> _allowedExtensions;
 
         /// <summary>
+        /// Allowed files extensions to be uploaded
+        /// </summary>
+        /// <value></value>
+        public string FileExtensions { get; }
+
+        /// <summary>
         /// Allowing only selected file extensions are safe to be uploaded.
         /// </summary>
         /// <param name="fileExtensions">Allowed files extensions to be uploaded</param>
         public UploadFileExtensionsAttribute(string fileExtensions)
         {
+            if (string.IsNullOrWhiteSpace(fileExtensions))
+            {
+                throw new ArgumentNullException(nameof(fileExtensions));
+            }
+
+            FileExtensions = fileExtensions;
             _allowedExtensions = fileExtensions.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
         }
 
         /// <summary>
         /// Determines whether the specified value of the object is valid.
         /// </summary>
-        public override bool IsValid(object value)
+        public override bool IsValid(object? value)
         {
             if (value == null)
             {
@@ -39,7 +51,7 @@ namespace DNTCommon.Web.Core
                 return isValidFile(file);
             }
 
-            if (!(value is IList<IFormFile> files))
+            if (value is not IList<IFormFile> files)
             {
                 return false;
             }

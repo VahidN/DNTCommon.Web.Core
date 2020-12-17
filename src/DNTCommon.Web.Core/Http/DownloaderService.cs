@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -35,27 +34,27 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Downloads a file from a given url and then stores it as a local file.
         /// </summary>
-        Task<DownloadStatus> DownloadFileAsync(string url, string outputFilePath, AutoRetriesPolicy autoRetries = null);
+        Task<DownloadStatus?> DownloadFileAsync(string url, string outputFilePath, AutoRetriesPolicy? autoRetries = null);
 
         /// <summary>
         /// Downloads a file from a given url and then returns it as a byte array.
         /// </summary>
-        Task<(byte[] Data, DownloadStatus DownloadStatus)> DownloadDataAsync(string url, AutoRetriesPolicy autoRetries = null);
+        Task<(byte[] Data, DownloadStatus DownloadStatus)> DownloadDataAsync(string url, AutoRetriesPolicy? autoRetries = null);
 
         /// <summary>
         /// Downloads a file from a given url and then returns it as a text.
         /// </summary>
-        Task<(string Data, DownloadStatus DownloadStatus)> DownloadPageAsync(string url, AutoRetriesPolicy autoRetries = null);
+        Task<(string Data, DownloadStatus DownloadStatus)> DownloadPageAsync(string url, AutoRetriesPolicy? autoRetries = null);
 
         /// <summary>
         /// Gives the current download operation's status.
         /// </summary>
-        Action<DownloadStatus> OnDownloadStatusChanged { set; get; }
+        Action<DownloadStatus>? OnDownloadStatusChanged { set; get; }
 
         /// <summary>
         /// It fires when the download operation is completed.
         /// </summary>
-        Action<DownloadStatus> OnDownloadCompleted { set; get; }
+        Action<DownloadStatus>? OnDownloadCompleted { set; get; }
 
         /// <summary>
         /// Cancels the download operation.
@@ -102,7 +101,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Received remote file name from the server.
         /// </summary>
-        public string RemoteFileName { get; set; }
+        public string RemoteFileName { get; set; } = default!;
 
         /// <summary>
         /// Current task's status.
@@ -134,37 +133,38 @@ namespace DNTCommon.Web.Core
     /// Lifetime of this class should be set to `Transient`.
     /// Because setting HttpClient's `DefaultRequestHeaders` is not thread-safe and can't be shared across different threads.
     /// </summary>
-    public class DownloaderService : IDownloaderService
+    public class DownloaderService : IDownloaderService, IDisposable
     {
         private const int MaxBufferSize = 0x10000; // 64K. The artificial constraint due to win32 api limitations. Increasing the buffer size beyond 64k will not help in any circumstance, as the underlying SMB protocol does not support buffer lengths beyond 64k.
-        private readonly HttpClient _client = new HttpClient(new HttpClientHandler
-        {
-            UseProxy = false,
-            Proxy = null,
-            AllowAutoRedirect = true,
-            CookieContainer = new CookieContainer(),
-            AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
-        })
-        {
-            Timeout = Timeout.InfiniteTimeSpan
-        };
         private readonly CancellationTokenSource _cancelSrc = new CancellationTokenSource();
         private readonly DownloadStatus _downloadStatus = new DownloadStatus();
+        private readonly HttpClient _client;
+        private bool _isDisposed;
 
         /// <summary>
         /// Gives the current download operation's status.
         /// </summary>
-        public Action<DownloadStatus> OnDownloadStatusChanged { set; get; }
+        public Action<DownloadStatus>? OnDownloadStatusChanged { set; get; }
 
         /// <summary>
         /// It fires when the download operation is completed.
         /// </summary>
-        public Action<DownloadStatus> OnDownloadCompleted { set; get; }
+        public Action<DownloadStatus>? OnDownloadCompleted { set; get; }
+
+        /// <summary>
+        /// Lifetime of this class should be set to `Transient`.
+        /// Because setting HttpClient's `DefaultRequestHeaders` is not thread-safe and can't be shared across different threads.
+        /// </summary>
+        public DownloaderService(BaseHttpClient baseHttpClient)
+        {
+            var httpClient = baseHttpClient ?? throw new ArgumentNullException(nameof(baseHttpClient));
+            _client = httpClient.HttpClient;
+        }
 
         /// <summary>
         /// Downloads a file from a given url and then stores it as a local file.
         /// </summary>
-        public Task<DownloadStatus> DownloadFileAsync(string url, string outputFilePath, AutoRetriesPolicy autoRetries = null)
+        public Task<DownloadStatus?> DownloadFileAsync(string url, string outputFilePath, AutoRetriesPolicy? autoRetries = null)
         {
             return downloadAsync(() => doDownloadFileAsync(url, outputFilePath), autoRetries);
         }
@@ -172,7 +172,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Downloads a file from a given url and then returns it as a byte array.
         /// </summary>
-        public Task<(byte[] Data, DownloadStatus DownloadStatus)> DownloadDataAsync(string url, AutoRetriesPolicy autoRetries = null)
+        public Task<(byte[] Data, DownloadStatus DownloadStatus)> DownloadDataAsync(string url, AutoRetriesPolicy? autoRetries = null)
         {
             return downloadAsync(() => doDownloadDataAsync(url), autoRetries);
         }
@@ -180,13 +180,13 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Downloads a file from a given url and then returns it as a text.
         /// </summary>
-        public async Task<(string Data, DownloadStatus DownloadStatus)> DownloadPageAsync(string url, AutoRetriesPolicy autoRetries = null)
+        public async Task<(string Data, DownloadStatus DownloadStatus)> DownloadPageAsync(string url, AutoRetriesPolicy? autoRetries = null)
         {
             var result = await DownloadDataAsync(url, autoRetries);
             return result.Data == null ? (string.Empty, _downloadStatus) : (Encoding.UTF8.GetString(result.Data), _downloadStatus);
         }
 
-        private async Task<T> downloadAsync<T>(Func<Task<T>> task, AutoRetriesPolicy autoRetries)
+        private async Task<T?> downloadAsync<T>(Func<Task<T>> task, AutoRetriesPolicy? autoRetries)
         {
             if (autoRetries == null)
             {
@@ -199,7 +199,7 @@ namespace DNTCommon.Web.Core
 
             var exceptions = new List<Exception>();
 
-            T result = default(T);
+            T result = default;
             do
             {
                 --autoRetries.MaxRequestAutoRetries;
@@ -252,6 +252,36 @@ namespace DNTCommon.Web.Core
             _downloadStatus.Status = TaskStatus.Canceled;
             _cancelSrc.Cancel();
             _client.CancelPendingRequests();
+        }
+
+        /// <summary>
+        /// Dispose all of the httpClients
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Dispose all of the httpClients
+        /// </summary>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_isDisposed)
+            {
+                try
+                {
+                    if (disposing)
+                    {
+                        _cancelSrc?.Dispose();
+                    }
+                }
+                finally
+                {
+                    _isDisposed = true;
+                }
+            }
         }
 
         private async Task<DownloadStatus> doDownloadFileAsync(string url, string outputFilePath)
@@ -312,7 +342,7 @@ namespace DNTCommon.Web.Core
             var buffer = new byte[MaxBufferSize];
             int read;
             var readCount = 0L;
-            while ((read = await inputStream.ReadAsync(buffer, 0, buffer.Length, _cancelSrc.Token)) > 0 &&
+            while ((read = await inputStream.ReadAsync(buffer.AsMemory(0, buffer.Length), _cancelSrc.Token)) > 0 &&
                    !_cancelSrc.IsCancellationRequested)
             {
                 _downloadStatus.BytesTransferred += read;
@@ -324,7 +354,7 @@ namespace DNTCommon.Web.Core
                     updateDownloadStatus();
                 }
 
-                await outputStream.WriteAsync(buffer, 0, read, _cancelSrc.Token);
+                await outputStream.WriteAsync(buffer.AsMemory(0, read), _cancelSrc.Token);
             }
         }
 
@@ -333,15 +363,16 @@ namespace DNTCommon.Web.Core
             _client.DefaultRequestHeaders.ExpectContinue = false;
             _client.DefaultRequestHeaders.Add("Keep-Alive", "false");
             _client.DefaultRequestHeaders.Add("User-Agent", typeof(DownloaderService).Namespace);
-            _client.DefaultRequestHeaders.Referrer = new Uri(url);
+            var uri = new Uri(url);
+            _client.DefaultRequestHeaders.Referrer = uri;
 
-            var response = await _client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, _cancelSrc.Token);
+            var response = await _client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, _cancelSrc.Token);
             response.EnsureSuccessStatusCode();
 
             _downloadStatus.RemoteFileSize =
                response.Content.Headers?.ContentRange?.Length ?? response.Content?.Headers?.ContentLength ?? 0;
             _downloadStatus.RemoteFileName =
-               response.Content?.Headers?.ContentDisposition?.FileName ?? String.Empty;
+               response.Content?.Headers?.ContentDisposition?.FileName ?? string.Empty;
             return response;
         }
 
@@ -402,23 +433,33 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Checks if two exceptions are equal.
         /// </summary>
-        public bool Equals(Exception ex1, Exception ex2)
+        public bool Equals(Exception? x, Exception? y)
         {
-            if (ex2 == null && ex1 == null)
+            if (y == null && x == null)
+            {
                 return true;
-            if (ex1 == null | ex2 == null)
+            }
+
+            if (x == null || y == null)
+            {
                 return false;
-            if (ex1.GetType().Name.Equals(ex2.GetType().Name) && ex1.Message.Equals(ex2.Message))
-                return true;
-            return false;
+            }
+
+            return x.GetType().Name.Equals(y.GetType().Name, StringComparison.Ordinal)
+                    && x.Message.Equals(y.Message, StringComparison.Ordinal);
         }
 
         /// <summary>
         /// Gets the exception's hash.
         /// </summary>
-        public int GetHashCode(Exception ex)
+        public int GetHashCode(Exception obj)
         {
-            return (ex.GetType().Name + ex.Message).GetHashCode();
+            if (obj == null)
+            {
+                throw new ArgumentNullException(nameof(obj));
+            }
+
+            return (obj.GetType().Name + obj.Message).GetHashCode(StringComparison.Ordinal);
         }
     }
 }

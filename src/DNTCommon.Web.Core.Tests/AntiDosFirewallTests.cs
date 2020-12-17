@@ -20,8 +20,7 @@ namespace DNTCommon.Web.Core.Tests
                     UserAgent = "google",
                     UrlReferrer = new Uri("https://google.com"),
                     RawUrl = "http://localhost:5000/home",
-                    IsLocal = true,
-                    RequestHeaders = new HeaderDictionary()
+                    IsLocal = true
                 }));
             });
         }
@@ -37,8 +36,7 @@ namespace DNTCommon.Web.Core.Tests
                                 UserAgent = "asafaweb",
                                 UrlReferrer = new Uri("https://google.com"),
                                 RawUrl = "http://localhost:5000/home",
-                                IsLocal = true,
-                                RequestHeaders = new HeaderDictionary()
+                                IsLocal = true
                             }).ShouldBlockClient);
                         });
         }
@@ -54,8 +52,7 @@ namespace DNTCommon.Web.Core.Tests
                                 UserAgent = "google",
                                 UrlReferrer = new Uri("https://google.com"),
                                 RawUrl = "http://localhost:5000/home/.svn/",
-                                IsLocal = true,
-                                RequestHeaders = new HeaderDictionary()
+                                IsLocal = true
                             }).ShouldBlockClient);
                         });
         }
@@ -66,16 +63,16 @@ namespace DNTCommon.Web.Core.Tests
             ServiceProvider.RunScopedService<IAntiDosFirewall>(antiDosFirewall =>
                         {
                             Assert.IsTrue(antiDosFirewall.ShouldBanBotHeaders(new AntiDosFirewallRequestInfo
+                            (new HeaderDictionary(new Dictionary<string, StringValues>
+                                {
+                                    {"ACUNETIX",  "in use"}
+                                }))
                             {
                                 IP = "192.168.1.1",
                                 UserAgent = "google",
                                 UrlReferrer = new Uri("https://google.com"),
                                 RawUrl = "http://localhost:5000/home",
-                                IsLocal = true,
-                                RequestHeaders = new HeaderDictionary(new Dictionary<string, StringValues>
-                                {
-                                    {"ACUNETIX",  "in use"}
-                                })
+                                IsLocal = true
                             }).ShouldBlockClient);
                         });
         }
@@ -91,8 +88,7 @@ namespace DNTCommon.Web.Core.Tests
                                 UserAgent = "asafaweb",
                                 UrlReferrer = new Uri("https://google.com"),
                                 RawUrl = "http://localhost:5000/home",
-                                IsLocal = true,
-                                RequestHeaders = new HeaderDictionary()
+                                IsLocal = true
                             }).ShouldBlockClient);
                         });
         }
@@ -103,16 +99,16 @@ namespace DNTCommon.Web.Core.Tests
             ServiceProvider.RunScopedService<IAntiDosFirewall>(antiDosFirewall =>
                         {
                             Assert.IsTrue(antiDosFirewall.ShouldBlockClient(new AntiDosFirewallRequestInfo
+                            (new HeaderDictionary(new Dictionary<string, StringValues>
+                                {
+                                    {"ACUNETIX",  "in use"}
+                                }))
                             {
                                 IP = "192.168.1.1",
                                 UserAgent = "google",
                                 UrlReferrer = new Uri("https://google.com"),
                                 RawUrl = "http://localhost:5000/home",
-                                IsLocal = true,
-                                RequestHeaders = new HeaderDictionary(new Dictionary<string, StringValues>
-                                {
-                                    {"ACUNETIX",  "in use"}
-                                })
+                                IsLocal = true
                             }).ShouldBlockClient);
                         });
         }
@@ -128,8 +124,7 @@ namespace DNTCommon.Web.Core.Tests
                                 UserAgent = "google",
                                 UrlReferrer = new Uri("https://google.com"),
                                 RawUrl = "http://localhost:5000/home",
-                                IsLocal = true,
-                                RequestHeaders = new HeaderDictionary()
+                                IsLocal = true
                             }).ShouldBlockClient);
                         });
         }

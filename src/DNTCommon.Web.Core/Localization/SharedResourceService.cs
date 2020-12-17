@@ -34,7 +34,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Gets the string resource with the given name.
         /// </summary>
-        string this[string index] { get; }
+        string? this[string index] { get; }
 
         /// <summary>
         /// Gets all string resources.
@@ -44,12 +44,12 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Gets the string resource with the given name and formatted with the supplied arguments.
         /// </summary>
-        string GetString(string name, params object[] arguments);
+        string? GetString(string name, params object[] arguments);
 
         /// <summary>
         /// Gets the string resource with the given name.
         /// </summary>
-        string GetString(string name);
+        string? GetString(string name);
     }
 
     /// <summary>
@@ -86,12 +86,12 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Gets the string resource with the given name.
         /// </summary>
-        public string this[string index] => GetString(index);
+        public string? this[string index] => GetString(index);
 
         /// <summary>
         /// Gets the string resource with the given name and formatted with the supplied arguments.
         /// </summary>
-        public string GetString(string name, params object[] arguments)
+        public string? GetString(string name, params object[] arguments)
         {
             var result = _sharedLocalizer.GetString(name, arguments);
             logError(name, result);
@@ -110,7 +110,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Gets the string resource with the given name.
         /// </summary>
-        public string GetString(string name)
+        public string? GetString(string name)
         {
             var result = _sharedLocalizer.GetString(name);
             logError(name, result);

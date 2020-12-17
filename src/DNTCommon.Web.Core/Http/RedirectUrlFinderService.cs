@@ -30,12 +30,12 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Finds the actual hidden URL after multiple redirects.
         /// </summary>
-        Task<string> GetRedirectUrlAsync(string siteUrl, int maxRedirects = 20);
+        Task<string?> GetRedirectUrlAsync(string siteUrl, int maxRedirects = 20);
 
         /// <summary>
         /// Finds the actual hidden URL after multiple redirects.
         /// </summary>
-        Task<Uri> GetRedirectUrlAsync(Uri siteUri, int maxRedirects = 20);
+        Task<Uri?> GetRedirectUrlAsync(Uri siteUri, int maxRedirects = 20);
     }
 
     /// <summary>
@@ -43,18 +43,8 @@ namespace DNTCommon.Web.Core
     /// </summary>
     public class RedirectUrlFinderService : IRedirectUrlFinderService
     {
-        private readonly HttpClient _client = new HttpClient(new HttpClientHandler
-        {
-            UseProxy = false,
-            Proxy = null,
-            AllowAutoRedirect = false,
-            CookieContainer = new CookieContainer()
-        })
-        {
-            Timeout = TimeSpan.FromMinutes(3)
-        };
-
         private readonly ICacheService _cacheService;
+        private readonly HttpClient _client;
         private const string CachePrefix = "LocationFinder::";
         private readonly ILogger<RedirectUrlFinderService> _logger;
 
@@ -69,32 +59,41 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Redirect Url Finder Service
         /// </summary>
-        public RedirectUrlFinderService(ICacheService cacheService, ILogger<RedirectUrlFinderService> logger)
+        public RedirectUrlFinderService(
+            ICacheService cacheService,
+            ILogger<RedirectUrlFinderService> logger,
+            BaseHttpClient baseHttpClient)
         {
             _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            var httpClient = baseHttpClient ?? throw new ArgumentNullException(nameof(baseHttpClient));
+            _client = httpClient.HttpClient;
         }
 
         /// <summary>
         /// Finds the actual hidden URL after multiple redirects.
         /// </summary>
-        public async Task<string> GetRedirectUrlAsync(string siteUrl, int maxRedirects = 20)
+        public async Task<string?> GetRedirectUrlAsync(string siteUrl, int maxRedirects = 20)
         {
             var uri = await GetRedirectUrlAsync(new Uri(siteUrl), maxRedirects);
-            return uri.OriginalString;
+            return uri?.OriginalString;
         }
 
         /// <summary>
         /// Finds the actual hidden URL after multiple redirects.
         /// </summary>
-        public async Task<Uri> GetRedirectUrlAsync(Uri siteUri, int maxRedirects = 20)
+        public async Task<Uri?> GetRedirectUrlAsync(Uri siteUri, int maxRedirects = 20)
         {
+            if (siteUri == null)
+            {
+                throw new ArgumentNullException(nameof(siteUri));
+            }
+
             var redirectUri = siteUri;
 
             try
             {
-                string outUrl;
-                if (_cacheService.TryGetValue($"{CachePrefix}{siteUri}", out outUrl))
+                if (_cacheService.TryGetValue($"{CachePrefix}{siteUri}", out string outUrl))
                 {
                     return new Uri(outUrl);
                 }
@@ -117,7 +116,7 @@ namespace DNTCommon.Web.Core
                         case HttpStatusCode.Found: // 302 = HttpStatusCode.Redirect
                         case HttpStatusCode.Moved: // 301 = HttpStatusCode.MovedPermanently
                             redirectUri = webResp.Headers.Location;
-                            if (!redirectUri.IsAbsoluteUri)
+                            if (redirectUri?.IsAbsoluteUri == false)
                             {
                                 var leftPartAuthority = siteUri.GetComponents(UriComponents.Scheme | UriComponents.StrongAuthority, UriFormat.Unescaped);
                                 redirectUri = new Uri($"{leftPartAuthority}{redirectUri}");
@@ -152,10 +151,13 @@ namespace DNTCommon.Web.Core
             return cacheReturn(siteUri, redirectUri);
         }
 
-        private Uri cacheReturn(Uri originalUrl, Uri redirectUrl)
+        private Uri? cacheReturn(Uri originalUrl, Uri? redirectUrl)
         {
-            _cacheService.Add($"{CachePrefix}{originalUrl}", redirectUrl,
-                DateTimeOffset.UtcNow.AddMinutes(15), size: 1);
+            if (redirectUrl != null)
+            {
+                _cacheService.Add($"{CachePrefix}{originalUrl}", redirectUrl,
+                    DateTimeOffset.UtcNow.AddMinutes(15), size: 1);
+            }
             return redirectUrl;
         }
     }

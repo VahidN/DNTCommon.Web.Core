@@ -18,7 +18,7 @@ namespace DNTCommon.Web.Core
         /// The posted errors data
         /// </summary>
         [JsonPropertyName("csp-report")]
-        public CspReport CspReport { get; set; }
+        public CspReport CspReport { get; set; } = new CspReport();
     }
 
     /// <summary>
@@ -30,43 +30,43 @@ namespace DNTCommon.Web.Core
         /// Such as "http://localhost:5000/untypedSha"
         /// </summary>
         [JsonPropertyName("document-uri")]
-        public string DocumentUri { get; set; }
+        public string? DocumentUri { get; set; }
 
         /// <summary>
         /// The Referrer.
         /// </summary>
         [JsonPropertyName("referrer")]
-        public string Referrer { get; set; }
+        public string? Referrer { get; set; }
 
         /// <summary>
         /// Such as "script-src"
         /// </summary>
         [JsonPropertyName("violated-directive")]
-        public string ViolatedDirective { get; set; }
+        public string? ViolatedDirective { get; set; }
 
         /// <summary>
         /// Such as "script-src"
         /// </summary>
         [JsonPropertyName("effective-directive")]
-        public string EffectiveDirective { get; set; }
+        public string? EffectiveDirective { get; set; }
 
         /// <summary>
         /// The Original Policy
         /// </summary>
         [JsonPropertyName("original-policy")]
-        public string OriginalPolicy { get; set; }
+        public string? OriginalPolicy { get; set; }
 
         /// <summary>
         /// Such as "enforce"
         /// </summary>
         [JsonPropertyName("disposition")]
-        public string Disposition { get; set; }
+        public string? Disposition { get; set; }
 
         /// <summary>
         /// Such as "eval"
         /// </summary>
         [JsonPropertyName("blocked-uri")]
-        public string BlockedUri { get; set; }
+        public string? BlockedUri { get; set; }
 
         /// <summary>
         /// The LineNumber of the error
@@ -84,7 +84,7 @@ namespace DNTCommon.Web.Core
         /// The SourceFile of the error
         /// </summary>
         [JsonPropertyName("source-file")]
-        public string SourceFile { get; set; }
+        public string? SourceFile { get; set; }
 
         /// <summary>
         /// Such as 200
@@ -96,7 +96,7 @@ namespace DNTCommon.Web.Core
         /// The Script Sample
         /// </summary>
         [JsonPropertyName("script-sample")]
-        public string ScriptSample { get; set; }
+        public string? ScriptSample { get; set; }
     }
 
     /// <summary>
@@ -143,7 +143,7 @@ namespace DNTCommon.Web.Core
             }
             */
 
-            CspPost cspPost;
+            CspPost? cspPost;
             using (var bodyReader = new StreamReader(this.HttpContext.Request.Body))
             {
                 var body = await bodyReader.ReadToEndAsync();

@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 
 namespace DNTCommon.Web.Core
 {
@@ -26,7 +27,7 @@ namespace DNTCommon.Web.Core
 
             if (size == 0)
             {
-                return string.Format(formatTemplate, null, 0, sizeSuffixes[0]);
+                return string.Format(CultureInfo.InvariantCulture, formatTemplate, null, 0, sizeSuffixes[0]);
             }
 
             var absSize = Math.Abs((double)size);
@@ -38,6 +39,7 @@ namespace DNTCommon.Web.Core
             var normSize = absSize / Math.Pow(1000, iUnit);
 
             return string.Format(
+                CultureInfo.InvariantCulture,
                 formatTemplate,
                 size < 0 ? "-" : null, normSize, sizeSuffixes[iUnit]);
         }

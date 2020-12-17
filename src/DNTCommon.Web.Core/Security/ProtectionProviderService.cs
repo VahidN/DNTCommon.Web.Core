@@ -32,7 +32,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Decrypts the message
         /// </summary>
-        string Decrypt(string inputText);
+        string? Decrypt(string inputText);
 
         /// <summary>
         /// Encrypts the message
@@ -47,7 +47,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// It will decrypt a Base64UrlEncode encrypted JSON string and then deserialize it as an object.
         /// </summary>
-        T DecryptObject<T>(string data);
+        T? DecryptObject<T>(string data);
     }
 
     /// <summary>
@@ -72,14 +72,14 @@ namespace DNTCommon.Web.Core
                 throw new ArgumentNullException(nameof(dataProtectionProvider));
             }
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _dataProtector = dataProtectionProvider.CreateProtector(typeof(ProtectionProviderService).FullName);
+            _dataProtector = dataProtectionProvider.CreateProtector(typeof(ProtectionProviderService).FullName ?? nameof(ProtectionProviderService));
             _serializationProvider = serializationProvider ?? throw new ArgumentNullException(nameof(serializationProvider));
         }
 
         /// <summary>
         /// Decrypts the message
         /// </summary>
-        public string Decrypt(string inputText)
+        public string? Decrypt(string inputText)
         {
             if (inputText == null)
             {
@@ -130,9 +130,10 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// It will decrypt a Base64UrlEncode encrypted JSON string and then deserialize it as an object.
         /// </summary>
-        public T DecryptObject<T>(string data)
+        public T? DecryptObject<T>(string data)
         {
-            return _serializationProvider.Deserialize<T>(Decrypt(data));
+            var decryptData = Decrypt(data);
+            return decryptData == null ? default : _serializationProvider.Deserialize<T>(decryptData);
         }
     }
 }

@@ -11,7 +11,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Client's IP
         /// </summary>
-        public string IP { set; get; } = string.Empty;
+        public string? IP { set; get; }
 
         /// <summary>
         /// Client's UserAgent
@@ -21,12 +21,12 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Request's URL
         /// </summary>
-        public string RawUrl { set; get; }
+        public string RawUrl { set; get; } = string.Empty;
 
         /// <summary>
         /// Request's Referrer
         /// </summary>
-        public Uri UrlReferrer { set; get; }
+        public Uri? UrlReferrer { set; get; }
 
         /// <summary>
         /// Is local request?
@@ -36,6 +36,21 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Represents HttpRequest and HttpResponse headers
         /// </summary>
-        public IHeaderDictionary RequestHeaders { set; get; }
+        public IHeaderDictionary RequestHeaders { get; } = new HeaderDictionary();
+
+        /// <summary>
+        /// Request Info
+        /// </summary>
+        public AntiDosFirewallRequestInfo(IHeaderDictionary requestHeaders)
+        {
+            RequestHeaders = requestHeaders;
+        }
+
+        /// <summary>
+        /// Request Info
+        /// </summary>
+        public AntiDosFirewallRequestInfo()
+        {
+        }
     }
 }

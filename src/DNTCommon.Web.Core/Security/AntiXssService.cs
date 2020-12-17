@@ -17,7 +17,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// List of allowed HTML tags and their attributes
         /// </summary>
-        public ValidHtmlTag[] ValidHtmlTags { set; get; }
+        public IReadOnlyCollection<ValidHtmlTag> ValidHtmlTags { set; get; } = new List<ValidHtmlTag>();
 
         /// <summary>
         /// If an attribute's value contains one of these characters, it will be removed.
@@ -33,7 +33,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// A valid tag name
         /// </summary>
-        public string Tag { set; get; }
+        public string Tag { set; get; } = default!;
 
         /// <summary>
         /// Valid tag's attributes
@@ -150,7 +150,7 @@ namespace DNTCommon.Web.Core
             }
         }
 
-        private bool cleanWhitespacesBetweenTags(HtmlNode node)
+        private static bool cleanWhitespacesBetweenTags(HtmlNode node)
         {
             if (node.NodeType == HtmlNodeType.Text)
             {
@@ -208,8 +208,8 @@ namespace DNTCommon.Web.Core
         private bool isAllowedAttribute(HtmlAttribute attribute, bool allowDataAttributes)
         {
             return
-            (allowDataAttributes && attribute.Name != null && attribute.Name.StartsWith("data-", StringComparison.OrdinalIgnoreCase)) ||
-             _antiXssConfig.Value.ValidHtmlTags.Any(tag => tag.Attributes.Contains(attribute.Name));
+            (allowDataAttributes && attribute.Name?.StartsWith("data-", StringComparison.OrdinalIgnoreCase) == true)
+            || _antiXssConfig.Value.ValidHtmlTags.Any(tag => attribute.Name != null && tag.Attributes.Contains(attribute.Name));
         }
 
         private bool cleanComments(HtmlNode node)
@@ -236,11 +236,11 @@ namespace DNTCommon.Web.Core
 
         private (bool HasUnsafeValue, string UnsafeItem) checkAttributeValue(string attributeValue)
         {
-            attributeValue = attributeValue.Replace("\n", "")
-                                           .Replace("\r", "")
-                                           .Replace("\t", "")
-                                           .Replace("`", "")
-                                           .Replace("\0", "");
+            attributeValue = attributeValue.Replace("\n", "", StringComparison.Ordinal)
+                                           .Replace("\r", "", StringComparison.Ordinal)
+                                           .Replace("\t", "", StringComparison.Ordinal)
+                                           .Replace("`", "", StringComparison.Ordinal)
+                                           .Replace("\0", "", StringComparison.Ordinal);
 
             foreach (var item in _antiXssConfig.Value.UnsafeAttributeValueCharacters)
             {

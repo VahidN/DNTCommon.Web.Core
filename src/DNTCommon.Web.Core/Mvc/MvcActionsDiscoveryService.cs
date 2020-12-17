@@ -70,7 +70,7 @@ namespace DNTCommon.Web.Core
             MvcControllers = new List<MvcControllerViewModel>();
 
             var lastControllerName = string.Empty;
-            MvcControllerViewModel currentController = null;
+            MvcControllerViewModel? currentController = null;
 
             var actionDescriptors = actionDescriptorCollectionProvider.ActionDescriptors.Items;
             foreach (var actionDescriptor in actionDescriptors)
@@ -88,27 +88,33 @@ namespace DNTCommon.Web.Core
                     currentController = new MvcControllerViewModel
                     {
                         AreaName = controllerTypeInfo.GetCustomAttribute<AreaAttribute>()?.RouteValue,
-                        ControllerAttributes = getAttributes(controllerTypeInfo),
                         ControllerDisplayName =
                            controllerTypeInfo.GetCustomAttribute<DisplayNameAttribute>()?.DisplayName ??
                            controllerTypeInfo.GetCustomAttribute<DisplayAttribute>()?.Name,
                         ControllerName = descriptor.ControllerName,
                     };
+                    currentController.ControllerAttributes.AddRange(getAttributes(controllerTypeInfo));
                     MvcControllers.Add(currentController);
 
                     lastControllerName = descriptor.ControllerName;
                 }
 
-                currentController?.MvcActions.Add(new MvcActionViewModel
+                if (currentController == null)
+                {
+                    continue;
+                }
+
+                var mvcActionItem = new MvcActionViewModel
                 {
                     ControllerId = currentController.ControllerId,
                     ActionName = descriptor.ActionName,
                     ActionDisplayName =
-                      actionMethodInfo.GetCustomAttribute<DisplayNameAttribute>()?.DisplayName ??
-                      actionMethodInfo.GetCustomAttribute<DisplayAttribute>()?.Name,
-                    ActionAttributes = getAttributes(actionMethodInfo),
+                                      actionMethodInfo.GetCustomAttribute<DisplayNameAttribute>()?.DisplayName ??
+                                      actionMethodInfo.GetCustomAttribute<DisplayAttribute>()?.Name,
                     IsSecuredAction = isSecuredAction(controllerTypeInfo, actionMethodInfo)
-                });
+                };
+                mvcActionItem.ActionAttributes.AddRange(getAttributes(actionMethodInfo));
+                currentController.MvcActions.Add(mvcActionItem);
             }
         }
 
@@ -128,12 +134,12 @@ namespace DNTCommon.Web.Core
                     var controllers = new List<MvcControllerViewModel>(MvcControllers);
                     foreach (var controller in controllers)
                     {
-                        controller.MvcActions = controller.MvcActions.Where(
+                        controller.MvcActions.AddRange(controller.MvcActions.Where(
                             model => model.IsSecuredAction &&
                             (
                             model.ActionAttributes.OfType<AuthorizeAttribute>().FirstOrDefault()?.Policy == policyName ||
                             controller.ControllerAttributes.OfType<AuthorizeAttribute>().FirstOrDefault()?.Policy == policyName
-                            )).ToList();
+                            )).ToList());
                     }
                     return controllers.Where(model => model.MvcActions.Any()).ToList();
                 }));
@@ -185,12 +191,12 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Returns the list of Attributes of the action method.
         /// </summary>
-        public IList<Attribute> ActionAttributes { get; set; }
+        public IList<Attribute> ActionAttributes { get; } = new List<Attribute>();
 
         /// <summary>
         /// Returns `DisplayNameAttribute` value of the action method.
         /// </summary>
-        public string ActionDisplayName { get; set; }
+        public string? ActionDisplayName { get; set; }
 
         /// <summary>
         /// It's set to `{ControllerId}:{ActionName}`
@@ -200,12 +206,12 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Return ControllerActionDescriptor.ActionName
         /// </summary>
-        public string ActionName { get; set; }
+        public string ActionName { get; set; } = default!;
 
         /// <summary>
         /// It's set to `{AreaName}:{ControllerName}`
         /// </summary>
-        public string ControllerId { get; set; }
+        public string ControllerId { get; set; } = default!;
 
         /// <summary>
         /// Returns true if the action method has an `AuthorizeAttribute`.
@@ -219,7 +225,8 @@ namespace DNTCommon.Web.Core
         public override string ToString()
         {
             const string attribute = "Attribute";
-            var actionAttributes = string.Join(",", ActionAttributes.Select(a => a.GetType().Name.Replace(attribute, "")));
+            var actionAttributes = string.Join(",",
+                ActionAttributes.Select(a => a.GetType().Name.Replace(attribute, "", StringComparison.Ordinal)));
             return $"[{actionAttributes}]{ActionName}";
         }
     }
@@ -232,17 +239,17 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Return `AreaAttribute.RouteValue`
         /// </summary>
-        public string AreaName { get; set; }
+        public string? AreaName { get; set; }
 
         /// <summary>
         /// Returns the list of the Controller's Attributes.
         /// </summary>
-        public IList<Attribute> ControllerAttributes { get; set; }
+        public IList<Attribute> ControllerAttributes { get; } = new List<Attribute>();
 
         /// <summary>
         /// Returns the `DisplayNameAttribute` value
         /// </summary>
-        public string ControllerDisplayName { get; set; }
+        public string? ControllerDisplayName { get; set; }
 
         /// <summary>
         /// It's set to `{AreaName}:{ControllerName}`
@@ -252,12 +259,12 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Return ControllerActionDescriptor.ControllerName
         /// </summary>
-        public string ControllerName { get; set; }
+        public string ControllerName { get; set; } = default!;
 
         /// <summary>
         /// Returns the list of the Controller's action methods.
         /// </summary>
-        public IList<MvcActionViewModel> MvcActions { get; set; } = new List<MvcActionViewModel>();
+        public IList<MvcActionViewModel> MvcActions { get; } = new List<MvcActionViewModel>();
 
         /// <summary>
         /// Returns `[{controllerAttributes}]{AreaName}.{ControllerName}`
@@ -265,7 +272,8 @@ namespace DNTCommon.Web.Core
         public override string ToString()
         {
             const string attribute = "Attribute";
-            var controllerAttributes = string.Join(",", ControllerAttributes.Select(a => a.GetType().Name.Replace(attribute, "")));
+            var controllerAttributes = string.Join(",",
+                ControllerAttributes.Select(a => a.GetType().Name.Replace(attribute, "", StringComparison.Ordinal)));
             return $"[{controllerAttributes}]{AreaName}.{ControllerName}";
         }
     }

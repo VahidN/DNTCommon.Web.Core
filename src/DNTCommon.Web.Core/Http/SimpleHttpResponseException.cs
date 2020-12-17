@@ -20,5 +20,26 @@ namespace DNTCommon.Web.Core
         {
             StatusCode = statusCode;
         }
+
+        /// <summary>
+        /// Simple HttpResponse Exception
+        /// </summary>
+        public SimpleHttpResponseException() : base()
+        {
+        }
+
+        /// <summary>
+        /// Simple HttpResponse Exception
+        /// </summary>
+        public SimpleHttpResponseException(string? message) : base(message)
+        {
+        }
+
+        /// <summary>
+        /// Simple HttpResponse Exception
+        /// </summary>
+        public SimpleHttpResponseException(string? message, Exception? innerException) : base(message, innerException)
+        {
+        }
     }
 }

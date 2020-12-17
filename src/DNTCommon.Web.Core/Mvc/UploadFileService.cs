@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
@@ -40,7 +41,7 @@ namespace DNTCommon.Web.Core
         /// Saves the posted IFormFile to a byte array.
         /// </summary>
         /// <param name="formFile">The posted file.</param>
-        Task<byte[]> GetPostedFileDataAsync(IFormFile formFile);
+        Task<byte[]?> GetPostedFileDataAsync(IFormFile formFile);
     }
 
     /// <summary>
@@ -103,7 +104,7 @@ namespace DNTCommon.Web.Core
         /// Saves the posted IFormFile to a byte array.
         /// </summary>
         /// <param name="formFile">The posted file.</param>
-        public async Task<byte[]> GetPostedFileDataAsync(IFormFile formFile)
+        public async Task<byte[]?> GetPostedFileDataAsync(IFormFile formFile)
         {
             if (formFile == null || formFile.Length == 0)
             {
@@ -121,7 +122,7 @@ namespace DNTCommon.Web.Core
         {
             var fileName = Path.GetFileNameWithoutExtension(formFile.FileName);
             var extension = Path.GetExtension(formFile.FileName);
-            return Path.Combine(uploadsRootFolder, $"{fileName}.{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.{Guid.NewGuid().ToString("N")}{extension}");
+            return Path.Combine(uploadsRootFolder, $"{fileName}.{DateTime.Now.ToString("yyyyMMddHHmmssfff", CultureInfo.InvariantCulture)}.{Guid.NewGuid().ToString("N")}{extension}");
         }
     }
 }

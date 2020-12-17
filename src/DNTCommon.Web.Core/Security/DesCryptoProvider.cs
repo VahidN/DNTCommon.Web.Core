@@ -1,4 +1,6 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -31,12 +33,12 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Decrypts the message
         /// </summary>
-        string Decrypt(string inputText, string key);
+        string? Decrypt(string inputText, string key);
 
         /// <summary>
         /// It will decrypt a Base64UrlEncode encrypted JSON string and then deserialize it as an object.
         /// </summary>
-        T DecryptObject<T>(string data, string key);
+        T? DecryptObject<T>(string data, string key);
 
         /// <summary>
         /// Encrypts the message
@@ -88,7 +90,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Decrypts the message
         /// </summary>
-        public string Decrypt(string inputText, string key)
+        public string? Decrypt(string inputText, string key)
         {
             if (string.IsNullOrWhiteSpace(inputText))
             {
@@ -139,44 +141,65 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// It will decrypt a Base64UrlEncode encrypted JSON string and then deserialize it as an object.
         /// </summary>
-        public T DecryptObject<T>(string data, string key)
+        public T? DecryptObject<T>(string data, string key)
         {
-            return _serializationProvider.Deserialize<T>(Decrypt(data, key));
+            var decryptedData = Decrypt(data, key);
+            return decryptedData == null ? default : _serializationProvider.Deserialize<T>(decryptedData);
         }
 
+        [SuppressMessage("Microsoft.Usage", "CA5350:encrypt uses a weak cryptographic algorithm TripleDES",
+                        Justification = "That's enough for our usecase!")]
         private byte[] encrypt(byte[] data, string key)
         {
+            var desKey = getDesKey(key);
             using (var des = new TripleDESCryptoServiceProvider
             {
-                Key = getDesKey(key),
-                Mode = CipherMode.ECB,
+                Key = desKey,
+                Mode = CipherMode.CBC,
                 Padding = PaddingMode.PKCS7
             })
             {
-                using (var cTransform = des.CreateEncryptor())
+                using var encryptor = des.CreateEncryptor();
+                using var cipherStream = new MemoryStream();
+                using (var cryptoStream = new CryptoStream(cipherStream, encryptor, CryptoStreamMode.Write))
+                using (var binaryWriter = new BinaryWriter(cryptoStream))
                 {
-                    var result = cTransform.TransformFinalBlock(data, 0, data.Length);
-                    des.Clear();
-                    return result;
+                    // prepend IV to data
+                    cipherStream.Write(des.IV); // This is an auto-generated random key
+                    binaryWriter.Write(data);
+                    cryptoStream.FlushFinalBlock();
                 }
+                return cipherStream.ToArray();
             }
         }
 
+        [SuppressMessage("Microsoft.Usage", "CA5350:encrypt uses a weak cryptographic algorithm TripleDES",
+                        Justification = "That's enough for our usecase!")]
         private byte[] decrypt(byte[] data, string key)
         {
+            var desKey = getDesKey(key);
             using (var des = new TripleDESCryptoServiceProvider
             {
-                Key = getDesKey(key),
-                Mode = CipherMode.ECB,
+                Key = desKey,
+                Mode = CipherMode.CBC,
                 Padding = PaddingMode.PKCS7
             })
             {
-                using (var cTransform = des.CreateDecryptor())
+                var iv = new byte[8]; // 3DES-IV is always 8 bytes/64 bits because block size is always 64 bits
+                Array.Copy(data, 0, iv, 0, iv.Length);
+
+                using var ms = new MemoryStream();
+                using (var decryptor = new CryptoStream(ms, des.CreateDecryptor(desKey, iv), CryptoStreamMode.Write))
+                using (var binaryWriter = new BinaryWriter(decryptor))
                 {
-                    var result = cTransform.TransformFinalBlock(data, 0, data.Length);
-                    des.Clear();
-                    return result;
+                    // decrypt cipher text from data, starting just past the IV
+                    binaryWriter.Write(
+                        data,
+                        iv.Length,
+                        data.Length - iv.Length
+                    );
                 }
+                return ms.ToArray();
             }
         }
 
@@ -189,7 +212,8 @@ namespace DNTCommon.Web.Core
             // The key size of TripleDES is 168 bits, its len in byte is 24 Bytes (or 192 bits).
             // Last bit of each byte is not used (or used as version in some hardware).
             // Key len for TripleDES can also be 112 bits which is again stored in 128 bits or 16 bytes.
-            return Hash(key).HashBytes.Take(24).ToArray();
+            var hashBytes = Hash(key).HashBytes;
+            return hashBytes.Take(24).ToArray();
         }
     }
 }

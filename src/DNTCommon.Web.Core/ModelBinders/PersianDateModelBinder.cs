@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using DNTPersianUtils.Core;
 using Microsoft.AspNetCore.Mvc;
@@ -37,14 +38,14 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Creates an IModelBinder based on ModelBinderProviderContext.
         /// </summary>
-        public IModelBinder GetBinder(ModelBinderProviderContext context)
+        public IModelBinder? GetBinder(ModelBinderProviderContext context)
         {
             if (context == null)
             {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            if (context.Metadata == null || context.Metadata.IsComplexType)
+            if (context.Metadata?.IsComplexType != false)
             {
                 return null;
             }
@@ -70,6 +71,8 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Attempts to bind a model.
         /// </summary>
+        [SuppressMessage("Microsoft.Usage", "CA1031:catch a more specific allowed exception type, or rethrow the exception",
+                Justification = "The exception will be logged.")]
         public Task BindModelAsync(ModelBindingContext bindingContext)
         {
             if (bindingContext == null)
@@ -99,7 +102,7 @@ namespace DNTCommon.Web.Core
                     return fallbackBinder.BindModelAsync(bindingContext);
                 }
 
-                dt = valueAsString.ToGregorianDateTime();
+                dt = valueAsString?.ToGregorianDateTime();
             }
             catch (Exception ex)
             {
@@ -112,10 +115,14 @@ namespace DNTCommon.Web.Core
                 return Task.CompletedTask;
             }
 
-            bindingContext.Result =
-              Nullable.GetUnderlyingType(bindingContext.ModelType) == typeof(DateTime) ?
-                       ModelBindingResult.Success(dt) :
-                       ModelBindingResult.Success(dt.Value);
+            if (Nullable.GetUnderlyingType(bindingContext.ModelType) == typeof(DateTime))
+            {
+                bindingContext.Result = ModelBindingResult.Success(dt);
+            }
+            else if (dt.HasValue)
+            {
+                bindingContext.Result = ModelBindingResult.Success(dt.Value);
+            }
             return Task.CompletedTask;
         }
     }

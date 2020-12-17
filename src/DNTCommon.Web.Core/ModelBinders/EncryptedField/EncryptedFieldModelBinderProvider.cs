@@ -34,7 +34,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Creates an IModelBinder based on ModelBinderProviderContext.
         /// </summary>
-        public IModelBinder GetBinder(ModelBinderProviderContext context)
+        public IModelBinder? GetBinder(ModelBinderProviderContext context)
         {
             if (context == null)
             {
@@ -52,7 +52,7 @@ namespace DNTCommon.Web.Core
                 return null;
             }
 
-            var propInfo = context.Metadata.ContainerType.GetProperty(propName);
+            var propInfo = context.Metadata.ContainerType?.GetProperty(propName);
             if (propInfo == null)
             {
                 return null;

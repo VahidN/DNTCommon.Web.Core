@@ -29,7 +29,7 @@ namespace DNTCommon.Web.Core
                    ip.IsInSubnet("172.16.0.0/12") ||
                    ip.IsInSubnet("192.168.0.0/16") ||
                    ip.IsInSubnet("169.254.0.0/16 ") ||
-				   ip == NullIPv6;
+                   ip == NullIPv6;
         }
 
         /// <summary>
@@ -38,6 +38,11 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public static bool IsInSubnet(this string ipAddress, string cidr)
         {
+            if (string.IsNullOrWhiteSpace(cidr))
+            {
+                throw new ArgumentNullException(nameof(cidr));
+            }
+
             var parts = cidr.Split('/');
             var baseAddress = BitConverter.ToInt32(IPAddress.Parse(parts[0]).GetAddressBytes(), 0);
             var address = BitConverter.ToInt32(IPAddress.Parse(ipAddress).GetAddressBytes(), 0);
@@ -50,13 +55,18 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public static bool IsLocal(this ConnectionInfo conn)
         {
-            if (!conn.RemoteIpAddress.IsSet())
+            if (conn == null)
+            {
+                throw new ArgumentNullException(nameof(conn));
+            }
+
+            if (conn.RemoteIpAddress?.IsSet() == false)
                 return true;
 
-            if (conn.LocalIpAddress.IsSet())
+            if (conn.RemoteIpAddress != null && conn.LocalIpAddress?.IsSet() == true)
                 return conn.RemoteIpAddress.Equals(conn.LocalIpAddress);
 
-            return conn.RemoteIpAddress.IsLoopback();
+            return conn.RemoteIpAddress?.IsLoopback() ?? false;
         }
 
         /// <summary>
@@ -64,6 +74,11 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public static bool IsLocal(this HttpContext ctx)
         {
+            if (ctx == null)
+            {
+                throw new ArgumentNullException(nameof(ctx));
+            }
+
             return ctx.Connection.IsLocal();
         }
 
@@ -72,6 +87,11 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public static bool IsLocal(this HttpRequest req)
         {
+            if (req == null)
+            {
+                throw new ArgumentNullException(nameof(req));
+            }
+
             return req.HttpContext.IsLocal();
         }
 

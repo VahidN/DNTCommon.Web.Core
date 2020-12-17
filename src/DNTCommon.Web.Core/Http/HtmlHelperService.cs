@@ -220,7 +220,7 @@ namespace DNTCommon.Web.Core
                         continue;
                     }
 
-                    originalUrl = originalUrl.Replace("\\", "/").TrimStart('.').TrimStart('/').Trim();
+                    originalUrl = originalUrl.Replace("\\", "/", StringComparison.Ordinal).TrimStart('.').TrimStart('/').Trim();
 
                     var newUrl = $"http://{originalUrl}";
                     var (urlDomain, hasBestMatch) = newUrl.GetUrlDomain();
@@ -248,7 +248,13 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public string FixRelativeUrls(string html, string imageNotFoundPath)
         {
-            return FixRelativeUrls(html, imageNotFoundPath, _httpRequestInfoService.GetBaseUrl());
+            var siteBaseUrl = _httpRequestInfoService.GetBaseUrl();
+            if (string.IsNullOrWhiteSpace(siteBaseUrl))
+            {
+                throw new InvalidOperationException("`siteBaseUrl` is null.");
+            }
+
+            return FixRelativeUrls(html, imageNotFoundPath, siteBaseUrl);
         }
 
         /// <summary>
@@ -256,6 +262,11 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public async Task<string> GetUrlTitleAsync(Uri uri)
         {
+            if (uri == null)
+            {
+                throw new ArgumentNullException(nameof(uri));
+            }
+
             var result = await _downloaderService.DownloadPageAsync(uri.ToString());
             return GetHtmlPageTitle(result.Data);
         }
@@ -284,9 +295,9 @@ namespace DNTCommon.Web.Core
             }
 
             titleText = titleText.Trim()
-                .Replace(Environment.NewLine, " ")
-                .Replace("\t", " ")
-                .Replace("\n", " ");
+                .Replace(Environment.NewLine, " ", StringComparison.Ordinal)
+                .Replace("\t", " ", StringComparison.Ordinal)
+                .Replace("\n", " ", StringComparison.Ordinal);
             return WebUtility.HtmlDecode(titleText.Trim());
         }
 

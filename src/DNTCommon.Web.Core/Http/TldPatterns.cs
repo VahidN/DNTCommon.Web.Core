@@ -7,11 +7,10 @@ namespace DNTCommon.Web.Core
     /// </summary>
     public static class TldPatterns
     {
-
         /// <summary>
         /// If a hostname is contained in this set, it is a TLD.
         /// </summary>
-        public static ISet<string> EXACT = new HashSet<string>(new[]{
+        public static readonly ISet<string> EXACT = new HashSet<string>(new[]{
       "ac",
       "com.ac",
       "edu.ac",
@@ -6191,7 +6190,7 @@ namespace DNTCommon.Web.Core
         /// leftmost component results in a name which is contained in this
         /// set, it is a TLD.
         /// </summary>
-        public static ISet<string> UNDER = new HashSet<string>(new[]{
+        public static readonly ISet<string> UNDER = new HashSet<string>(new[]{
             "ar",
             "bd",
             "bn",
@@ -6236,11 +6235,11 @@ namespace DNTCommon.Web.Core
             "zw"
        });
 
-    /// <summary>
-    /// The elements in this set would pass the UNDER test, but are
-    /// set, it is a TLD.
-    /// </summary>
-    public static ISet<string> EXCLUDED = new HashSet<string>(new[]{
+        /// <summary>
+        /// The elements in this set would pass the UNDER test, but are
+        /// set, it is a TLD.
+        /// </summary>
+        public static readonly ISet<string> EXCLUDED = new HashSet<string>(new[]{
             "congresodelalengua3.ar",
             "educ.ar",
             "gobiernoelectronico.ar",

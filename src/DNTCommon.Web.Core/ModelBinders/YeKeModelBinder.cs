@@ -36,7 +36,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Creates an IModelBinder based on ModelBinderProviderContext.
         /// </summary>
-        public IModelBinder GetBinder(ModelBinderProviderContext context)
+        public IModelBinder? GetBinder(ModelBinderProviderContext context)
         {
             if (context == null)
             {

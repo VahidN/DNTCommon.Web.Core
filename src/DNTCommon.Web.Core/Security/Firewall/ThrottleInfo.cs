@@ -25,7 +25,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Ban Reason
         /// </summary>
-        public string BanReason { set; get; }
+        public string BanReason { set; get; } = default!;
 
         /// <summary>
         /// ToString()

@@ -4,7 +4,6 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DNTCommon.Web.Core
@@ -18,32 +17,32 @@ namespace DNTCommon.Web.Core
         /// A short name for the search engine. The value must contain 16 or fewer characters of plain text.
         /// The value must not contain HTML or other markup.
         /// </summary>
-        public string ShortName { set; get; }
+        public string ShortName { set; get; } = default!;
 
         /// <summary>
         /// A brief description of the search engine. The value must contain 1024 or fewer characters of plain text.
         /// The value must not contain HTML or other markup.
         /// </summary>
-        public string Description { set; get; }
+        public string Description { set; get; } = default!;
 
         /// <summary>
         ///	The URL to go to to open up the search page at the site for which the plugin is designed to search.
         /// This provides a way for Firefox to let the user visit the web site directly.
         /// </summary>
-        public string SearchForm { set; get; }
+        public string SearchForm { set; get; } = default!;
 
         /// <summary>
         /// URI to an icon representative of the search engine. When possible,
         /// search engines should offer a 16x16 image of type "image/x-icon" and a 64x64 image of type "image/jpeg"
         /// or "image/png".
         /// </summary>
-        public string FavIconUrl { set; get; }
+        public string FavIconUrl { set; get; } = default!;
 
         /// <summary>
         /// Describes the URL or URLs to use for the search. The method attribute indicates whether to use a
         /// GET or POST request to fetch the result. The template attribute indicates the base URL for the search query.
         /// </summary>
-        public string SearchUrlTemplate { set; get; }
+        public string SearchUrlTemplate { set; get; } = default!;
 
         /// <summary>
         /// Executes the result operation of the action method synchronously.
@@ -52,7 +51,7 @@ namespace DNTCommon.Web.Core
         {
             if (context == null)
             {
-                throw new ArgumentNullException("context");
+                throw new ArgumentNullException(nameof(context));
             }
 
             var response = context.HttpContext.Response;
@@ -63,7 +62,7 @@ namespace DNTCommon.Web.Core
             response.ContentType = mediaType.ToString();
 
             var data = getOpenSearchData();
-            await response.Body.WriteAsync(data, 0, data.Length);
+            await response.Body.WriteAsync(data.AsMemory(0, data.Length));
         }
 
         private byte[] getOpenSearchData()
