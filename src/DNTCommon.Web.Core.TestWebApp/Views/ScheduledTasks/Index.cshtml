@@ -1,0 +1,48 @@
+@model ISet<DNTCommon.Web.Core.ScheduledTaskStatus>
+@{
+    ViewBag.Title = "Index";
+}
+<meta http-equiv="refresh" content="3" />
+
+<h2>
+    DNTScheduler.Core Tasks Status Report
+</h2>
+
+<table class="table table-striped table-hover table-bordered table-condensed">
+    <thead>
+        <tr>
+            <th class="text-center">
+                Task
+            </th>
+            <th class="text-center">
+                LastRun (UTC)
+            </th>
+            <th class="text-center">
+                LastException
+            </th>
+            <th class="text-center">
+                IsRunning
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td dir="ltr">
+                    @item.ToString()
+                </td>
+
+                <td class="text-center" dir="ltr">
+                    @item.LastRun
+                </td>
+                <td dir="ltr">
+                    @item.LastException
+                </td>
+                <td class="text-center" dir="ltr">
+                    @item.IsRunning
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -199,7 +199,7 @@ namespace DNTCommon.Web.Core
 
             var exceptions = new List<Exception>();
 
-            T result = default;
+            T? result = default;
             do
             {
                 --autoRetries.MaxRequestAutoRetries;

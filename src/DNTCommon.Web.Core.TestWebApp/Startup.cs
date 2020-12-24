@@ -32,6 +32,28 @@ namespace DNTCommon.Web.Core.TestWebApp
                 options.UseYeKeModelBinder();
             });
             services.AddRazorPages();
+
+            services.AddDNTScheduler(options =>
+            {
+                // DNTScheduler needs a ping service to keep it alive.
+                // If you don't need it, don't add it!
+                options.AddPingTask(siteRootUrl: "https://localhost:5001");
+
+                options.AddScheduledTask<DoBackupTask>(
+                    runAt: utcNow =>
+                    {
+                        var now = utcNow.AddHours(3.5);
+                        return now.Day % 3 == 0 && now.Hour == 0 && now.Minute == 1 && now.Second == 1;
+                    },
+                    order: 2);
+
+                options.AddScheduledTask<SendEmailsTask>(
+                    runAt: utcNow => utcNow.Second == 1,
+                    order: 1);
+
+                options.AddScheduledTask<ExceptionalTask>(utcNow => utcNow.Second == 1);
+                options.AddScheduledTask<LongRunningTask>(utcNow => utcNow.Second == 1);
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

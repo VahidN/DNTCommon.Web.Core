@@ -14,7 +14,13 @@ namespace DNTCommon.Web.Core.TestWebApp
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    webBuilder
+                        .UseDefaultServiceProvider((context, options) =>
+                                {
+                                    options.ValidateScopes = context.HostingEnvironment.IsDevelopment();
+                                    options.ValidateOnBuild = true;
+                                })
+                        .UseStartup<Startup>();
                 });
     }
 }

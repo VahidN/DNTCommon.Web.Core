@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DNTCommon.Web.Core
@@ -10,9 +11,13 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Adds all of the default providers of DNTCommon.Web.Core at once.
         /// </summary>
-        public static IServiceCollection AddDNTCommonWeb(this IServiceCollection services)
+        public static IServiceCollection AddDNTCommonWeb(
+            this IServiceCollection services,
+            Action<ScheduledTasksStorage>? scheduledTasksOptions = null)
         {
+            services.AddBackgroundQueueService();
             services.AddHttpRequestInfoService();
+            services.AddRandomNumberProvider();
             services.AddWebMailService();
             services.AddDownloaderService();
             services.AddBaseHttpClient();
@@ -32,6 +37,12 @@ namespace DNTCommon.Web.Core
             services.AddHtmlReaderService();
             services.AddAntiXssService();
             services.AddSerializationProvider();
+
+            if (scheduledTasksOptions != null)
+            {
+                services.AddDNTScheduler(scheduledTasksOptions);
+            }
+
             return services;
         }
     }

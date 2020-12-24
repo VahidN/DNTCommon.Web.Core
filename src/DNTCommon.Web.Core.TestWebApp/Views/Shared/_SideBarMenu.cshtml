@@ -107,6 +107,20 @@
 
 <div class="panel panel-default">
     <div class="panel-heading">
+        <h3 class="panel-title">Schedulers</h3>
+    </div>
+    <ul class="list-group">
+        <li class="list-group-item">
+            <a asp-area="" asp-controller="BackgroundQueue" asp-action="Index">Background Queue Service</a>
+        </li>
+        <li class="list-group-item">
+            <a asp-area="" asp-controller="ScheduledTasks" asp-action="Index">DNTScheduler.Core</a>
+        </li>
+    </ul>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
         <h3 class="panel-title">Security</h3>
     </div>
     <ul class="list-group">
