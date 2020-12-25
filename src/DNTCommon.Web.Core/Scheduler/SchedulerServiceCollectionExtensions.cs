@@ -21,7 +21,6 @@ namespace DNTCommon.Web.Core
                 throw new ArgumentNullException(nameof(options));
             }
 
-            services.TryAddTransient<IJobsRunnerTimer, JobsRunnerTimer>();
             services.TryAddSingleton<IScheduledTasksCoordinator, ScheduledTasksCoordinator>();
 
             configTasks(services, options);

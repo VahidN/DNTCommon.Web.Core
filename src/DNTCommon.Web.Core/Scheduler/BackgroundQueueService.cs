@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -35,6 +36,7 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public static IServiceCollection AddBackgroundQueueService(this IServiceCollection services)
         {
+            services.TryAddTransient<IJobsRunnerTimer, JobsRunnerTimer>();
             services.AddHostedApiService<IBackgroundQueueService, BackgroundQueueService>();
             return services;
         }
