@@ -63,13 +63,11 @@ namespace DNTCommon.Web.Core
             response.ContentType = mediaType.ToString();
 
             var xws = new XmlWriterSettings { Indent = true, Encoding = Encoding.UTF8, Async = true };
-            using (var xmlWriter = XmlWriter.Create(response.Body, xws))
-            {
-                var formatter = new RssFormatter(_attributes, xmlWriter.Settings);
-                var rssFeedWriter = await getRssFeedWriterAsync(xmlWriter);
-                await writeSyndicationItemsAsync(formatter, rssFeedWriter);
-                await xmlWriter.FlushAsync();
-            }
+            var xmlWriter = XmlWriter.Create(response.Body, xws);
+            var formatter = new RssFormatter(_attributes, xmlWriter.Settings);
+            var rssFeedWriter = await getRssFeedWriterAsync(xmlWriter);
+            await writeSyndicationItemsAsync(formatter, rssFeedWriter);
+            await xmlWriter.DisposeAsync();
         }
 
         private async Task writeSyndicationItemsAsync(RssFormatter formatter, RssFeedWriter rssFeedWriter)
