@@ -4,179 +4,12 @@ using MailKit.Security;
 using MimeKit;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using DNTPersianUtils.Core;
 using System.Linq;
 
 namespace DNTCommon.Web.Core
 {
-    /// <summary>
-    /// Web Mail Service Extensions
-    /// </summary>
-    public static class WebMailServiceExtensions
-    {
-        /// <summary>
-        /// Adds IWebMailService to IServiceCollection.
-        /// </summary>
-        public static IServiceCollection AddWebMailService(this IServiceCollection services)
-        {
-            services.AddScoped<IWebMailService, WebMailService>();
-            return services;
-        }
-    }
-
-    /// <summary>
-    /// A web mail service using the `MailKit` library.
-    /// </summary>
-    public interface IWebMailService
-    {
-        /// <summary>
-        /// Sends an email using the `MailKit` library.
-        /// </summary>
-        Task SendEmailAsync(
-            SmtpConfig smtpConfig,
-            IEnumerable<MailAddress> emails,
-            string subject,
-            string message,
-            IEnumerable<MailAddress>? blindCarpbonCopies = null,
-            IEnumerable<MailAddress>? carpbonCopies = null,
-            IEnumerable<MailAddress>? replyTos = null,
-            DelayDelivery? delayDelivery = null,
-            IEnumerable<string>? attachmentFiles = null,
-            MailHeaders? headers = null);
-
-        /// <summary>
-        /// Sends an email using the `MailKit` library.
-        /// This method converts a razor template file to an string and then uses it as the email's message.
-        /// </summary>
-        Task SendEmailAsync<T>(
-            SmtpConfig smtpConfig,
-            IEnumerable<MailAddress> emails,
-            string subject,
-            string viewNameOrPath,
-            T viewModel,
-            IEnumerable<MailAddress>? blindCarpbonCopies = null,
-            IEnumerable<MailAddress>? carpbonCopies = null,
-            IEnumerable<MailAddress>? replyTos = null,
-            DelayDelivery? delayDelivery = null,
-            IEnumerable<string>? attachmentFiles = null,
-            MailHeaders? headers = null);
-    }
-
-    /// <summary>
-    /// Delay Delivery
-    /// </summary>
-    public class DelayDelivery
-    {
-        /// <summary>
-        /// Its default value is 1 second.
-        /// </summary>
-        public TimeSpan Delay { set; get; } = TimeSpan.FromSeconds(1);
-
-        /// <summary>
-        /// Its default value is after sending 30 messages.
-        /// </summary>
-        public int NumberOfMessages { set; get; } = 30;
-    }
-
-    /// <summary>
-    /// Defines an email address
-    /// </summary>
-    public class MailAddress
-    {
-        /// <summary>
-        /// The recipient's name
-        /// </summary>
-        public string ToName { set; get; } = default!;
-
-        /// <summary>
-        /// The recipient's email address
-        /// </summary>
-        public string ToAddress { set; get; } = default!;
-    }
-
-    /// <summary>
-    /// Custom mail headers
-    /// </summary>
-    public class MailHeaders
-    {
-        /// <summary>
-        /// Gets or sets the message identifier.
-        /// The Message-Id is meant to be a globally unique identifier for a message. MimeKit.Utils.MimeUtils.GenerateMessageId can be used to generate this value.
-        /// The message identifier.
-        /// </summary>
-        public string? MessageId { set; get; }
-
-        /// <summary>
-        /// Gets or sets the Message-Id that this message is in reply to.
-        /// If the message is a reply to another message, it will typically use the In-Reply-To header to specify the Message-Id of the original message being replied to.
-        /// The message id that this message is in reply to.
-        /// </summary>
-        public string? InReplyTo { set; get; }
-
-        /// <summary>
-        /// Gets or sets the list of references to other messages.
-        /// The References header contains a chain of Message-Ids back to the original message that started the thread.
-        /// The references.
-        /// </summary>
-        public string? References { set; get; }
-    }
-
-    /// <summary>
-    /// The SMTP server's config
-    /// </summary>
-    public class SmtpConfig
-    {
-        /// <summary>
-        /// The host name to connect to.
-        /// </summary>
-        public string Server { get; set; } = default!;
-
-        /// <summary>
-        /// The optional user name.
-        /// </summary>
-        public string? Username { get; set; }
-
-        /// <summary>
-        /// The optional password.
-        /// </summary>
-        public string? Password { get; set; }
-
-        /// <summary>
-        /// The port to connect to. If the specified port is 0, then the default port will be used.
-        /// </summary>
-        public int Port { get; set; }
-
-        /// <summary>
-        /// The local domain is used in the HELO or EHLO commands sent to the SMTP server. If left unset, the local IP address will be used instead.
-        /// </summary>
-        public string? LocalDomain { get; set; }
-
-        /// <summary>
-        /// If you set this value to true, the `SendEmailAsync` method won't send this email to the recipient and
-        /// saves its content as an .eml file in the `PickupFolder`.
-        /// Later you can open this file using Outlook or your web browser to debug your program.
-        /// </summary>
-        /// <returns></returns>
-        public bool UsePickupFolder { get; set; }
-
-        /// <summary>
-        /// An optional path to save emails on the local HDD. Its value will be used if you set the `UsePickupFolder` to true.
-        /// </summary>
-        public string? PickupFolder { get; set; }
-
-        /// <summary>
-        /// The name of the mailbox.
-        /// </summary>
-        public string FromName { get; set; } = default!;
-
-        /// <summary>
-        /// The address of the mailbox.
-        /// </summary>
-        public string FromAddress { get; set; } = default!;
-    }
-
     /// <summary>
     /// A web mail service using the `MailKit` library.
     /// </summary>
@@ -241,59 +74,71 @@ namespace DNTCommon.Web.Core
 
             if (smtpConfig.UsePickupFolder && !string.IsNullOrWhiteSpace(smtpConfig.PickupFolder))
             {
-                const int maxBufferSize = 0x10000; // 64K.
-
-                if (!Directory.Exists(smtpConfig.PickupFolder))
-                {
-                    Directory.CreateDirectory(smtpConfig.PickupFolder);
-                }
-
-                foreach (var email in emails)
-                {
-                    using (var stream = new FileStream(
-                        Path.Combine(smtpConfig.PickupFolder, $"email-{Guid.NewGuid().ToString("N")}.eml"),
-                        FileMode.CreateNew, FileAccess.Write, FileShare.None,
-                        maxBufferSize, useAsync: true))
-                    {
-                        var emailMessage = getEmailMessage(email.ToName, email.ToAddress, subject,
-                        message, attachmentFiles, smtpConfig, headers, blindCarpbonCopies, carpbonCopies, replyTos);
-                        await emailMessage.WriteToAsync(stream);
-                    }
-                }
+                await usePickupFolderAsync(smtpConfig, emails, subject, message, blindCarpbonCopies, carpbonCopies, replyTos, attachmentFiles, headers);
             }
             else
             {
-                using (var client = new SmtpClient())
+                await sendEmailAsync(smtpConfig, emails, subject, message, blindCarpbonCopies, carpbonCopies, replyTos, delayDelivery, attachmentFiles, headers);
+            }
+        }
+
+        private static async Task sendEmailAsync(SmtpConfig smtpConfig, IEnumerable<MailAddress> emails, string subject, string message, IEnumerable<MailAddress>? blindCarpbonCopies, IEnumerable<MailAddress>? carpbonCopies, IEnumerable<MailAddress>? replyTos, DelayDelivery? delayDelivery, IEnumerable<string>? attachmentFiles, MailHeaders? headers)
+        {
+            using (var client = new SmtpClient())
+            {
+                if (!string.IsNullOrWhiteSpace(smtpConfig.LocalDomain))
                 {
-                    if (!string.IsNullOrWhiteSpace(smtpConfig.LocalDomain))
-                    {
-                        client.LocalDomain = smtpConfig.LocalDomain;
-                    }
-                    await client.ConnectAsync(smtpConfig.Server, smtpConfig.Port, SecureSocketOptions.Auto);
-                    if (!string.IsNullOrWhiteSpace(smtpConfig.Username) &&
-                        !string.IsNullOrWhiteSpace(smtpConfig.Password))
-                    {
-                        await client.AuthenticateAsync(smtpConfig.Username, smtpConfig.Password);
-                    }
+                    client.LocalDomain = smtpConfig.LocalDomain;
+                }
+                await client.ConnectAsync(smtpConfig.Server, smtpConfig.Port, SecureSocketOptions.Auto);
+                if (!string.IsNullOrWhiteSpace(smtpConfig.Username) &&
+                    !string.IsNullOrWhiteSpace(smtpConfig.Password))
+                {
+                    await client.AuthenticateAsync(smtpConfig.Username, smtpConfig.Password);
+                }
 
-                    var count = 0;
-                    foreach (var email in emails)
+                var count = 0;
+                foreach (var email in emails)
+                {
+                    var emailMessage = getEmailMessage(email.ToName, email.ToAddress, subject,
+                    message, attachmentFiles, smtpConfig, headers, blindCarpbonCopies, carpbonCopies, replyTos);
+                    await client.SendAsync(emailMessage);
+                    count++;
+
+                    if (delayDelivery != null && count % delayDelivery.NumberOfMessages == 0)
                     {
-                        var emailMessage = getEmailMessage(email.ToName, email.ToAddress, subject,
-                        message, attachmentFiles, smtpConfig, headers, blindCarpbonCopies, carpbonCopies, replyTos);
-                        await client.SendAsync(emailMessage);
-                        count++;
-
-                        if (delayDelivery != null)
-                        {
-                            if (count % delayDelivery.NumberOfMessages == 0)
-                            {
-                                await Task.Delay(delayDelivery.Delay);
-                            }
-                        }
+                        await Task.Delay(delayDelivery.Delay);
                     }
+                }
 
-                    await client.DisconnectAsync(true);
+                await client.DisconnectAsync(true);
+            }
+        }
+
+        private static async Task usePickupFolderAsync(SmtpConfig smtpConfig, IEnumerable<MailAddress> emails, string subject, string message, IEnumerable<MailAddress>? blindCarpbonCopies, IEnumerable<MailAddress>? carpbonCopies, IEnumerable<MailAddress>? replyTos, IEnumerable<string>? attachmentFiles, MailHeaders? headers)
+        {
+            const int maxBufferSize = 0x10000; // 64K.
+
+            if (string.IsNullOrWhiteSpace(smtpConfig.PickupFolder))
+            {
+                return;
+            }
+
+            if (!Directory.Exists(smtpConfig.PickupFolder))
+            {
+                Directory.CreateDirectory(smtpConfig.PickupFolder);
+            }
+
+            foreach (var email in emails)
+            {
+                using (var stream = new FileStream(
+                    Path.Combine(smtpConfig.PickupFolder, $"email-{Guid.NewGuid().ToString("N")}.eml"),
+                    FileMode.CreateNew, FileAccess.Write, FileShare.None,
+                    maxBufferSize, useAsync: true))
+                {
+                    var emailMessage = getEmailMessage(email.ToName, email.ToAddress, subject,
+                    message, attachmentFiles, smtpConfig, headers, blindCarpbonCopies, carpbonCopies, replyTos);
+                    await emailMessage.WriteToAsync(stream);
                 }
             }
         }

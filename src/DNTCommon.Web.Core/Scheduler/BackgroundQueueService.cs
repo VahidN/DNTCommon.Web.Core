@@ -6,58 +6,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace DNTCommon.Web.Core
 {
-    /// <summary>
-    /// Adds IQueueBackgroundWorkItem to IServiceCollection.
-    /// </summary>
-    public static class BackgroundQueueServiceExtensions
-    {
-        /// <summary>
-        /// Used to register <see cref="IHostedService"/> class which defines an referenced <typeparamref name="TInterface"/> interface.
-        /// </summary>
-        /// <typeparam name="TInterface">The interface other components will use</typeparam>
-        /// <typeparam name="TService">The actual <see cref="IHostedService"/> service.</typeparam>
-        /// <param name="services"></param>
-        public static void AddHostedApiService<TInterface, TService>(this IServiceCollection services)
-            where TInterface : class
-            where TService : class, IHostedService, TInterface
-        {
-            services.AddSingleton<TInterface, TService>();
-            services.AddHostedService(p => (TService)p.GetRequiredService<TInterface>());
-        }
-
-        /// <summary>
-        /// Adds IQueueBackgroundWorkItem to IServiceCollection.
-        /// </summary>
-        public static IServiceCollection AddBackgroundQueueService(this IServiceCollection services)
-        {
-            services.TryAddTransient<IJobsRunnerTimer, JobsRunnerTimer>();
-            services.AddHostedApiService<IBackgroundQueueService, BackgroundQueueService>();
-            return services;
-        }
-    }
-
-    /// <summary>
-    /// A .NET Core replacement for the old HostingEnvironment.QueueBackgroundWorkItem.
-    /// </summary>
-    public interface IBackgroundQueueService
-    {
-        /// <summary>
-        /// Schedules a task which can run in the background, independent of any request
-        /// </summary>
-        void QueueBackgroundWorkItem(Func<CancellationToken, IServiceProvider, Task> workItem);
-
-        /// <summary>
-        /// Schedules a task which can run in the background, independent of any request.
-        /// </summary>
-        void QueueBackgroundWorkItem(Action<CancellationToken, IServiceProvider> workItem);
-    }
-
     /// <summary>
     /// BackgroundQueue Service
     /// A .NET Core replacement for the old HostingEnvironment.QueueBackgroundWorkItem.
@@ -67,7 +20,6 @@ namespace DNTCommon.Web.Core
         private readonly ILogger<BackgroundQueueService> _logger;
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly IJobsRunnerTimer _jobsRunnerTimer;
-        //private readonly TimeSpan _secondsToWaitBeforePickingUpTask = TimeSpan.FromSeconds(1);
         private readonly ConcurrentQueue<Func<CancellationToken, IServiceProvider, Task>> _asyncTasksQueue = new();
         private readonly ConcurrentQueue<Action<CancellationToken, IServiceProvider>> _syncTasksQueue = new();
 

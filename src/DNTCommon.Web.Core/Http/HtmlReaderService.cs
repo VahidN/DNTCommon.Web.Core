@@ -3,42 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using HtmlAgilityPack;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace DNTCommon.Web.Core
 {
-    /// <summary>
-    /// HtmlReaderService Extensions
-    /// </summary>
-    public static class HtmlReaderServiceExtensions
-    {
-        /// <summary>
-        /// Adds IHtmlReaderService to IServiceCollection
-        /// </summary>
-        public static IServiceCollection AddHtmlReaderService(this IServiceCollection services)
-        {
-            services.AddTransient<IHtmlReaderService, HtmlReaderService>();
-            return services;
-        }
-    }
-
-    /// <summary>
-    /// Html Reader Service
-    /// </summary>
-    public interface IHtmlReaderService
-    {
-        /// <summary>
-        /// ‍Creates a properly initialized new HtmlDocument.
-        /// </summary>
-        HtmlDocument CreateHtmlDocument(string html);
-
-        /// <summary>
-        /// Parses an HTML document recursively.
-        /// </summary>
-        (HtmlDocument HtmlDocument, IEnumerable<HtmlNode> HtmlNodes) ParseHtml(string html);
-    }
-
     /// <summary>
     /// Html Reader Service
     /// </summary>
@@ -68,7 +36,7 @@ namespace DNTCommon.Web.Core
             };
             doc.LoadHtml(html);
 
-            if (doc.ParseErrors != null && doc.ParseErrors.Any())
+            if (doc.ParseErrors?.Any() == true)
             {
                 foreach (var error in doc.ParseErrors)
                 {

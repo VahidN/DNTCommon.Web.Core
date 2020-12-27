@@ -6,7 +6,7 @@ namespace DNTCommon.Web.Core
     /// <summary>
     /// ServiceCollection Extensions
     /// </summary>
-    public static class DNTCommonWebServiceCollectionExtensions
+    public static class DntCommonWebServiceCollectionExtensions
     {
         /// <summary>
         /// Adds all of the default providers of DNTCommon.Web.Core at once.

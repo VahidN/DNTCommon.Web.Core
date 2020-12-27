@@ -2,42 +2,10 @@ using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace DNTCommon.Web.Core
 {
-    /// <summary>
-    /// Redirect Url Finder Service Extensions
-    /// </summary>
-    public static class RedirectUrlFinderServiceExtensions
-    {
-        /// <summary>
-        /// Adds IRedirectUrlFinderService to IServiceCollection.
-        /// </summary>
-        public static IServiceCollection AddRedirectUrlFinderService(this IServiceCollection services)
-        {
-            services.AddTransient<IRedirectUrlFinderService, RedirectUrlFinderService>();
-            return services;
-        }
-    }
-
-    /// <summary>
-    /// Redirect Url Finder Service
-    /// </summary>
-    public interface IRedirectUrlFinderService
-    {
-        /// <summary>
-        /// Finds the actual hidden URL after multiple redirects.
-        /// </summary>
-        Task<string?> GetRedirectUrlAsync(string siteUrl, int maxRedirects = 20);
-
-        /// <summary>
-        /// Finds the actual hidden URL after multiple redirects.
-        /// </summary>
-        Task<Uri?> GetRedirectUrlAsync(Uri siteUri, int maxRedirects = 20);
-    }
-
     /// <summary>
     /// Redirect Url Finder Service
     /// </summary>
@@ -98,10 +66,7 @@ namespace DNTCommon.Web.Core
                     return new Uri(outUrl);
                 }
 
-                _client.DefaultRequestHeaders.Add("User-Agent", typeof(RedirectUrlFinderService).Namespace);
-                _client.DefaultRequestHeaders.Add("Keep-Alive", "true");
-                _client.DefaultRequestHeaders.Referrer = siteUri;
-
+                setHeaders(siteUri);
                 var hops = 1;
                 do
                 {
@@ -123,14 +88,11 @@ namespace DNTCommon.Web.Core
                             }
                             break;
                         case HttpStatusCode.Unauthorized:
-                        case HttpStatusCode.Forbidden:
-                            // fine! they have banned this server, but the link is correct!
-                            return cacheReturn(siteUri, redirectUri);
+                        case HttpStatusCode.Forbidden: // fine! they have banned this server, but the link is correct!
                         case HttpStatusCode.OK:
                             return cacheReturn(siteUri, redirectUri);
-
                         default:
-                            webResp.EnsureSuccessStatusCode();
+                            await webResp.EnsureSuccessStatusCodeAsync();
                             break;
                     }
 
@@ -149,6 +111,13 @@ namespace DNTCommon.Web.Core
             }
 
             return cacheReturn(siteUri, redirectUri);
+        }
+
+        private void setHeaders(Uri siteUri)
+        {
+            _client.DefaultRequestHeaders.Add("User-Agent", typeof(RedirectUrlFinderService).Namespace);
+            _client.DefaultRequestHeaders.Add("Keep-Alive", "true");
+            _client.DefaultRequestHeaders.Referrer = siteUri;
         }
 
         private Uri? cacheReturn(Uri originalUrl, Uri? redirectUrl)

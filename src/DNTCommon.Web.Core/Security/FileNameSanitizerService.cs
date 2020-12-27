@@ -1,57 +1,9 @@
 using System;
 using System.IO;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace DNTCommon.Web.Core
 {
-    /// <summary>
-    /// SafeFile Download Service Extensions
-    /// </summary>
-    public static class FileNameSanitizerServiceExtensions
-    {
-        /// <summary>
-        /// Adds IFileNameSanitizerService to IServiceCollection.
-        /// </summary>
-        public static IServiceCollection AddFileNameSanitizerService(this IServiceCollection services)
-        {
-            services.AddTransient<IFileNameSanitizerService, FileNameSanitizerService>();
-            return services;
-        }
-    }
-
-    /// <summary>
-    /// Safe File
-    /// </summary>
-    public class SafeFile
-    {
-        /// <summary>
-        /// Determines whether the requested file is safe to download.
-        /// </summary>
-        public bool IsSafeToDownload { get; set; }
-
-        /// <summary>
-        /// Cleaned requested file's name.
-        /// </summary>
-        public string SafeFileName { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Cleaned requested file's path.
-        /// </summary>
-        public string SafeFilePath { get; set; } = string.Empty;
-    }
-
-    /// <summary>
-    /// SafeFile Download Service
-    /// </summary>
-    public interface IFileNameSanitizerService
-    {
-        /// <summary>
-        /// Determines whether the requested file is safe to download.
-        /// </summary>
-        SafeFile IsSafeToDownload(string folderPath, string requestedFileName);
-    }
-
     /// <summary>
     /// SafeFile Download Service
     /// </summary>
@@ -78,7 +30,7 @@ namespace DNTCommon.Web.Core
             }
 
             var fileName = Path.GetFileName(requestedFileName);
-            if (fileName != requestedFileName)
+            if (!string.Equals(fileName, requestedFileName, StringComparison.Ordinal))
             {
                 _logger.LogWarning($"Bad file request. Sanitized file name is different than the actual name. `{fileName}` != `{requestedFileName}`");
                 return new SafeFile();

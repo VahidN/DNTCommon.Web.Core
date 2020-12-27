@@ -10,32 +10,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Primitives;
 
 namespace DNTCommon.Web.Core
 {
-
-    /// <summary>
-    /// To read request body in an asp.net core webapi controller
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-    public sealed class EnableReadableBodyStreamAttribute : Attribute, IAuthorizationFilter
-    {
-        /// <summary>
-        /// To read request body in an asp.net core webapi controller
-        /// </summary>
-        public void OnAuthorization(AuthorizationFilterContext context)
-        {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
-            context.HttpContext.Request.EnableBuffering();
-        }
-    }
-
     /// <summary>
     /// Http Request Extensions
     /// </summary>
@@ -284,7 +262,7 @@ namespace DNTCommon.Web.Core
         /// Deserialize `request.Body` as a JSON content.
         /// This method needs [EnableReadableBodyStream] attribute to be added to a given action method.
         /// </summary>
-        public static async Task<Dictionary<string, string>?> DeserializeRequestJsonBodyAsDictionaryAsync(this HttpContext httpContext)
+        public static async Task<IDictionary<string, string>?> DeserializeRequestJsonBodyAsDictionaryAsync(this HttpContext httpContext)
         {
             var body = await httpContext.ReadRequestBodyAsStringAsync();
             return JsonSerializer.Deserialize<Dictionary<string, string>>(body);

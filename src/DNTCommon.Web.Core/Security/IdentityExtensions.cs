@@ -65,7 +65,7 @@ namespace DNTCommon.Web.Core
                 return null;
             }
 
-            if (int.TryParse(userIdValue, out var userId))
+            if (int.TryParse(userIdValue, NumberStyles.Number, CultureInfo.InvariantCulture, out var userId))
             {
                 return userId;
             }

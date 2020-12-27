@@ -5,57 +5,10 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace DNTCommon.Web.Core
 {
-    /// <summary>
-    /// Des CryptoProvider Service Extensions
-    /// </summary>
-    public static class DesCryptoProviderServiceExtensions
-    {
-        /// <summary>
-        /// Adds IDesCryptoProvider to IServiceCollection.
-        /// </summary>
-        public static IServiceCollection AddDesProviderService(this IServiceCollection services)
-        {
-            services.AddSingleton<IDesCryptoProvider, DesCryptoProvider>();
-            return services;
-        }
-    }
-
-    /// <summary>
-    /// The DES protection provider
-    /// </summary>
-    public interface IDesCryptoProvider
-    {
-        /// <summary>
-        /// Decrypts the message
-        /// </summary>
-        string? Decrypt(string inputText, string key);
-
-        /// <summary>
-        /// It will decrypt a Base64UrlEncode encrypted JSON string and then deserialize it as an object.
-        /// </summary>
-        T? DecryptObject<T>(string data, string key);
-
-        /// <summary>
-        /// Encrypts the message
-        /// </summary>
-        string Encrypt(string inputText, string key);
-
-        /// <summary>
-        /// It will serialize an object as a JSON string and then encrypt it as a Base64UrlEncode string.
-        /// </summary>
-        string EncryptObject(object data, string key);
-
-        /// <summary>
-        /// Creates the hash of the message
-        /// </summary>
-        (string HashString, byte[] HashBytes) Hash(string inputText);
-    }
-
     /// <summary>
     /// The DES protection provider
     /// </summary>
@@ -149,6 +102,8 @@ namespace DNTCommon.Web.Core
 
         [SuppressMessage("Microsoft.Usage", "CA5350:encrypt uses a weak cryptographic algorithm TripleDES",
                         Justification = "That's enough for our usecase!")]
+        [SuppressMessage("Microsoft.Usage", "S5547:encrypt uses a weak cryptographic algorithm TripleDES",
+                        Justification = "That's enough for our usecase!")]
         private byte[] encrypt(byte[] data, string key)
         {
             var desKey = getDesKey(key);
@@ -174,6 +129,8 @@ namespace DNTCommon.Web.Core
         }
 
         [SuppressMessage("Microsoft.Usage", "CA5350:encrypt uses a weak cryptographic algorithm TripleDES",
+                        Justification = "That's enough for our usecase!")]
+        [SuppressMessage("Microsoft.Usage", "S5547:encrypt uses a weak cryptographic algorithm TripleDES",
                         Justification = "That's enough for our usecase!")]
         private byte[] decrypt(byte[] data, string key)
         {

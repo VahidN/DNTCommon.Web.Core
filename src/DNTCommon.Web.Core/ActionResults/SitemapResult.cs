@@ -12,78 +12,11 @@ using System.IO;
 namespace DNTCommon.Web.Core
 {
     /// <summary>
-    /// SitemapItem's Change frequency
-    /// </summary>
-    public enum ChangeFrequency
-    {
-        /// <summary>
-        /// Always
-        /// </summary>
-        Always,
-
-        /// <summary>
-        /// Hourly
-        /// </summary>
-        Hourly,
-
-        /// <summary>
-        /// Daily
-        /// </summary>
-        Daily,
-
-        /// <summary>
-        /// Weekly
-        /// </summary>
-        Weekly,
-
-        /// <summary>
-        /// Monthly
-        /// </summary>
-        Monthly,
-
-        /// <summary>
-        /// Yearly
-        /// </summary>
-        Yearly,
-
-        /// <summary>
-        /// Never
-        /// </summary>
-        Never
-    }
-
-    /// <summary>
-    /// Represents a Sitemap entry
-    /// </summary>
-    public class SitemapItem
-    {
-        /// <summary>
-        /// Item's absolute URL
-        /// </summary>
-        public string Url { set; get; } = default!;
-
-        /// <summary>
-        /// Item's Last Updated Time
-        /// </summary>
-        public DateTimeOffset LastUpdatedTime { set; get; }
-
-        /// <summary>
-        /// Change frequency. Its default value is `daily`.
-        /// </summary>
-        public ChangeFrequency ChangeFrequency { set; get; } = ChangeFrequency.Daily;
-
-        /// <summary>
-        /// Item's priority. Its default value is `0.5`.
-        /// </summary>
-        public decimal Priority { set; get; } = 0.5M;
-    }
-
-    /// <summary>
     /// Sitemap Result
     /// </summary>
     public class SitemapResult : ActionResult
     {
-        readonly IList<SitemapItem> _allItems;
+        private readonly IList<SitemapItem> _allItems;
 
         /// <summary>
         /// Sitemap Result
@@ -96,7 +29,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Executes the result operation of the action method asynchronously.
         /// </summary>
-        public override async Task ExecuteResultAsync(ActionContext context)
+        public override Task ExecuteResultAsync(ActionContext context)
         {
             if (context == null)
             {
@@ -107,7 +40,7 @@ namespace DNTCommon.Web.Core
             var response = context.HttpContext.Response;
             var mediaType = new MediaTypeHeaderValue("application/xml")
             {
-                CharSet = Encoding.UTF8.WebName
+                CharSet = Encoding.UTF8.WebName,
             };
             response.ContentType = mediaType.ToString();
 
@@ -117,7 +50,7 @@ namespace DNTCommon.Web.Core
                 throw new InvalidOperationException("baseUrl is null.");
             }
             var data = getSitemapData(baseUrl);
-            await response.Body.WriteAsync(data.AsMemory(0, data.Length));
+            return response.Body.WriteAsync(data.AsMemory(0, data.Length)).AsTask();
         }
 
         private byte[] getSitemapData(string baseUrl)

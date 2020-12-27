@@ -6,47 +6,12 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.DependencyInjection;
 using System.IO;
 using System.Threading.Tasks;
 using System;
 
 namespace DNTCommon.Web.Core
 {
-    /// <summary>
-    /// More info: http://www.dotnettips.info/post/2564
-    /// </summary>
-    public static class RazorViewToStringRendererExtensions
-    {
-        /// <summary>
-        /// Adds IViewRendererService to IServiceCollection.
-        /// </summary>
-        public static IServiceCollection AddRazorViewRenderer(this IServiceCollection services)
-        {
-            services.AddMvcCore().AddRazorViewEngine();
-            services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddScoped<IViewRendererService, ViewRendererService>();
-            return services;
-        }
-    }
-
-    /// <summary>
-    /// More info: http://www.dotnettips.info/post/2564
-    /// </summary>
-    public interface IViewRendererService
-    {
-        /// <summary>
-        /// Renders a .cshtml file as an string.
-        /// </summary>
-        Task<string> RenderViewToStringAsync(string viewNameOrPath);
-
-        /// <summary>
-        /// Renders a .cshtml file as an string.
-        /// </summary>
-        Task<string> RenderViewToStringAsync<TModel>(string viewNameOrPath, TModel model);
-    }
-
     /// <summary>
     /// Modified version of: https://github.com/aspnet/Entropy/blob/dev/samples/Mvc.RenderViewToString/RazorViewToStringRenderer.cs
     /// </summary>

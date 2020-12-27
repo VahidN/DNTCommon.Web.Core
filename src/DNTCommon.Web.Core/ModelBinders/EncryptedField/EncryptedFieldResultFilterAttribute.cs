@@ -12,11 +12,11 @@ namespace DNTCommon.Web.Core
     /// <summary>
     /// This filter encrypts the outgoing Models of action methods, before sending them to the client.
     /// </summary>
-    public sealed class EncryptedFieldResultFilter : ResultFilterAttribute
+    public sealed class EncryptedFieldResultFilterAttribute : ResultFilterAttribute
     {
         private readonly IProtectionProviderService _protectionProviderService;
-        private readonly ILogger<EncryptedFieldResultFilter> _logger;
-        private readonly ConcurrentDictionary<Type, bool> _modelsWithEncryptedFieldAttributes = new ConcurrentDictionary<Type, bool>();
+        private readonly ILogger<EncryptedFieldResultFilterAttribute> _logger;
+        private readonly ConcurrentDictionary<Type, bool> _modelsWithEncryptedFieldAttributes = new();
 
         /// <summary>
         /// An IProtectionProvider
@@ -28,14 +28,14 @@ namespace DNTCommon.Web.Core
         /// The current ILogger
         /// </summary>
         /// <value></value>
-        public ILogger<EncryptedFieldResultFilter> Logger { get; }
+        public ILogger<EncryptedFieldResultFilterAttribute> Logger { get; }
 
         /// <summary>
         /// This filter encrypts the outgoing Models of action methods, before sending them to the client.
         /// </summary>
-        public EncryptedFieldResultFilter(
+        public EncryptedFieldResultFilterAttribute(
             IProtectionProviderService protectionProviderService,
-            ILogger<EncryptedFieldResultFilter> logger)
+            ILogger<EncryptedFieldResultFilterAttribute> logger)
         {
             _protectionProviderService = protectionProviderService ?? throw new ArgumentNullException(nameof(protectionProviderService));
             ProtectionProviderService = protectionProviderService;
@@ -67,7 +67,7 @@ namespace DNTCommon.Web.Core
                 return;
             }
 
-            if (typeof(IEnumerable).IsAssignableFrom(model.GetType()))
+            if (model is IEnumerable)
             {
                 if (model is IEnumerable items)
                 {
@@ -113,7 +113,7 @@ namespace DNTCommon.Web.Core
                     continue;
                 }
 
-                if (value.GetType() != typeof(string))
+                if (value is not string)
                 {
                     _logger.LogWarning($"[EncryptedField] should be applied to `string` proprties, But type of `{property.DeclaringType}.{property.Name}` is `{property.PropertyType}`.");
                     continue;

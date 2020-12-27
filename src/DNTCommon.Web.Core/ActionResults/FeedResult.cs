@@ -42,7 +42,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Executes the result operation of the action method asynchronously.
         /// </summary>
-        public override async Task ExecuteResultAsync(ActionContext context)
+        public override Task ExecuteResultAsync(ActionContext context)
         {
             if (context == null)
             {
@@ -50,7 +50,7 @@ namespace DNTCommon.Web.Core
             }
 
             _httpContextInfo = context.HttpContext.RequestServices.GetRequiredService<IHttpRequestInfoService>();
-            await writeSyndicationFeedToResponseAsync(context);
+            return writeSyndicationFeedToResponseAsync(context);
         }
 
         private async Task writeSyndicationFeedToResponseAsync(ActionContext context)
@@ -77,7 +77,7 @@ namespace DNTCommon.Web.Core
             foreach (var item in getSyndicationItems())
             {
                 var content = new SyndicationContent(formatter.CreateContent(item));
-                content.AddField(new SyndicationContent("atom:updated", Atom10Namespace, item.LastUpdated.ToString("r")));
+                content.AddField(new SyndicationContent("atom:updated", Atom10Namespace, item.LastUpdated.ToString("r", CultureInfo.InvariantCulture)));
                 await rssFeedWriter.Write(content);
             }
         }
@@ -93,7 +93,7 @@ namespace DNTCommon.Web.Core
 
         private async Task addChannelLastUpdatedTimeAsync(RssFeedWriter rssFeedWriter)
         {
-            if (_feedChannel.RssItems == null || !_feedChannel.RssItems.Any())
+            if (_feedChannel.RssItems?.Any() != true)
             {
                 return;
             }
@@ -142,12 +142,12 @@ namespace DNTCommon.Web.Core
             foreach (var item in _feedChannel.RssItems)
             {
                 var uri = new Uri(QueryHelpers.AddQueryString(item.Url,
-                                new Dictionary<string, string?>
+                                new Dictionary<string, string?>(StringComparer.Ordinal)
                                 {
                                     { "utm_source", "feed" },
                                     { "utm_medium", "rss" },
                                     { "utm_campaign", "featured" },
-                                    { "utm_updated", getUpdatedStamp(item) }
+                                    { "utm_updated", getUpdatedStamp(item) },
                                 }));
                 var syndicationItem = new SyndicationItem
                 {
@@ -170,9 +170,9 @@ namespace DNTCommon.Web.Core
         private static string getUpdatedStamp(FeedItem item)
         {
             return item.LastUpdatedTime.ToShortPersianDateTimeString()
-                                       .Replace("/", "-", StringComparison.Ordinal)
-                                       .Replace(" ", "-", StringComparison.Ordinal)
-                                       .Replace(":", "-", StringComparison.Ordinal);
+                                    .Replace("/", "-", StringComparison.Ordinal)
+                                    .Replace(" ", "-", StringComparison.Ordinal)
+                                    .Replace(":", "-", StringComparison.Ordinal);
         }
     }
 }

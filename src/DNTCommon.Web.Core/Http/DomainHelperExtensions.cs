@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Text;
 using System.Threading;
 
 namespace DNTCommon.Web.Core
@@ -166,9 +167,9 @@ namespace DNTCommon.Web.Core
             string bestMatch = "";
             foreach (var tld in Tlds)
             {
-                if (url.Host.EndsWith(tld, StringComparison.OrdinalIgnoreCase))
+                if (url.Host.EndsWith(tld, StringComparison.OrdinalIgnoreCase) && tld.Length > bestMatch.Length)
                 {
-                    if (tld.Length > bestMatch.Length) bestMatch = tld;
+                    bestMatch = tld;
                 }
             }
             if (string.IsNullOrEmpty(bestMatch))
@@ -178,13 +179,13 @@ namespace DNTCommon.Web.Core
             string[] bestBits = bestMatch.Split('.');
             string[] inputBits = url.Host.Split('.');
             int getLastBits = bestBits.Length + 1;
-            bestMatch = "";
+            var bestMatchBuilder = new StringBuilder();
             for (int c = inputBits.Length - getLastBits; c < inputBits.Length; c++)
             {
-                if (bestMatch.Length > 0) bestMatch += ".";
-                bestMatch += inputBits[c];
+                if (bestMatchBuilder.Length > 0) bestMatchBuilder.Append('.');
+                bestMatchBuilder.Append(inputBits[c]);
             }
-            return (bestMatch, true);
+            return (bestMatchBuilder.ToString(), true);
         }
 
         /// <summary>

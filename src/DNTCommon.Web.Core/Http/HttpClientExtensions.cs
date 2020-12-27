@@ -173,6 +173,16 @@ namespace DNTCommon.Web.Core
                 throw new InvalidOperationException($"`response.Content` of `{url}` is null!");
             }
 
+            await saveToFile(outputFileNamePath, logger, response, remoteFileSize, tempFilePath);
+        }
+
+        private static async Task saveToFile(
+            string outputFileNamePath,
+            Action<string>? logger,
+            HttpResponseMessage response,
+            long remoteFileSize,
+            string tempFilePath)
+        {
             const int maxBufferSize = 0x10000;
             using (var inputStream = await response.Content.ReadAsStreamAsync())
             {

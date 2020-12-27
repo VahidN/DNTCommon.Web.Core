@@ -5,79 +5,18 @@ using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace DNTCommon.Web.Core
 {
     /// <summary>
-    /// Html Helper Service Extensions
-    /// </summary>
-    public static class HtmlHelperServiceExtensions
-    {
-        /// <summary>
-        /// Adds IHtmlHelperService to IServiceCollection.
-        /// </summary>
-        public static IServiceCollection AddHtmlHelperService(this IServiceCollection services)
-        {
-            services.AddScoped<IHtmlHelperService, HtmlHelperService>();
-            return services;
-        }
-    }
-
-    /// <summary>
-    /// Html Helper Service
-    /// </summary>
-    public interface IHtmlHelperService
-    {
-        /// <summary>
-        /// Returns the src list of img tags.
-        /// </summary>
-        IEnumerable<string> ExtractImagesLinks(string html);
-
-        /// <summary>
-        /// Returns the href list of anchor tags.
-        /// </summary>
-        IEnumerable<string> ExtractLinks(string html);
-
-        /// <summary>
-        /// Parses an HTML content and tries to convert its relative URLs to absolute urls based on the siteBaseUrl.
-        /// </summary>
-        string FixRelativeUrls(string html, string imageNotFoundPath, string siteBaseUrl);
-
-        /// <summary>
-        /// Parses an HTML content and tries to convert its relative URLs to absolute urls based on the siteBaseUrl.
-        /// </summary>
-        string FixRelativeUrls(string html, string imageNotFoundPath);
-
-        /// <summary>
-        /// Download the given uri and then extracts its title.
-        /// </summary>
-        Task<string> GetUrlTitleAsync(Uri uri);
-
-        /// <summary>
-        /// Extracts the given HTML page's title.
-        /// </summary>
-        string GetHtmlPageTitle(string html);
-
-        /// <summary>
-        /// Download the given uri and then extracts its title.
-        /// </summary>
-        Task<string> GetUrlTitleAsync(string url);
-
-        /// <summary>
-        /// Removes all of the HTML tags.
-        /// </summary>
-        string RemoveHtmlTags(string html);
-    }
-
-    /// <summary>
     /// Html Helper Service
     /// </summary>
     public class HtmlHelperService : IHtmlHelperService
     {
+        private static readonly TimeSpan oneMinute = TimeSpan.FromMinutes(1);
         private static readonly Regex _htmlSpacesPattern =
-                    new Regex(@"&nbsp;|&zwnj;|(\n)\s*", RegexOptions.Compiled);
+                    new Regex(@"&nbsp;|&zwnj;|(\n)\s*", RegexOptions.Compiled | RegexOptions.ExplicitCapture, oneMinute);
 
         private readonly ILogger<HtmlHelperService> _logger;
         private readonly IDownloaderService _downloaderService;
@@ -193,7 +132,7 @@ namespace DNTCommon.Web.Core
                     if (originalUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase)
                         || originalUrl.StartsWith("https", StringComparison.OrdinalIgnoreCase))
                     {
-                        if (attribute.Value != originalUrl)
+                        if (!attribute.Value.Equals(originalUrl, StringComparison.OrdinalIgnoreCase))
                         {
                             _logger.LogWarning($"Changed URL: '{attribute.Value}' to '{originalUrl}'.");
                             attribute.Value = originalUrl;
@@ -205,7 +144,7 @@ namespace DNTCommon.Web.Core
                     if (idx != -1)
                     {
                         var newImage = originalUrl.Substring(idx);
-                        if (attribute.Value != newImage)
+                        if (!attribute.Value.Equals(newImage, StringComparison.OrdinalIgnoreCase))
                         {
                             attribute.Value = newImage;
                             _logger.LogWarning($"Changed Image: '{originalUrl}' to '{attribute.Value}'.");
@@ -232,7 +171,7 @@ namespace DNTCommon.Web.Core
                     }
 
                     newUrl = siteBaseUrl.CombineUrl(originalUrl);
-                    if (newUrl != attribute.Value)
+                    if (!newUrl.Equals(attribute.Value, StringComparison.OrdinalIgnoreCase))
                     {
                         attribute.Value = newUrl;
                         _logger.LogWarning($"Changed URL: '{originalUrl}' to '{newUrl}'.");
@@ -272,6 +211,14 @@ namespace DNTCommon.Web.Core
         }
 
         /// <summary>
+        /// Download the given uri and then extracts its title.
+        /// </summary>
+        public Task<string> GetUrlTitleAsync(string url)
+        {
+            return GetUrlTitleAsync(new Uri(url));
+        }
+
+        /// <summary>
         /// Extracts the given HTML page's title.
         /// </summary>
         public string GetHtmlPageTitle(string html)
@@ -299,14 +246,6 @@ namespace DNTCommon.Web.Core
                 .Replace("\t", " ", StringComparison.Ordinal)
                 .Replace("\n", " ", StringComparison.Ordinal);
             return WebUtility.HtmlDecode(titleText.Trim());
-        }
-
-        /// <summary>
-        /// Download the given uri and then extracts its title.
-        /// </summary>
-        public Task<string> GetUrlTitleAsync(string url)
-        {
-            return GetUrlTitleAsync(new Uri(url));
         }
 
         /// <summary>

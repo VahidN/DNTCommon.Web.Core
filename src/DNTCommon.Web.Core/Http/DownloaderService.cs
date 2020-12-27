@@ -7,128 +7,9 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace DNTCommon.Web.Core
 {
-    /// <summary>
-    /// DownloaderService Extensions
-    /// </summary>
-    public static class DownloaderServiceExtensions
-    {
-        /// <summary>
-        /// Adds IDownloaderService to IServiceCollection
-        /// </summary>
-        public static IServiceCollection AddDownloaderService(this IServiceCollection services)
-        {
-            services.AddTransient<IDownloaderService, DownloaderService>();
-            return services;
-        }
-    }
-
-    /// <summary>
-    /// Downloader Service
-    /// </summary>
-    public interface IDownloaderService
-    {
-        /// <summary>
-        /// Downloads a file from a given url and then stores it as a local file.
-        /// </summary>
-        Task<DownloadStatus?> DownloadFileAsync(string url, string outputFilePath, AutoRetriesPolicy? autoRetries = null);
-
-        /// <summary>
-        /// Downloads a file from a given url and then returns it as a byte array.
-        /// </summary>
-        Task<(byte[] Data, DownloadStatus DownloadStatus)> DownloadDataAsync(string url, AutoRetriesPolicy? autoRetries = null);
-
-        /// <summary>
-        /// Downloads a file from a given url and then returns it as a text.
-        /// </summary>
-        Task<(string Data, DownloadStatus DownloadStatus)> DownloadPageAsync(string url, AutoRetriesPolicy? autoRetries = null);
-
-        /// <summary>
-        /// Gives the current download operation's status.
-        /// </summary>
-        Action<DownloadStatus>? OnDownloadStatusChanged { set; get; }
-
-        /// <summary>
-        /// It fires when the download operation is completed.
-        /// </summary>
-        Action<DownloadStatus>? OnDownloadCompleted { set; get; }
-
-        /// <summary>
-        /// Cancels the download operation.
-        /// </summary>
-        void CancelDownload();
-    }
-
-    /// <summary>
-    /// Auto Retries Policy
-    /// </summary>
-    public class AutoRetriesPolicy
-    {
-        /// <summary>
-        /// How many time the downloader service should retries if an error has occurred.
-        /// </summary>
-        public int MaxRequestAutoRetries { set; get; }
-
-        /// <summary>
-        /// How much time the downloader service should wait between retries if an error has occurred.
-        /// </summary>
-        public TimeSpan AutoRetriesDelay { set; get; }
-    }
-
-    /// <summary>
-    /// Download Status
-    /// </summary>
-    public class DownloadStatus
-    {
-        /// <summary>
-        /// Estimated Remote FileSize
-        /// </summary>
-        public long RemoteFileSize { get; set; }
-
-        /// <summary>
-        /// Current downloaded bytes.
-        /// </summary>
-        public long BytesTransferred { get; set; }
-
-        /// <summary>
-        /// Download's start time.
-        /// </summary>
-        public DateTimeOffset StartTime { get; set; }
-
-        /// <summary>
-        /// Received remote file name from the server.
-        /// </summary>
-        public string RemoteFileName { get; set; } = default!;
-
-        /// <summary>
-        /// Current task's status.
-        /// </summary>
-        public TaskStatus Status { get; set; }
-
-        /// <summary>
-        /// Current percent of download operation.
-        /// </summary>
-        public decimal PercentComplete { get; set; }
-
-        /// <summary>
-        /// Download speed.
-        /// </summary>
-        public double BytesPerSecond { get; set; }
-
-        /// <summary>
-        /// Estimated Completion Time
-        /// </summary>
-        public TimeSpan EstimatedCompletionTime { get; set; }
-
-        /// <summary>
-        /// Elapsed Download Time
-        /// </summary>
-        public TimeSpan ElapsedDownloadTime { get; set; }
-    }
-
     /// <summary>
     /// Lifetime of this class should be set to `Transient`.
     /// Because setting HttpClient's `DefaultRequestHeaders` is not thread-safe and can't be shared across different threads.
@@ -229,12 +110,12 @@ namespace DNTCommon.Web.Core
                     await Task.Delay(autoRetries.AutoRetriesDelay, _cancelSrc.Token);
                 }
             } while (autoRetries.MaxRequestAutoRetries > 0 &&
-                     _downloadStatus.Status != TaskStatus.RanToCompletion &&
-                     !_cancelSrc.IsCancellationRequested);
+                    _downloadStatus.Status != TaskStatus.RanToCompletion &&
+                    !_cancelSrc.IsCancellationRequested);
 
             var uniqueExceptions = exceptions.Distinct(new ExceptionEqualityComparer()).ToList();
             if (uniqueExceptions.Any() &&
-               _downloadStatus.Status != TaskStatus.RanToCompletion)
+                _downloadStatus.Status != TaskStatus.RanToCompletion)
             {
                 if (uniqueExceptions.Count() == 1)
                     throw uniqueExceptions.First();
@@ -325,7 +206,7 @@ namespace DNTCommon.Web.Core
                     {
                         // Resume is not supported. Starting over.
                         fileStream.SetLength(0);
-                        fileStream.Flush();
+                        await fileStream.FlushAsync();
                         _downloadStatus.BytesTransferred = 0;
                     }
 
@@ -367,7 +248,7 @@ namespace DNTCommon.Web.Core
             _client.DefaultRequestHeaders.Referrer = uri;
 
             var response = await _client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, _cancelSrc.Token);
-            response.EnsureSuccessStatusCode();
+            await response.EnsureSuccessStatusCodeAsync();
 
             _downloadStatus.RemoteFileSize =
                response.Content.Headers?.ContentRange?.Length ?? response.Content?.Headers?.ContentLength ?? 0;
@@ -422,44 +303,6 @@ namespace DNTCommon.Web.Core
             _downloadStatus.EstimatedCompletionTime = TimeSpan.FromSeconds(rawEta);
 
             OnDownloadStatusChanged?.Invoke(_downloadStatus);
-        }
-    }
-
-    /// <summary>
-    /// Exception EqualityComparer
-    /// </summary>
-    public class ExceptionEqualityComparer : IEqualityComparer<Exception>
-    {
-        /// <summary>
-        /// Checks if two exceptions are equal.
-        /// </summary>
-        public bool Equals(Exception? x, Exception? y)
-        {
-            if (y == null && x == null)
-            {
-                return true;
-            }
-
-            if (x == null || y == null)
-            {
-                return false;
-            }
-
-            return x.GetType().Name.Equals(y.GetType().Name, StringComparison.Ordinal)
-                    && x.Message.Equals(y.Message, StringComparison.Ordinal);
-        }
-
-        /// <summary>
-        /// Gets the exception's hash.
-        /// </summary>
-        public int GetHashCode(Exception obj)
-        {
-            if (obj == null)
-            {
-                throw new ArgumentNullException(nameof(obj));
-            }
-
-            return (obj.GetType().Name + obj.Message).GetHashCode(StringComparison.Ordinal);
         }
     }
 }

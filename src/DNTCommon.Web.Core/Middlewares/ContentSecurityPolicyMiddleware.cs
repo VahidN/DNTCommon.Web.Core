@@ -1,23 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
 namespace DNTCommon.Web.Core
 {
-    /// <summary>
-    /// CSP config
-    /// </summary>
-    public class ContentSecurityPolicyConfig
-    {
-        /// <summary>
-        /// CSP options. Each options should be specified in one line.
-        /// </summary>
-        public IList<string> Options { get; } = new List<string>();
-    }
-
     /// <summary>
     /// Content Security Policy Middleware
     /// </summary>
@@ -88,21 +75,6 @@ namespace DNTCommon.Web.Core
                     getContentSecurityPolicyValue(config.Value, errorLogUri));
             }
             return _next(context);
-        }
-    }
-
-    /// <summary>
-    /// CSP Extensions
-    /// </summary>
-    public static class ContentSecurityPolicyMiddlewareExtensions
-    {
-        /// <summary>
-        /// Make sure you add this code BEFORE app.UseStaticFiles();,
-        /// otherwise the headers will not be applied to your static files.
-        /// </summary>
-        public static IApplicationBuilder UseContentSecurityPolicy(this IApplicationBuilder builder)
-        {
-            return builder.UseMiddleware<ContentSecurityPolicyMiddleware>();
         }
     }
 }

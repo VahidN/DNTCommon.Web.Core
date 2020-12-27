@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace DNTCommon.Web.Core
@@ -10,7 +11,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// If a hostname is contained in this set, it is a TLD.
         /// </summary>
-        public static readonly ISet<string> EXACT = new HashSet<string>(new[]{
+        public static readonly IReadOnlyCollection<string> EXACT = new HashSet<string>(new[]{
       "ac",
       "com.ac",
       "edu.ac",
@@ -6182,7 +6183,7 @@ namespace DNTCommon.Web.Core
       "\u049b\u0430\u0437",
       "xn--80ao21a",
       "cw"
-    });
+    }, StringComparer.OrdinalIgnoreCase);
 
 
         /// <summary>
@@ -6190,7 +6191,7 @@ namespace DNTCommon.Web.Core
         /// leftmost component results in a name which is contained in this
         /// set, it is a TLD.
         /// </summary>
-        public static readonly ISet<string> UNDER = new HashSet<string>(new[]{
+        public static readonly IReadOnlyCollection<string> UNDER = new HashSet<string>(new[]{
             "ar",
             "bd",
             "bn",
@@ -6233,13 +6234,13 @@ namespace DNTCommon.Web.Core
             "za",
             "zm",
             "zw"
-       });
+       }, StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// The elements in this set would pass the UNDER test, but are
         /// set, it is a TLD.
         /// </summary>
-        public static readonly ISet<string> EXCLUDED = new HashSet<string>(new[]{
+        public static readonly IReadOnlyCollection<string> EXCLUDED = new HashSet<string>(new[]{
             "congresodelalengua3.ar",
             "educ.ar",
             "gobiernoelectronico.ar",
@@ -6278,6 +6279,6 @@ namespace DNTCommon.Web.Core
             "nic.uk",
             "nls.uk",
             "parliament.uk"
-       });
+       }, StringComparer.OrdinalIgnoreCase);
     }
 }

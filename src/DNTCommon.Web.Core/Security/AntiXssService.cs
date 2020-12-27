@@ -3,73 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using HtmlAgilityPack;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace DNTCommon.Web.Core
 {
-    /// <summary>
-    /// AntiXss Config
-    /// </summary>
-    public class AntiXssConfig
-    {
-        /// <summary>
-        /// List of allowed HTML tags and their attributes
-        /// </summary>
-        public IReadOnlyCollection<ValidHtmlTag> ValidHtmlTags { set; get; } = new List<ValidHtmlTag>();
-
-        /// <summary>
-        /// If an attribute's value contains one of these characters, it will be removed.
-        /// </summary>
-        public ISet<string> UnsafeAttributeValueCharacters { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-    }
-
-    /// <summary>
-    /// Represents a valid HTML tag for the AntiXss
-    /// </summary>
-    public class ValidHtmlTag
-    {
-        /// <summary>
-        /// A valid tag name
-        /// </summary>
-        public string Tag { set; get; } = default!;
-
-        /// <summary>
-        /// Valid tag's attributes
-        /// </summary>
-        public ISet<string> Attributes { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-    }
-
-    /// <summary>
-    /// SafeFile Download Service Extensions
-    /// </summary>
-    public static class AntiXssServiceExtensions
-    {
-        /// <summary>
-        /// Adds IFileNameSanitizerService to IServiceCollection.
-        /// </summary>
-        public static IServiceCollection AddAntiXssService(this IServiceCollection services)
-        {
-            services.AddTransient<IAntiXssService, AntiXssService>();
-            return services;
-        }
-    }
-
-    /// <summary>
-    /// Anti Xss Service
-    /// </summary>
-    public interface IAntiXssService
-    {
-        /// <summary>
-        /// Takes raw HTML input and cleans against a whitelist
-        /// </summary>
-        /// <param name="html">Html source</param>
-        /// <param name="allowDataAttributes">Allow HTML5 data attributes prefixed with data-</param>
-        /// <returns>Clean output</returns>
-        string GetSanitizedHtml(string html, bool allowDataAttributes = true);
-    }
-
     /// <summary>
     /// Anti Xss Service
     /// </summary>
@@ -105,7 +43,7 @@ namespace DNTCommon.Web.Core
         /// <param name="html">Html source</param>
         /// <param name="allowDataAttributes">Allow HTML5 data attributes prefixed with data-</param>
         /// <returns>Clean output</returns>
-        public string GetSanitizedHtml(string html, bool allowDataAttributes)
+        public string GetSanitizedHtml(string html, bool allowDataAttributes = true)
         {
             var parser = _htmlReaderService.ParseHtml(html);
             var whitelistTags = new HashSet<string>(_antiXssConfig.Value.ValidHtmlTags.Select(x => x.Tag.ToLowerInvariant()).ToArray(), StringComparer.OrdinalIgnoreCase);
@@ -137,12 +75,13 @@ namespace DNTCommon.Web.Core
         private void fixCodeTag(HtmlNode node)
         {
             if (node.NodeType == HtmlNodeType.Element &&
-                (node.Name == "pre" || node.Name == "code") &&
-                !string.IsNullOrWhiteSpace(node.InnerHtml))
+                (string.Equals(node.Name, "pre", StringComparison.Ordinal)
+                || string.Equals(node.Name, "code", StringComparison.Ordinal))
+                && !string.IsNullOrWhiteSpace(node.InnerHtml))
             {
                 var decodedHtml = WebUtility.HtmlDecode(node.InnerHtml);
                 var encodedHtml = WebUtility.HtmlEncode(decodedHtml);
-                if (node.InnerHtml != encodedHtml)
+                if (!string.Equals(node.InnerHtml, encodedHtml, StringComparison.Ordinal))
                 {
                     node.InnerHtml = encodedHtml;
                     _logger.LogWarning($"Fixed a non-encoded `{node.Name}` tag: `{node.OuterHtml}`.");
@@ -152,13 +91,12 @@ namespace DNTCommon.Web.Core
 
         private static bool cleanWhitespacesBetweenTags(HtmlNode node)
         {
-            if (node.NodeType == HtmlNodeType.Text)
+            if (node.NodeType == HtmlNodeType.Text
+                && (string.IsNullOrWhiteSpace(node.InnerText)
+                || string.IsNullOrEmpty(node.InnerText.Trim())))
             {
-                if (string.IsNullOrWhiteSpace(node.InnerText) || string.IsNullOrEmpty(node.InnerText.Trim()))
-                {
-                    node.ParentNode?.RemoveChild(node);
-                    return true;
-                }
+                node.ParentNode?.RemoveChild(node);
+                return true;
             }
             return false;
         }

@@ -25,11 +25,11 @@ namespace DNTCommon.Web.Core
                 return false;
             }
             return ip.IsInSubnet("127.0.0.1/8") ||
-                   ip.IsInSubnet("10.0.0.0/8") ||
-                   ip.IsInSubnet("172.16.0.0/12") ||
-                   ip.IsInSubnet("192.168.0.0/16") ||
-                   ip.IsInSubnet("169.254.0.0/16 ") ||
-                   ip == NullIPv6;
+                ip.IsInSubnet("10.0.0.0/8") ||
+                ip.IsInSubnet("172.16.0.0/12") ||
+                ip.IsInSubnet("192.168.0.0/16") ||
+                ip.IsInSubnet("169.254.0.0/16 ") ||
+                string.Equals(ip, NullIPv6, StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -100,7 +100,7 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public static bool IsSet(this IPAddress address)
         {
-            return address != null && address.ToString() != NullIPv6;
+            return address != null && !string.Equals(address.ToString(), NullIPv6, StringComparison.Ordinal);
         }
 
         /// <summary>

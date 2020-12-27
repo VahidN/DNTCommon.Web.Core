@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,56 +7,6 @@ using Microsoft.Extensions.Logging;
 
 namespace DNTCommon.Web.Core
 {
-    /// <summary>
-    /// Ye Ke Model Binder Extensions
-    /// </summary>
-    public static class YeKeModelBinderExtensions
-    {
-        /// <summary>
-        /// Inserts YeKeModelBinderProvider at the top of the MvcOptions.ModelBinderProviders list.
-        /// </summary>
-        public static MvcOptions UseYeKeModelBinder(this MvcOptions options)
-        {
-            if (options == null)
-            {
-                throw new ArgumentNullException(nameof(options));
-            }
-
-            options.ModelBinderProviders.Insert(0, new YeKeModelBinderProvider());
-            return options;
-        }
-    }
-
-    /// <summary>
-    /// Persian Ye Ke Model Binder Provider
-    /// </summary>
-    public class YeKeModelBinderProvider : IModelBinderProvider
-    {
-        /// <summary>
-        /// Creates an IModelBinder based on ModelBinderProviderContext.
-        /// </summary>
-        public IModelBinder? GetBinder(ModelBinderProviderContext context)
-        {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
-            if (context.Metadata.IsComplexType)
-            {
-                return null;
-            }
-
-            if (context.Metadata.ModelType == typeof(string))
-            {
-                return new YeKeModelBinder();
-            }
-
-            var loggerFactory = context.Services.GetRequiredService<ILoggerFactory>();
-            return new SimpleTypeModelBinder(context.Metadata.ModelType, loggerFactory);
-        }
-    }
-
     /// <summary>
     /// Persian Ye Ke Model Binder
     /// </summary>

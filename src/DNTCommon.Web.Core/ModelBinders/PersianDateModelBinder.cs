@@ -2,7 +2,6 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using DNTPersianUtils.Core;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,59 +9,6 @@ using Microsoft.Extensions.Logging;
 
 namespace DNTCommon.Web.Core
 {
-    /// <summary>
-    /// Persian Date Model Binder Extensions
-    /// </summary>
-    public static class PersianDateModelBinderExtensions
-    {
-        /// <summary>
-        /// Inserts PersianDateModelBinderProvider at the top of the MvcOptions.ModelBinderProviders list.
-        /// </summary>
-        public static MvcOptions UsePersianDateModelBinder(this MvcOptions options)
-        {
-            if (options == null)
-            {
-                throw new ArgumentNullException(nameof(options));
-            }
-
-            options.ModelBinderProviders.Insert(0, new PersianDateModelBinderProvider());
-            return options;
-        }
-    }
-
-    /// <summary>
-    /// Persian Date Model Binder Provider
-    /// </summary>
-    public class PersianDateModelBinderProvider : IModelBinderProvider
-    {
-        /// <summary>
-        /// Creates an IModelBinder based on ModelBinderProviderContext.
-        /// </summary>
-        public IModelBinder? GetBinder(ModelBinderProviderContext context)
-        {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
-            if (context.Metadata?.IsComplexType != false)
-            {
-                return null;
-            }
-
-            if (context.Metadata.ModelType == typeof(DateTime?) ||
-                context.Metadata.ModelType == typeof(DateTime) ||
-                context.Metadata.ModelType == typeof(DateTimeOffset) ||
-                context.Metadata.ModelType == typeof(DateTimeOffset?))
-            {
-                return new PersianDateModelBinder();
-            }
-
-            var loggerFactory = context.Services.GetRequiredService<ILoggerFactory>();
-            return new SimpleTypeModelBinder(context.Metadata.ModelType, loggerFactory);
-        }
-    }
-
     /// <summary>
     /// Persian Date Model Binder
     /// </summary>

@@ -8,57 +8,6 @@ using System.IO;
 namespace DNTCommon.Web.Core
 {
     /// <summary>
-    /// Text To Image Options
-    /// </summary>
-    public class TextToImageOptions
-    {
-        /// <summary>
-        /// Its default value is `verdana`.
-        /// </summary>
-        public string FontName { set; get; } = "verdana";
-
-        /// <summary>
-        /// Its default value is `13`.
-        /// </summary>
-        public int FontSize { set; get; } = 13;
-
-        /// <summary>
-        /// Its default value is `Color.Black`.
-        /// </summary>
-        public Color FontColor { set; get; } = Color.Black;
-
-        /// <summary>
-        /// Its default value is `Color.White`.
-        /// </summary>
-        public Color BgColor { set; get; } = Color.White;
-
-        /// <summary>
-        /// Its default value is `FontStyle.Regular`.
-        /// </summary>
-        public FontStyle FontStyle { set; get; } = FontStyle.Regular;
-
-        /// <summary>
-        /// Its default value is `3`.
-        /// </summary>
-        public int DropShadowLevel { set; get; } = 3;
-
-        /// <summary>
-        /// Its default value is `Color.LightGray`.
-        /// </summary>
-        public Color ShadowColor { set; get; } = Color.LightGray;
-
-        /// <summary>
-        /// Its default value is `true`.
-        /// </summary>
-        public bool AntiAlias { set; get; } = true;
-
-        /// <summary>
-        /// Its default value is `true`.
-        /// </summary>
-        public bool Rectangle { set; get; } = true;
-    }
-
-    /// <summary>
     /// Text to image extensions
     /// </summary>
     public static class TextToImageExtensions
@@ -68,13 +17,9 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public static SizeF MeasureString(this string text, Font font)
         {
-            using (var bmp = new Bitmap(1, 1))
-            {
-                using (var graphics = Graphics.FromImage(bmp))
-                {
-                    return graphics.MeasureString(text, font);
-                }
-            }
+            using var bmp = new Bitmap(1, 1);
+            using var graphics = Graphics.FromImage(bmp);
+            return graphics.MeasureString(text, font);
         }
 
         /// <summary>
@@ -117,8 +62,22 @@ namespace DNTCommon.Web.Core
 
             using var pen = new Pen(Color.LightGray);
             graphics.DrawRectangle(pen, new Rectangle(0, 0, width - 1, height - 1));
+            drawString(text, options, font, rectangle, graphics, fgBrush);
 
-            using StringFormat format = new StringFormat
+            using var memory = new MemoryStream();
+            pic.Save(memory, ImageFormat.Png);
+            return memory.ToArray();
+        }
+
+        private static void drawString(
+            string text,
+            TextToImageOptions options,
+            Font font,
+            RectangleF rectangle,
+            Graphics graphics,
+            SolidBrush fgBrush)
+        {
+            using var format = new StringFormat
             {
                 FormatFlags = StringFormatFlags.NoWrap,
                 Alignment = StringAlignment.Center
@@ -156,10 +115,6 @@ namespace DNTCommon.Web.Core
             }
 
             graphics.DrawString(text, font, fgBrush, rectangle, format);
-
-            using var memory = new MemoryStream();
-            pic.Save(memory, ImageFormat.Png);
-            return memory.ToArray();
         }
     }
 }

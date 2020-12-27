@@ -47,7 +47,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Executes the result operation of the action method synchronously.
         /// </summary>
-        public override async Task ExecuteResultAsync(ActionContext context)
+        public override Task ExecuteResultAsync(ActionContext context)
         {
             if (context == null)
             {
@@ -62,7 +62,7 @@ namespace DNTCommon.Web.Core
             response.ContentType = mediaType.ToString();
 
             var data = getOpenSearchData();
-            await response.Body.WriteAsync(data.AsMemory(0, data.Length));
+            return response.Body.WriteAsync(data.AsMemory(0, data.Length)).AsTask();
         }
 
         private byte[] getOpenSearchData()

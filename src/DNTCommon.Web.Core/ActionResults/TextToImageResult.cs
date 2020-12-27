@@ -25,22 +25,22 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Executes the result operation of the action method asynchronously.
         /// </summary>
-        public override async Task ExecuteResultAsync(ActionContext context)
+        public override Task ExecuteResultAsync(ActionContext context)
         {
             if (context == null)
             {
                 throw new ArgumentNullException(nameof(context));
             }
-            await writeToResponse(context);
+            return writeToResponseAsync(context);
         }
 
-        private async Task writeToResponse(ActionContext context)
+        private Task writeToResponseAsync(ActionContext context)
         {
             var response = context.HttpContext.Response;
             response.ContentType = new MediaTypeHeaderValue("image/png").ToString();
             context.HttpContext.DisableBrowserCache();
             var data = _text.TextToImage(_options);
-            await response.Body.WriteAsync(data.AsMemory(0, data.Length));
+            return response.Body.WriteAsync(data.AsMemory(0, data.Length)).AsTask();
         }
     }
 }
