@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
+using static System.FormattableString;
 
 namespace DNTCommon.Web.Core
 {
@@ -36,7 +37,7 @@ namespace DNTCommon.Web.Core
                         case SecurityTokenExpiredException tokenException:
                             await showError(
                                 HttpStatusCode.Unauthorized,
-                                $"Your token has been expired at {tokenException.Expires}. Please login again!");
+                                Invariant($"Your token has been expired at {tokenException.Expires}. Please login again!"));
                             break;
                         case UnauthorizedAccessException _:
                             await showError(

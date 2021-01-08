@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Hosting;
 using System.Diagnostics.CodeAnalysis;
+using static System.FormattableString;
 
 namespace DNTCommon.Web.Core
 {
@@ -165,10 +166,10 @@ namespace DNTCommon.Web.Core
                     taskStatus.IsRunning = true;
                     taskStatus.LastRun = now;
 
-                    _logger.LogInformation($"Start running `{name}` task @ {now}.");
+                    _logger.LogInformation(Invariant($"Start running `{name}` task @ {now}."));
                     scheduledTask.RunAsync().Wait();
 
-                    _logger.LogInformation($"Finished running `{name}` task @ {now}.");
+                    _logger.LogInformation(Invariant($"Finished running `{name}` task @ {now}."));
                     taskStatus.IsLastRunSuccessful = true;
                 }
                 catch (Exception ex)

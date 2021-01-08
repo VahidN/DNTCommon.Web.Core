@@ -16,7 +16,7 @@ namespace DNTCommon.Web.Core
     {
         private static readonly TimeSpan oneMinute = TimeSpan.FromMinutes(1);
         private static readonly Regex _htmlSpacesPattern =
-                    new Regex(@"&nbsp;|&zwnj;|(\n)\s*", RegexOptions.Compiled | RegexOptions.ExplicitCapture, oneMinute);
+                    new Regex(@"&nbsp;|&zwnj;|(\n)\s*", RegexOptions.Compiled, oneMinute);
 
         private readonly ILogger<HtmlHelperService> _logger;
         private readonly IDownloaderService _downloaderService;

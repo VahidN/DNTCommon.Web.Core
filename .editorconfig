@@ -4,6 +4,12 @@
 dotnet_diagnostic.CA2007.severity = none
 dotnet_diagnostic.RCS1090.severity = none
 
+# MA0023 : Add RegexOptions.ExplicitCapture to prevent capturing unneeded groups
+dotnet_diagnostic.MA0023.severity = suggestion
+
+# MA0076: Do not use implicit culture-sensitive ToString in interpolated strings
+dotnet_diagnostic.MA0076.severity = error
+
 # MA0051 : Method is too long. maximum allowed: 60.
 dotnet_diagnostic.MA0051.severity = suggestion
 

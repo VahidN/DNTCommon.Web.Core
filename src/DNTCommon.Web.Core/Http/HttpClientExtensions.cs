@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Text;
 using System.Collections.Generic;
 using System.IO;
+using static System.FormattableString;
 
 namespace DNTCommon.Web.Core
 {
@@ -206,7 +207,7 @@ namespace DNTCommon.Web.Core
                             var percentComplete = Math.Round((decimal)bytesTransferred * 100 / (decimal)remoteFileSize, 2);
                             if (readCount % 100 == 0)
                             {
-                                logger?.Invoke($"\rProgress: {percentComplete}%   ");
+                                logger?.Invoke(Invariant($"\rProgress: {percentComplete}%   "));
                             }
                         }
 

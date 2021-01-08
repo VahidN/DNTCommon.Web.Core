@@ -1,4 +1,5 @@
 using System;
+using static System.FormattableString;
 
 namespace DNTCommon.Web.Core
 {
@@ -32,7 +33,7 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public override string ToString()
         {
-            return $"RequestsCount: {RequestsCount}, ExpiresAt: {ExpiresAt},  Reason: {BanReason}";
+            return Invariant($"RequestsCount: {RequestsCount}, ExpiresAt: {ExpiresAt},  Reason: {BanReason}");
         }
     }
 }
