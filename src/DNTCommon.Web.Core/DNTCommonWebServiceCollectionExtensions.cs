@@ -18,6 +18,7 @@ namespace DNTCommon.Web.Core
             services.AddBackgroundQueueService();
             services.AddHttpRequestInfoService();
             services.AddRandomNumberProvider();
+            services.AddEnhancedStackTraceService();
             services.AddWebMailService();
             services.AddDownloaderService();
             services.AddBaseHttpClient();

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
@@ -129,7 +130,7 @@ namespace DNTCommon.Web.Core
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error occurred executing {nameof(workItem)}.");
+                _logger.LogError(ex.Demystify(), $"Error occurred executing {nameof(workItem)}.");
             }
         }
 
@@ -144,7 +145,7 @@ namespace DNTCommon.Web.Core
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error occurred executing {nameof(workItem)}.");
+                _logger.LogError(ex.Demystify(), $"Error occurred executing {nameof(workItem)}.");
             }
         }
     }

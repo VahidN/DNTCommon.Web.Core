@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -40,7 +41,7 @@ namespace DNTCommon.Web.Core
             }
             catch (Exception ex)
             {
-                _logger.LogCritical(0, ex, "Failed running the Ping task.");
+                _logger.LogCritical(0, ex.Demystify(), "Failed running the Ping task.");
             }
         }
     }

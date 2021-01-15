@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -103,11 +104,11 @@ namespace DNTCommon.Web.Core
             }
             catch (HttpRequestException ex)
             {
-                _logger.LogError("LocationFinderService error", ex, $"Couldn't find redirect of {siteUri}");
+                _logger.LogError("LocationFinderService error", ex.Demystify(), $"Couldn't find redirect of {siteUri}");
             }
             catch (Exception ex) when (ex.IsNetworkError())
             {
-                _logger.LogError("LocationFinderService error", ex, $"Couldn't find redirect of {siteUri}");
+                _logger.LogError("LocationFinderService error", ex.Demystify(), $"Couldn't find redirect of {siteUri}");
             }
 
             return cacheReturn(siteUri, redirectUri);

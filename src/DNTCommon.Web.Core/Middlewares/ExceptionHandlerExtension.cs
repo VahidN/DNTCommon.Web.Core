@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Net;
 using System.Text;
 using System.Text.Json;
@@ -64,7 +65,7 @@ namespace DNTCommon.Web.Core
 
                     Task showDevelopmentError(HttpStatusCode statusCode, string message)
                     {
-                        var exceptionMessage = exception.ToString() ?? "Unexpected error! Try again later.";
+                        var exceptionMessage = exception.Demystify().ToString() ?? "Unexpected error! Try again later.";
                         return context.Response.WriteAsync(JsonSerializer.Serialize(new ApiErrorDto
                         {
                             StatusCode = (int)statusCode,

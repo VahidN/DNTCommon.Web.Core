@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -91,17 +92,17 @@ namespace DNTCommon.Web.Core
                 catch (TaskCanceledException ex)
                 {
                     _downloadStatus.Status = _cancelSrc.IsCancellationRequested ? TaskStatus.Canceled : TaskStatus.Faulted;
-                    exceptions.Add(ex);
+                    exceptions.Add(ex.Demystify());
                 }
                 catch (HttpRequestException ex)
                 {
                     _downloadStatus.Status = TaskStatus.Faulted;
-                    exceptions.Add(ex);
+                    exceptions.Add(ex.Demystify());
                 }
                 catch (Exception ex) when (ex.IsNetworkError())
                 {
                     _downloadStatus.Status = TaskStatus.Faulted;
-                    exceptions.Add(ex);
+                    exceptions.Add(ex.Demystify());
                 }
 
                 if (exceptions.Any())

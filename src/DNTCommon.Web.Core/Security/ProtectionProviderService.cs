@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.DataProtection;
@@ -51,11 +52,11 @@ namespace DNTCommon.Web.Core
             }
             catch (FormatException ex)
             {
-                _logger.LogError(ex.Message, "Invalid base 64 string. Fall through.");
+                _logger.LogError(ex.Demystify(), "Invalid base 64 string. Fall through.");
             }
             catch (CryptographicException ex)
             {
-                _logger.LogError(ex.Message, "Invalid protected payload. Fall through.");
+                _logger.LogError(ex.Demystify(), "Invalid protected payload. Fall through.");
             }
 
             return null;

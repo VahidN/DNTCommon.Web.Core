@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Hosting;
 using System.Diagnostics.CodeAnalysis;
 using static System.FormattableString;
+using System.Diagnostics;
 
 namespace DNTCommon.Web.Core
 {
@@ -174,9 +175,10 @@ namespace DNTCommon.Web.Core
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogCritical(0, ex, $"Failed running {name}");
+                    var exception = ex.Demystify();
+                    _logger.LogCritical(0, exception, $"Failed running {name}");
                     taskStatus.IsLastRunSuccessful = false;
-                    taskStatus.LastException = ex;
+                    taskStatus.LastException = exception;
                 }
                 finally
                 {

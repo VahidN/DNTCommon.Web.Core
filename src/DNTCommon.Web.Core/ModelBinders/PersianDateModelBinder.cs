@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using DNTPersianUtils.Core;
@@ -56,7 +57,7 @@ namespace DNTCommon.Web.Core
                 bindingContext.ModelState.TryAddModelError(bindingContext.ModelName, message);
 
                 var binderLogger = logger.CreateLogger(nameof(PersianDateModelBinder));
-                binderLogger.LogError("PersianDateModelBinder error", ex, message);
+                binderLogger.LogError("PersianDateModelBinder error", ex.Demystify(), message);
 
                 return Task.CompletedTask;
             }
