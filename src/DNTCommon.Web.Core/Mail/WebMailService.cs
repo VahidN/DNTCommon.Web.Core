@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using DNTPersianUtils.Core;
 using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 
 namespace DNTCommon.Web.Core
 {
@@ -40,11 +41,22 @@ namespace DNTCommon.Web.Core
             IEnumerable<MailAddress>? replyTos = null,
             DelayDelivery? delayDelivery = null,
             IEnumerable<string>? attachmentFiles = null,
-            MailHeaders? headers = null)
+            MailHeaders? headers = null,
+            bool shouldValidateServerCertificate = true)
         {
             var message = await _viewRendererService.RenderViewToStringAsync(viewNameOrPath, viewModel);
-            await SendEmailAsync(smtpConfig, emails, subject, message,
-              blindCarpbonCopies, carpbonCopies, replyTos, delayDelivery, attachmentFiles, headers);
+            await SendEmailAsync(
+                smtpConfig,
+                emails,
+                subject,
+                message,
+                blindCarpbonCopies,
+                carpbonCopies,
+                replyTos,
+                delayDelivery,
+                attachmentFiles,
+                headers,
+                shouldValidateServerCertificate);
         }
 
         /// <summary>
@@ -60,7 +72,8 @@ namespace DNTCommon.Web.Core
             IEnumerable<MailAddress>? replyTos = null,
             DelayDelivery? delayDelivery = null,
             IEnumerable<string>? attachmentFiles = null,
-            MailHeaders? headers = null)
+            MailHeaders? headers = null,
+            bool shouldValidateServerCertificate = true)
         {
             if (smtpConfig == null)
             {
@@ -78,14 +91,44 @@ namespace DNTCommon.Web.Core
             }
             else
             {
-                await sendEmailAsync(smtpConfig, emails, subject, message, blindCarpbonCopies, carpbonCopies, replyTos, delayDelivery, attachmentFiles, headers);
+                await sendEmailAsync(
+                    smtpConfig,
+                    emails,
+                    subject,
+                    message,
+                    blindCarpbonCopies,
+                    carpbonCopies,
+                    replyTos,
+                    delayDelivery,
+                    attachmentFiles,
+                    headers,
+                    shouldValidateServerCertificate);
             }
         }
 
-        private static async Task sendEmailAsync(SmtpConfig smtpConfig, IEnumerable<MailAddress> emails, string subject, string message, IEnumerable<MailAddress>? blindCarpbonCopies, IEnumerable<MailAddress>? carpbonCopies, IEnumerable<MailAddress>? replyTos, DelayDelivery? delayDelivery, IEnumerable<string>? attachmentFiles, MailHeaders? headers)
+        [SuppressMessage("Microsoft.Usage", "S4830")]
+        [SuppressMessage("Microsoft.Usage", "CA5359")]
+        private static async Task sendEmailAsync(
+            SmtpConfig smtpConfig,
+            IEnumerable<MailAddress> emails,
+            string subject,
+            string message,
+            IEnumerable<MailAddress>? blindCarpbonCopies,
+            IEnumerable<MailAddress>? carpbonCopies,
+            IEnumerable<MailAddress>? replyTos,
+            DelayDelivery? delayDelivery,
+            IEnumerable<string>? attachmentFiles,
+            MailHeaders? headers,
+            bool shouldValidateServerCertificate)
         {
             using (var client = new SmtpClient())
             {
+                if (!shouldValidateServerCertificate)
+                {
+                    client.ServerCertificateValidationCallback = (_, _, _, _) => true;
+                    client.CheckCertificateRevocation = false;
+                }
+
                 if (!string.IsNullOrWhiteSpace(smtpConfig.LocalDomain))
                 {
                     client.LocalDomain = smtpConfig.LocalDomain;

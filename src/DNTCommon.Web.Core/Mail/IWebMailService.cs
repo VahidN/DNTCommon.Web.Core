@@ -21,7 +21,8 @@ namespace DNTCommon.Web.Core
             IEnumerable<MailAddress>? replyTos = null,
             DelayDelivery? delayDelivery = null,
             IEnumerable<string>? attachmentFiles = null,
-            MailHeaders? headers = null);
+            MailHeaders? headers = null,
+            bool shouldValidateServerCertificate = true);
 
         /// <summary>
         /// Sends an email using the `MailKit` library.
@@ -38,6 +39,7 @@ namespace DNTCommon.Web.Core
             IEnumerable<MailAddress>? replyTos = null,
             DelayDelivery? delayDelivery = null,
             IEnumerable<string>? attachmentFiles = null,
-            MailHeaders? headers = null);
+            MailHeaders? headers = null,
+            bool shouldValidateServerCertificate = true);
     }
 }
