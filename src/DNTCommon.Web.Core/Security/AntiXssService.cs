@@ -147,7 +147,7 @@ namespace DNTCommon.Web.Core
         {
             return
             (allowDataAttributes && attribute.Name?.StartsWith("data-", StringComparison.OrdinalIgnoreCase) == true)
-            || _antiXssConfig.Value.ValidHtmlTags.Any(tag => attribute.Name != null && tag.Attributes.Contains(attribute.Name));
+            || _antiXssConfig.Value.ValidHtmlTags.Any(tag => attribute.Name != null && tag.Attributes.Contains(attribute.Name, StringComparer.OrdinalIgnoreCase));
         }
 
         private bool cleanComments(HtmlNode node)

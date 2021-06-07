@@ -115,9 +115,9 @@ namespace DNTCommon.Web.Core
                 return false;
             }
 
-            return !_extensionsToFilter.Contains(ext) &&
-                   !_namesToFilter.Contains(name) &&
-                   !_namesToFilter.Contains(ext) &&
+            return !_extensionsToFilter.Contains(ext, StringComparer.OrdinalIgnoreCase) &&
+                   !_namesToFilter.Contains(name, StringComparer.OrdinalIgnoreCase) &&
+                   !_namesToFilter.Contains(ext, StringComparer.OrdinalIgnoreCase) &&
                    //for "file.asp;.jpg" files --> run as an ASP file
                    _extensionsToFilter.All(item => !name.Contains(item, StringComparison.OrdinalIgnoreCase));
         }
