@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DNTCommon.Web.Core.TestWebApp.Models
 {
-    [ModelBinder(BinderType = typeof(PersianDateModelBinder))]
+    // NOTE! [PersianDateModelBinder] doesn't work in .NET 5x anymore! Don't use it!
+    // [ModelBinder(BinderType = typeof(PersianDateModelBinder))]
     public class PersianDateModelBinderViewModel
     {
         public DateTime PDateTime1 { set; get; }

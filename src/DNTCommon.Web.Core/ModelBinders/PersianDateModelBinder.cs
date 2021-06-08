@@ -28,11 +28,15 @@ namespace DNTCommon.Web.Core
             }
 
             var logger = bindingContext.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>();
+            var binderLogger = logger.CreateLogger(nameof(PersianDateModelBinder));
+
             var fallbackBinder = new SimpleTypeModelBinder(bindingContext.ModelType, logger);
 
             var valueProviderResult = bindingContext.ValueProvider.GetValue(bindingContext.ModelName);
             if (valueProviderResult == ValueProviderResult.None)
             {
+                binderLogger.LogError("PersianDateModelBinder error",
+                    $"There is not valueProvider for bindingContext.ModelName:`{bindingContext.ModelName}`.");
                 return fallbackBinder.BindModelAsync(bindingContext);
             }
             bindingContext.ModelState.SetModelValue(bindingContext.ModelName, valueProviderResult);
@@ -46,6 +50,9 @@ namespace DNTCommon.Web.Core
 
                 if (!isValidPersianDateTime)
                 {
+                    binderLogger.LogError("PersianDateModelBinder error",
+                        $"`{valueAsString}` is not a valid PersianDateTime.");
+
                     return fallbackBinder.BindModelAsync(bindingContext);
                 }
 
@@ -56,7 +63,6 @@ namespace DNTCommon.Web.Core
                 var message = $"`{valueProviderResult.FirstValue}` is not a valid Persian date.";
                 bindingContext.ModelState.TryAddModelError(bindingContext.ModelName, message);
 
-                var binderLogger = logger.CreateLogger(nameof(PersianDateModelBinder));
                 binderLogger.LogError("PersianDateModelBinder error", ex.Demystify(), message);
 
                 return Task.CompletedTask;
