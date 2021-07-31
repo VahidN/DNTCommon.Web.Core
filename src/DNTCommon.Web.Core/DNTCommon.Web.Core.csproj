@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>DNTCommon.Web.Core provides common scenarios' solutions for ASP.NET Core applications.</Description>
-    <VersionPrefix>2.9.2</VersionPrefix>
+    <VersionPrefix>2.9.3</VersionPrefix>
     <Authors>Vahid Nasiri</Authors>
     <TargetFrameworks>net5.0;netcoreapp3.1</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -38,7 +38,7 @@
     <ReportAnalyzer>true</ReportAnalyzer>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Meziantou.Analyzer" Version="1.0.665">
+    <PackageReference Include="Meziantou.Analyzer" Version="1.0.667">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -54,19 +54,19 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="SonarAnalyzer.CSharp" Version="8.24.0.32949">
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="8.26.0.34506">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.11.1" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.12.0" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="System.Drawing.Common" Version="5.0.2" />
     <PackageReference Include="Microsoft.SyndicationFeed.ReaderWriter" Version="1.0.2" />
-    <PackageReference Include="DNTPersianUtils.Core" Version="4.3.0" />
-    <PackageReference Include="MailKit" Version="2.12.0" />
+    <PackageReference Include="DNTPersianUtils.Core" Version="5.2.0" />
+    <PackageReference Include="MailKit" Version="2.14.0" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.34" />
     <PackageReference Include="IPAddressRange" Version="4.2.0" />
     <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="5.0.1" />
