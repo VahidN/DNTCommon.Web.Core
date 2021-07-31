@@ -101,12 +101,14 @@ namespace DNTCommon.Web.Core
                     var controllers = new List<MvcControllerViewModel>(MvcControllers);
                     foreach (var controller in controllers)
                     {
-                        controller.MvcActions.AddRange(controller.MvcActions.Where(
-                            model => model.IsSecuredAction &&
-                            (
-                                string.Equals(model.ActionAttributes.OfType<AuthorizeAttribute>().FirstOrDefault()?.Policy, policyName, StringComparison.Ordinal) ||
-                                string.Equals(controller.ControllerAttributes.OfType<AuthorizeAttribute>().FirstOrDefault()?.Policy, policyName, StringComparison.Ordinal))).ToList()
-                            );
+						var securedOnes = controller.MvcActions.Where(
+											model => model.IsSecuredAction &&
+											(
+												string.Equals(model.ActionAttributes.OfType<AuthorizeAttribute>().FirstOrDefault()?.Policy, policyName, StringComparison.Ordinal) ||
+												string.Equals(controller.ControllerAttributes.OfType<AuthorizeAttribute>().FirstOrDefault()?.Policy, policyName, StringComparison.Ordinal)
+											)).ToList();										
+						controller.MvcActions.Clear();
+                        controller.MvcActions.AddRange(securedOnes);                            
                     }
                     return controllers.Where(model => model.MvcActions.Any()).ToList();
                 }));

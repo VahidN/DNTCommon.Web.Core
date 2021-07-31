@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>DNTCommon.Web.Core provides common scenarios' solutions for ASP.NET Core applications.</Description>
-    <VersionPrefix>2.9.3</VersionPrefix>
+    <VersionPrefix>2.9.4</VersionPrefix>
     <Authors>Vahid Nasiri</Authors>
     <TargetFrameworks>net5.0;netcoreapp3.1</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
