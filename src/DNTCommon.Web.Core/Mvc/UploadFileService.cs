@@ -28,17 +28,21 @@ namespace DNTCommon.Web.Core
         /// Saves the posted IFormFile to the specified directory asynchronously.
         /// </summary>
         /// <param name="formFile">The posted file.</param>
-        /// <param name="destinationDirectoryName">A directory name in the wwwroot directory.</param>
         /// <param name="allowOverwrite">Creates a unique file name if the file already exists.</param>
+        /// <param name="destinationDirectoryNames">Directory names in the wwwroot directory.</param>
         /// <returns></returns>
-        public async Task<(bool IsSaved, string SavedFilePath)> SavePostedFileAsync(IFormFile formFile, string destinationDirectoryName, bool allowOverwrite)
+        public async Task<(bool IsSaved, string SavedFilePath)> SavePostedFileAsync(IFormFile formFile, bool allowOverwrite, params string[] destinationDirectoryNames)
         {
             if (formFile == null || formFile.Length == 0)
             {
                 return (false, string.Empty);
             }
 
-            var uploadsRootFolder = Path.Combine(_environment.WebRootPath, destinationDirectoryName);
+            var uploadsRootFolder = Path.Combine(_environment.WebRootPath);
+            for (int counter = 0; counter < destinationDirectoryNames.Length; counter++)
+            {
+                uploadsRootFolder = Path.Combine(uploadsRootFolder, destinationDirectoryNames[counter]);
+            }
             if (!Directory.Exists(uploadsRootFolder))
             {
                 Directory.CreateDirectory(uploadsRootFolder);

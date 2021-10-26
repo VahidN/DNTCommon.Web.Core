@@ -12,10 +12,10 @@ namespace DNTCommon.Web.Core
         /// Saves the posted IFormFile to the specified directory asynchronously.
         /// </summary>
         /// <param name="formFile">The posted file.</param>
-        /// <param name="destinationDirectoryName">A directory name in the wwwroot directory.</param>
         /// <param name="allowOverwrite">Creates a unique file name if the file already exists.</param>
+        /// <param name="destinationDirectoryNames">Directory names in the wwwroot directory.</param>
         /// <returns></returns>
-        Task<(bool IsSaved, string SavedFilePath)> SavePostedFileAsync(IFormFile formFile, string destinationDirectoryName, bool allowOverwrite);
+        Task<(bool IsSaved, string SavedFilePath)> SavePostedFileAsync(IFormFile formFile, bool allowOverwrite, params string[] destinationDirectoryNames);
 
         /// <summary>
         /// Saves the posted IFormFile to a byte array.

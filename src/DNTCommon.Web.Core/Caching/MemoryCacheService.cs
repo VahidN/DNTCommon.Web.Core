@@ -97,7 +97,7 @@ namespace DNTCommon.Web.Core
             {
                 if (_memoryCache.TryGetValue(cacheKey, out result))
                 {
-                    return result;
+                    return result!;
                 }
 
                 result = factory();
