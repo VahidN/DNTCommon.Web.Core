@@ -16,7 +16,7 @@ namespace DNTCommon.Web.Core
         /// <param name="absoluteExpiration"></param>
         /// <param name="size">Gets or sets the size of the cache entry value. If you set it to 1, the size limit will be the count of entries.</param>
         /// <typeparam name="T"></typeparam>
-        T GetOrAdd<T>(string cacheKey, Func<T> factory, DateTimeOffset absoluteExpiration, int size = 1);
+        T? GetOrAdd<T>(string cacheKey, Func<T> factory, DateTimeOffset absoluteExpiration, int size = 1);
 
         /// <summary>
         /// Gets the key's value from the cache.

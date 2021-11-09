@@ -1,5 +1,6 @@
 using System;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace DNTCommon.Web.Core
 {
@@ -21,7 +22,16 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public string Serialize(object data)
         {
-            return JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = false, IgnoreNullValues = true });
+            return JsonSerializer.Serialize(data,
+            new JsonSerializerOptions
+            {
+                WriteIndented = false,
+#if !NETCORE3_1
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+#else
+                IgnoreNullValues = true
+#endif
+            });
         }
 
         /// <summary>
@@ -53,7 +63,16 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public byte[] SerializeToUtf8Bytes(object data)
         {
-            return JsonSerializer.SerializeToUtf8Bytes(data, new JsonSerializerOptions { WriteIndented = false, IgnoreNullValues = true });
+            return JsonSerializer.SerializeToUtf8Bytes(data,
+            new JsonSerializerOptions
+            {
+                WriteIndented = false,
+#if !NETCORE3_1
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+#else
+                IgnoreNullValues = true
+#endif
+            });
         }
 
         /// <summary>

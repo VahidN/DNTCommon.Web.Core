@@ -70,9 +70,12 @@ namespace DNTCommon.Web.Core
                 var errorLogUri = context.GetGenericActionUrl(
                         action: nameof(CspReportController.Log),
                         controller: nameof(CspReportController).Replace("Controller", string.Empty, StringComparison.Ordinal));
-                context.Response.Headers.Add(
-                    ContentSecurityPolicy,
-                    getContentSecurityPolicyValue(config.Value, errorLogUri));
+                if (errorLogUri is not null)
+                {
+                    context.Response.Headers.Add(
+                        ContentSecurityPolicy,
+                        getContentSecurityPolicyValue(config.Value, errorLogUri));
+                }
             }
             return _next(context);
         }

@@ -106,8 +106,6 @@ namespace DNTCommon.Web.Core
             }
         }
 
-        [SuppressMessage("Microsoft.Usage", "S4830")]
-        [SuppressMessage("Microsoft.Usage", "CA5359")]
         private static async Task sendEmailAsync(
             SmtpConfig smtpConfig,
             IEnumerable<MailAddress> emails,

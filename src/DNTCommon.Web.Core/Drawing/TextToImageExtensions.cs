@@ -4,6 +4,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
 using System.IO;
+using System.Runtime.Versioning;
 
 namespace DNTCommon.Web.Core
 {
@@ -15,6 +16,9 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Measures the size of the text according to the given font.
         /// </summary>
+#if !NETCORE3_1
+        [SupportedOSPlatform("windows")]
+#endif
         public static SizeF MeasureString(this string text, Font font)
         {
             using var bmp = new Bitmap(1, 1);
@@ -25,6 +29,9 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Draws a text on a bitmap and then returns it as a png byte array.
         /// </summary>
+#if !NETCORE3_1
+        [SupportedOSPlatform("windows")]
+#endif
         public static byte[] TextToImage(this string text, TextToImageOptions options)
         {
             if (options == null)
@@ -69,13 +76,16 @@ namespace DNTCommon.Web.Core
             return memory.ToArray();
         }
 
+#if !NETCORE3_1
+        [SupportedOSPlatform("windows")]
+#endif
         private static void drawString(
-            string text,
-            TextToImageOptions options,
-            Font font,
-            RectangleF rectangle,
-            Graphics graphics,
-            SolidBrush fgBrush)
+                    string text,
+                    TextToImageOptions options,
+                    Font font,
+                    RectangleF rectangle,
+                    Graphics graphics,
+                    SolidBrush fgBrush)
         {
             using var format = new StringFormat
             {

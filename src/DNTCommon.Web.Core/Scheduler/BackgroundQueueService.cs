@@ -119,8 +119,6 @@ namespace DNTCommon.Web.Core
             _syncTasksQueue.Enqueue(workItem);
         }
 
-        [SuppressMessage("Microsoft.Usage", "CA1031:catch a more specific allowed exception type, or rethrow the exception",
-                Justification = "The exception will be logged.")]
         private async Task runTaskAsync(Func<CancellationToken, IServiceProvider, Task> workItem, CancellationToken ct)
         {
             using var serviceScope = _serviceScopeFactory.CreateScope();
@@ -134,8 +132,6 @@ namespace DNTCommon.Web.Core
             }
         }
 
-        [SuppressMessage("Microsoft.Usage", "CA1031:catch a more specific allowed exception type, or rethrow the exception",
-                Justification = "The exception will be logged.")]
         private void runTaskSync(Action<CancellationToken, IServiceProvider> workItem, CancellationToken ct)
         {
             using var serviceScope = _serviceScopeFactory.CreateScope();

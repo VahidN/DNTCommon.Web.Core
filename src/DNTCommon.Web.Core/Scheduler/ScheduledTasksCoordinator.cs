@@ -147,8 +147,6 @@ namespace DNTCommon.Web.Core
             }
         }
 
-        [SuppressMessage("Microsoft.Usage", "CA1031:catch a more specific allowed exception type, or rethrow the exception",
-                        Justification = "The exception will be logged.")]
         private void runTask(ScheduledTaskStatus taskStatus, DateTime now)
         {
             using (var serviceScope = _serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope())

@@ -18,8 +18,6 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Attempts to bind a model.
         /// </summary>
-        [SuppressMessage("Microsoft.Usage", "CA1031:catch a more specific allowed exception type, or rethrow the exception",
-                Justification = "The exception will be logged.")]
         public Task BindModelAsync(ModelBindingContext bindingContext)
         {
             if (bindingContext == null)
@@ -63,7 +61,7 @@ namespace DNTCommon.Web.Core
                 var message = $"`{valueProviderResult.FirstValue}` is not a valid Persian date.";
                 bindingContext.ModelState.TryAddModelError(bindingContext.ModelName, message);
 
-                binderLogger.LogError("PersianDateModelBinder error", ex.Demystify(), message);
+                binderLogger.LogError(ex.Demystify(), $"PersianDateModelBinder error. {message}");
 
                 return Task.CompletedTask;
             }

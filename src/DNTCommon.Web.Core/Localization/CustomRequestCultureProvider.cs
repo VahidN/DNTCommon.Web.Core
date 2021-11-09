@@ -22,9 +22,9 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Determining the culture information of an HttpRequest.
         /// </summary>
-        public override Task<ProviderCultureResult> DetermineProviderCultureResult(HttpContext httpContext)
+        public override Task<ProviderCultureResult?> DetermineProviderCultureResult(HttpContext httpContext)
         {
-            return Task.FromResult(new ProviderCultureResult(_culture));
+            return Task.FromResult<ProviderCultureResult?>(new ProviderCultureResult(_culture));
         }
     }
 }

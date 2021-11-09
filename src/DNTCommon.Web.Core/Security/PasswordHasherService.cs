@@ -16,7 +16,7 @@ namespace DNTCommon.Web.Core
         /// </summary>
         public string GetSha256Hash(string input)
         {
-            using var hashAlgorithm = new SHA256CryptoServiceProvider();
+            using var hashAlgorithm = SHA256.Create();
             var byteValue = Encoding.UTF8.GetBytes(input);
             var byteHash = hashAlgorithm.ComputeHash(byteValue);
             Array.Reverse(byteHash);

@@ -1,5 +1,31 @@
 [*.cs]
 
+dotnet_diagnostic.SYSLIB0021.severity = suggestion
+
+dotnet_diagnostic.CA5350.severity = suggestion
+
+dotnet_diagnostic.S5547.severity = suggestion
+
+dotnet_diagnostic.S4830.severity = suggestion
+
+dotnet_diagnostic.CA5359.severity = suggestion
+
+dotnet_diagnostic.CA1031.severity = suggestion
+
+dotnet_diagnostic.S3267.severity = suggestion
+
+dotnet_diagnostic.CA2254.severity = suggestion
+
+dotnet_diagnostic.SYSLIB0014.severity = suggestion
+
+dotnet_diagnostic.S2326.severity = suggestion
+
+dotnet_diagnostic.S3260.severity = suggestion
+
+dotnet_diagnostic.S2743.severity = suggestion
+
+dotnet_diagnostic.CA1848.severity = suggestion
+
 # CA2007: Consider calling ConfigureAwait on the awaited task
 dotnet_diagnostic.CA2007.severity = none
 dotnet_diagnostic.RCS1090.severity = none

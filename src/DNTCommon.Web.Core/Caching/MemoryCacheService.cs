@@ -80,7 +80,7 @@ namespace DNTCommon.Web.Core
         /// A thread-safe way of working with memory cache. First tries to get the key's value from the cache.
         /// Otherwise it will use the factory method to get the value and then inserts it.
         /// </summary>
-        public T GetOrAdd<T>(string cacheKey, Func<T> factory, DateTimeOffset absoluteExpiration, int size = 1)
+        public T? GetOrAdd<T>(string cacheKey, Func<T> factory, DateTimeOffset absoluteExpiration, int size = 1)
         {
             if (factory == null)
             {
@@ -97,7 +97,7 @@ namespace DNTCommon.Web.Core
             {
                 if (_memoryCache.TryGetValue(cacheKey, out result))
                 {
-                    return result!;
+                    return result;
                 }
 
                 result = factory();
@@ -119,8 +119,6 @@ namespace DNTCommon.Web.Core
             _memoryCache.Remove(cacheKey);
         }
 
-        [SuppressMessage("Microsoft.Usage", "S2326")]
-        [SuppressMessage("Microsoft.Usage", "S2743")]
         private static class TypeLock<T>
         {
             public static object Lock { get; } = new object();

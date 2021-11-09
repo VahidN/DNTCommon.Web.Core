@@ -101,10 +101,6 @@ namespace DNTCommon.Web.Core
             return decryptedData == null ? default : _serializationProvider.Deserialize<T>(decryptedData);
         }
 
-        [SuppressMessage("Microsoft.Usage", "CA5350:encrypt uses a weak cryptographic algorithm TripleDES",
-                        Justification = "That's enough for our usecase!")]
-        [SuppressMessage("Microsoft.Usage", "S5547:encrypt uses a weak cryptographic algorithm TripleDES",
-                        Justification = "That's enough for our usecase!")]
         private byte[] encrypt(byte[] data, string key)
         {
             var desKey = getDesKey(key);
@@ -129,10 +125,6 @@ namespace DNTCommon.Web.Core
             }
         }
 
-        [SuppressMessage("Microsoft.Usage", "CA5350:encrypt uses a weak cryptographic algorithm TripleDES",
-                        Justification = "That's enough for our usecase!")]
-        [SuppressMessage("Microsoft.Usage", "S5547:encrypt uses a weak cryptographic algorithm TripleDES",
-                        Justification = "That's enough for our usecase!")]
         private byte[] decrypt(byte[] data, string key)
         {
             var desKey = getDesKey(key);

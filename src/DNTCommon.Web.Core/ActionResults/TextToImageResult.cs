@@ -1,5 +1,6 @@
 using System;
 using System.Net.Http.Headers;
+using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,6 +9,9 @@ namespace DNTCommon.Web.Core
     /// <summary>
     /// An ASP.NET Core text to image renderer.
     /// </summary>
+#if !NETCORE3_1
+    [SupportedOSPlatform("windows")]
+#endif
     public class TextToImageResult : ActionResult
     {
         private readonly TextToImageOptions _options;
@@ -25,6 +29,9 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Executes the result operation of the action method asynchronously.
         /// </summary>
+#if !NETCORE3_1
+        [SupportedOSPlatform("windows")]
+#endif
         public override Task ExecuteResultAsync(ActionContext context)
         {
             if (context == null)
@@ -34,6 +41,9 @@ namespace DNTCommon.Web.Core
             return writeToResponseAsync(context);
         }
 
+#if !NETCORE3_1
+        [SupportedOSPlatform("windows")]
+#endif
         private Task writeToResponseAsync(ActionContext context)
         {
             var response = context.HttpContext.Response;

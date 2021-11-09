@@ -28,8 +28,6 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Pings the site's root url.
         /// </summary>
-        [SuppressMessage("Microsoft.Usage", "CA1031:catch a more specific allowed exception type, or rethrow the exception",
-                        Justification = "The exception will be logged.")]
         public async Task WakeUp()
         {
             try

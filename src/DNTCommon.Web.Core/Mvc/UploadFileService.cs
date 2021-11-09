@@ -31,7 +31,8 @@ namespace DNTCommon.Web.Core
         /// <param name="allowOverwrite">Creates a unique file name if the file already exists.</param>
         /// <param name="destinationDirectoryNames">Directory names in the wwwroot directory.</param>
         /// <returns></returns>
-        public async Task<(bool IsSaved, string SavedFilePath)> SavePostedFileAsync(IFormFile formFile, bool allowOverwrite, params string[] destinationDirectoryNames)
+        public async Task<(bool IsSaved, string SavedFilePath)> SavePostedFileAsync(
+            IFormFile formFile, bool allowOverwrite, params string[] destinationDirectoryNames)
         {
             if (formFile == null || formFile.Length == 0)
             {
@@ -39,10 +40,15 @@ namespace DNTCommon.Web.Core
             }
 
             var uploadsRootFolder = Path.Combine(_environment.WebRootPath);
-            for (int counter = 0; counter < destinationDirectoryNames.Length; counter++)
+
+            if (destinationDirectoryNames is not null)
             {
-                uploadsRootFolder = Path.Combine(uploadsRootFolder, destinationDirectoryNames[counter]);
+                for (int counter = 0; counter < destinationDirectoryNames.Length; counter++)
+                {
+                    uploadsRootFolder = Path.Combine(uploadsRootFolder, destinationDirectoryNames[counter]);
+                }
             }
+
             if (!Directory.Exists(uploadsRootFolder))
             {
                 Directory.CreateDirectory(uploadsRootFolder);

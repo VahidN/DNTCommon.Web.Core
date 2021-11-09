@@ -30,7 +30,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Its default value is `FontStyle.Regular`.
         /// </summary>
-        public FontStyle FontStyle { set; get; } = FontStyle.Regular;
+        public FontStyle FontStyle { set; get; }
 
         /// <summary>
         /// Its default value is `3`.

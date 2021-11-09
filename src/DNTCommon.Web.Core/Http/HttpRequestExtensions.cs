@@ -134,7 +134,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Creates the action's URL
         /// </summary>
-        public static string GetActionUrl(this HttpContext httpContext, string action, string controller)
+        public static string? GetActionUrl(this HttpContext httpContext, string action, string controller)
         {
             var urlHelper = httpContext.GetUrlHelper();
             return urlHelper.Action(action, controller);
@@ -143,7 +143,7 @@ namespace DNTCommon.Web.Core
         /// <summary>
         /// Creates the action's URL, even outside of the MVC's pipeline
         /// </summary>
-        public static string GetGenericActionUrl(this HttpContext httpContext, string action, string controller)
+        public static string? GetGenericActionUrl(this HttpContext httpContext, string action, string controller)
         {
             var generator = httpContext.GetLinkGenerator();
             return generator.GetPathByAction(action, controller);
