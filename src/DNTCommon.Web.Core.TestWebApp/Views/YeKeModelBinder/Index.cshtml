@@ -1,12 +1,11 @@
-﻿@using DNTCommon.Web.Core
-
-@{
+﻿@{
     ViewData["Title"] = "Ye Ke Model Binder";
 }
 
 <h1>@ViewData["Title"]</h1>
 
-<button type="submit" onclick="postData()" class="btn btn-primary">Post Arabic Ye Ke</button>
+<button type="submit" onclick="postDataOld()" class="btn btn-primary">Post Arabic Ye Ke - model binder</button>
+<button type="submit" onclick="postData()" class="btn btn-primary">Post Arabic Ye Ke - FilterAttribute</button>
 
 @section Scripts
 {
@@ -14,7 +13,22 @@
         function postData() {
             $.ajax({
                 type: 'POST',
-                url: '@Url.Action("Index","YeKeModelBinder")',
+                url: '@Url.Action("TestApplyCorrectYeKeFilterAttribute", "YeKeModelBinder")',
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({
+                    Data: "ي ك مي‌شود"
+                }),
+                success: function (response) {
+                    alert(JSON.stringify(response, null, ' '));
+                }
+            });
+        }
+
+        function postDataOld() {
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("Index", "YeKeModelBinder")',
                 dataType: 'json',
                 contentType: 'application/x-www-form-urlencoded; charset=utf-8', //'application/json; charset=utf-8', doesn't work here
                 data: {

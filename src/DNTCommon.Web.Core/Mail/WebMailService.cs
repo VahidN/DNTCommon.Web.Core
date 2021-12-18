@@ -141,9 +141,11 @@ namespace DNTCommon.Web.Core
                 var count = 0;
                 foreach (var email in emails)
                 {
-                    var emailMessage = getEmailMessage(email.ToName, email.ToAddress, subject,
-                    message, attachmentFiles, smtpConfig, headers, blindCarpbonCopies, carpbonCopies, replyTos);
-                    await client.SendAsync(emailMessage);
+                    using (var emailMessage = getEmailMessage(email.ToName, email.ToAddress, subject, message, attachmentFiles, smtpConfig, headers, blindCarpbonCopies, carpbonCopies, replyTos))
+                    {
+                        await client.SendAsync(emailMessage);
+                    }
+
                     count++;
 
                     if (delayDelivery != null && count % delayDelivery.NumberOfMessages == 0)
@@ -177,9 +179,10 @@ namespace DNTCommon.Web.Core
                     FileMode.CreateNew, FileAccess.Write, FileShare.None,
                     maxBufferSize, useAsync: true))
                 {
-                    var emailMessage = getEmailMessage(email.ToName, email.ToAddress, subject,
-                    message, attachmentFiles, smtpConfig, headers, blindCarpbonCopies, carpbonCopies, replyTos);
-                    await emailMessage.WriteToAsync(stream);
+                    using (var emailMessage = getEmailMessage(email.ToName, email.ToAddress, subject, message, attachmentFiles, smtpConfig, headers, blindCarpbonCopies, carpbonCopies, replyTos))
+                    {
+                        await emailMessage.WriteToAsync(stream);
+                    }
                 }
             }
         }

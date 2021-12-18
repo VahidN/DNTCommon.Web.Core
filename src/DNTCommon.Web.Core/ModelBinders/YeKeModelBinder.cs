@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using DNTPersianUtils.Core;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,7 +40,7 @@ namespace DNTCommon.Web.Core
                 return fallbackBinder.BindModelAsync(bindingContext);
             }
 
-            var model = valueAsString.Replace((char)1610, (char)1740).Replace((char)1603, (char)1705);
+            var model = valueAsString.ApplyCorrectYeKe();
             bindingContext.Result = ModelBindingResult.Success(model);
             return Task.CompletedTask;
         }

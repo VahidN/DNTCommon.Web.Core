@@ -75,6 +75,8 @@ namespace MyWebApp
 
   - [PersianDateModelBinderProvider](/src/DNTCommon.Web.Core.TestWebApp/Views/PersianDateModelBinder/Index.cshtml) parses an incoming Persian date and then binds it to a DateTime property automatically. To use it globally (assuming your app only sends Persian dates to the server), Add it to MvcOptions: `services.AddMvc(options => options.UsePersianDateModelBinder())` or just apply it to an specific view-model `[ModelBinder(BinderType = typeof(PersianDateModelBinder))]`.
   - [YeKeModelBinderProvider](/src/DNTCommon.Web.Core.TestWebApp/Views/YeKeModelBinder/Index.cshtml) parses an incoming text and then corrects its Ye & Ke characters automatically. To use it globally, Add it to MvcOptions: `services.AddMvc(options => options.UseYeKeModelBinder())` or just apply it to an specific view-model `[ModelBinder(BinderType = typeof(YeKeModelBinder))]`.
+  - [ApplyCorrectYeKeFilterAttribute](/src/DNTCommon.Web.Core.TestWebApp/Views/YeKeModelBinder/Index.cshtml) parses an incoming text and then corrects its Ye & Ke characters automatically. To use it globally, Add it to MvcOptions: `services.AddControllersWithViews(options => options.Filters.Add(typeof(ApplyCorrectYeKeFilterAttribute)))`.
+
 
 - Mvc
 
