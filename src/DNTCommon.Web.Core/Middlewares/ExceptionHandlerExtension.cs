@@ -7,18 +7,16 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
-using Microsoft.IdentityModel.Tokens;
-using static System.FormattableString;
 
 namespace DNTCommon.Web.Core
 {
     /// <summary>
-    /// Exception Handler Extension
+    ///     Exception Handler Extension
     /// </summary>
     public static class ExceptionHandlerExtension
     {
         /// <summary>
-        /// A customized version of app.UseExceptionHandler
+        ///     A customized version of app.UseExceptionHandler
         /// </summary>
         public static void UseApiExceptionHandler(this IApplicationBuilder app, bool isDevelopment)
         {
@@ -35,11 +33,6 @@ namespace DNTCommon.Web.Core
 
                     switch (exception)
                     {
-                        case SecurityTokenExpiredException tokenException:
-                            await showError(
-                                HttpStatusCode.Unauthorized,
-                                Invariant($"Your token has been expired at {tokenException.Expires}. Please login again!"));
-                            break;
                         case UnauthorizedAccessException _:
                             await showError(
                                 HttpStatusCode.Unauthorized,
@@ -58,9 +51,9 @@ namespace DNTCommon.Web.Core
 
                         context.Response.StatusCode = (int)statusCode;
                         context.Response.ContentType = "application/json";
-                        return isDevelopment ?
-                            showDevelopmentError(statusCode, message) :
-                            showProductionError(statusCode, message);
+                        return isDevelopment
+                            ? showDevelopmentError(statusCode, message)
+                            : showProductionError(statusCode, message);
                     }
 
                     Task showDevelopmentError(HttpStatusCode statusCode, string message)
@@ -94,7 +87,8 @@ namespace DNTCommon.Web.Core
 
                         if (!context.Response.Headers.ContainsKey("Access-Control-Allow-Headers"))
                         {
-                            context.Response.Headers.Add("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+                            context.Response.Headers.Add("Access-Control-Allow-Headers",
+                                "Origin, X-Requested-With, Content-Type, Accept");
                         }
                     }
                 });

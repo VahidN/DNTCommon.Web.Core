@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Description>DNTCommon.Web.Core provides common scenarios' solutions for ASP.NET Core applications.</Description>
-        <VersionPrefix>3.2.0</VersionPrefix>
+        <VersionPrefix>3.2.1</VersionPrefix>
         <Authors>Vahid Nasiri</Authors>
         <TargetFrameworks>net6.0;net5.0;netcoreapp3.1</TargetFrameworks>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -61,7 +61,6 @@
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
-        <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.15.0"/>
         <FrameworkReference Include="Microsoft.AspNetCore.App"/>
         <PackageReference Include="System.Drawing.Common" Version="6.0.0"/>
         <PackageReference Include="Microsoft.SyndicationFeed.ReaderWriter" Version="1.0.2"/>
