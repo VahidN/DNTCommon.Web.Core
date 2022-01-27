@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Description>DNTCommon.Web.Core provides common scenarios' solutions for ASP.NET Core applications.</Description>
-        <VersionPrefix>3.2.1</VersionPrefix>
+        <VersionPrefix>3.3.0</VersionPrefix>
         <Authors>Vahid Nasiri</Authors>
         <TargetFrameworks>net6.0;net5.0;netcoreapp3.1</TargetFrameworks>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -23,7 +23,7 @@
         <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
     </PropertyGroup>
     <PropertyGroup>
-        <LangVersion>9</LangVersion>
+        <LangVersion>latest</LangVersion>
         <AnalysisLevel>latest</AnalysisLevel>
         <AnalysisMode>AllEnabledByDefault</AnalysisMode>
         <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
@@ -38,7 +38,7 @@
         <ReportAnalyzer>true</ReportAnalyzer>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Meziantou.Analyzer" Version="1.0.681">
+        <PackageReference Include="Meziantou.Analyzer" Version="1.0.688">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
@@ -54,7 +54,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="SonarAnalyzer.CSharp" Version="8.33.0.40503">
+        <PackageReference Include="SonarAnalyzer.CSharp" Version="8.34.0.42011">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
@@ -65,8 +65,8 @@
         <PackageReference Include="System.Drawing.Common" Version="6.0.0"/>
         <PackageReference Include="Microsoft.SyndicationFeed.ReaderWriter" Version="1.0.2"/>
         <PackageReference Include="DNTPersianUtils.Core" Version="5.4.0"/>
-        <PackageReference Include="MailKit" Version="3.0.0"/>
-        <PackageReference Include="HtmlAgilityPack" Version="1.11.39"/>
+        <PackageReference Include="MailKit" Version="3.1.0"/>
+        <PackageReference Include="HtmlAgilityPack" Version="1.11.40"/>
         <PackageReference Include="IPAddressRange" Version="4.2.0"/>
         <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="6.0.1"/>
         <PackageReference Include="Ben.Demystifier" Version="0.4.1"/>
@@ -74,5 +74,9 @@
 
     <PropertyGroup Condition="('$(TargetFramework)' == 'netcoreapp3.1')">
         <DefineConstants>NETCORE3_1</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="('$(TargetFramework)' == 'net6.0')">
+        <DefineConstants>NET_6</DefineConstants>
     </PropertyGroup>
 </Project>
