@@ -1,28 +1,27 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace DNTCommon.Web.Core.TestWebApp.Controllers
+namespace DNTCommon.Web.Core.TestWebApp.Controllers;
+
+public class MvcActionsDiscoveryController : Controller
 {
-    public class MvcActionsDiscoveryController : Controller
+    private readonly IMvcActionsDiscoveryService _mvcActionsDiscoveryService;
+
+    public MvcActionsDiscoveryController(IMvcActionsDiscoveryService mvcActionsDiscoveryService)
     {
-        private readonly IMvcActionsDiscoveryService _mvcActionsDiscoveryService;
+        _mvcActionsDiscoveryService = mvcActionsDiscoveryService;
+    }
 
-        public MvcActionsDiscoveryController(IMvcActionsDiscoveryService mvcActionsDiscoveryService)
-        {
-            _mvcActionsDiscoveryService = mvcActionsDiscoveryService;
-        }
+    public IActionResult Index()
+    {
+        //var securedControllerActions = _mvcActionsDiscoveryService.GetAllSecuredControllerActionsWithPolicy("DynamicPermission");
+        var controllerActions = _mvcActionsDiscoveryService.MvcControllers;
+        return View(controllerActions);
+    }
 
-        public IActionResult Index()
-        {
-            //var securedControllerActions = _mvcActionsDiscoveryService.GetAllSecuredControllerActionsWithPolicy("DynamicPermission");
-            var controllerActions = _mvcActionsDiscoveryService.MvcControllers;
-            return View(controllerActions);
-        }
-
-        [AjaxOnly, HttpPost, ValidateAntiForgeryToken]
-        [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Index(string[] actionIds)
-        {
-            return Json(actionIds);
-        }
+    [AjaxOnly, HttpPost, ValidateAntiForgeryToken]
+    [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
+    public IActionResult Index(string[] actionIds)
+    {
+        return Json(actionIds);
     }
 }

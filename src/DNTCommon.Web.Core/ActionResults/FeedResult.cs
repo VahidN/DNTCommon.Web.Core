@@ -14,167 +14,166 @@ using DNTPersianUtils.Core.Normalizer;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DNTCommon.Web.Core
+namespace DNTCommon.Web.Core;
+
+/// <summary>
+/// An ASP.NET Core RSS Feed Renderer.
+/// </summary>
+public class FeedResult : ActionResult
 {
+    private const string Atom10Namespace = "https://www.w3.org/2005/Atom";
+    private readonly List<SyndicationAttribute> _attributes = new List<SyndicationAttribute>
+            {
+               new SyndicationAttribute("xmlns:atom", Atom10Namespace)
+            };
+
+    private readonly FeedChannel _feedChannel;
+    private IHttpRequestInfoService? _httpContextInfo;
+
     /// <summary>
     /// An ASP.NET Core RSS Feed Renderer.
     /// </summary>
-    public class FeedResult : ActionResult
+    /// <param name="feedChannel">Channel's info</param>
+    public FeedResult(FeedChannel feedChannel)
     {
-        private const string Atom10Namespace = "https://www.w3.org/2005/Atom";
-        private readonly List<SyndicationAttribute> _attributes = new List<SyndicationAttribute>
-                {
-                   new SyndicationAttribute("xmlns:atom", Atom10Namespace)
-                };
+        _feedChannel = feedChannel;
+    }
 
-        private readonly FeedChannel _feedChannel;
-        private IHttpRequestInfoService? _httpContextInfo;
-
-        /// <summary>
-        /// An ASP.NET Core RSS Feed Renderer.
-        /// </summary>
-        /// <param name="feedChannel">Channel's info</param>
-        public FeedResult(FeedChannel feedChannel)
+    /// <summary>
+    /// Executes the result operation of the action method asynchronously.
+    /// </summary>
+    public override Task ExecuteResultAsync(ActionContext context)
+    {
+        if (context == null)
         {
-            _feedChannel = feedChannel;
+            throw new ArgumentNullException(nameof(context));
         }
 
-        /// <summary>
-        /// Executes the result operation of the action method asynchronously.
-        /// </summary>
-        public override Task ExecuteResultAsync(ActionContext context)
+        _httpContextInfo = context.HttpContext.RequestServices.GetRequiredService<IHttpRequestInfoService>();
+        return writeSyndicationFeedToResponseAsync(context);
+    }
+
+    private async Task writeSyndicationFeedToResponseAsync(ActionContext context)
+    {
+        var response = context.HttpContext.Response;
+        var mediaType = new MediaTypeHeaderValue("application/rss+xml")
         {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
+            CharSet = Encoding.UTF8.WebName
+        };
+        response.ContentType = mediaType.ToString();
 
-            _httpContextInfo = context.HttpContext.RequestServices.GetRequiredService<IHttpRequestInfoService>();
-            return writeSyndicationFeedToResponseAsync(context);
-        }
-
-        private async Task writeSyndicationFeedToResponseAsync(ActionContext context)
-        {
-            var response = context.HttpContext.Response;
-            var mediaType = new MediaTypeHeaderValue("application/rss+xml")
-            {
-                CharSet = Encoding.UTF8.WebName
-            };
-            response.ContentType = mediaType.ToString();
-
-            var xws = new XmlWriterSettings { Indent = true, Encoding = Encoding.UTF8, Async = true };
+        var xws = new XmlWriterSettings { Indent = true, Encoding = Encoding.UTF8, Async = true };
 #if NETCORE3_1
-            using var xmlWriter = XmlWriter.Create(response.Body, xws);
+        using var xmlWriter = XmlWriter.Create(response.Body, xws);
 #else
-            await using var xmlWriter = XmlWriter.Create(response.Body, xws);
+        await using var xmlWriter = XmlWriter.Create(response.Body, xws);
 #endif
-            var formatter = new RssFormatter(_attributes, xmlWriter.Settings);
-            var rssFeedWriter = await getRssFeedWriterAsync(xmlWriter);
-            await writeSyndicationItemsAsync(formatter, rssFeedWriter);
-            await xmlWriter.FlushAsync();
+        var formatter = new RssFormatter(_attributes, xmlWriter.Settings);
+        var rssFeedWriter = await getRssFeedWriterAsync(xmlWriter);
+        await writeSyndicationItemsAsync(formatter, rssFeedWriter);
+        await xmlWriter.FlushAsync();
+    }
+
+    private async Task writeSyndicationItemsAsync(RssFormatter formatter, RssFeedWriter rssFeedWriter)
+    {
+        foreach (var item in getSyndicationItems())
+        {
+            var content = new SyndicationContent(formatter.CreateContent(item));
+            content.AddField(new SyndicationContent("atom:updated", Atom10Namespace, item.LastUpdated.ToString("r", CultureInfo.InvariantCulture)));
+            await rssFeedWriter.Write(content);
+        }
+    }
+
+    private async Task<RssFeedWriter> getRssFeedWriterAsync(XmlWriter xmlWriter)
+    {
+        var rssFeedWriter = new RssFeedWriter(xmlWriter, _attributes);
+        await addChannelIdentityAsync(rssFeedWriter);
+        await addChannelLastUpdatedTimeAsync(rssFeedWriter);
+        await addChannelImageAsync(rssFeedWriter);
+        return rssFeedWriter;
+    }
+
+    private async Task addChannelLastUpdatedTimeAsync(RssFeedWriter rssFeedWriter)
+    {
+        if (_feedChannel.RssItems?.Any() != true)
+        {
+            return;
         }
 
-        private async Task writeSyndicationItemsAsync(RssFormatter formatter, RssFeedWriter rssFeedWriter)
+        await rssFeedWriter.WriteLastBuildDate(
+            _feedChannel.RssItems.OrderByDescending(x => x.LastUpdatedTime).First().LastUpdatedTime);
+    }
+
+    private async Task addChannelIdentityAsync(RssFeedWriter rssFeedWriter)
+    {
+        if (_httpContextInfo == null)
         {
-            foreach (var item in getSyndicationItems())
-            {
-                var content = new SyndicationContent(formatter.CreateContent(item));
-                content.AddField(new SyndicationContent("atom:updated", Atom10Namespace, item.LastUpdated.ToString("r", CultureInfo.InvariantCulture)));
-                await rssFeedWriter.Write(content);
-            }
+            throw new InvalidOperationException("_httpContextInfo is null.");
         }
 
-        private async Task<RssFeedWriter> getRssFeedWriterAsync(XmlWriter xmlWriter)
+        await rssFeedWriter.WriteDescription(_feedChannel.FeedDescription.ApplyRle().RemoveHexadecimalSymbols());
+        await rssFeedWriter.WriteCopyright(_feedChannel.FeedCopyright.ApplyRle().RemoveHexadecimalSymbols());
+        await rssFeedWriter.WriteTitle(_feedChannel.FeedTitle.ApplyRle().RemoveHexadecimalSymbols());
+        await rssFeedWriter.WriteLanguage(new CultureInfo(_feedChannel.CultureName));
+        await rssFeedWriter.WriteRaw($"<atom:link href=\"{_httpContextInfo.GetRawUrl()}\" rel=\"self\" type=\"application/rss+xml\" />");
+        await rssFeedWriter.Write(new SyndicationLink(_httpContextInfo.GetBaseUri(), relationshipType: RssElementNames.Link));
+    }
+
+    private async Task addChannelImageAsync(RssFeedWriter rssFeedWriter)
+    {
+        if (string.IsNullOrWhiteSpace(_feedChannel.FeedImageContentPath))
         {
-            var rssFeedWriter = new RssFeedWriter(xmlWriter, _attributes);
-            await addChannelIdentityAsync(rssFeedWriter);
-            await addChannelLastUpdatedTimeAsync(rssFeedWriter);
-            await addChannelImageAsync(rssFeedWriter);
-            return rssFeedWriter;
+            return;
         }
 
-        private async Task addChannelLastUpdatedTimeAsync(RssFeedWriter rssFeedWriter)
+        if (_httpContextInfo == null)
         {
-            if (_feedChannel.RssItems?.Any() != true)
-            {
-                return;
-            }
-
-            await rssFeedWriter.WriteLastBuildDate(
-                _feedChannel.RssItems.OrderByDescending(x => x.LastUpdatedTime).First().LastUpdatedTime);
+            throw new InvalidOperationException("_httpContextInfo is null.");
         }
 
-        private async Task addChannelIdentityAsync(RssFeedWriter rssFeedWriter)
+        var syndicationImage = new SyndicationImage(_httpContextInfo.AbsoluteContent(_feedChannel.FeedImageContentPath))
         {
-            if (_httpContextInfo == null)
-            {
-                throw new InvalidOperationException("_httpContextInfo is null.");
-            }
+            Title = _feedChannel.FeedImageTitle,
+            Link = new SyndicationLink(_httpContextInfo.AbsoluteContent(_feedChannel.FeedImageContentPath))
+        };
+        await rssFeedWriter.Write(syndicationImage);
+    }
 
-            await rssFeedWriter.WriteDescription(_feedChannel.FeedDescription.ApplyRle().RemoveHexadecimalSymbols());
-            await rssFeedWriter.WriteCopyright(_feedChannel.FeedCopyright.ApplyRle().RemoveHexadecimalSymbols());
-            await rssFeedWriter.WriteTitle(_feedChannel.FeedTitle.ApplyRle().RemoveHexadecimalSymbols());
-            await rssFeedWriter.WriteLanguage(new CultureInfo(_feedChannel.CultureName));
-            await rssFeedWriter.WriteRaw($"<atom:link href=\"{_httpContextInfo.GetRawUrl()}\" rel=\"self\" type=\"application/rss+xml\" />");
-            await rssFeedWriter.Write(new SyndicationLink(_httpContextInfo.GetBaseUri(), relationshipType: RssElementNames.Link));
-        }
-
-        private async Task addChannelImageAsync(RssFeedWriter rssFeedWriter)
+    private IEnumerable<SyndicationItem> getSyndicationItems()
+    {
+        foreach (var item in _feedChannel.RssItems)
         {
-            if (string.IsNullOrWhiteSpace(_feedChannel.FeedImageContentPath))
+            var uri = new Uri(QueryHelpers.AddQueryString(item.Url,
+                            new Dictionary<string, string?>(StringComparer.Ordinal)
+                            {
+                                { "utm_source", "feed" },
+                                { "utm_medium", "rss" },
+                                { "utm_campaign", "featured" },
+                                { "utm_updated", getUpdatedStamp(item) },
+                            }));
+            var syndicationItem = new SyndicationItem
             {
-                return;
-            }
-
-            if (_httpContextInfo == null)
-            {
-                throw new InvalidOperationException("_httpContextInfo is null.");
-            }
-
-            var syndicationImage = new SyndicationImage(_httpContextInfo.AbsoluteContent(_feedChannel.FeedImageContentPath))
-            {
-                Title = _feedChannel.FeedImageTitle,
-                Link = new SyndicationLink(_httpContextInfo.AbsoluteContent(_feedChannel.FeedImageContentPath))
+                Title = item.Title.ApplyRle().RemoveHexadecimalSymbols(),
+                Id = uri.ToString(),
+                Description = item.Content.WrapInDirectionalDiv().RemoveHexadecimalSymbols(),
+                Published = item.PublishDate,
+                LastUpdated = item.LastUpdatedTime
             };
-            await rssFeedWriter.Write(syndicationImage);
-        }
-
-        private IEnumerable<SyndicationItem> getSyndicationItems()
-        {
-            foreach (var item in _feedChannel.RssItems)
+            syndicationItem.AddLink(new SyndicationLink(uri));
+            syndicationItem.AddContributor(new SyndicationPerson(item.AuthorName, item.AuthorName));
+            foreach (var category in item.Categories)
             {
-                var uri = new Uri(QueryHelpers.AddQueryString(item.Url,
-                                new Dictionary<string, string?>(StringComparer.Ordinal)
-                                {
-                                    { "utm_source", "feed" },
-                                    { "utm_medium", "rss" },
-                                    { "utm_campaign", "featured" },
-                                    { "utm_updated", getUpdatedStamp(item) },
-                                }));
-                var syndicationItem = new SyndicationItem
-                {
-                    Title = item.Title.ApplyRle().RemoveHexadecimalSymbols(),
-                    Id = uri.ToString(),
-                    Description = item.Content.WrapInDirectionalDiv().RemoveHexadecimalSymbols(),
-                    Published = item.PublishDate,
-                    LastUpdated = item.LastUpdatedTime
-                };
-                syndicationItem.AddLink(new SyndicationLink(uri));
-                syndicationItem.AddContributor(new SyndicationPerson(item.AuthorName, item.AuthorName));
-                foreach (var category in item.Categories)
-                {
-                    syndicationItem.AddCategory(new SyndicationCategory(category));
-                }
-                yield return syndicationItem;
+                syndicationItem.AddCategory(new SyndicationCategory(category));
             }
+            yield return syndicationItem;
         }
+    }
 
-        private static string getUpdatedStamp(FeedItem item)
-        {
-            return item.LastUpdatedTime.ToShortPersianDateTimeString()
-                                    .Replace("/", "-", StringComparison.Ordinal)
-                                    .Replace(" ", "-", StringComparison.Ordinal)
-                                    .Replace(":", "-", StringComparison.Ordinal);
-        }
+    private static string getUpdatedStamp(FeedItem item)
+    {
+        return item.LastUpdatedTime.ToShortPersianDateTimeString()
+                                .Replace("/", "-", StringComparison.Ordinal)
+                                .Replace(" ", "-", StringComparison.Ordinal)
+                                .Replace(":", "-", StringComparison.Ordinal);
     }
 }

@@ -1,12 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace DNTCommon.Web.Core.TestWebApp.Controllers
+namespace DNTCommon.Web.Core.TestWebApp.Controllers;
+
+public class DomainHelperExtensionsController : Controller
 {
-    public class DomainHelperExtensionsController : Controller
+    public IActionResult Index()
     {
-        public IActionResult Index()
-        {
-            return View();
-        }
+        return View();
     }
 }

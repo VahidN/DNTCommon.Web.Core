@@ -1,7 +1,6 @@
-namespace DNTCommon.Web.Core.TestWebApp.Models
+namespace DNTCommon.Web.Core.TestWebApp.Models;
+
+public class EmailTemplateViewModel
 {
-    public class EmailTemplateViewModel
-    {
-        public string EmailSignature { set; get; }
-    }
+    public string EmailSignature { set; get; }
 }

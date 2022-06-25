@@ -1,19 +1,18 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DNTCommon.Web.Core
+namespace DNTCommon.Web.Core;
+
+/// <summary>
+/// SafeFile Download Service Extensions
+/// </summary>
+public static class AntiXssServiceExtensions
 {
     /// <summary>
-    /// SafeFile Download Service Extensions
+    /// Adds IFileNameSanitizerService to IServiceCollection.
     /// </summary>
-    public static class AntiXssServiceExtensions
+    public static IServiceCollection AddAntiXssService(this IServiceCollection services)
     {
-        /// <summary>
-        /// Adds IFileNameSanitizerService to IServiceCollection.
-        /// </summary>
-        public static IServiceCollection AddAntiXssService(this IServiceCollection services)
-        {
-            services.AddTransient<IAntiXssService, AntiXssService>();
-            return services;
-        }
+        services.AddTransient<IAntiXssService, AntiXssService>();
+        return services;
     }
 }

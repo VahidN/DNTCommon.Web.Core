@@ -1,19 +1,18 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DNTCommon.Web.Core
+namespace DNTCommon.Web.Core;
+
+/// <summary>
+/// MvcActions Discovery Service Extensions
+/// </summary>
+public static class MvcActionsDiscoveryServiceExtensions
 {
     /// <summary>
-    /// MvcActions Discovery Service Extensions
+    /// Adds IMvcActionsDiscoveryService to IServiceCollection.
     /// </summary>
-    public static class MvcActionsDiscoveryServiceExtensions
+    public static IServiceCollection AddMvcActionsDiscoveryService(this IServiceCollection services)
     {
-        /// <summary>
-        /// Adds IMvcActionsDiscoveryService to IServiceCollection.
-        /// </summary>
-        public static IServiceCollection AddMvcActionsDiscoveryService(this IServiceCollection services)
-        {
-            services.AddSingleton<IMvcActionsDiscoveryService, MvcActionsDiscoveryService>();
-            return services;
-        }
+        services.AddSingleton<IMvcActionsDiscoveryService, MvcActionsDiscoveryService>();
+        return services;
     }
 }

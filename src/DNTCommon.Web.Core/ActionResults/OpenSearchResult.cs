@@ -6,94 +6,93 @@ using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.AspNetCore.Mvc;
 
-namespace DNTCommon.Web.Core
+namespace DNTCommon.Web.Core;
+
+/// <summary>
+/// An ASP.NET Core OpenSearch provider.
+/// </summary>
+public class OpenSearchResult : ActionResult
 {
     /// <summary>
-    /// An ASP.NET Core OpenSearch provider.
+    /// A short name for the search engine. The value must contain 16 or fewer characters of plain text.
+    /// The value must not contain HTML or other markup.
     /// </summary>
-    public class OpenSearchResult : ActionResult
+    public string ShortName { set; get; } = default!;
+
+    /// <summary>
+    /// A brief description of the search engine. The value must contain 1024 or fewer characters of plain text.
+    /// The value must not contain HTML or other markup.
+    /// </summary>
+    public string Description { set; get; } = default!;
+
+    /// <summary>
+    ///	The URL to go to to open up the search page at the site for which the plugin is designed to search.
+    /// This provides a way for Firefox to let the user visit the web site directly.
+    /// </summary>
+    public string SearchForm { set; get; } = default!;
+
+    /// <summary>
+    /// URI to an icon representative of the search engine. When possible,
+    /// search engines should offer a 16x16 image of type "image/x-icon" and a 64x64 image of type "image/jpeg"
+    /// or "image/png".
+    /// </summary>
+    public string FavIconUrl { set; get; } = default!;
+
+    /// <summary>
+    /// Describes the URL or URLs to use for the search. The method attribute indicates whether to use a
+    /// GET or POST request to fetch the result. The template attribute indicates the base URL for the search query.
+    /// </summary>
+    public string SearchUrlTemplate { set; get; } = default!;
+
+    /// <summary>
+    /// Executes the result operation of the action method synchronously.
+    /// </summary>
+    public override Task ExecuteResultAsync(ActionContext context)
     {
-        /// <summary>
-        /// A short name for the search engine. The value must contain 16 or fewer characters of plain text.
-        /// The value must not contain HTML or other markup.
-        /// </summary>
-        public string ShortName { set; get; } = default!;
-
-        /// <summary>
-        /// A brief description of the search engine. The value must contain 1024 or fewer characters of plain text.
-        /// The value must not contain HTML or other markup.
-        /// </summary>
-        public string Description { set; get; } = default!;
-
-        /// <summary>
-        ///	The URL to go to to open up the search page at the site for which the plugin is designed to search.
-        /// This provides a way for Firefox to let the user visit the web site directly.
-        /// </summary>
-        public string SearchForm { set; get; } = default!;
-
-        /// <summary>
-        /// URI to an icon representative of the search engine. When possible,
-        /// search engines should offer a 16x16 image of type "image/x-icon" and a 64x64 image of type "image/jpeg"
-        /// or "image/png".
-        /// </summary>
-        public string FavIconUrl { set; get; } = default!;
-
-        /// <summary>
-        /// Describes the URL or URLs to use for the search. The method attribute indicates whether to use a
-        /// GET or POST request to fetch the result. The template attribute indicates the base URL for the search query.
-        /// </summary>
-        public string SearchUrlTemplate { set; get; } = default!;
-
-        /// <summary>
-        /// Executes the result operation of the action method synchronously.
-        /// </summary>
-        public override Task ExecuteResultAsync(ActionContext context)
+        if (context == null)
         {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
-            var response = context.HttpContext.Response;
-            var mediaType = new MediaTypeHeaderValue("application/opensearchdescription+xml")
-            {
-                CharSet = Encoding.UTF8.WebName
-            };
-            response.ContentType = mediaType.ToString();
-
-            var data = getOpenSearchData();
-            return response.Body.WriteAsync(data.AsMemory(0, data.Length)).AsTask();
+            throw new ArgumentNullException(nameof(context));
         }
 
-        private byte[] getOpenSearchData()
+        var response = context.HttpContext.Response;
+        var mediaType = new MediaTypeHeaderValue("application/opensearchdescription+xml")
         {
-            using (var memoryStream = new MemoryStream())
+            CharSet = Encoding.UTF8.WebName
+        };
+        response.ContentType = mediaType.ToString();
+
+        var data = getOpenSearchData();
+        return response.Body.WriteAsync(data.AsMemory(0, data.Length)).AsTask();
+    }
+
+    private byte[] getOpenSearchData()
+    {
+        using (var memoryStream = new MemoryStream())
+        {
+            var xws = new XmlWriterSettings { Indent = true, Encoding = Encoding.UTF8 };
+            using (var xmlWriter = XmlWriter.Create(memoryStream, xws))
             {
-                var xws = new XmlWriterSettings { Indent = true, Encoding = Encoding.UTF8 };
-                using (var xmlWriter = XmlWriter.Create(memoryStream, xws))
-                {
-                    xmlWriter.WriteStartElement("OpenSearchDescription", "http://a9.com/-/spec/opensearch/1.1/");
+                xmlWriter.WriteStartElement("OpenSearchDescription", "http://a9.com/-/spec/opensearch/1.1/");
 
-                    xmlWriter.WriteElementString("ShortName", ShortName);
-                    xmlWriter.WriteElementString("Description", Description);
-                    xmlWriter.WriteElementString("InputEncoding", "UTF-8");
-                    xmlWriter.WriteElementString("SearchForm", SearchForm);
+                xmlWriter.WriteElementString("ShortName", ShortName);
+                xmlWriter.WriteElementString("Description", Description);
+                xmlWriter.WriteElementString("InputEncoding", "UTF-8");
+                xmlWriter.WriteElementString("SearchForm", SearchForm);
 
-                    xmlWriter.WriteStartElement("Url");
-                    xmlWriter.WriteAttributeString("type", "text/html");
-                    xmlWriter.WriteAttributeString("template", SearchUrlTemplate);
-                    xmlWriter.WriteEndElement();
+                xmlWriter.WriteStartElement("Url");
+                xmlWriter.WriteAttributeString("type", "text/html");
+                xmlWriter.WriteAttributeString("template", SearchUrlTemplate);
+                xmlWriter.WriteEndElement();
 
-                    xmlWriter.WriteStartElement("Image");
-                    xmlWriter.WriteAttributeString("width", "16");
-                    xmlWriter.WriteAttributeString("height", "16");
-                    xmlWriter.WriteString(FavIconUrl);
-                    xmlWriter.WriteEndElement();
+                xmlWriter.WriteStartElement("Image");
+                xmlWriter.WriteAttributeString("width", "16");
+                xmlWriter.WriteAttributeString("height", "16");
+                xmlWriter.WriteString(FavIconUrl);
+                xmlWriter.WriteEndElement();
 
-                    xmlWriter.WriteEndElement();
-                }
-                return memoryStream.ToArray();
+                xmlWriter.WriteEndElement();
             }
+            return memoryStream.ToArray();
         }
     }
 }

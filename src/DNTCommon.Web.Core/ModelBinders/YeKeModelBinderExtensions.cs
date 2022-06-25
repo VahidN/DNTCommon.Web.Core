@@ -1,25 +1,24 @@
 using System;
 using Microsoft.AspNetCore.Mvc;
 
-namespace DNTCommon.Web.Core
+namespace DNTCommon.Web.Core;
+
+/// <summary>
+/// Ye Ke Model Binder Extensions
+/// </summary>
+public static class YeKeModelBinderExtensions
 {
     /// <summary>
-    /// Ye Ke Model Binder Extensions
+    /// Inserts YeKeModelBinderProvider at the top of the MvcOptions.ModelBinderProviders list.
     /// </summary>
-    public static class YeKeModelBinderExtensions
+    public static MvcOptions UseYeKeModelBinder(this MvcOptions options)
     {
-        /// <summary>
-        /// Inserts YeKeModelBinderProvider at the top of the MvcOptions.ModelBinderProviders list.
-        /// </summary>
-        public static MvcOptions UseYeKeModelBinder(this MvcOptions options)
+        if (options == null)
         {
-            if (options == null)
-            {
-                throw new ArgumentNullException(nameof(options));
-            }
-
-            options.ModelBinderProviders.Insert(0, new YeKeModelBinderProvider());
-            return options;
+            throw new ArgumentNullException(nameof(options));
         }
+
+        options.ModelBinderProviders.Insert(0, new YeKeModelBinderProvider());
+        return options;
     }
 }

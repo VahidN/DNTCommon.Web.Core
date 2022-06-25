@@ -1,43 +1,42 @@
-namespace DNTCommon.Web.Core
+namespace DNTCommon.Web.Core;
+
+/// <summary>
+/// SitemapItem's Change frequency
+/// </summary>
+public enum ChangeFrequency
 {
     /// <summary>
-    /// SitemapItem's Change frequency
+    /// Always
     /// </summary>
-    public enum ChangeFrequency
-    {
-        /// <summary>
-        /// Always
-        /// </summary>
-        Always,
+    Always,
 
-        /// <summary>
-        /// Hourly
-        /// </summary>
-        Hourly,
+    /// <summary>
+    /// Hourly
+    /// </summary>
+    Hourly,
 
-        /// <summary>
-        /// Daily
-        /// </summary>
-        Daily,
+    /// <summary>
+    /// Daily
+    /// </summary>
+    Daily,
 
-        /// <summary>
-        /// Weekly
-        /// </summary>
-        Weekly,
+    /// <summary>
+    /// Weekly
+    /// </summary>
+    Weekly,
 
-        /// <summary>
-        /// Monthly
-        /// </summary>
-        Monthly,
+    /// <summary>
+    /// Monthly
+    /// </summary>
+    Monthly,
 
-        /// <summary>
-        /// Yearly
-        /// </summary>
-        Yearly,
+    /// <summary>
+    /// Yearly
+    /// </summary>
+    Yearly,
 
-        /// <summary>
-        /// Never
-        /// </summary>
-        Never
-    }
+    /// <summary>
+    /// Never
+    /// </summary>
+    Never
 }

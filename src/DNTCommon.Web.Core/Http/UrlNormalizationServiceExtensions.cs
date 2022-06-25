@@ -1,19 +1,18 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DNTCommon.Web.Core
+namespace DNTCommon.Web.Core;
+
+/// <summary>
+/// Url Normalization Service Extensions
+/// </summary>
+public static class UrlNormalizationServiceExtensions
 {
     /// <summary>
-    /// Url Normalization Service Extensions
+    /// Adds IUrlNormalizationService to IServiceCollection.
     /// </summary>
-    public static class UrlNormalizationServiceExtensions
+    public static IServiceCollection AddUrlNormalizationService(this IServiceCollection services)
     {
-        /// <summary>
-        /// Adds IUrlNormalizationService to IServiceCollection.
-        /// </summary>
-        public static IServiceCollection AddUrlNormalizationService(this IServiceCollection services)
-        {
-            services.AddTransient<IUrlNormalizationService, UrlNormalizationService>();
-            return services;
-        }
+        services.AddTransient<IUrlNormalizationService, UrlNormalizationService>();
+        return services;
     }
 }

@@ -1,19 +1,18 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DNTCommon.Web.Core
+namespace DNTCommon.Web.Core;
+
+/// <summary>
+/// SerializationProvider Extensions
+/// </summary>
+public static class SerializationProviderExtensions
 {
     /// <summary>
-    /// SerializationProvider Extensions
+    /// Adds ISerializationProvider to IServiceCollection.
     /// </summary>
-    public static class SerializationProviderExtensions
+    public static IServiceCollection AddSerializationProvider(this IServiceCollection services)
     {
-        /// <summary>
-        /// Adds ISerializationProvider to IServiceCollection.
-        /// </summary>
-        public static IServiceCollection AddSerializationProvider(this IServiceCollection services)
-        {
-            services.AddSingleton<ISerializationProvider, SerializationProvider>();
-            return services;
-        }
+        services.AddSingleton<ISerializationProvider, SerializationProvider>();
+        return services;
     }
 }

@@ -2,33 +2,32 @@ using System.Threading.Tasks;
 using DNTCommon.Web.Core.TestWebApp.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace DNTCommon.Web.Core.TestWebApp.Controllers
+namespace DNTCommon.Web.Core.TestWebApp.Controllers;
+
+public class HttpRequestInfoController : Controller
 {
-    public class HttpRequestInfoController : Controller
+    private readonly IHttpRequestInfoService _httpRequestInfoService;
+
+    public HttpRequestInfoController(IHttpRequestInfoService httpRequestInfoService)
     {
-        private readonly IHttpRequestInfoService _httpRequestInfoService;
+        _httpRequestInfoService = httpRequestInfoService;
+    }
 
-        public HttpRequestInfoController(IHttpRequestInfoService httpRequestInfoService)
-        {
-            _httpRequestInfoService = httpRequestInfoService;
-        }
+    public IActionResult Index()
+    {
+        return View();
+    }
 
-        public IActionResult Index()
+    [HttpPost]
+    [EnableReadableBodyStream]
+    public async Task<IActionResult> Index([FromBody] RoleViewModel model)
+    {
+        var requestBody = string.Empty;
+        if (Request.IsAjaxRequest() && Request.ContentType.Contains("application/json"))
         {
-            return View();
+            //var roleModel = await _httpRequestInfoService.DeserializeRequestJsonBodyAsAsync<RoleViewModel>();
+            requestBody = await _httpRequestInfoService.ReadRequestBodyAsStringAsync();
         }
-
-        [HttpPost]
-        [EnableReadableBodyStream]
-        public async Task<IActionResult> Index([FromBody] RoleViewModel model)
-        {
-            var requestBody = string.Empty;
-            if (Request.IsAjaxRequest() && Request.ContentType.Contains("application/json"))
-            {
-                //var roleModel = await _httpRequestInfoService.DeserializeRequestJsonBodyAsAsync<RoleViewModel>();
-                requestBody = await _httpRequestInfoService.ReadRequestBodyAsStringAsync();
-            }
-            return Content(requestBody);
-        }
+        return Content(requestBody);
     }
 }

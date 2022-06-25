@@ -1,18 +1,17 @@
 using Microsoft.AspNetCore.Builder;
 
-namespace DNTCommon.Web.Core
+namespace DNTCommon.Web.Core;
+
+/// <summary>
+/// AntiDos Middleware Extensions
+/// </summary>
+public static class AntiDosMiddlewareExtensions
 {
     /// <summary>
-    /// AntiDos Middleware Extensions
+    /// Adds AntiDosMiddleware to the pipeline.
     /// </summary>
-    public static class AntiDosMiddlewareExtensions
+    public static IApplicationBuilder UseAntiDos(this IApplicationBuilder builder)
     {
-        /// <summary>
-        /// Adds AntiDosMiddleware to the pipeline.
-        /// </summary>
-        public static IApplicationBuilder UseAntiDos(this IApplicationBuilder builder)
-        {
-            return builder.UseMiddleware<AntiDosMiddleware>();
-        }
+        return builder.UseMiddleware<AntiDosMiddleware>();
     }
 }

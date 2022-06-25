@@ -1,19 +1,18 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DNTCommon.Web.Core
+namespace DNTCommon.Web.Core;
+
+/// <summary>
+/// Html Helper Service Extensions
+/// </summary>
+public static class HtmlHelperServiceExtensions
 {
     /// <summary>
-    /// Html Helper Service Extensions
+    /// Adds IHtmlHelperService to IServiceCollection.
     /// </summary>
-    public static class HtmlHelperServiceExtensions
+    public static IServiceCollection AddHtmlHelperService(this IServiceCollection services)
     {
-        /// <summary>
-        /// Adds IHtmlHelperService to IServiceCollection.
-        /// </summary>
-        public static IServiceCollection AddHtmlHelperService(this IServiceCollection services)
-        {
-            services.AddScoped<IHtmlHelperService, HtmlHelperService>();
-            return services;
-        }
+        services.AddScoped<IHtmlHelperService, HtmlHelperService>();
+        return services;
     }
 }

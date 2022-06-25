@@ -1,13 +1,12 @@
-namespace DNTCommon.Web.Core
+namespace DNTCommon.Web.Core;
+
+/// <summary>
+/// SafeFile Download Service
+/// </summary>
+public interface IFileNameSanitizerService
 {
     /// <summary>
-    /// SafeFile Download Service
+    /// Determines whether the requested file is safe to download.
     /// </summary>
-    public interface IFileNameSanitizerService
-    {
-        /// <summary>
-        /// Determines whether the requested file is safe to download.
-        /// </summary>
-        SafeFile IsSafeToDownload(string folderPath, string requestedFileName);
-    }
+    SafeFile IsSafeToDownload(string folderPath, string requestedFileName);
 }

@@ -2,29 +2,28 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Localization;
 
-namespace DNTCommon.Web.Core
+namespace DNTCommon.Web.Core;
+
+/// <summary>
+/// How to use it: requestLocalizationOptions.RequestCultureProviders.Insert(0, new FaRequestCultureProvider());
+/// </summary>
+public class CustomRequestCultureProvider : RequestCultureProvider
 {
+    private readonly string _culture;
+
     /// <summary>
-    /// How to use it: requestLocalizationOptions.RequestCultureProviders.Insert(0, new FaRequestCultureProvider());
+    /// A provider for determining the culture information of an HttpRequest.
     /// </summary>
-    public class CustomRequestCultureProvider : RequestCultureProvider
+    public CustomRequestCultureProvider(string culture)
     {
-        private readonly string _culture;
+        _culture = culture;
+    }
 
-        /// <summary>
-        /// A provider for determining the culture information of an HttpRequest.
-        /// </summary>
-        public CustomRequestCultureProvider(string culture)
-        {
-            _culture = culture;
-        }
-
-        /// <summary>
-        /// Determining the culture information of an HttpRequest.
-        /// </summary>
-        public override Task<ProviderCultureResult?> DetermineProviderCultureResult(HttpContext httpContext)
-        {
-            return Task.FromResult<ProviderCultureResult?>(new ProviderCultureResult(_culture));
-        }
+    /// <summary>
+    /// Determining the culture information of an HttpRequest.
+    /// </summary>
+    public override Task<ProviderCultureResult?> DetermineProviderCultureResult(HttpContext httpContext)
+    {
+        return Task.FromResult<ProviderCultureResult?>(new ProviderCultureResult(_culture));
     }
 }

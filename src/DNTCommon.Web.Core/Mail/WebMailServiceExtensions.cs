@@ -1,19 +1,18 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DNTCommon.Web.Core
+namespace DNTCommon.Web.Core;
+
+/// <summary>
+/// Web Mail Service Extensions
+/// </summary>
+public static class WebMailServiceExtensions
 {
     /// <summary>
-    /// Web Mail Service Extensions
+    /// Adds IWebMailService to IServiceCollection.
     /// </summary>
-    public static class WebMailServiceExtensions
+    public static IServiceCollection AddWebMailService(this IServiceCollection services)
     {
-        /// <summary>
-        /// Adds IWebMailService to IServiceCollection.
-        /// </summary>
-        public static IServiceCollection AddWebMailService(this IServiceCollection services)
-        {
-            services.AddScoped<IWebMailService, WebMailService>();
-            return services;
-        }
+        services.AddScoped<IWebMailService, WebMailService>();
+        return services;
     }
 }

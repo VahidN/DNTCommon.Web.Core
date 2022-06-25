@@ -2,29 +2,28 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
-namespace DNTCommon.Web.Core.TestWebApp
+namespace DNTCommon.Web.Core.TestWebApp;
+
+public class DoBackupTask : IScheduledTask
 {
-    public class DoBackupTask : IScheduledTask
+    private readonly ILogger<DoBackupTask> _logger;
+
+    public DoBackupTask(ILogger<DoBackupTask> logger)
     {
-        private readonly ILogger<DoBackupTask> _logger;
+        _logger = logger;
+    }
 
-        public DoBackupTask(ILogger<DoBackupTask> logger)
+    public bool IsShuttingDown { get; set; }
+
+    public async Task RunAsync()
+    {
+        if (this.IsShuttingDown)
         {
-            _logger = logger;
+            return;
         }
 
-        public bool IsShuttingDown { get; set; }
+        _logger.LogInformation("Running Do Backup");
 
-        public async Task RunAsync()
-        {
-            if (this.IsShuttingDown)
-            {
-                return;
-            }
-
-            _logger.LogInformation("Running Do Backup");
-
-            await Task.Delay(TimeSpan.FromMinutes(3));
-        }
+        await Task.Delay(TimeSpan.FromMinutes(3));
     }
 }

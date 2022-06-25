@@ -1,25 +1,24 @@
 using System;
 using Microsoft.AspNetCore.Mvc;
 
-namespace DNTCommon.Web.Core
+namespace DNTCommon.Web.Core;
+
+/// <summary>
+/// Persian Date Model Binder Extensions
+/// </summary>
+public static class PersianDateModelBinderExtensions
 {
     /// <summary>
-    /// Persian Date Model Binder Extensions
+    /// Inserts PersianDateModelBinderProvider at the top of the MvcOptions.ModelBinderProviders list.
     /// </summary>
-    public static class PersianDateModelBinderExtensions
+    public static MvcOptions UsePersianDateModelBinder(this MvcOptions options)
     {
-        /// <summary>
-        /// Inserts PersianDateModelBinderProvider at the top of the MvcOptions.ModelBinderProviders list.
-        /// </summary>
-        public static MvcOptions UsePersianDateModelBinder(this MvcOptions options)
+        if (options == null)
         {
-            if (options == null)
-            {
-                throw new ArgumentNullException(nameof(options));
-            }
-
-            options.ModelBinderProviders.Insert(0, new PersianDateModelBinderProvider());
-            return options;
+            throw new ArgumentNullException(nameof(options));
         }
+
+        options.ModelBinderProviders.Insert(0, new PersianDateModelBinderProvider());
+        return options;
     }
 }

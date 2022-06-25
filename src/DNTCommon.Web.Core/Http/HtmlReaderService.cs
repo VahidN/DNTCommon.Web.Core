@@ -5,84 +5,83 @@ using System.Text;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 
-namespace DNTCommon.Web.Core
+namespace DNTCommon.Web.Core;
+
+/// <summary>
+/// Html Reader Service
+/// </summary>
+public class HtmlReaderService : IHtmlReaderService
 {
+    private readonly ILogger<HtmlReaderService> _logger;
+
     /// <summary>
     /// Html Reader Service
     /// </summary>
-    public class HtmlReaderService : IHtmlReaderService
+    public HtmlReaderService(ILogger<HtmlReaderService> logger)
     {
-        private readonly ILogger<HtmlReaderService> _logger;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
 
-        /// <summary>
-        /// Html Reader Service
-        /// </summary>
-        public HtmlReaderService(ILogger<HtmlReaderService> logger)
+    /// <summary>
+    /// ‍Creates a properly initialized new HtmlDocument.
+    /// </summary>
+    public HtmlDocument CreateHtmlDocument(string html)
+    {
+        var doc = new HtmlDocument
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
+            OptionCheckSyntax = true,
+            OptionFixNestedTags = true,
+            OptionAutoCloseOnEnd = true,
+            OptionDefaultStreamEncoding = Encoding.UTF8
+        };
+        doc.LoadHtml(html);
 
-        /// <summary>
-        /// ‍Creates a properly initialized new HtmlDocument.
-        /// </summary>
-        public HtmlDocument CreateHtmlDocument(string html)
+        if (doc.ParseErrors?.Any() == true)
         {
-            var doc = new HtmlDocument
+            foreach (var error in doc.ParseErrors)
             {
-                OptionCheckSyntax = true,
-                OptionFixNestedTags = true,
-                OptionAutoCloseOnEnd = true,
-                OptionDefaultStreamEncoding = Encoding.UTF8
-            };
-            doc.LoadHtml(html);
-
-            if (doc.ParseErrors?.Any() == true)
-            {
-                foreach (var error in doc.ParseErrors)
-                {
-                    _logger.LogWarning($"LoadHtml Error. SourceText: {error.SourceText} -> Code: {error.Code} -> Reason: {error.Reason}");
-                }
+                _logger.LogWarning($"LoadHtml Error. SourceText: {error.SourceText} -> Code: {error.Code} -> Reason: {error.Reason}");
             }
-
-            return doc;
         }
 
-        /// <summary>
-        /// Parses an HTML document recursively.
-        /// </summary>
-        public (HtmlDocument HtmlDocument, IEnumerable<HtmlNode> HtmlNodes) ParseHtml(string html)
-        {
-            if (string.IsNullOrWhiteSpace(html))
-            {
-                throw new ArgumentNullException(nameof(html));
-            }
+        return doc;
+    }
 
-            var doc = CreateHtmlDocument(html);
-            return (doc, handleChildren(doc.DocumentNode.ChildNodes));
+    /// <summary>
+    /// Parses an HTML document recursively.
+    /// </summary>
+    public (HtmlDocument HtmlDocument, IEnumerable<HtmlNode> HtmlNodes) ParseHtml(string html)
+    {
+        if (string.IsNullOrWhiteSpace(html))
+        {
+            throw new ArgumentNullException(nameof(html));
         }
 
-        private IEnumerable<HtmlNode> handleChildren(HtmlNodeCollection nodes)
+        var doc = CreateHtmlDocument(html);
+        return (doc, handleChildren(doc.DocumentNode.ChildNodes));
+    }
+
+    private IEnumerable<HtmlNode> handleChildren(HtmlNodeCollection nodes)
+    {
+        foreach (var node in nodes)
         {
-            foreach (var node in nodes)
+            if (node.Name.Equals("html", StringComparison.OrdinalIgnoreCase))
             {
-                if (node.Name.Equals("html", StringComparison.OrdinalIgnoreCase))
+                var body = node.Element("body");
+                if (body != null)
                 {
-                    var body = node.Element("body");
-                    if (body != null)
+                    foreach (var bodyNode in handleChildren(body.ChildNodes))
                     {
-                        foreach (var bodyNode in handleChildren(body.ChildNodes))
-                        {
-                            yield return bodyNode;
-                        }
+                        yield return bodyNode;
                     }
                 }
-                else
+            }
+            else
+            {
+                yield return node;
+                foreach (var childNode in handleChildren(node.ChildNodes))
                 {
-                    yield return node;
-                    foreach (var childNode in handleChildren(node.ChildNodes))
-                    {
-                        yield return childNode;
-                    }
+                    yield return childNode;
                 }
             }
         }

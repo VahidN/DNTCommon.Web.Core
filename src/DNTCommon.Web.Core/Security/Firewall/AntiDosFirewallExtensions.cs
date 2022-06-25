@@ -1,19 +1,18 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DNTCommon.Web.Core
+namespace DNTCommon.Web.Core;
+
+/// <summary>
+/// Anti Dos Firewall Extensions
+/// </summary>
+public static class AntiDosFirewallExtensions
 {
     /// <summary>
-    /// Anti Dos Firewall Extensions
+    /// Adds IAntiDosFirewall to IServiceCollection.
     /// </summary>
-    public static class AntiDosFirewallExtensions
+    public static IServiceCollection AddAntiDosFirewall(this IServiceCollection services)
     {
-        /// <summary>
-        /// Adds IAntiDosFirewall to IServiceCollection.
-        /// </summary>
-        public static IServiceCollection AddAntiDosFirewall(this IServiceCollection services)
-        {
-            services.AddScoped<IAntiDosFirewall, AntiDosFirewall>();
-            return services;
-        }
+        services.AddScoped<IAntiDosFirewall, AntiDosFirewall>();
+        return services;
     }
 }

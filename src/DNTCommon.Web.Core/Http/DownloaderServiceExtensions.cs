@@ -1,19 +1,18 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DNTCommon.Web.Core
+namespace DNTCommon.Web.Core;
+
+/// <summary>
+/// DownloaderService Extensions
+/// </summary>
+public static class DownloaderServiceExtensions
 {
     /// <summary>
-    /// DownloaderService Extensions
+    /// Adds IDownloaderService to IServiceCollection
     /// </summary>
-    public static class DownloaderServiceExtensions
+    public static IServiceCollection AddDownloaderService(this IServiceCollection services)
     {
-        /// <summary>
-        /// Adds IDownloaderService to IServiceCollection
-        /// </summary>
-        public static IServiceCollection AddDownloaderService(this IServiceCollection services)
-        {
-            services.AddTransient<IDownloaderService, DownloaderService>();
-            return services;
-        }
+        services.AddTransient<IDownloaderService, DownloaderService>();
+        return services;
     }
 }

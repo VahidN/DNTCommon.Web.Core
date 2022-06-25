@@ -1,19 +1,18 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DNTCommon.Web.Core
+namespace DNTCommon.Web.Core;
+
+/// <summary>
+/// Redirect Url Finder Service Extensions
+/// </summary>
+public static class RedirectUrlFinderServiceExtensions
 {
     /// <summary>
-    /// Redirect Url Finder Service Extensions
+    /// Adds IRedirectUrlFinderService to IServiceCollection.
     /// </summary>
-    public static class RedirectUrlFinderServiceExtensions
+    public static IServiceCollection AddRedirectUrlFinderService(this IServiceCollection services)
     {
-        /// <summary>
-        /// Adds IRedirectUrlFinderService to IServiceCollection.
-        /// </summary>
-        public static IServiceCollection AddRedirectUrlFinderService(this IServiceCollection services)
-        {
-            services.AddTransient<IRedirectUrlFinderService, RedirectUrlFinderService>();
-            return services;
-        }
+        services.AddTransient<IRedirectUrlFinderService, RedirectUrlFinderService>();
+        return services;
     }
 }

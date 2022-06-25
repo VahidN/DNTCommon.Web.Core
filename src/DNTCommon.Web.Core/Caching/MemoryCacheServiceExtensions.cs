@@ -1,20 +1,19 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DNTCommon.Web.Core
+namespace DNTCommon.Web.Core;
+
+/// <summary>
+/// Memory Cache Service Extensions
+/// </summary>
+public static class MemoryCacheServiceExtensions
 {
     /// <summary>
-    /// Memory Cache Service Extensions
+    /// Adds ICacheService to IServiceCollection.
     /// </summary>
-    public static class MemoryCacheServiceExtensions
+    public static IServiceCollection AddMemoryCacheService(this IServiceCollection services)
     {
-        /// <summary>
-        /// Adds ICacheService to IServiceCollection.
-        /// </summary>
-        public static IServiceCollection AddMemoryCacheService(this IServiceCollection services)
-        {
-            services.AddMemoryCache();
-            services.AddSingleton<ICacheService, MemoryCacheService>();
-            return services;
-        }
+        services.AddMemoryCache();
+        services.AddSingleton<ICacheService, MemoryCacheService>();
+        return services;
     }
 }

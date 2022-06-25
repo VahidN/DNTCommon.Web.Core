@@ -1,19 +1,18 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DNTCommon.Web.Core
+namespace DNTCommon.Web.Core;
+
+/// <summary>
+/// EnhancedStackTraceService Extensions
+/// </summary>
+public static class EnhancedStackTraceServiceExtensions
 {
     /// <summary>
-    /// EnhancedStackTraceService Extensions
+    /// Adds IEnhancedStackTraceService to IServiceCollection.
     /// </summary>
-    public static class EnhancedStackTraceServiceExtensions
+    public static IServiceCollection AddEnhancedStackTraceService(this IServiceCollection services)
     {
-        /// <summary>
-        /// Adds IEnhancedStackTraceService to IServiceCollection.
-        /// </summary>
-        public static IServiceCollection AddEnhancedStackTraceService(this IServiceCollection services)
-        {
-            services.AddSingleton<IEnhancedStackTraceService, EnhancedStackTraceService>();
-            return services;
-        }
+        services.AddSingleton<IEnhancedStackTraceService, EnhancedStackTraceService>();
+        return services;
     }
 }

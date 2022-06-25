@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Description>DNTCommon.Web.Core provides common scenarios' solutions for ASP.NET Core applications.</Description>
-        <VersionPrefix>3.3.0</VersionPrefix>
+        <VersionPrefix>3.3.1</VersionPrefix>
         <Authors>Vahid Nasiri</Authors>
         <TargetFrameworks>net6.0;net5.0;netcoreapp3.1</TargetFrameworks>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -36,17 +36,32 @@
         <Deterministic>true</Deterministic>
         <Features>strict</Features>
         <ReportAnalyzer>true</ReportAnalyzer>
+        <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
+	<ItemGroup>		
+		<Using Include="System.Globalization"/>
+		<Using Include="System.FormattableString" Static="True"/>
+		<Using Include="System.Console" Static="True" />
+		<Using Include="System.Security.Cryptography"/>
+		<Using Include="System.Diagnostics.CodeAnalysis"/>
+		<Using Include="System.Linq.Expressions"/>
+		<Using Include="System.Reflection"/>
+		<Using Include="System.ComponentModel.DataAnnotations"/>
+		<Using Include="System.Diagnostics"/>
+		<Using Include="System.ComponentModel.DataAnnotations.Schema"/>	
+		<Using Include="System.Net"/>
+		<Using Include="System.Net.Http.Headers"/>
+	</ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Meziantou.Analyzer" Version="1.0.688">
+        <PackageReference Include="Meziantou.Analyzer" Version="1.0.702">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.0.64">
+        <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.2.32">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="AsyncFixer" Version="1.5.1">
+        <PackageReference Include="AsyncFixer" Version="1.6.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
@@ -54,7 +69,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="SonarAnalyzer.CSharp" Version="8.34.0.42011">
+        <PackageReference Include="SonarAnalyzer.CSharp" Version="8.40.0.48530">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
@@ -64,11 +79,11 @@
         <FrameworkReference Include="Microsoft.AspNetCore.App"/>
         <PackageReference Include="System.Drawing.Common" Version="6.0.0"/>
         <PackageReference Include="Microsoft.SyndicationFeed.ReaderWriter" Version="1.0.2"/>
-        <PackageReference Include="DNTPersianUtils.Core" Version="5.4.0"/>
-        <PackageReference Include="MailKit" Version="3.1.0"/>
-        <PackageReference Include="HtmlAgilityPack" Version="1.11.40"/>
+        <PackageReference Include="DNTPersianUtils.Core" Version="5.4.4"/>
+        <PackageReference Include="MailKit" Version="3.3.0"/>
+        <PackageReference Include="HtmlAgilityPack" Version="1.11.43"/>
         <PackageReference Include="IPAddressRange" Version="4.2.0"/>
-        <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="6.0.1"/>
+        <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="6.0.6"/>
         <PackageReference Include="Ben.Demystifier" Version="0.4.1"/>
     </ItemGroup>
 

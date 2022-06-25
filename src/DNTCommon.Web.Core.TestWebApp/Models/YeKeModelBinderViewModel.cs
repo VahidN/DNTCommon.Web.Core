@@ -1,10 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace DNTCommon.Web.Core.TestWebApp.Models
+namespace DNTCommon.Web.Core.TestWebApp.Models;
+
+//[ModelBinder(BinderType = typeof(YeKeModelBinder))]
+public class YeKeModelBinderViewModel
 {
-    //[ModelBinder(BinderType = typeof(YeKeModelBinder))]
-    public class YeKeModelBinderViewModel
-    {
-        public string Data { set; get; }
-    }
+    public string Data { set; get; }
 }

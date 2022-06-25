@@ -1,37 +1,36 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace DNTCommon.Web.Core.TestWebApp.Controllers
+namespace DNTCommon.Web.Core.TestWebApp.Controllers;
+
+public class TestModel
 {
-    public class TestModel
+    public int Id { set; get; }
+    public string Name { set; get; }
+}
+
+public class ProtectionProviderServiceController : Controller
+{
+    private readonly IProtectionProviderService _protectionProviderService;
+
+    public ProtectionProviderServiceController(IProtectionProviderService protectionProviderService)
     {
-        public int Id { set; get; }
-        public string Name { set; get; }
+        _protectionProviderService = protectionProviderService;
     }
 
-    public class ProtectionProviderServiceController : Controller
+    public IActionResult Index()
     {
-        private readonly IProtectionProviderService _protectionProviderService;
+        ViewBag.Msg = "This is a test";
 
-        public ProtectionProviderServiceController(IProtectionProviderService protectionProviderService)
-        {
-            _protectionProviderService = protectionProviderService;
-        }
+        ViewBag.EncryptedMsg1 = _protectionProviderService.Encrypt(ViewBag.Msg);
+        ViewBag.DecryptMsg1 = _protectionProviderService.Decrypt(ViewBag.EncryptedMsg1);
 
-        public IActionResult Index()
-        {
-            ViewBag.Msg = "This is a test";
+        ViewBag.EncryptedMsg2 = _protectionProviderService.Encrypt(ViewBag.Msg);
+        ViewBag.DecryptMsg2 = _protectionProviderService.Decrypt(ViewBag.EncryptedMsg2);
 
-            ViewBag.EncryptedMsg1 = _protectionProviderService.Encrypt(ViewBag.Msg);
-            ViewBag.DecryptMsg1 = _protectionProviderService.Decrypt(ViewBag.EncryptedMsg1);
+        var model = new TestModel { Id = 1, Name = "Test" };
+        ViewBag.EncryptedMsg3 = _protectionProviderService.EncryptObject(model);
+        ViewBag.DecryptMsg3 = _protectionProviderService.DecryptObject<TestModel>(ViewBag.EncryptedMsg3).Name;
 
-            ViewBag.EncryptedMsg2 = _protectionProviderService.Encrypt(ViewBag.Msg);
-            ViewBag.DecryptMsg2 = _protectionProviderService.Decrypt(ViewBag.EncryptedMsg2);
-
-            var model = new TestModel { Id = 1, Name = "Test" };
-            ViewBag.EncryptedMsg3 = _protectionProviderService.EncryptObject(model);
-            ViewBag.DecryptMsg3 = _protectionProviderService.DecryptObject<TestModel>(ViewBag.EncryptedMsg3).Name;
-
-            return View();
-        }
+        return View();
     }
 }
