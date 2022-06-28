@@ -9,9 +9,6 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 /// An ASP.NET Core text to image renderer.
 /// </summary>
-#if !NETCORE3_1
-[SupportedOSPlatform("windows")]
-#endif
 public class TextToImageResult : ActionResult
 {
     private readonly TextToImageOptions _options;
@@ -29,9 +26,6 @@ public class TextToImageResult : ActionResult
     /// <summary>
     /// Executes the result operation of the action method asynchronously.
     /// </summary>
-#if !NETCORE3_1
-    [SupportedOSPlatform("windows")]
-#endif
     public override Task ExecuteResultAsync(ActionContext context)
     {
         if (context == null)
@@ -41,9 +35,6 @@ public class TextToImageResult : ActionResult
         return writeToResponseAsync(context);
     }
 
-#if !NETCORE3_1
-    [SupportedOSPlatform("windows")]
-#endif
     private Task writeToResponseAsync(ActionContext context)
     {
         var response = context.HttpContext.Response;

@@ -1,4 +1,4 @@
-using System.Drawing;
+using SixLabors.ImageSharp;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DNTCommon.Web.Core.TestWebApp.Controllers;

@@ -1,4 +1,8 @@
-using System.Drawing;
+using SixLabors.Fonts;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing.Processing;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace DNTCommon.Web.Core;
 
@@ -10,7 +14,12 @@ public class TextToImageOptions
     /// <summary>
     /// Its default value is `verdana`.
     /// </summary>
-    public string FontName { set; get; } = "verdana";
+    public string FontName { set; get; } = "verdana";	
+
+    /// <summary>
+    /// You can specify an optional custom local font here. In this case, the `FontName` will be ignored.
+    /// </summary>	
+	public string? CustomFontPath { set; get; }
 
     /// <summary>
     /// Its default value is `13`.

@@ -1,10 +1,12 @@
 using System;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
-using System.Drawing.Text;
+using SixLabors.Fonts;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing.Processing;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.PixelFormats;
 using System.IO;
 using System.Runtime.Versioning;
+using SixLabors.ImageSharp.Formats.Png;
 
 namespace DNTCommon.Web.Core;
 
@@ -13,117 +15,71 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public static class TextToImageExtensions
 {
-    /// <summary>
-    /// Measures the size of the text according to the given font.
-    /// </summary>
-#if !NETCORE3_1
-    [SupportedOSPlatform("windows")]
-#endif
-    public static SizeF MeasureString(this string text, Font font)
-    {
-        using var bmp = new Bitmap(1, 1);
-        using var graphics = Graphics.FromImage(bmp);
-        return graphics.MeasureString(text, font);
-    }
-
+	private const int Margin = 5;
+	
     /// <summary>
     /// Draws a text on a bitmap and then returns it as a png byte array.
     /// </summary>
-#if !NETCORE3_1
-    [SupportedOSPlatform("windows")]
-#endif
     public static byte[] TextToImage(this string text, TextToImageOptions options)
     {
         if (options == null)
         {
             throw new ArgumentNullException(nameof(options));
         }
-
-        using var family = new FontFamily(options.FontName);
-        using var font = new Font(family, options.FontSize, options.FontStyle, GraphicsUnit.Pixel);
-        var textSize = MeasureString(text, font);
-        int width = ((int)textSize.Width) + 5;
-        int height = ((int)textSize.Height) + 3;
-
-        var rectangle = new RectangleF(0, 0, width, height);
-        using var pic = new Bitmap(width, height);
-        using var graphics = Graphics.FromImage(pic);
-        graphics.SmoothingMode = SmoothingMode.AntiAlias;
-        graphics.SmoothingMode = SmoothingMode.HighQuality;
-        graphics.CompositingQuality = CompositingQuality.HighQuality;
-        graphics.InterpolationMode = InterpolationMode.High;
-        if (options.AntiAlias) graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
-
-        using var fgBrush = new SolidBrush(options.FontColor);
-        using var bgBrush = new SolidBrush(options.BgColor);
-        if (options.Rectangle)
-        {
-            graphics.FillRectangle(bgBrush, rectangle);
-        }
-        else
-        {
-            using var brush = new SolidBrush(Color.White);
-            graphics.FillRectangle(brush, rectangle);
-            graphics.FillEllipse(bgBrush, rectangle);
-        }
-
-        using var pen = new Pen(Color.LightGray);
-        graphics.DrawRectangle(pen, new Rectangle(0, 0, width - 1, height - 1));
-        drawString(text, options, font, rectangle, graphics, fgBrush);
-
-        using var memory = new MemoryStream();
-        pic.Save(memory, ImageFormat.Png);
-        return memory.ToArray();
+		
+		var font = getFont(options);
+		var (width, height) = getImageSize(text, font);
+		using (var image = new Image<Rgba32>(width, height))
+		{
+			image.Mutate(pc =>
+			{
+				pc.SetGraphicsOptions(g => g.Antialias = options.AntiAlias);
+				drawText(pc, text, options.FontColor, options.BgColor, font);	
+				drawRectangle(pc, width, height, options);
+			});
+			return saveAsPng(image);
+		}	
     }
+	
+	private static void drawText(IImageProcessingContext pc, string text, Color fColor, Color bColor, Font font)
+	{
+		pc.Fill(bColor);
+		pc.DrawText(text, font, fColor, new PointF(Margin, 0));
+	}	
+	
+	private static void drawRectangle(IImageProcessingContext pc, int width, int height, TextToImageOptions options)
+	{
+		if (options.Rectangle)
+		{
+			var rectangle = new Rectangle(0, 0, width - 1, height - 1);				
+			pc.Draw(options.ShadowColor, 1, rectangle);
+		}		
+	}	
+	
+	private static byte[] saveAsPng(Image<Rgba32> image)
+	{
+		using var stream = new MemoryStream();
+		image.Save(stream, new PngEncoder());
+		return stream.ToArray();
+	}	
 
-#if !NETCORE3_1
-    [SupportedOSPlatform("windows")]
-#endif
-    private static void drawString(
-                string text,
-                TextToImageOptions options,
-                Font font,
-                RectangleF rectangle,
-                Graphics graphics,
-                SolidBrush fgBrush)
-    {
-        using var format = new StringFormat
-        {
-            FormatFlags = StringFormatFlags.NoWrap,
-            Alignment = StringAlignment.Center
-        };
+	private static (int Width, int Height) getImageSize(string message, Font font)
+	{
+		var captchaSize = TextMeasurer.Measure(message, new TextOptions(font));
+		var width = (int)captchaSize.Width + (2 * Margin);
+		var height = (int)captchaSize.Height + Margin;
+		return (width, height);
+	}
+	
+	private static Font getFont(TextToImageOptions options)
+	{
+		if (string.IsNullOrWhiteSpace(options.CustomFontPath))
+		{
+			var fontFamily = SystemFonts.Get(options.FontName, CultureInfo.InvariantCulture);
+			return new Font(fontFamily, options.FontSize);
+		}
 
-        if (options.DropShadowLevel > 0)
-        {
-            using var brush = new SolidBrush(options.ShadowColor);
-            switch (options.DropShadowLevel)
-            {
-                case 1:
-                    rectangle.Offset(-1, -1);
-                    graphics.DrawString(text, font, brush, rectangle, format);
-                    rectangle.Offset(+1, +1);
-                    break;
-
-                case 2:
-                    rectangle.Offset(+1, -1);
-                    graphics.DrawString(text, font, brush, rectangle, format);
-                    rectangle.Offset(-1, +1);
-                    break;
-
-                case 3:
-                    rectangle.Offset(-1, +1);
-                    graphics.DrawString(text, font, brush, rectangle, format);
-                    rectangle.Offset(+1, -1);
-                    break;
-
-                case 4:
-                    rectangle.Offset(+1, +1);
-                    graphics.DrawString(text, font, brush, rectangle, format);
-                    rectangle.Offset(-1, -1);
-                    break;
-            }
-        }
-
-        graphics.DrawString(text, font, fgBrush, rectangle, format);
-    }
+		var fontCollection = new FontCollection();
+		return fontCollection.Add(options.CustomFontPath, CultureInfo.InvariantCulture).CreateFont(options.FontSize);
+	}	
 }

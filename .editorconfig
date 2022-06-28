@@ -7,6 +7,8 @@ roslynator_object_creation_type_style = implicit_when_type_is_obvious
 
 dotnet_diagnostic.SYSLIB0021.severity = suggestion
 
+dotnet_diagnostic.NU5104.severity = suggestion
+
 dotnet_diagnostic.CA5350.severity = suggestion
 
 dotnet_diagnostic.CA2227.severity = suggestion
