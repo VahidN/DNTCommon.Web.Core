@@ -6,14 +6,14 @@ public class AntiXssController : Controller
 {
     private readonly IAntiXssService _antiXssService;
 
-    public AntiXssController(IAntiXssService antiXssService)
-    {
-        _antiXssService = antiXssService;
-    }
+    public AntiXssController(IAntiXssService antiXssService) // Or use can use [ApplyAntiXssFilter]
+        => _antiXssService = antiXssService;
 
     public IActionResult Index()
     {
-        ViewBag.Text = _antiXssService.GetSanitizedHtml("<A HREF=\"http://www.codeplex.com?url=¼script¾alert(¢XSS¢)¼/script¾\">XSS</A>");
+        ViewBag.Text =
+            _antiXssService
+                .GetSanitizedHtml("<A HREF=\"http://www.codeplex.com?url=¼script¾alert(¢XSS¢)¼/script¾\">XSS</A>");
         return View();
     }
 }

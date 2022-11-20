@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Description>DNTCommon.Web.Core provides common scenarios' solutions for ASP.NET Core applications.</Description>
-        <VersionPrefix>3.4.0</VersionPrefix>
+        <VersionPrefix>3.4.1</VersionPrefix>
         <Authors>Vahid Nasiri</Authors>
-        <TargetFrameworks>net6.0;net5.0;netcoreapp3.1</TargetFrameworks>
+        <TargetFrameworks>net7.0;net6.0;net5.0;netcoreapp3.1</TargetFrameworks>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <AssemblyName>DNTCommon.Web.Core</AssemblyName>
         <PackageId>DNTCommon.Web.Core</PackageId>
@@ -54,11 +54,11 @@
 		<Using Include="System.Net.Http.Headers"/>
 	</ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Meziantou.Analyzer" Version="1.0.702">
+        <PackageReference Include="Meziantou.Analyzer" Version="1.0.750">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.2.32">
+        <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.4.27">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
@@ -70,29 +70,30 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="SonarAnalyzer.CSharp" Version="8.40.0.48530">
+        <PackageReference Include="SonarAnalyzer.CSharp" Version="8.48.0.56517">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
         <FrameworkReference Include="Microsoft.AspNetCore.App"/>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>        
         <PackageReference Include="Microsoft.SyndicationFeed.ReaderWriter" Version="1.0.2"/>
-        <PackageReference Include="DNTPersianUtils.Core" Version="5.4.4"/>
-        <PackageReference Include="MailKit" Version="3.3.0"/>
-        <PackageReference Include="HtmlAgilityPack" Version="1.11.43"/>
+        <PackageReference Include="DNTPersianUtils.Core" Version="5.4.5"/>
+        <PackageReference Include="MailKit" Version="3.4.2"/>
+        <PackageReference Include="HtmlAgilityPack" Version="1.11.46"/>
         <PackageReference Include="IPAddressRange" Version="4.2.0"/>
-		<PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta14" />
-        <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="6.0.6"/>
-        <PackageReference Include="Ben.Demystifier" Version="0.4.1"/>
+		<PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta15" />
+        <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="7.0.0"/>
+        <PackageReference Include="Ben.Demystifier" Version="0.4.1"/>      
     </ItemGroup>
-
     <PropertyGroup Condition="('$(TargetFramework)' == 'netcoreapp3.1')">
         <DefineConstants>NETCORE3_1</DefineConstants>
     </PropertyGroup>
-
     <PropertyGroup Condition="('$(TargetFramework)' == 'net6.0')">
         <DefineConstants>NET_6</DefineConstants>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(TargetFramework)' == 'net7.0')">
+        <DefineConstants>NET_7</DefineConstants>
     </PropertyGroup>
 </Project>

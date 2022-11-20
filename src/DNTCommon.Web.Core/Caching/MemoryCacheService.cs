@@ -22,7 +22,7 @@ public class MemoryCacheService : ICacheService
     /// <summary>
     /// Gets the key's value from the cache.
     /// </summary>
-    public T GetValue<T>(string cacheKey)
+    public T? GetValue<T>(string cacheKey)
     {
         return _memoryCache.Get<T>(cacheKey);
     }
@@ -30,7 +30,7 @@ public class MemoryCacheService : ICacheService
     /// <summary>
     /// Tries to get the key's value from the cache.
     /// </summary>
-    public bool TryGetValue<T>(string cacheKey, out T result)
+    public bool TryGetValue<T>(string cacheKey, out T? result)
     {
         return _memoryCache.TryGetValue(cacheKey, out result);
     }

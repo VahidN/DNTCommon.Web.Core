@@ -326,7 +326,7 @@ public class AntiDosFirewall : IAntiDosFirewall
     {
         var key = GetCacheKey(requestInfo);
         var expiresAt = GetCacheExpiresAt();
-        if (!_cacheService.TryGetValue<ThrottleInfo>(key, out var clientThrottleInfo))
+        if (!_cacheService.TryGetValue<ThrottleInfo>(key, out var clientThrottleInfo) || clientThrottleInfo is null)
         {
             clientThrottleInfo = new ThrottleInfo { RequestsCount = 1, ExpiresAt = expiresAt };
             _cacheService.Add(key, clientThrottleInfo, expiresAt, size: 1);

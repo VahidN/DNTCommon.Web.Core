@@ -21,12 +21,12 @@ public interface ICacheService
     /// <summary>
     /// Gets the key's value from the cache.
     /// </summary>
-    T GetValue<T>(string cacheKey);
+    T? GetValue<T>(string cacheKey);
 
     /// <summary>
     /// Tries to get the key's value from the cache.
     /// </summary>
-    bool TryGetValue<T>(string cacheKey, out T result);
+    bool TryGetValue<T>(string cacheKey, out T? result);
 
     /// <summary>
     /// Adds a key-value to the cache.

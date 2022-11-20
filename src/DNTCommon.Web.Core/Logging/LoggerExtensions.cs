@@ -1,4 +1,4 @@
-#if NET_6
+#if NET_6 || NET_7
 using System;
 using Microsoft.Extensions.Logging;
 

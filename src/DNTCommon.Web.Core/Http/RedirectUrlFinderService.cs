@@ -62,7 +62,8 @@ public class RedirectUrlFinderService : IRedirectUrlFinderService
 
         try
         {
-            if (_cacheService.TryGetValue($"{CachePrefix}{siteUri}", out string outUrl))
+            if (_cacheService.TryGetValue($"{CachePrefix}{siteUri}", out string? outUrl) &&
+                outUrl is not null)
             {
                 return new Uri(outUrl);
             }
