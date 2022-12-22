@@ -1,23 +1,18 @@
-using SixLabors.ImageSharp;
 using Microsoft.AspNetCore.Mvc;
+using SkiaSharp;
 
 namespace DNTCommon.Web.Core.TestWebApp.Controllers;
 
 public class TextToImageController : Controller
 {
-    public IActionResult Index()
-    {
-        return View();
-    }
+    public IActionResult Index() => View();
 
-    public IActionResult EmailToImage()
-    {
-        return new TextToImageResult("name@site.com",
-                                        new TextToImageOptions
-                                        {
-                                            FontName = "Tahoma",
-                                            FontSize = 24,
-                                            FontColor = Color.Blue
-                                        });
-    }
+    public IActionResult EmailToImage() =>
+        new TextToImageResult("name@site.com",
+                              new TextToImageOptions
+                              {
+                                  FontName = "Tahoma",
+                                  FontSize = 24,
+                                  FontColor = SKColors.Blue,
+                              });
 }

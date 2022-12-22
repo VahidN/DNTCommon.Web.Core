@@ -1,93 +1,65 @@
-using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-/// Serialization Provider
+///     Serialization Provider
 /// </summary>
 public class SerializationProvider : ISerializationProvider
 {
     /// <summary>
-    /// Serialize the given data to an string.
+    ///     Serialize the given data to an string.
     /// </summary>
-    public string Serialize(object data, JsonSerializerOptions options)
-    {
-        return JsonSerializer.Serialize(data, options);
-    }
+    public string Serialize(object data, JsonSerializerOptions options) => JsonSerializer.Serialize(data, options);
 
     /// <summary>
-    /// Serialize the given data to an string.
+    ///     Serialize the given data to an string.
     /// </summary>
-    public string Serialize(object data)
-    {
-        return JsonSerializer.Serialize(data,
-        new JsonSerializerOptions
-        {
-            WriteIndented = false,
-#if !NETCORE3_1
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-#else
-            IgnoreNullValues = true
-#endif
-        });
-    }
+    public string Serialize(object data) =>
+        JsonSerializer.Serialize(data,
+                                 new JsonSerializerOptions
+                                 {
+                                     WriteIndented = false,
+                                     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                                 });
 
     /// <summary>
-    /// Deserialize the given string to an object.
+    ///     Deserialize the given string to an object.
     /// </summary>
-    public T? Deserialize<T>(string data)
-    {
-        return JsonSerializer.Deserialize<T>(data);
-    }
+    public T? Deserialize<T>(string data) => JsonSerializer.Deserialize<T>(data);
 
     /// <summary>
-    /// Deserialize the given string to an object.
+    ///     Deserialize the given string to an object.
     /// </summary>
-    public T? Deserialize<T>(string data, JsonSerializerOptions options)
-    {
-        return JsonSerializer.Deserialize<T>(data, options);
-    }
+    public T? Deserialize<T>(string data, JsonSerializerOptions options) =>
+        JsonSerializer.Deserialize<T>(data, options);
 
     /// <summary>
-    /// Serialize the given data to a byte array.
+    ///     Serialize the given data to a byte array.
     /// </summary>
-    public byte[] SerializeToUtf8Bytes(object data, JsonSerializerOptions options)
-    {
-        return JsonSerializer.SerializeToUtf8Bytes(data, options);
-    }
+    public byte[] SerializeToUtf8Bytes(object data, JsonSerializerOptions options) =>
+        JsonSerializer.SerializeToUtf8Bytes(data, options);
 
     /// <summary>
-    /// Serialize the given data to a byte array.
+    ///     Serialize the given data to a byte array.
     /// </summary>
-    public byte[] SerializeToUtf8Bytes(object data)
-    {
-        return JsonSerializer.SerializeToUtf8Bytes(data,
-        new JsonSerializerOptions
-        {
-            WriteIndented = false,
-#if !NETCORE3_1
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-#else
-            IgnoreNullValues = true
-#endif
-        });
-    }
+    public byte[] SerializeToUtf8Bytes(object data) =>
+        JsonSerializer.SerializeToUtf8Bytes(data,
+                                            new JsonSerializerOptions
+                                            {
+                                                WriteIndented = false,
+                                                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                                            });
 
     /// <summary>
-    /// Deserialize the given byte array to an object.
+    ///     Deserialize the given byte array to an object.
     /// </summary>
-    public T? DeserializeFromUtf8Bytes<T>(byte[] data)
-    {
-        return JsonSerializer.Deserialize<T>(new ReadOnlySpan<byte>(data));
-    }
+    public T? DeserializeFromUtf8Bytes<T>(byte[] data) => JsonSerializer.Deserialize<T>(new ReadOnlySpan<byte>(data));
 
     /// <summary>
-    /// Deserialize the given byte array to an object.
+    ///     Deserialize the given byte array to an object.
     /// </summary>
-    public T? DeserializeFromUtf8Bytes<T>(byte[] data, JsonSerializerOptions options)
-    {
-        return JsonSerializer.Deserialize<T>(new ReadOnlySpan<byte>(data), options);
-    }
+    public T? DeserializeFromUtf8Bytes<T>(byte[] data, JsonSerializerOptions options) =>
+        JsonSerializer.Deserialize<T>(new ReadOnlySpan<byte>(data), options);
 }

@@ -12,6 +12,16 @@ public static class FilterAttributesExtensions
     /// </summary>
     public static void CleanupActionStringValues(this ActionExecutingContext context, Func<string, string> action)
     {
+        if (context == null)
+        {
+            throw new ArgumentNullException(nameof(context));
+        }
+
+        if (action == null)
+        {
+            throw new ArgumentNullException(nameof(action));
+        }
+
         foreach (var (aKey, aValue) in context.ActionArguments)
         {
             if (aValue is null)

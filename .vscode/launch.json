@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/src/DNTCommon.Web.Core.TestWebApp/bin/Debug/net5.0/DNTCommon.Web.Core.TestWebApp.dll",
+            "program": "${workspaceFolder}/src/DNTCommon.Web.Core.TestWebApp/bin/Debug/net7.0/DNTCommon.Web.Core.TestWebApp.dll",
             "args": [],
             "cwd": "${workspaceFolder}/src/DNTCommon.Web.Core.TestWebApp",
             "stopAtEntry": false,

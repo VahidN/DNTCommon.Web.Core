@@ -1,24 +1,21 @@
-using System;
-using SixLabors.Fonts;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Drawing.Processing;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.PixelFormats;
-using System.IO;
-using System.Runtime.Versioning;
-using SixLabors.ImageSharp.Formats.Png;
+using System.Collections.Concurrent;
+using HarfBuzzSharp;
+using SkiaSharp;
+using SkiaSharp.HarfBuzz;
+using Buffer = HarfBuzzSharp.Buffer;
 
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-/// Text to image extensions
+///     Text to image extensions
 /// </summary>
 public static class TextToImageExtensions
 {
-	private const int Margin = 5;
-	
+    private static readonly ConcurrentDictionary<string, SKTypeface> FontsTypeface =
+        new(StringComparer.OrdinalIgnoreCase);
+
     /// <summary>
-    /// Draws a text on a bitmap and then returns it as a png byte array.
+    ///     Draws a text on a bitmap and then returns it as a png byte array.
     /// </summary>
     public static byte[] TextToImage(this string text, TextToImageOptions options)
     {
@@ -26,60 +23,129 @@ public static class TextToImageExtensions
         {
             throw new ArgumentNullException(nameof(options));
         }
-		
-		var font = getFont(options);
-		var (width, height) = getImageSize(text, font);
-		using (var image = new Image<Rgba32>(width, height))
-		{
-			image.Mutate(pc =>
-			{
-				pc.SetGraphicsOptions(g => g.Antialias = options.AntiAlias);
-				drawText(pc, text, options.FontColor, options.BgColor, font);	
-				drawRectangle(pc, width, height, options);
-			});
-			return saveAsPng(image);
-		}	
+
+        var fontType = GetFont(options);
+        using var shaper = new SKShaper(fontType);
+        using var textPaint = new SKPaint
+                              {
+                                  IsAntialias = options.AntiAlias,
+                                  FilterQuality = SKFilterQuality.High,
+                                  TextSize = options.FontSize,
+                                  Color = options.FontColor,
+                                  TextAlign = SKTextAlign.Left,
+                                  Typeface = fontType,
+                                  SubpixelText = true,
+                              };
+
+        var textBounds = GetTextBounds(text, textPaint);
+        var width = GetTextWidth(text, options, textPaint);
+
+        var info = new SKImageInfo((int)width + 2 * options.TextMargin,
+                                   (int)textBounds.Height + 2 * options.TextMargin);
+        using var surface = SKSurface.Create(info);
+        var canvas = surface.Canvas;
+        canvas.Clear(options.BgColor);
+
+        DrawRectangle(options, canvas, width, textBounds.Height);
+        DrawText(text, options, canvas, shaper, textPaint, textBounds);
+        return ToPng(surface);
     }
-	
-	private static void drawText(IImageProcessingContext pc, string text, Color fColor, Color bColor, Font font)
-	{
-		pc.Fill(bColor);
-		pc.DrawText(text, font, fColor, new PointF(Margin, 0));
-	}	
-	
-	private static void drawRectangle(IImageProcessingContext pc, int width, int height, TextToImageOptions options)
-	{
-		if (options.Rectangle)
-		{
-			var rectangle = new Rectangle(0, 0, width - 1, height - 1);				
-			pc.Draw(options.ShadowColor, 1, rectangle);
-		}		
-	}	
-	
-	private static byte[] saveAsPng(Image<Rgba32> image)
-	{
-		using var stream = new MemoryStream();
-		image.Save(stream, new PngEncoder());
-		return stream.ToArray();
-	}	
 
-	private static (int Width, int Height) getImageSize(string message, Font font)
-	{
-		var captchaSize = TextMeasurer.Measure(message, new TextOptions(font));
-		var width = (int)captchaSize.Width + (2 * Margin);
-		var height = (int)captchaSize.Height + Margin;
-		return (width, height);
-	}
-	
-	private static Font getFont(TextToImageOptions options)
-	{
-		if (string.IsNullOrWhiteSpace(options.CustomFontPath))
-		{
-			var fontFamily = SystemFonts.Get(options.FontName, CultureInfo.InvariantCulture);
-			return new Font(fontFamily, options.FontSize);
-		}
+    private static float GetTextWidth(string text, TextToImageOptions options, SKPaint textPaint)
+    {
+        using var blob = textPaint.Typeface.OpenStream().ToHarfBuzzBlob();
+        using var hbFace = new Face(blob, 0);
+        using var hbFont = new Font(hbFace);
+        using var buffer = new Buffer();
+        buffer.AddUtf16(text);
+        buffer.GuessSegmentProperties();
+        hbFont.Shape(buffer);
 
-		var fontCollection = new FontCollection();
-		return fontCollection.Add(options.CustomFontPath, CultureInfo.InvariantCulture).CreateFont(options.FontSize);
-	}	
+        hbFont.GetScale(out var xScale, out _);
+        var scale = options.FontSize / (float)xScale;
+        var width = buffer.GlyphPositions.Sum(position => position.XAdvance) * scale;
+        return width;
+    }
+
+    private static SKRect GetTextBounds(string text, SKPaint textPaint)
+    {
+        var textBounds = new SKRect();
+        textPaint.MeasureText(text, ref textBounds);
+        return textBounds;
+    }
+
+    private static void DrawText(string text, TextToImageOptions options, SKCanvas canvas, SKShaper shaper,
+                                 SKPaint textPaint, SKRect textBounds)
+    {
+        var x = options.TextMargin + textBounds.Left;
+        var y = Math.Abs(textBounds.Top) + options.TextMargin;
+
+        canvas.DrawShapedText(shaper, text, x, y, textPaint);
+
+        if (options.DropShadowLevel <= 0)
+        {
+            return;
+        }
+
+        textPaint.Color = options.ShadowColor;
+
+        switch (options.DropShadowLevel)
+        {
+            case 1:
+                canvas.DrawShapedText(shaper, text, x - 1, y - 1, textPaint);
+                break;
+
+            case 2:
+                canvas.DrawShapedText(shaper, text, x + 1, y - 1, textPaint);
+                break;
+
+            case 3:
+                canvas.DrawShapedText(shaper, text, x - 1, y + 1, textPaint);
+                break;
+
+            case 4:
+                canvas.DrawShapedText(shaper, text, x + 1, y + 1, textPaint);
+                break;
+        }
+    }
+
+    private static void DrawRectangle(TextToImageOptions options, SKCanvas canvas, float width, float height)
+    {
+        if (options.Rectangle)
+        {
+            using var skPaint = new SKPaint
+                                {
+                                    Color = SKColors.LightGray,
+                                    IsStroke = true,
+                                    StrokeWidth = 1f,
+                                };
+            canvas.DrawRect(new SKRect(0, 0, width + 2 * options.TextMargin - 1,
+                                       height + 2 * options.TextMargin - 1), skPaint);
+        }
+    }
+
+    private static SKTypeface GetFont(TextToImageOptions options)
+    {
+        if (string.IsNullOrWhiteSpace(options.CustomFontPath))
+        {
+            return FontsTypeface.GetOrAdd(options.FontName,
+                                          _ => SKTypeface.FromFamilyName(options.FontName, options.FontStyle));
+        }
+
+        return FontsTypeface.GetOrAdd(options.CustomFontPath,
+                                      _ =>
+                                      {
+                                          using var embeddedFont = File.OpenRead(options.CustomFontPath);
+                                          return SKTypeface.FromStream(File.OpenRead(options.CustomFontPath));
+                                      });
+    }
+
+    private static byte[] ToPng(this SKSurface surface)
+    {
+        using var image = surface.Snapshot();
+        using var data = image.Encode(SKEncodedImageFormat.Png, 100);
+        using var memory = new MemoryStream();
+        data.SaveTo(memory);
+        return memory.ToArray();
+    }
 }
