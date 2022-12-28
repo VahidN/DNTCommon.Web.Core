@@ -18,6 +18,26 @@ PM> Install-Package DNTCommon.Web.Core
 
 You can also view the [package page](http://www.nuget.org/packages/DNTCommon.Web.Core/) on NuGet.
 
+
+## Linux (and containers) support
+
+The `SkiaSharp` library needs extra dependencies to work on Linux and containers. Please install the following NuGet packages:
+
+```
+PM> Install-Package SkiaSharp.NativeAssets.Linux.NoDependencies
+PM> Install-Package HarfBuzzSharp.NativeAssets.Linux
+```
+
+You also need to modify your `.csproj` file to include some MSBuild directives that ensure the required files are in a good place. These extra steps are normally not required but seems to be some issues on how .NET loads them.
+
+```xml
+<Target Name="CopyFilesAfterPublish" AfterTargets="AfterPublish">
+    <Copy SourceFiles="$(TargetDir)runtimes/linux-x64/native/libSkiaSharp.so" DestinationFolder="$([System.IO.Path]::GetFullPath('$(PublishDir)'))/bin/" />
+    <Copy SourceFiles="$(TargetDir)runtimes/linux-x64/native/libHarfBuzzSharp.so" DestinationFolder="$([System.IO.Path]::GetFullPath('$(PublishDir)'))/bin/" />    
+</Target>
+```
+
+
 ## Usage
 
 After installing the DNTCommon.Web.Core package, to register its default providers, call `services.AddDNTCommonWeb();` method in your [Startup class](/src/DNTCommon.Web.Core.TestWebApp/Startup.cs).
