@@ -1,11 +1,4 @@
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -13,19 +6,19 @@ using Microsoft.Extensions.Logging;
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-/// BackgroundQueue Service
-/// A .NET Core replacement for the old HostingEnvironment.QueueBackgroundWorkItem.
+///     BackgroundQueue Service
+///     A .NET Core replacement for the old HostingEnvironment.QueueBackgroundWorkItem.
 /// </summary>
 public class BackgroundQueueService : BackgroundService, IBackgroundQueueService
 {
+    private readonly ConcurrentQueue<Func<CancellationToken, IServiceProvider, Task>> _asyncTasksQueue = new();
+    private readonly IJobsRunnerTimer _jobsRunnerTimer;
     private readonly ILogger<BackgroundQueueService> _logger;
     private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly IJobsRunnerTimer _jobsRunnerTimer;
-    private readonly ConcurrentQueue<Func<CancellationToken, IServiceProvider, Task>> _asyncTasksQueue = new();
     private readonly ConcurrentQueue<Action<CancellationToken, IServiceProvider>> _syncTasksQueue = new();
 
     /// <summary>
-    /// BackgroundQueue Service
+    ///     BackgroundQueue Service
     /// </summary>
     public BackgroundQueueService(
         ILogger<BackgroundQueueService> logger,
@@ -38,63 +31,7 @@ public class BackgroundQueueService : BackgroundService, IBackgroundQueueService
     }
 
     /// <summary>
-    /// This method is called when the IHostedService starts.
-    /// </summary>
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        _logger.LogDebug("Background Queue Service is starting.");
-
-        if (_jobsRunnerTimer.IsRunning)
-        {
-            return Task.CompletedTask;
-        }
-
-        _jobsRunnerTimer.OnThreadPoolTimerCallback = () =>
-        {
-            if (stoppingToken.IsCancellationRequested)
-            {
-                return;
-            }
-
-            var tasks = new List<Task>();
-
-            while (!_asyncTasksQueue.IsEmpty)
-            {
-                if (_asyncTasksQueue.TryDequeue(out var asyncWorkItem))
-                {
-                    tasks.Add(runTaskAsync(asyncWorkItem, stoppingToken));
-                }
-            }
-
-            while (!_syncTasksQueue.IsEmpty)
-            {
-                if (_syncTasksQueue.TryDequeue(out var workItem))
-                {
-                    tasks.Add(Task.Run(() => runTaskSync(workItem, stoppingToken)));
-                }
-            }
-
-            if (tasks.Any())
-            {
-                Task.WaitAll(tasks.ToArray());
-            }
-        };
-        _jobsRunnerTimer.StartJobs();
-
-        return Task.CompletedTask;
-    }
-
-    /// <summary>
-    /// Triggered when the application host is performing a graceful shutdown.
-    /// </summary>
-    public override Task StopAsync(CancellationToken cancellationToken)
-    {
-        _jobsRunnerTimer.StopJobs();
-        return Task.CompletedTask;
-    }
-
-    /// <summary>
-    /// Queues a background Task
+    ///     Queues a background Task
     /// </summary>
     public void QueueBackgroundWorkItem(Func<CancellationToken, IServiceProvider, Task> workItem)
     {
@@ -107,7 +44,7 @@ public class BackgroundQueueService : BackgroundService, IBackgroundQueueService
     }
 
     /// <summary>
-    /// Queues a background Task
+    ///     Queues a background Task
     /// </summary>
     public void QueueBackgroundWorkItem(Action<CancellationToken, IServiceProvider> workItem)
     {
@@ -117,6 +54,63 @@ public class BackgroundQueueService : BackgroundService, IBackgroundQueueService
         }
 
         _syncTasksQueue.Enqueue(workItem);
+    }
+
+    /// <summary>
+    ///     This method is called when the IHostedService starts.
+    /// </summary>
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        _logger.LogDebug("Background Queue Service is starting.");
+
+        if (_jobsRunnerTimer.IsRunning)
+        {
+            return Task.CompletedTask;
+        }
+
+        _jobsRunnerTimer.OnThreadPoolTimerCallback = () =>
+                                                     {
+                                                         if (stoppingToken.IsCancellationRequested)
+                                                         {
+                                                             return;
+                                                         }
+
+                                                         var tasks = new List<Task>();
+
+                                                         while (!_asyncTasksQueue.IsEmpty)
+                                                         {
+                                                             if (_asyncTasksQueue.TryDequeue(out var asyncWorkItem))
+                                                             {
+                                                                 tasks.Add(runTaskAsync(asyncWorkItem, stoppingToken));
+                                                             }
+                                                         }
+
+                                                         while (!_syncTasksQueue.IsEmpty)
+                                                         {
+                                                             if (_syncTasksQueue.TryDequeue(out var workItem))
+                                                             {
+                                                                 tasks.Add(Task.Run(() => runTaskSync(workItem,
+                                                                            stoppingToken)));
+                                                             }
+                                                         }
+
+                                                         if (tasks.Count != 0)
+                                                         {
+                                                             Task.WaitAll(tasks.ToArray());
+                                                         }
+                                                     };
+        _jobsRunnerTimer.StartJobs();
+
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    ///     Triggered when the application host is performing a graceful shutdown.
+    /// </summary>
+    public override Task StopAsync(CancellationToken cancellationToken)
+    {
+        _jobsRunnerTimer.StopJobs();
+        return Task.CompletedTask;
     }
 
     private async Task runTaskAsync(Func<CancellationToken, IServiceProvider, Task> workItem, CancellationToken ct)

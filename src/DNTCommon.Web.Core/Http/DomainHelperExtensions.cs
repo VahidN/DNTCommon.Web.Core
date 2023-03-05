@@ -1,22 +1,22 @@
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
 using System.Text;
-using System.Threading;
 
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-/// Domain Helper Extensions
+///     Domain Helper Extensions
 /// </summary>
 public static class DomainHelperExtensions
 {
     private static readonly Lazy<List<string>> _tldsBuilder =
-         new Lazy<List<string>>(defaultTlds, LazyThreadSafetyMode.ExecutionAndPublication);
+        new(defaultTlds, LazyThreadSafetyMode.ExecutionAndPublication);
 
     /// <summary>
-    /// Determines whether uri1 and uri2 have the same domain.
+    ///     Tld Patterns
+    /// </summary>
+    public static IReadOnlyCollection<string> Tlds => _tldsBuilder.Value;
+
+    /// <summary>
+    ///     Determines whether uri1 and uri2 have the same domain.
     /// </summary>
     public static bool HaveTheSameDomain(this Uri uri1, Uri uri2)
     {
@@ -26,31 +26,23 @@ public static class DomainHelperExtensions
     }
 
     /// <summary>
-    /// Determines whether uri1 and uri2 have the same domain.
+    ///     Determines whether uri1 and uri2 have the same domain.
     /// </summary>
-    public static bool HaveTheSameDomain(this string uri1, string uri2)
-    {
-        return HaveTheSameDomain(new Uri(uri1), new Uri(uri2));
-    }
+    public static bool HaveTheSameDomain(this string uri1, string uri2) =>
+        HaveTheSameDomain(new Uri(uri1), new Uri(uri2));
 
     /// <summary>
-    /// Determines whether the url has no extension.
+    ///     Determines whether the url has no extension.
     /// </summary>
-    public static bool IsMvcPage(this Uri url)
-    {
-        return string.IsNullOrWhiteSpace(url.GetUriExtension());
-    }
+    public static bool IsMvcPage(this Uri url) => string.IsNullOrWhiteSpace(url.GetUriExtension());
 
     /// <summary>
-    /// Determines whether the url has no extension.
+    ///     Determines whether the url has no extension.
     /// </summary>
-    public static bool IsMvcPage(this string url)
-    {
-        return IsMvcPage(new Uri(url));
-    }
+    public static bool IsMvcPage(this string url) => IsMvcPage(new Uri(url));
 
     /// <summary>
-    /// Returns the extension of the uri.
+    ///     Returns the extension of the uri.
     /// </summary>
     public static string GetUriExtension(this Uri uri, bool throwOnException = false)
     {
@@ -75,15 +67,12 @@ public static class DomainHelperExtensions
     }
 
     /// <summary>
-    /// Returns the extension of the uri.
+    ///     Returns the extension of the uri.
     /// </summary>
-    public static string GetUriExtension(this string uri)
-    {
-        return GetUriExtension(new Uri(uri));
-    }
+    public static string GetUriExtension(this string uri) => GetUriExtension(new Uri(uri));
 
     /// <summary>
-    /// Returns the SubDomain of the uri.
+    ///     Returns the SubDomain of the uri.
     /// </summary>
     public static string? GetSubDomain(this Uri url)
     {
@@ -93,11 +82,15 @@ public static class DomainHelperExtensions
         }
 
         if (url.HostNameType != UriHostNameType.Dns)
+        {
             return null;
+        }
 
         var host = url.Host.TrimEnd('.');
         if (host.Split('.').Length <= 2)
+        {
             return null;
+        }
 
         var lastIndex = host.LastIndexOf(".", StringComparison.Ordinal);
         var index = host.LastIndexOf(".", lastIndex - 1, StringComparison.Ordinal);
@@ -105,7 +98,7 @@ public static class DomainHelperExtensions
     }
 
     /// <summary>
-    /// Returns the SubDomain of the uri.
+    ///     Returns the SubDomain of the uri.
     /// </summary>
     public static string? GetSubDomain(this string url)
     {
@@ -118,44 +111,43 @@ public static class DomainHelperExtensions
     }
 
     /// <summary>
-    /// Returns the host part without its SubDomain.
+    ///     Returns the host part without its SubDomain.
     /// </summary>
     public static string GetHostWithoutSubDomain(this Uri url)
     {
         var subdomain = GetSubDomain(url);
-        var host = url.Host.TrimEnd(new[] { '.' });
+        var host = url.Host.TrimEnd('.');
         if (subdomain != null)
         {
             host = host.Replace(
-                    string.Format(CultureInfo.InvariantCulture, "{0}.", subdomain),
-                    string.Empty,
-                    StringComparison.OrdinalIgnoreCase);
+                                string.Format(CultureInfo.InvariantCulture, "{0}.", subdomain),
+                                string.Empty,
+                                StringComparison.OrdinalIgnoreCase);
         }
+
         return host;
     }
 
     /// <summary>
-    /// Returns the host part without its SubDomain.
+    ///     Returns the host part without its SubDomain.
     /// </summary>
-    public static string GetHostWithoutSubDomain(this string url)
-    {
-        return GetHostWithoutSubDomain(new Uri(url));
-    }
+    public static string GetHostWithoutSubDomain(this string url) => GetHostWithoutSubDomain(new Uri(url));
 
     /// <summary>
-    /// Returns the domain part of the url.
+    ///     Returns the domain part of the url.
     /// </summary>
-    public static (string Domain, bool HasBestMatch) GetUrlDomain(this string url)
-    {
-        return GetUrlDomain(new Uri(url));
-    }
+    public static (string Domain, bool HasBestMatch) GetUrlDomain(this string url) => GetUrlDomain(new Uri(url));
 
     /// <summary>
-    /// Returns the domain part of the url.
+    ///     Returns the domain part of the url.
     /// </summary>
     public static (string Domain, bool HasBestMatch) GetUrlDomain(this Uri url)
     {
-        if (url == null) return (string.Empty, false);
+        if (url == null)
+        {
+            return (string.Empty, false);
+        }
+
         var dotBits = url.Host.Split('.');
         switch (dotBits.Length)
         {
@@ -164,7 +156,7 @@ public static class DomainHelperExtensions
                 return (url.Host, false); //eg http://localhost/blah.php = "localhost"
         }
 
-        string bestMatch = "";
+        var bestMatch = "";
         foreach (var tld in Tlds)
         {
             if (url.Host.EndsWith(tld, StringComparison.OrdinalIgnoreCase) && tld.Length > bestMatch.Length)
@@ -172,32 +164,32 @@ public static class DomainHelperExtensions
                 bestMatch = tld;
             }
         }
+
         if (string.IsNullOrEmpty(bestMatch))
+        {
             return (url.Host, false); //eg http://domain.com/blah = "domain.com"
+        }
 
         //add the domain name onto tld
-        string[] bestBits = bestMatch.Split('.');
-        string[] inputBits = url.Host.Split('.');
-        int getLastBits = bestBits.Length + 1;
+        var bestBits = bestMatch.Split('.');
+        var inputBits = url.Host.Split('.');
+        var getLastBits = bestBits.Length + 1;
         var bestMatchBuilder = new StringBuilder();
-        for (int c = inputBits.Length - getLastBits; c < inputBits.Length; c++)
+        for (var c = inputBits.Length - getLastBits; c < inputBits.Length; c++)
         {
-            if (bestMatchBuilder.Length > 0) bestMatchBuilder.Append('.');
+            if (bestMatchBuilder.Length > 0)
+            {
+                bestMatchBuilder.Append('.');
+            }
+
             bestMatchBuilder.Append(inputBits[c]);
         }
+
         return (bestMatchBuilder.ToString(), true);
     }
 
     /// <summary>
-    /// Tld Patterns
-    /// </summary>
-    public static IReadOnlyCollection<string> Tlds
-    {
-        get { return _tldsBuilder.Value; }
-    }
-
-    /// <summary>
-    /// Determines whether the `referrer` has the same host or domain as `url`.
+    ///     Determines whether the `referrer` has the same host or domain as `url`.
     /// </summary>
     public static bool IsLocalReferrer(this Uri referrer, Uri url)
     {
@@ -212,19 +204,17 @@ public static class DomainHelperExtensions
         }
 
         return referrer.Host.TrimEnd('.').Equals(url.Host.TrimEnd('.'), StringComparison.OrdinalIgnoreCase)
-            || HaveTheSameDomain(referrer, url);
+               || HaveTheSameDomain(referrer, url);
     }
 
     /// <summary>
-    /// Determines whether the `referrer` has the same host or domain as `url`.
+    ///     Determines whether the `referrer` has the same host or domain as `url`.
     /// </summary>
-    public static bool IsLocalReferrer(this string referrer, string url)
-    {
-        return IsLocalReferrer(new Uri(referrer), new Uri(url));
-    }
+    public static bool IsLocalReferrer(this string referrer, string url) =>
+        IsLocalReferrer(new Uri(referrer), new Uri(url));
 
     /// <summary>
-    /// Determines whether the `destUri` has the same domain as `siteRootUrl`.
+    ///     Determines whether the `destUri` has the same domain as `siteRootUrl`.
     /// </summary>
     public static bool IsReferrerToThisSite(this Uri destUri, string siteRootUrl)
     {
@@ -239,16 +229,14 @@ public static class DomainHelperExtensions
     }
 
     /// <summary>
-    /// Determines whether the `destUri` has the same domain as `siteRootUrl`.
+    ///     Determines whether the `destUri` has the same domain as `siteRootUrl`.
     /// </summary>
-    public static bool IsReferrerToThisSite(this string destUri, string siteRootUrl)
-    {
-        return IsReferrerToThisSite(new Uri(destUri), siteRootUrl);
-    }
+    public static bool IsReferrerToThisSite(this string destUri, string siteRootUrl) =>
+        IsReferrerToThisSite(new Uri(destUri), siteRootUrl);
 
     private static List<string> defaultTlds()
     {
-        List<string> tlds = new List<string>();
+        var tlds = new List<string>();
         tlds.AddRange(TldPatterns.EXACT);
         tlds.AddRange(TldPatterns.UNDER);
         tlds.AddRange(TldPatterns.EXCLUDED);
@@ -256,14 +244,17 @@ public static class DomainHelperExtensions
     }
 
     /// <summary>
-    /// Path.Combine for URLs
+    ///     Path.Combine for URLs
     /// </summary>
     public static string CombineUrl(this string baseUrl, string relativeUrl)
     {
         var baseUri = new UriBuilder(baseUrl);
 
         if (Uri.TryCreate(baseUri.Uri, relativeUrl, out var newUri))
+        {
             return newUri.ToString();
+        }
+
         throw new InvalidOperationException($"Unable to combine {baseUrl} with {relativeUrl}.");
     }
 }

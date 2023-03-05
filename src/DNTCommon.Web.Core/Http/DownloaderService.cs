@@ -1,41 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Text;
 
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-/// Lifetime of this class should be set to `Transient`.
-/// Because setting HttpClient's `DefaultRequestHeaders` is not thread-safe and can't be shared across different threads.
+///     Lifetime of this class should be set to `Transient`.
+///     Because setting HttpClient's `DefaultRequestHeaders` is not thread-safe and can't be shared across different
+///     threads.
 /// </summary>
 public class DownloaderService : IDownloaderService, IDisposable
 {
-    private const int MaxBufferSize = 0x10000; // 64K. The artificial constraint due to win32 api limitations. Increasing the buffer size beyond 64k will not help in any circumstance, as the underlying SMB protocol does not support buffer lengths beyond 64k.
-    private readonly CancellationTokenSource _cancelSrc = new CancellationTokenSource();
-    private readonly DownloadStatus _downloadStatus = new DownloadStatus();
+    private const int
+        MaxBufferSize =
+            0x10000; // 64K. The artificial constraint due to win32 api limitations. Increasing the buffer size beyond 64k will not help in any circumstance, as the underlying SMB protocol does not support buffer lengths beyond 64k.
+
+    private readonly CancellationTokenSource _cancelSrc = new();
     private readonly HttpClient _client;
+    private readonly DownloadStatus _downloadStatus = new();
     private bool _isDisposed;
 
     /// <summary>
-    /// Gives the current download operation's status.
-    /// </summary>
-    public Action<DownloadStatus>? OnDownloadStatusChanged { set; get; }
-
-    /// <summary>
-    /// It fires when the download operation is completed.
-    /// </summary>
-    public Action<DownloadStatus>? OnDownloadCompleted { set; get; }
-
-    /// <summary>
-    /// Lifetime of this class should be set to `Transient`.
-    /// Because setting HttpClient's `DefaultRequestHeaders` is not thread-safe and can't be shared across different threads.
+    ///     Lifetime of this class should be set to `Transient`.
+    ///     Because setting HttpClient's `DefaultRequestHeaders` is not thread-safe and can't be shared across different
+    ///     threads.
     /// </summary>
     public DownloaderService(BaseHttpClient baseHttpClient)
     {
@@ -44,28 +30,62 @@ public class DownloaderService : IDownloaderService, IDisposable
     }
 
     /// <summary>
-    /// Downloads a file from a given url and then stores it as a local file.
+    ///     Dispose all of the httpClients
     /// </summary>
-    public Task<DownloadStatus?> DownloadFileAsync(string url, string outputFilePath, AutoRetriesPolicy? autoRetries = null)
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    ///     Gives the current download operation's status.
+    /// </summary>
+    public Action<DownloadStatus>? OnDownloadStatusChanged { set; get; }
+
+    /// <summary>
+    ///     It fires when the download operation is completed.
+    /// </summary>
+    public Action<DownloadStatus>? OnDownloadCompleted { set; get; }
+
+    /// <summary>
+    ///     Downloads a file from a given url and then stores it as a local file.
+    /// </summary>
+    public Task<DownloadStatus?> DownloadFileAsync(string url, string outputFilePath,
+                                                   AutoRetriesPolicy? autoRetries = null)
     {
         return downloadAsync(() => doDownloadFileAsync(url, outputFilePath), autoRetries);
     }
 
     /// <summary>
-    /// Downloads a file from a given url and then returns it as a byte array.
+    ///     Downloads a file from a given url and then returns it as a byte array.
     /// </summary>
-    public Task<(byte[] Data, DownloadStatus DownloadStatus)> DownloadDataAsync(string url, AutoRetriesPolicy? autoRetries = null)
+    public Task<(byte[] Data, DownloadStatus DownloadStatus)> DownloadDataAsync(
+        string url, AutoRetriesPolicy? autoRetries = null)
     {
         return downloadAsync(() => doDownloadDataAsync(url), autoRetries);
     }
 
     /// <summary>
-    /// Downloads a file from a given url and then returns it as a text.
+    ///     Downloads a file from a given url and then returns it as a text.
     /// </summary>
-    public async Task<(string Data, DownloadStatus DownloadStatus)> DownloadPageAsync(string url, AutoRetriesPolicy? autoRetries = null)
+    public async Task<(string Data, DownloadStatus DownloadStatus)> DownloadPageAsync(
+        string url, AutoRetriesPolicy? autoRetries = null)
     {
         var result = await DownloadDataAsync(url, autoRetries);
-        return result.Data == null ? (string.Empty, _downloadStatus) : (Encoding.UTF8.GetString(result.Data), _downloadStatus);
+        return result.Data == null
+                   ? (string.Empty, _downloadStatus)
+                   : (Encoding.UTF8.GetString(result.Data), _downloadStatus);
+    }
+
+    /// <summary>
+    ///     Cancels the download operation.
+    /// </summary>
+    public void CancelDownload()
+    {
+        _downloadStatus.Status = TaskStatus.Canceled;
+        _cancelSrc.Cancel();
+        _client.CancelPendingRequests();
     }
 
     private async Task<T?> downloadAsync<T>(Func<Task<T>> task, AutoRetriesPolicy? autoRetries)
@@ -73,10 +93,10 @@ public class DownloaderService : IDownloaderService, IDisposable
         if (autoRetries == null)
         {
             autoRetries = new AutoRetriesPolicy
-            {
-                MaxRequestAutoRetries = 2,
-                AutoRetriesDelay = TimeSpan.FromSeconds(2)
-            };
+                          {
+                              MaxRequestAutoRetries = 2,
+                              AutoRetriesDelay = TimeSpan.FromSeconds(2),
+                          };
         }
 
         var exceptions = new List<Exception>();
@@ -105,21 +125,24 @@ public class DownloaderService : IDownloaderService, IDisposable
                 exceptions.Add(ex.Demystify());
             }
 
-            if (exceptions.Any())
+            if (exceptions.Count != 0)
             {
                 // Wait a bit and try again later
                 await Task.Delay(autoRetries.AutoRetriesDelay, _cancelSrc.Token);
             }
         } while (autoRetries.MaxRequestAutoRetries > 0 &&
-                _downloadStatus.Status != TaskStatus.RanToCompletion &&
-                !_cancelSrc.IsCancellationRequested);
+                 _downloadStatus.Status != TaskStatus.RanToCompletion &&
+                 !_cancelSrc.IsCancellationRequested);
 
         var uniqueExceptions = exceptions.Distinct(new ExceptionEqualityComparer()).ToList();
-        if (uniqueExceptions.Any() &&
+        if (uniqueExceptions.Count != 0 &&
             _downloadStatus.Status != TaskStatus.RanToCompletion)
         {
             if (uniqueExceptions.Count() == 1)
+            {
                 throw uniqueExceptions.First();
+            }
+
             throw new AggregateException("Could not process the request.", uniqueExceptions);
         }
 
@@ -127,26 +150,7 @@ public class DownloaderService : IDownloaderService, IDisposable
     }
 
     /// <summary>
-    /// Cancels the download operation.
-    /// </summary>
-    public void CancelDownload()
-    {
-        _downloadStatus.Status = TaskStatus.Canceled;
-        _cancelSrc.Cancel();
-        _client.CancelPendingRequests();
-    }
-
-    /// <summary>
-    /// Dispose all of the httpClients
-    /// </summary>
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    /// <summary>
-    /// Dispose all of the httpClients
+    ///     Dispose all of the httpClients
     /// </summary>
     protected virtual void Dispose(bool disposing)
     {
@@ -200,8 +204,8 @@ public class DownloaderService : IDownloaderService, IDisposable
                                                    MaxBufferSize,
                                                    // you have to explicitly open the FileStream as asynchronous
                                                    // or else you're just doing synchronous operations on a background thread.
-                                                   useAsync: true
-                                                   ))
+                                                   true
+                                                  ))
             {
                 if (response.Headers.AcceptRanges == null && fileStream.Length > 0)
                 {
@@ -252,9 +256,9 @@ public class DownloaderService : IDownloaderService, IDisposable
         await response.EnsureSuccessStatusCodeAsync();
 
         _downloadStatus.RemoteFileSize =
-           response.Content.Headers?.ContentRange?.Length ?? response.Content?.Headers?.ContentLength ?? 0;
+            response.Content.Headers?.ContentRange?.Length ?? response.Content?.Headers?.ContentLength ?? 0;
         _downloadStatus.RemoteFileName =
-           response.Content?.Headers?.ContentDisposition?.FileName ?? string.Empty;
+            response.Content?.Headers?.ContentDisposition?.FileName ?? string.Empty;
         return response;
     }
 
@@ -295,7 +299,7 @@ public class DownloaderService : IDownloaderService, IDisposable
         }
 
         _downloadStatus.PercentComplete =
-           Math.Round((decimal)_downloadStatus.BytesTransferred * 100 / (decimal)_downloadStatus.RemoteFileSize, 2);
+            Math.Round((decimal)_downloadStatus.BytesTransferred * 100 / _downloadStatus.RemoteFileSize, 2);
 
         var elapsedTime = DateTimeOffset.UtcNow - _downloadStatus.StartTime;
         _downloadStatus.BytesPerSecond = _downloadStatus.BytesTransferred / elapsedTime.TotalSeconds;

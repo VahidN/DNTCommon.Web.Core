@@ -1,20 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Hosting;
-using System.Diagnostics.CodeAnalysis;
-using static System.FormattableString;
-using System.Diagnostics;
 
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-/// Scheduled Tasks Manager
+///     Scheduled Tasks Manager
 /// </summary>
 public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
 {
@@ -28,7 +20,7 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
     private bool _isShuttingDown;
 
     /// <summary>
-    /// Scheduled Tasks Manager
+    ///     Scheduled Tasks Manager
     /// </summary>
     public ScheduledTasksCoordinator(
         ILogger<ScheduledTasksCoordinator> logger,
@@ -47,14 +39,14 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
         }
 
         applicationLifetime.ApplicationStopping.Register(() =>
-        {
-            _logger.LogInformation("Application is stopping ... .");
-            disposeResources().Wait();
-        });
+                                                         {
+                                                             _logger.LogInformation("Application is stopping ... .");
+                                                             disposeResources().Wait();
+                                                         });
     }
 
     /// <summary>
-    /// Starts the scheduler.
+    ///     Starts the scheduler.
     /// </summary>
     public void StartTasks()
     {
@@ -64,43 +56,41 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
         }
 
         _jobsRunnerTimer.OnThreadPoolTimerCallback = () =>
-        {
-            var now = DateTime.UtcNow;
+                                                     {
+                                                         var now = DateTime.UtcNow;
 
-            var tasks = new List<Task>();
-            foreach (var taskStatus in _tasksStorage.Value.Tasks
-                                                            .Where(x => x.RunAt(now))
-                                                            .OrderBy(x => x.Order))
-            {
-                if (_isShuttingDown)
-                {
-                    return;
-                }
+                                                         var tasks = new List<Task>();
+                                                         foreach (var taskStatus in _tasksStorage.Value.Tasks
+                                                                      .Where(x => x.RunAt(now))
+                                                                      .OrderBy(x => x.Order))
+                                                         {
+                                                             if (_isShuttingDown)
+                                                             {
+                                                                 return;
+                                                             }
 
-                if (taskStatus.IsRunning)
-                {
-                    _logger.LogInformation($"Ignoring `{taskStatus}` task. It's still running.");
-                    continue;
-                }
+                                                             if (taskStatus.IsRunning)
+                                                             {
+                                                                 _logger
+                                                                     .LogInformation($"Ignoring `{taskStatus}` task. It's still running.");
+                                                                 continue;
+                                                             }
 
-                tasks.Add(Task.Run(() => runTask(taskStatus, now)));
-            }
+                                                             tasks.Add(Task.Run(() => runTask(taskStatus, now)));
+                                                         }
 
-            if (tasks.Any())
-            {
-                Task.WaitAll(tasks.ToArray());
-            }
-        };
+                                                         if (tasks.Count != 0)
+                                                         {
+                                                             Task.WaitAll(tasks.ToArray());
+                                                         }
+                                                     };
         _jobsRunnerTimer.StartJobs();
     }
 
     /// <summary>
-    /// Stops the scheduler.
+    ///     Stops the scheduler.
     /// </summary>
-    public Task StopTasks()
-    {
-        return disposeResources();
-    }
+    public Task StopTasks() => disposeResources();
 
     private async Task disposeResources()
     {
