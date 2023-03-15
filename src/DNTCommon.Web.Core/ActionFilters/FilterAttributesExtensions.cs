@@ -7,6 +7,8 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public static class FilterAttributesExtensions
 {
+    private static Type StringType = typeof(string);
+    
     /// <summary>
     ///     Cleans all of the string values of the current ActionArguments and model's stringProperties
     /// </summary>
@@ -30,18 +32,18 @@ public static class FilterAttributesExtensions
             }
 
             var type = aValue.GetType();
-            if (type == typeof(string))
+            if (type == StringType)
             {
                 context.ActionArguments[aKey] = action(aValue.ToString() ?? "");
             }
             else
             {
-                var stringProperties = aValue.GetType()
+                var stringProperties = type
                                              .GetProperties(BindingFlags.Instance | BindingFlags.Public)
                                              .Where(x =>
                                                         x.CanRead
                                                         && x.CanWrite
-                                                        && x.PropertyType == typeof(string)
+                                                        && x.PropertyType == StringType
                                                         && x.GetGetMethod(true)?.IsPublic == true
                                                         && x.GetSetMethod(true)?.IsPublic == true);
 
