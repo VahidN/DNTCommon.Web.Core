@@ -51,7 +51,8 @@ public class DownloaderService : IDownloaderService, IDisposable
     /// <summary>
     ///     Downloads a file from a given url and then stores it as a local file.
     /// </summary>
-    public Task<DownloadStatus?> DownloadFileAsync(string url, string outputFilePath,
+    public Task<DownloadStatus?> DownloadFileAsync(string url,
+                                                   string outputFilePath,
                                                    AutoRetriesPolicy? autoRetries = null)
     {
         return downloadAsync(() => doDownloadFileAsync(url, outputFilePath), autoRetries);
@@ -61,7 +62,8 @@ public class DownloaderService : IDownloaderService, IDisposable
     ///     Downloads a file from a given url and then returns it as a byte array.
     /// </summary>
     public Task<(byte[] Data, DownloadStatus DownloadStatus)> DownloadDataAsync(
-        string url, AutoRetriesPolicy? autoRetries = null)
+        string url,
+        AutoRetriesPolicy? autoRetries = null)
     {
         return downloadAsync(() => doDownloadDataAsync(url), autoRetries);
     }
@@ -70,7 +72,8 @@ public class DownloaderService : IDownloaderService, IDisposable
     ///     Downloads a file from a given url and then returns it as a text.
     /// </summary>
     public async Task<(string Data, DownloadStatus DownloadStatus)> DownloadPageAsync(
-        string url, AutoRetriesPolicy? autoRetries = null)
+        string url,
+        AutoRetriesPolicy? autoRetries = null)
     {
         var result = await DownloadDataAsync(url, autoRetries);
         return result.Data == null
@@ -140,7 +143,7 @@ public class DownloaderService : IDownloaderService, IDisposable
         {
             if (uniqueExceptions.Count() == 1)
             {
-                throw uniqueExceptions.First();
+                throw uniqueExceptions[0];
             }
 
             throw new AggregateException("Could not process the request.", uniqueExceptions);
@@ -199,7 +202,9 @@ public class DownloaderService : IDownloaderService, IDisposable
 
         using (var inputStream = await response.Content.ReadAsStreamAsync())
         {
-            using (var fileStream = new FileStream(outputFilePath, fileMode, FileAccess.Write,
+            using (var fileStream = new FileStream(outputFilePath,
+                                                   fileMode,
+                                                   FileAccess.Write,
                                                    FileShare.None,
                                                    MaxBufferSize,
                                                    // you have to explicitly open the FileStream as asynchronous

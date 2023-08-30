@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Description>DNTCommon.Web.Core provides common scenarios' solutions for ASP.NET Core applications.</Description>
-        <VersionPrefix>3.5.2</VersionPrefix>
+        <VersionPrefix>3.5.3</VersionPrefix>
         <Authors>Vahid Nasiri</Authors>
         <TargetFrameworks>net7.0;net6.0;</TargetFrameworks>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -53,11 +53,11 @@
 		<Using Include="System.Net.Http.Headers"/>
 	</ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Meziantou.Analyzer" Version="2.0.19">
+        <PackageReference Include="Meziantou.Analyzer" Version="2.0.82">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.5.22">
+        <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.7.30">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
@@ -69,7 +69,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="SonarAnalyzer.CSharp" Version="8.53.0.62665">
+        <PackageReference Include="SonarAnalyzer.CSharp" Version="9.8.0.76515">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
@@ -78,12 +78,12 @@
         <FrameworkReference Include="Microsoft.AspNetCore.App"/>
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>        
         <PackageReference Include="Microsoft.SyndicationFeed.ReaderWriter" Version="1.0.2"/>
-        <PackageReference Include="DNTPersianUtils.Core" Version="5.5.0"/>
-        <PackageReference Include="MailKit" Version="3.6.0"/>
-        <PackageReference Include="HtmlAgilityPack" Version="1.11.46"/>
-        <PackageReference Include="IPAddressRange" Version="5.0.0"/>
-        <PackageReference Include="SkiaSharp" Version="2.88.3" />
-        <PackageReference Include="SkiaSharp.HarfBuzz" Version="2.88.3" />
+        <PackageReference Include="DNTPersianUtils.Core" Version="5.7.1"/>
+        <PackageReference Include="MailKit" Version="4.1.0"/>
+        <PackageReference Include="HtmlAgilityPack" Version="1.11.52"/>
+        <PackageReference Include="IPAddressRange" Version="6.0.0"/>
+        <PackageReference Include="SkiaSharp" Version="2.88.5" />
+        <PackageReference Include="SkiaSharp.HarfBuzz" Version="2.88.5" />
         <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="7.0.0"/>
         <PackageReference Include="Ben.Demystifier" Version="0.4.1"/>      
     </ItemGroup>

@@ -1,34 +1,25 @@
-using System;
-using MailKit.Net.Smtp;
-using MailKit.Security;
-using MimeKit;
-using System.IO;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 using DNTPersianUtils.Core;
-using System.Linq;
-using System.Diagnostics.CodeAnalysis;
+using MailKit.Net.Smtp;
+using MimeKit;
 
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-/// A web mail service using the `MailKit` library.
+///     A web mail service using the `MailKit` library.
 /// </summary>
 public class WebMailService : IWebMailService
 {
     private readonly IViewRendererService _viewRendererService;
 
     /// <summary>
-    /// A web mail service using the `MailKit` library.
+    ///     A web mail service using the `MailKit` library.
     /// </summary>
-    public WebMailService(IViewRendererService viewRendererService)
-    {
+    public WebMailService(IViewRendererService viewRendererService) =>
         _viewRendererService = viewRendererService ?? throw new ArgumentNullException(nameof(viewRendererService));
-    }
 
     /// <summary>
-    /// Sends an email using the `MailKit` library.
-    /// This method converts a razor template file to an string and then uses it as the email's message.
+    ///     Sends an email using the `MailKit` library.
+    ///     This method converts a razor template file to an string and then uses it as the email's message.
     /// </summary>
     public async Task SendEmailAsync<T>(
         SmtpConfig smtpConfig,
@@ -46,21 +37,21 @@ public class WebMailService : IWebMailService
     {
         var message = await _viewRendererService.RenderViewToStringAsync(viewNameOrPath, viewModel);
         await SendEmailAsync(
-            smtpConfig,
-            emails,
-            subject,
-            message,
-            blindCarpbonCopies,
-            carpbonCopies,
-            replyTos,
-            delayDelivery,
-            attachmentFiles,
-            headers,
-            shouldValidateServerCertificate);
+                             smtpConfig,
+                             emails,
+                             subject,
+                             message,
+                             blindCarpbonCopies,
+                             carpbonCopies,
+                             replyTos,
+                             delayDelivery,
+                             attachmentFiles,
+                             headers,
+                             shouldValidateServerCertificate);
     }
 
     /// <summary>
-    /// Sends an email using the `MailKit` library.
+    ///     Sends an email using the `MailKit` library.
     /// </summary>
     public async Task SendEmailAsync(
         SmtpConfig smtpConfig,
@@ -87,22 +78,30 @@ public class WebMailService : IWebMailService
 
         if (smtpConfig.UsePickupFolder && !string.IsNullOrWhiteSpace(smtpConfig.PickupFolder))
         {
-            await usePickupFolderAsync(smtpConfig, emails, subject, message, blindCarpbonCopies, carpbonCopies, replyTos, attachmentFiles, headers);
+            await usePickupFolderAsync(smtpConfig,
+                                       emails,
+                                       subject,
+                                       message,
+                                       blindCarpbonCopies,
+                                       carpbonCopies,
+                                       replyTos,
+                                       attachmentFiles,
+                                       headers);
         }
         else
         {
             await sendEmailAsync(
-                smtpConfig,
-                emails,
-                subject,
-                message,
-                blindCarpbonCopies,
-                carpbonCopies,
-                replyTos,
-                delayDelivery,
-                attachmentFiles,
-                headers,
-                shouldValidateServerCertificate);
+                                 smtpConfig,
+                                 emails,
+                                 subject,
+                                 message,
+                                 blindCarpbonCopies,
+                                 carpbonCopies,
+                                 replyTos,
+                                 delayDelivery,
+                                 attachmentFiles,
+                                 headers,
+                                 shouldValidateServerCertificate);
         }
     }
 
@@ -131,7 +130,8 @@ public class WebMailService : IWebMailService
             {
                 client.LocalDomain = smtpConfig.LocalDomain;
             }
-            await client.ConnectAsync(smtpConfig.Server, smtpConfig.Port, SecureSocketOptions.Auto);
+
+            await client.ConnectAsync(smtpConfig.Server, smtpConfig.Port);
             if (!string.IsNullOrWhiteSpace(smtpConfig.Username) &&
                 !string.IsNullOrWhiteSpace(smtpConfig.Password))
             {
@@ -141,7 +141,16 @@ public class WebMailService : IWebMailService
             var count = 0;
             foreach (var email in emails)
             {
-                using (var emailMessage = getEmailMessage(email.ToName, email.ToAddress, subject, message, attachmentFiles, smtpConfig, headers, blindCarpbonCopies, carpbonCopies, replyTos))
+                using (var emailMessage = getEmailMessage(email.ToName,
+                                                          email.ToAddress,
+                                                          subject,
+                                                          message,
+                                                          attachmentFiles,
+                                                          smtpConfig,
+                                                          headers,
+                                                          blindCarpbonCopies,
+                                                          carpbonCopies,
+                                                          replyTos))
                 {
                     await client.SendAsync(emailMessage);
                 }
@@ -158,7 +167,15 @@ public class WebMailService : IWebMailService
         }
     }
 
-    private static async Task usePickupFolderAsync(SmtpConfig smtpConfig, IEnumerable<MailAddress> emails, string subject, string message, IEnumerable<MailAddress>? blindCarpbonCopies, IEnumerable<MailAddress>? carpbonCopies, IEnumerable<MailAddress>? replyTos, IEnumerable<string>? attachmentFiles, MailHeaders? headers)
+    private static async Task usePickupFolderAsync(SmtpConfig smtpConfig,
+                                                   IEnumerable<MailAddress> emails,
+                                                   string subject,
+                                                   string message,
+                                                   IEnumerable<MailAddress>? blindCarpbonCopies,
+                                                   IEnumerable<MailAddress>? carpbonCopies,
+                                                   IEnumerable<MailAddress>? replyTos,
+                                                   IEnumerable<string>? attachmentFiles,
+                                                   MailHeaders? headers)
     {
         const int maxBufferSize = 0x10000; // 64K.
 
@@ -175,11 +192,24 @@ public class WebMailService : IWebMailService
         foreach (var email in emails)
         {
             using (var stream = new FileStream(
-                Path.Combine(smtpConfig.PickupFolder, $"email-{Guid.NewGuid().ToString("N")}.eml"),
-                FileMode.CreateNew, FileAccess.Write, FileShare.None,
-                maxBufferSize, useAsync: true))
+                                               Path.Combine(smtpConfig.PickupFolder,
+                                                            $"email-{Guid.NewGuid().ToString("N")}.eml"),
+                                               FileMode.CreateNew,
+                                               FileAccess.Write,
+                                               FileShare.None,
+                                               maxBufferSize,
+                                               true))
             {
-                using (var emailMessage = getEmailMessage(email.ToName, email.ToAddress, subject, message, attachmentFiles, smtpConfig, headers, blindCarpbonCopies, carpbonCopies, replyTos))
+                using (var emailMessage = getEmailMessage(email.ToName,
+                                                          email.ToAddress,
+                                                          subject,
+                                                          message,
+                                                          attachmentFiles,
+                                                          smtpConfig,
+                                                          headers,
+                                                          blindCarpbonCopies,
+                                                          carpbonCopies,
+                                                          replyTos))
                 {
                     await emailMessage.WriteToAsync(stream);
                 }
@@ -188,9 +218,15 @@ public class WebMailService : IWebMailService
     }
 
     private static MimeMessage getEmailMessage(
-        string toName, string toAddress, string subject, string message,
-        IEnumerable<string>? attachmentFiles, SmtpConfig smtpConfig, MailHeaders? headers,
-        IEnumerable<MailAddress>? blindCarpbonCopies, IEnumerable<MailAddress>? carpbonCopies,
+        string toName,
+        string toAddress,
+        string subject,
+        string message,
+        IEnumerable<string>? attachmentFiles,
+        SmtpConfig smtpConfig,
+        MailHeaders? headers,
+        IEnumerable<MailAddress>? blindCarpbonCopies,
+        IEnumerable<MailAddress>? carpbonCopies,
         IEnumerable<MailAddress>? replyTos)
     {
         var emailMessage = new MimeMessage();
@@ -235,7 +271,7 @@ public class WebMailService : IWebMailService
             return;
         }
 
-        var host = fromAddress.Split('@').Last();
+        var host = fromAddress.Split('@')[^1];
 
         if (!string.IsNullOrWhiteSpace(headers.MessageId))
         {
@@ -256,9 +292,9 @@ public class WebMailService : IWebMailService
     private static MimeEntity getMessageBody(string message, IEnumerable<string>? attachmentFiles)
     {
         var builder = new BodyBuilder
-        {
-            HtmlBody = message
-        };
+                      {
+                          HtmlBody = message,
+                      };
         if (attachmentFiles?.Any() == true)
         {
             foreach (var attachmentFile in attachmentFiles)
@@ -269,6 +305,7 @@ public class WebMailService : IWebMailService
                 }
             }
         }
+
         return builder.ToMessageBody();
     }
 }

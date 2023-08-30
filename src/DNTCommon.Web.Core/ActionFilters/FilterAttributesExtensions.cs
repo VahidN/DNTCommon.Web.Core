@@ -7,7 +7,7 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public static class FilterAttributesExtensions
 {
-    private static Type StringType = typeof(string);
+    private static readonly Type StringType = typeof(string);
     
     /// <summary>
     ///     Cleans all of the string values of the current ActionArguments and model's stringProperties
