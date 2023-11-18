@@ -1,5 +1,3 @@
-#if NET_6 || NET_7
-using System;
 using Microsoft.Extensions.Logging;
 
 namespace DNTCommon.Web.Core;
@@ -10,24 +8,24 @@ namespace DNTCommon.Web.Core;
 public static class LoggerExtensions
 {
     private static readonly Action<ILogger, string, Exception?> LogError = LoggerMessage.Define<string>(
-        LogLevel.Error,
-        new EventId(1, nameof(LogErrorMessage)),
-        "{Error}");
+         LogLevel.Error,
+         new EventId(1, nameof(LogErrorMessage)),
+         "{Error}");
 
     private static readonly Action<ILogger, string, Exception?> LogInformation = LoggerMessage.Define<string>(
-        LogLevel.Information,
-        new EventId(1, nameof(LogInformationMessage)),
-        "{Info}");
+         LogLevel.Information,
+         new EventId(1, nameof(LogInformationMessage)),
+         "{Info}");
 
     private static readonly Action<ILogger, string, Exception?> LogDebug = LoggerMessage.Define<string>(
-        LogLevel.Debug,
-        new EventId(2, nameof(LogDebugMessage)),
-        "{Info}");
+         LogLevel.Debug,
+         new EventId(2, nameof(LogDebugMessage)),
+         "{Info}");
 
     private static readonly Action<ILogger, string, Exception?> LogWarning = LoggerMessage.Define<string>(
-        LogLevel.Warning,
-        new EventId(3, nameof(LogWarningMessage)),
-        "{Info}");
+         LogLevel.Warning,
+         new EventId(3, nameof(LogWarningMessage)),
+         "{Info}");
 
     /// <summary>
     ///     _logError using the LoggerMessage
@@ -61,4 +59,3 @@ public static class LoggerExtensions
         LogWarning(logger, info, null);
     }
 }
-#endif

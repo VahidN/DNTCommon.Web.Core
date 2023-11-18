@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -9,16 +5,16 @@ using Microsoft.Extensions.Options;
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-/// Anti Xss Service
+///     Anti Xss Service
 /// </summary>
 public class AntiXssService : IAntiXssService
 {
     private readonly IOptionsSnapshot<AntiXssConfig> _antiXssConfig;
-    private readonly ILogger<AntiXssService> _logger;
     private readonly IHtmlReaderService _htmlReaderService;
+    private readonly ILogger<AntiXssService> _logger;
 
     /// <summary>
-    /// Anti Xss Library
+    ///     Anti Xss Library
     /// </summary>
     public AntiXssService(
         IHtmlReaderService htmlReaderService,
@@ -31,14 +27,15 @@ public class AntiXssService : IAntiXssService
         _antiXssConfig = antiXssConfig ?? throw new ArgumentNullException(nameof(antiXssConfig));
         if (_antiXssConfig.Value == null || _antiXssConfig.Value.ValidHtmlTags == null)
         {
-            throw new ArgumentNullException(nameof(antiXssConfig), "Please add AntiXssConfig to your appsettings.json file.");
+            throw new ArgumentNullException(nameof(antiXssConfig),
+                                            "Please add AntiXssConfig to your appsettings.json file.");
         }
 
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <summary>
-    /// Takes raw HTML input and cleans against a whitelist
+    ///     Takes raw HTML input and cleans against a whitelist
     /// </summary>
     /// <param name="html">Html source</param>
     /// <param name="allowDataAttributes">Allow HTML5 data attributes prefixed with data-</param>
@@ -46,7 +43,9 @@ public class AntiXssService : IAntiXssService
     public string GetSanitizedHtml(string html, bool allowDataAttributes = true)
     {
         var parser = _htmlReaderService.ParseHtml(html);
-        var whitelistTags = new HashSet<string>(_antiXssConfig.Value.ValidHtmlTags.Select(x => x.Tag.ToLowerInvariant()).ToArray(), StringComparer.OrdinalIgnoreCase);
+        var whitelistTags =
+            new HashSet<string>(_antiXssConfig.Value.ValidHtmlTags.Select(x => x.Tag.ToLowerInvariant()).ToArray(),
+                                StringComparer.OrdinalIgnoreCase);
         foreach (var node in parser.HtmlNodes.ToList())
         {
             fixCodeTag(node);
@@ -76,7 +75,7 @@ public class AntiXssService : IAntiXssService
     {
         if (node.NodeType == HtmlNodeType.Element &&
             (string.Equals(node.Name, "pre", StringComparison.Ordinal)
-            || string.Equals(node.Name, "code", StringComparison.Ordinal))
+             || string.Equals(node.Name, "code", StringComparison.Ordinal))
             && !string.IsNullOrWhiteSpace(node.InnerHtml))
         {
             var decodedHtml = WebUtility.HtmlDecode(node.InnerHtml);
@@ -93,11 +92,12 @@ public class AntiXssService : IAntiXssService
     {
         if (node.NodeType == HtmlNodeType.Text
             && (string.IsNullOrWhiteSpace(node.InnerText)
-            || string.IsNullOrEmpty(node.InnerText.Trim())))
+                || string.IsNullOrEmpty(node.InnerText.Trim())))
         {
             node.ParentNode?.RemoveChild(node);
             return true;
         }
+
         return false;
     }
 
@@ -146,8 +146,10 @@ public class AntiXssService : IAntiXssService
     private bool isAllowedAttribute(HtmlAttribute attribute, bool allowDataAttributes)
     {
         return
-        (allowDataAttributes && attribute.Name?.StartsWith("data-", StringComparison.OrdinalIgnoreCase) == true)
-        || _antiXssConfig.Value.ValidHtmlTags.Any(tag => attribute.Name != null && tag.Attributes.Contains(attribute.Name, StringComparer.OrdinalIgnoreCase));
+            (allowDataAttributes && attribute.Name?.StartsWith("data-", StringComparison.OrdinalIgnoreCase) == true)
+            || _antiXssConfig.Value.ValidHtmlTags.Any(tag => attribute.Name != null &&
+                                                             tag.Attributes.Contains(attribute.Name,
+                                                              StringComparer.OrdinalIgnoreCase));
     }
 
     private bool cleanComments(HtmlNode node)
@@ -158,6 +160,7 @@ public class AntiXssService : IAntiXssService
             node.ParentNode?.RemoveChild(node);
             return true;
         }
+
         return false;
     }
 
@@ -169,6 +172,7 @@ public class AntiXssService : IAntiXssService
             node.ParentNode?.RemoveChild(node);
             return true;
         }
+
         return false;
     }
 
@@ -182,7 +186,7 @@ public class AntiXssService : IAntiXssService
 
         foreach (var item in _antiXssConfig.Value.UnsafeAttributeValueCharacters)
         {
-            if (attributeValue.IndexOf(item, StringComparison.OrdinalIgnoreCase) != -1)
+            if (attributeValue.Contains(item, StringComparison.OrdinalIgnoreCase))
             {
                 return (true, item);
             }

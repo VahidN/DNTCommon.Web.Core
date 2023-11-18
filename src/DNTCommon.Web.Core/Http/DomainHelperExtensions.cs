@@ -92,8 +92,8 @@ public static class DomainHelperExtensions
             return null;
         }
 
-        var lastIndex = host.LastIndexOf(".", StringComparison.Ordinal);
-        var index = host.LastIndexOf(".", lastIndex - 1, StringComparison.Ordinal);
+        var lastIndex = host.LastIndexOf('.');
+        var index = host.LastIndexOf('.', lastIndex - 1);
         return host.Substring(0, index);
     }
 

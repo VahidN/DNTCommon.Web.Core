@@ -1,7 +1,3 @@
-using System;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Threading.Tasks;
 using DNTPersianUtils.Core;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
@@ -11,12 +7,12 @@ using Microsoft.Extensions.Logging;
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-/// Persian Date Model Binder
+///     Persian Date Model Binder
 /// </summary>
 public class PersianDateModelBinder : IModelBinder
 {
     /// <summary>
-    /// Attempts to bind a model.
+    ///     Attempts to bind a model.
     /// </summary>
     public Task BindModelAsync(ModelBindingContext bindingContext)
     {
@@ -33,10 +29,11 @@ public class PersianDateModelBinder : IModelBinder
         var valueProviderResult = bindingContext.ValueProvider.GetValue(bindingContext.ModelName);
         if (valueProviderResult == ValueProviderResult.None)
         {
-            binderLogger.LogError("PersianDateModelBinder error",
-                $"There is not valueProvider for bindingContext.ModelName:`{bindingContext.ModelName}`.");
+            binderLogger.LogError("There is not valueProvider for bindingContext.ModelName: {ModelName}",
+                                  bindingContext.ModelName);
             return fallbackBinder.BindModelAsync(bindingContext);
         }
+
         bindingContext.ModelState.SetModelValue(bindingContext.ModelName, valueProviderResult);
 
         DateTime? dt;
@@ -48,8 +45,7 @@ public class PersianDateModelBinder : IModelBinder
 
             if (!isValidPersianDateTime)
             {
-                binderLogger.LogError("PersianDateModelBinder error",
-                    $"`{valueAsString}` is not a valid PersianDateTime.");
+                binderLogger.LogError("{ValueAsString}` is not a valid PersianDateTime.", valueAsString);
 
                 return fallbackBinder.BindModelAsync(bindingContext);
             }
@@ -74,6 +70,7 @@ public class PersianDateModelBinder : IModelBinder
         {
             bindingContext.Result = ModelBindingResult.Success(dt.Value);
         }
+
         return Task.CompletedTask;
     }
 }

@@ -191,29 +191,24 @@ public class WebMailService : IWebMailService
 
         foreach (var email in emails)
         {
-            using (var stream = new FileStream(
-                                               Path.Combine(smtpConfig.PickupFolder,
-                                                            $"email-{Guid.NewGuid().ToString("N")}.eml"),
-                                               FileMode.CreateNew,
-                                               FileAccess.Write,
-                                               FileShare.None,
-                                               maxBufferSize,
-                                               true))
-            {
-                using (var emailMessage = getEmailMessage(email.ToName,
-                                                          email.ToAddress,
-                                                          subject,
-                                                          message,
-                                                          attachmentFiles,
-                                                          smtpConfig,
-                                                          headers,
-                                                          blindCarpbonCopies,
-                                                          carpbonCopies,
-                                                          replyTos))
-                {
-                    await emailMessage.WriteToAsync(stream);
-                }
-            }
+            await using var stream = new FileStream(Path.Combine(smtpConfig.PickupFolder,
+                                                                 $"email-{Guid.NewGuid().ToString("N")}.eml"),
+                                                    FileMode.CreateNew,
+                                                    FileAccess.Write,
+                                                    FileShare.None,
+                                                    maxBufferSize,
+                                                    true);
+            using var emailMessage = getEmailMessage(email.ToName,
+                                                     email.ToAddress,
+                                                     subject,
+                                                     message,
+                                                     attachmentFiles,
+                                                     smtpConfig,
+                                                     headers,
+                                                     blindCarpbonCopies,
+                                                     carpbonCopies,
+                                                     replyTos);
+            await emailMessage.WriteToAsync(stream);
         }
     }
 

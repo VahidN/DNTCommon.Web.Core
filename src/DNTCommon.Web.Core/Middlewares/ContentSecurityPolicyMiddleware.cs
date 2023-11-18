@@ -1,12 +1,10 @@
-using System;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-/// Content Security Policy Middleware
+///     Content Security Policy Middleware
 /// </summary>
 public class ContentSecurityPolicyMiddleware
 {
@@ -18,31 +16,31 @@ public class ContentSecurityPolicyMiddleware
     private readonly RequestDelegate _next;
 
     /// <summary>
-    /// Content Security Policy Middleware
+    ///     Content Security Policy Middleware
     /// </summary>
-    public ContentSecurityPolicyMiddleware(RequestDelegate next)
-    {
-        _next = next;
-    }
+    public ContentSecurityPolicyMiddleware(RequestDelegate next) => _next = next;
 
     private static string getContentSecurityPolicyValue(ContentSecurityPolicyConfig config, string errorLogUri)
     {
         if (config.Options == null || config.Options.Count == 0)
         {
-            throw new InvalidOperationException("Please set the `ContentSecurityPolicyConfig:Options` value in `appsettings.json` file.");
+            throw new
+                InvalidOperationException("Please set the `ContentSecurityPolicyConfig:Options` value in `appsettings.json` file.");
         }
+
         var options = string.Join("; ", config.Options);
         return $"{options}; report-uri {errorLogUri}";
     }
 
     /// <summary>
-    /// Content Security Policy Middleware pipeline
+    ///     Content Security Policy Middleware pipeline
     /// </summary>
     public Task Invoke(HttpContext context, IOptionsSnapshot<ContentSecurityPolicyConfig> config)
     {
         if (config == null || config.Value == null || config.Value.Options == null)
         {
-            throw new ArgumentNullException(nameof(config), "Please add ContentSecurityPolicyConfig to your appsettings.json file.");
+            throw new ArgumentNullException(nameof(config),
+                                            "Please add ContentSecurityPolicyConfig to your appsettings.json file.");
         }
 
         if (context == null)
@@ -52,31 +50,35 @@ public class ContentSecurityPolicyMiddleware
 
         if (!context.Response.Headers.ContainsKey(XFrameOptions))
         {
-            context.Response.Headers.Add(XFrameOptions, "SAMEORIGIN");
+            context.Response.Headers.Append(XFrameOptions, "SAMEORIGIN");
         }
 
         if (!context.Response.Headers.ContainsKey(XXssProtection))
         {
-            context.Response.Headers.Add(XXssProtection, "1; mode=block");
+            context.Response.Headers.Append(XXssProtection, "1; mode=block");
         }
 
         if (!context.Response.Headers.ContainsKey(XContentTypeOptions))
         {
-            context.Response.Headers.Add(XContentTypeOptions, "nosniff"); // Refused to execute script from '<URL>' because its MIME type ('') is not executable, and strict MIME type checking is enabled.
+            context.Response.Headers.Append(XContentTypeOptions,
+                                            "nosniff"); // Refused to execute script from '<URL>' because its MIME type ('') is not executable, and strict MIME type checking is enabled.
         }
 
         if (!context.Response.Headers.ContainsKey(ContentSecurityPolicy))
         {
             var errorLogUri = context.GetGenericActionUrl(
-                    action: nameof(CspReportController.Log),
-                    controller: nameof(CspReportController).Replace("Controller", string.Empty, StringComparison.Ordinal));
+                                                          nameof(CspReportController.Log),
+                                                          nameof(CspReportController)
+                                                              .Replace("Controller",
+                                                                       string.Empty,
+                                                                       StringComparison.Ordinal));
             if (errorLogUri is not null)
             {
-                context.Response.Headers.Add(
-                    ContentSecurityPolicy,
-                    getContentSecurityPolicyValue(config.Value, errorLogUri));
+                context.Response.Headers.Append(ContentSecurityPolicy,
+                                                getContentSecurityPolicyValue(config.Value, errorLogUri));
             }
         }
+
         return _next(context);
     }
 }

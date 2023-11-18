@@ -8,6 +8,13 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public class SerializationProvider : ISerializationProvider
 {
+    private static readonly JsonSerializerOptions JsonSerializerOptions =
+        new()
+        {
+            WriteIndented = false,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        };
+
     /// <summary>
     ///     Serialize the given data to an string.
     /// </summary>
@@ -16,13 +23,7 @@ public class SerializationProvider : ISerializationProvider
     /// <summary>
     ///     Serialize the given data to an string.
     /// </summary>
-    public string Serialize(object data) =>
-        JsonSerializer.Serialize(data,
-                                 new JsonSerializerOptions
-                                 {
-                                     WriteIndented = false,
-                                     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-                                 });
+    public string Serialize(object data) => JsonSerializer.Serialize(data, JsonSerializerOptions);
 
     /// <summary>
     ///     Deserialize the given string to an object.
@@ -45,12 +46,7 @@ public class SerializationProvider : ISerializationProvider
     ///     Serialize the given data to a byte array.
     /// </summary>
     public byte[] SerializeToUtf8Bytes(object data) =>
-        JsonSerializer.SerializeToUtf8Bytes(data,
-                                            new JsonSerializerOptions
-                                            {
-                                                WriteIndented = false,
-                                                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-                                            });
+        JsonSerializer.SerializeToUtf8Bytes(data, JsonSerializerOptions);
 
     /// <summary>
     ///     Deserialize the given byte array to an object.
