@@ -105,6 +105,12 @@ namespace MyWebApp
   - [IViewRendererService](/src/DNTCommon.Web.Core.TestWebApp/Controllers/ViewRendererServiceController.cs) helps rendering a .cshtml file as an string. It's useful for creating razor based email templates.
   - [UploadFileService](/src/DNTCommon.Web.Core.TestWebApp/Controllers/AllowUploadSafeFilesController.cs) saves the posted IFormFile to the specified directory asynchronously.
 
+
+- Blazor
+
+  - [IBlazorStaticRendererService](/src/DNTCommon.Web.Core/Blazor/IBlazorStaticRendererService.cs) helps rendering a razor component as an string. It's useful for creating razor based email templates.
+
+
 - Schedulers
 
   - [BackgroundQueueController](/src/DNTCommon.Web.Core.TestWebApp/Controllers/BackgroundQueueController.cs) A .NET Core replacement for the old `HostingEnvironment.QueueBackgroundWorkItem` method.

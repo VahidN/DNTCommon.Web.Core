@@ -5,21 +5,26 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - DNTCommon.Web.Core.TestWebApp</title>
-    <link href="~/css/site.min.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" asp-append-version="true"/>
     @RenderSection("SiteHeader", required: false)
 </head>
 
 <body>
-    <div class="container body-content">
-        <div class="col-md-3">
+    <div class="container mt-5 mb-3">
+      <div class="row">
+        <div class="col col-md-3">
            <partial name="_SideBarMenu"  />
         </div>
-        <div class="col-md-9">
+        <div class="col col-md-9">
            @RenderBody()
         </div>
+      </div>
     </div>
 
-    <script src="~/js/site.min.js" type="text/javascript" asp-append-version="true"></script>
+<script src="~/lib/jquery/dist/jquery.min.js" type="text/javascript" asp-append-version="true"></script>
+<script src="~/lib/jquery-validation/dist/jquery.validate.min.js" type="text/javascript" asp-append-version="true"></script>
+<script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js" type="text/javascript" asp-append-version="true"></script>
+<script src="~/lib/jquery-ajax-unobtrusive/dist/jquery.unobtrusive-ajax.min.js" type="text/javascript" asp-append-version="true"></script>
     @RenderSection("Scripts", required: false)
 </body>
 

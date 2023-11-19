@@ -1,15 +1,14 @@
-using System;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-/// ServiceCollection Extensions
+///     ServiceCollection Extensions
 /// </summary>
 public static class DntCommonWebServiceCollectionExtensions
 {
     /// <summary>
-    /// Adds all of the default providers of DNTCommon.Web.Core at once.
+    ///     Adds all of the default providers of DNTCommon.Web.Core at once.
     /// </summary>
     public static IServiceCollection AddDNTCommonWeb(
         this IServiceCollection services,
@@ -43,6 +42,10 @@ public static class DntCommonWebServiceCollectionExtensions
         {
             services.AddDNTScheduler(scheduledTasksOptions);
         }
+
+#if NET_8
+        services.AddBlazorStaticRendererService();
+#endif
 
         return services;
     }
