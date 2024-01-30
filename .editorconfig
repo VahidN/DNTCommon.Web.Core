@@ -9,8 +9,10 @@ roslynator_enum_has_flag_style = operator
 roslynator_object_creation_type_style = implicit_when_type_is_obvious
 
 dotnet_diagnostic.S2589.severity = suggestion
+dotnet_diagnostic.S6605.severity = suggestion
 
 dotnet_diagnostic.CA2000.severity = suggestion
+dotnet_diagnostic.CA5351.severity = suggestion
 
 dotnet_diagnostic.S1133.severity = suggestion
 
