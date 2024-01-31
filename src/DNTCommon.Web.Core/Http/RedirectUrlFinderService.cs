@@ -1,35 +1,30 @@
-using System;
-using System.Diagnostics;
-using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-/// Redirect Url Finder Service
+///     Redirect Url Finder Service
 /// </summary>
 public class RedirectUrlFinderService : IRedirectUrlFinderService
 {
+    private const string CachePrefix = "LocationFinder::";
     private readonly ICacheService _cacheService;
     private readonly HttpClient _client;
-    private const string CachePrefix = "LocationFinder::";
     private readonly ILogger<RedirectUrlFinderService> _logger;
 
     static RedirectUrlFinderService()
     {
         // Default is 2 minutes: https://msdn.microsoft.com/en-us/library/system.net.servicepointmanager.dnsrefreshtimeout(v=vs.110).aspx
         ServicePointManager.DnsRefreshTimeout = (int)TimeSpan.FromMinutes(1).TotalMilliseconds;
+
         // Increases the concurrent outbound connections
         ServicePointManager.DefaultConnectionLimit = 1024;
     }
 
     /// <summary>
-    /// Redirect Url Finder Service
+    ///     Redirect Url Finder Service
     /// </summary>
-    public RedirectUrlFinderService(
-        ICacheService cacheService,
+    public RedirectUrlFinderService(ICacheService cacheService,
         ILogger<RedirectUrlFinderService> logger,
         BaseHttpClient baseHttpClient)
     {
@@ -40,16 +35,17 @@ public class RedirectUrlFinderService : IRedirectUrlFinderService
     }
 
     /// <summary>
-    /// Finds the actual hidden URL after multiple redirects.
+    ///     Finds the actual hidden URL after multiple redirects.
     /// </summary>
     public async Task<string?> GetRedirectUrlAsync(string siteUrl, int maxRedirects = 20)
     {
         var uri = await GetRedirectUrlAsync(new Uri(siteUrl), maxRedirects);
+
         return uri?.OriginalString;
     }
 
     /// <summary>
-    /// Finds the actual hidden URL after multiple redirects.
+    ///     Finds the actual hidden URL after multiple redirects.
     /// </summary>
     public async Task<Uri?> GetRedirectUrlAsync(Uri siteUri, int maxRedirects = 20)
     {
@@ -62,17 +58,18 @@ public class RedirectUrlFinderService : IRedirectUrlFinderService
 
         try
         {
-            if (_cacheService.TryGetValue($"{CachePrefix}{siteUri}", out string? outUrl) &&
-                outUrl is not null)
+            if (_cacheService.TryGetValue($"{CachePrefix}{siteUri}", out string? outUrl) && outUrl is not null)
             {
                 return new Uri(outUrl);
             }
 
             setHeaders(siteUri);
             var hops = 1;
+
             do
             {
                 var webResp = await _client.GetAsync(redirectUri, HttpCompletionOption.ResponseHeadersRead);
+
                 if (webResp == null)
                 {
                     return cacheReturn(siteUri, siteUri);
@@ -83,11 +80,16 @@ public class RedirectUrlFinderService : IRedirectUrlFinderService
                     case HttpStatusCode.Found: // 302 = HttpStatusCode.Redirect
                     case HttpStatusCode.Moved: // 301 = HttpStatusCode.MovedPermanently
                         redirectUri = webResp.Headers.Location;
+
                         if (redirectUri?.IsAbsoluteUri == false)
                         {
-                            var leftPartAuthority = siteUri.GetComponents(UriComponents.Scheme | UriComponents.StrongAuthority, UriFormat.Unescaped);
+                            var leftPartAuthority =
+                                siteUri.GetComponents(UriComponents.Scheme | UriComponents.StrongAuthority,
+                                    UriFormat.Unescaped);
+
                             redirectUri = new Uri($"{leftPartAuthority}{redirectUri}");
                         }
+
                         break;
                     case HttpStatusCode.Unauthorized:
                     case HttpStatusCode.Forbidden: // fine! they have banned this server, but the link is correct!
@@ -95,21 +97,25 @@ public class RedirectUrlFinderService : IRedirectUrlFinderService
                         return cacheReturn(siteUri, redirectUri);
                     default:
                         await webResp.EnsureSuccessStatusCodeAsync();
+
                         break;
                 }
 
                 hops++;
-            } while (hops <= maxRedirects);
+            }
+            while (hops <= maxRedirects);
 
             throw new InvalidOperationException("Too many redirects detected.");
         }
         catch (HttpRequestException ex)
         {
-            _logger.LogError(ex.Demystify(), $"LocationFinderService error. Couldn't find redirect of {siteUri}");
+            _logger.LogError(ex.Demystify(), "LocationFinderService error. Couldn't find redirect of {SiteUri}",
+                siteUri);
         }
         catch (Exception ex) when (ex.IsNetworkError())
         {
-            _logger.LogError(ex.Demystify(), $"LocationFinderService error. Couldn't find redirect of {siteUri}");
+            _logger.LogError(ex.Demystify(), "LocationFinderService error. Couldn't find redirect of {SiteUri}",
+                siteUri);
         }
 
         return cacheReturn(siteUri, redirectUri);
@@ -126,9 +132,9 @@ public class RedirectUrlFinderService : IRedirectUrlFinderService
     {
         if (redirectUrl != null)
         {
-            _cacheService.Add($"{CachePrefix}{originalUrl}", redirectUrl,
-                DateTimeOffset.UtcNow.AddMinutes(15), size: 1);
+            _cacheService.Add($"{CachePrefix}{originalUrl}", redirectUrl, DateTimeOffset.UtcNow.AddMinutes(15), 1);
         }
+
         return redirectUrl;
     }
 }

@@ -27,19 +27,23 @@ public class PersianDateModelBinder : IModelBinder
         var fallbackBinder = new SimpleTypeModelBinder(bindingContext.ModelType, logger);
 
         var valueProviderResult = bindingContext.ValueProvider.GetValue(bindingContext.ModelName);
+
         if (valueProviderResult == ValueProviderResult.None)
         {
             binderLogger.LogError("There is not valueProvider for bindingContext.ModelName: {ModelName}",
-                                  bindingContext.ModelName);
+                bindingContext.ModelName);
+
             return fallbackBinder.BindModelAsync(bindingContext);
         }
 
         bindingContext.ModelState.SetModelValue(bindingContext.ModelName, valueProviderResult);
 
         DateTime? dt;
+
         try
         {
             var valueAsString = valueProviderResult.FirstValue;
+
             var isValidPersianDateTime = !string.IsNullOrWhiteSpace(valueAsString) &&
                                          valueAsString.IsValidPersianDateTime();
 
@@ -57,7 +61,7 @@ public class PersianDateModelBinder : IModelBinder
             var message = $"`{valueProviderResult.FirstValue}` is not a valid Persian date.";
             bindingContext.ModelState.TryAddModelError(bindingContext.ModelName, message);
 
-            binderLogger.LogError(ex.Demystify(), $"PersianDateModelBinder error. {message}");
+            binderLogger.LogError(ex.Demystify(), "PersianDateModelBinder error. {Message}", message);
 
             return Task.CompletedTask;
         }

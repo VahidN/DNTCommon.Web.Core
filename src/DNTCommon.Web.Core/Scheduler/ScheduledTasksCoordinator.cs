@@ -22,8 +22,7 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
     /// <summary>
     ///     Scheduled Tasks Manager
     /// </summary>
-    public ScheduledTasksCoordinator(
-        ILogger<ScheduledTasksCoordinator> logger,
+    public ScheduledTasksCoordinator(ILogger<ScheduledTasksCoordinator> logger,
         IHostApplicationLifetime applicationLifetime,
         IOptions<ScheduledTasksStorage> tasksStorage,
         IJobsRunnerTimer jobsRunnerTimer,
@@ -33,16 +32,17 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
         _tasksStorage = tasksStorage ?? throw new ArgumentNullException(nameof(tasksStorage));
         _jobsRunnerTimer = jobsRunnerTimer ?? throw new ArgumentNullException(nameof(jobsRunnerTimer));
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+
         if (applicationLifetime == null)
         {
             throw new ArgumentNullException(nameof(applicationLifetime));
         }
 
         applicationLifetime.ApplicationStopping.Register(() =>
-                                                         {
-                                                             _logger.LogInformation("Application is stopping ... .");
-                                                             disposeResources().Wait();
-                                                         });
+        {
+            _logger.LogInformation("Application is stopping ... .");
+            disposeResources().Wait();
+        });
     }
 
     /// <summary>
@@ -56,41 +56,42 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
         }
 
         _jobsRunnerTimer.OnThreadPoolTimerCallback = () =>
-                                                     {
-                                                         var now = DateTime.UtcNow;
+        {
+            var now = DateTime.UtcNow;
 
-                                                         var tasks = new List<Task>();
-                                                         foreach (var taskStatus in _tasksStorage.Value.Tasks
-                                                                      .Where(x => x.RunAt(now))
-                                                                      .OrderBy(x => x.Order))
-                                                         {
-                                                             if (_isShuttingDown)
-                                                             {
-                                                                 return;
-                                                             }
+            var tasks = new List<Task>();
 
-                                                             if (taskStatus.IsRunning)
-                                                             {
-                                                                 _logger
-                                                                     .LogInformation($"Ignoring `{taskStatus}` task. It's still running.");
-                                                                 continue;
-                                                             }
+            foreach (var taskStatus in _tasksStorage.Value.Tasks.Where(x => x.RunAt(now)).OrderBy(x => x.Order))
+            {
+                if (_isShuttingDown)
+                {
+                    return;
+                }
 
-                                                             tasks.Add(Task.Run(() => runTask(taskStatus, now)));
-                                                         }
+                if (taskStatus.IsRunning)
+                {
+                    _logger.LogInformation("Ignoring `{TaskStatus}` task. It's still running.", taskStatus);
 
-                                                         if (tasks.Count != 0)
-                                                         {
-                                                             Task.WaitAll(tasks.ToArray());
-                                                         }
-                                                     };
+                    continue;
+                }
+
+                tasks.Add(Task.Run(() => runTask(taskStatus, now)));
+            }
+
+            if (tasks.Count != 0)
+            {
+                Task.WaitAll(tasks.ToArray());
+            }
+        };
+
         _jobsRunnerTimer.StartJobs();
     }
 
     /// <summary>
     ///     Stops the scheduler.
     /// </summary>
-    public Task StopTasks() => disposeResources();
+    public Task StopTasks()
+        => disposeResources();
 
     private async Task disposeResources()
     {
@@ -114,6 +115,7 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
             }
 
             var timeOut = TimeToFinish;
+
             while (_tasksStorage.Value.Tasks.Any(x => x.IsRunning) && timeOut >= 0)
             {
                 // still running ...
@@ -131,6 +133,7 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
     private async Task wakeUp()
     {
         var mySitePingClient = _serviceProvider.GetService<MySitePingClient>();
+
         if (mySitePingClient != null)
         {
             await mySitePingClient.WakeUp();
@@ -155,16 +158,16 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
                 taskStatus.IsRunning = true;
                 taskStatus.LastRun = now;
 
-                _logger.LogInformation(Invariant($"Start running `{name}` task @ {now}."));
+                _logger.LogInformation("Start running `{Name}` task @ {Now}.", name, now);
                 scheduledTask.RunAsync().Wait();
 
-                _logger.LogInformation(Invariant($"Finished running `{name}` task @ {now}."));
+                _logger.LogInformation("Finished running `{Name}` task @ {Now}.", name, now);
                 taskStatus.IsLastRunSuccessful = true;
             }
             catch (Exception ex)
             {
                 var exception = ex.Demystify();
-                _logger.LogCritical(0, exception, $"Failed running {name}");
+                _logger.LogCritical(0, exception, "Failed running {Name}", name);
                 taskStatus.IsLastRunSuccessful = false;
                 taskStatus.LastException = exception;
             }

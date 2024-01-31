@@ -16,16 +16,16 @@ public class AntiDosFirewall : IAntiDosFirewall
     /// <summary>
     ///     Anti Dos Firewall
     /// </summary>
-    public AntiDosFirewall(
-        IOptionsSnapshot<AntiDosConfig> antiDosConfig,
+    public AntiDosFirewall(IOptionsSnapshot<AntiDosConfig> antiDosConfig,
         ICacheService cacheService,
         ILogger<AntiDosFirewall> logger)
     {
         _antiDosConfig = antiDosConfig ?? throw new ArgumentNullException(nameof(antiDosConfig));
+
         if (_antiDosConfig.Value == null)
         {
             throw new ArgumentNullException(nameof(antiDosConfig),
-                                            "Please add AntiDosConfig to your appsettings.json file.");
+                "Please add AntiDosConfig to your appsettings.json file.");
         }
 
         _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
@@ -52,9 +52,8 @@ public class AntiDosFirewall : IAntiDosFirewall
             return true;
         }
 
-        return _antiDosConfig.Value.GoodBotsUserAgents
-                             .Any(goodBot => requestInfo.UserAgent.Contains(goodBot,
-                                                                            StringComparison.OrdinalIgnoreCase));
+        return _antiDosConfig.Value.GoodBotsUserAgents.Any(goodBot
+            => requestInfo.UserAgent.Contains(goodBot, StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>
@@ -63,12 +62,14 @@ public class AntiDosFirewall : IAntiDosFirewall
     public (bool ShouldBlockClient, ThrottleInfo? ThrottleInfo) IsBadBot(AntiDosFirewallRequestInfo requestInfo)
     {
         var shouldBanBotHeader = ShouldBanBotHeaders(requestInfo);
+
         if (shouldBanBotHeader.ShouldBlockClient)
         {
             return (true, shouldBanBotHeader.ThrottleInfo);
         }
 
         var shouldBanUserAgent = ShouldBanUserAgent(requestInfo);
+
         if (shouldBanUserAgent.ShouldBlockClient)
         {
             return (true, shouldBanUserAgent.ThrottleInfo);
@@ -119,11 +120,11 @@ public class AntiDosFirewall : IAntiDosFirewall
         if (requestInfo.RawUrl.EndsWith(".php", StringComparison.OrdinalIgnoreCase))
         {
             return (true, new ThrottleInfo
-                          {
-                              ExpiresAt = GetCacheExpiresAt(),
-                              RequestsCount = _antiDosConfig.Value.AllowedRequests,
-                              BanReason = $"{requestInfo.RawUrl} ends with .php and this an ASP.NET Core site!",
-                          });
+            {
+                ExpiresAt = GetCacheExpiresAt(),
+                RequestsCount = _antiDosConfig.Value.AllowedRequests,
+                BanReason = $"{requestInfo.RawUrl} ends with .php and this an ASP.NET Core site!"
+            });
         }
 
         if (_antiDosConfig.Value.UrlAttackVectors?.Any() != true)
@@ -131,18 +132,17 @@ public class AntiDosFirewall : IAntiDosFirewall
             return (false, null);
         }
 
-        var vector = _antiDosConfig.Value.UrlAttackVectors
-                                   .FirstOrDefault(attackVector =>
-                                                       requestInfo.RawUrl.Contains(attackVector,
-                                                        StringComparison.OrdinalIgnoreCase));
+        var vector = _antiDosConfig.Value.UrlAttackVectors.FirstOrDefault(attackVector
+            => requestInfo.RawUrl.Contains(attackVector, StringComparison.OrdinalIgnoreCase));
+
         if (!string.IsNullOrWhiteSpace(vector))
         {
             return (true, new ThrottleInfo
-                          {
-                              ExpiresAt = GetCacheExpiresAt(),
-                              RequestsCount = _antiDosConfig.Value.AllowedRequests,
-                              BanReason = $"UrlAttackVector: {vector}.",
-                          });
+            {
+                ExpiresAt = GetCacheExpiresAt(),
+                RequestsCount = _antiDosConfig.Value.AllowedRequests,
+                BanReason = $"UrlAttackVector: {vector}."
+            });
         }
 
         return (false, null);
@@ -159,8 +159,7 @@ public class AntiDosFirewall : IAntiDosFirewall
             throw new ArgumentNullException(nameof(requestInfo));
         }
 
-        if (_antiDosConfig.Value.BadBotsRequestHeaders?.Any() != true ||
-            requestInfo.RequestHeaders == null)
+        if (_antiDosConfig.Value.BadBotsRequestHeaders?.Any() != true || requestInfo.RequestHeaders == null)
         {
             return (false, null);
         }
@@ -168,26 +167,24 @@ public class AntiDosFirewall : IAntiDosFirewall
         foreach (var headerkey in requestInfo.RequestHeaders.Keys)
         {
             var headerValue = requestInfo.RequestHeaders[headerkey];
+
             if (string.IsNullOrWhiteSpace(headerValue))
             {
                 continue;
             }
 
-            var botHeader = _antiDosConfig.Value.BadBotsRequestHeaders
-                                          .FirstOrDefault(badBotHeader =>
-                                                              headerValue.ToString()
-                                                                         .Contains(badBotHeader,
-                                                                          StringComparison.OrdinalIgnoreCase) ||
-                                                              headerkey.Contains(badBotHeader,
-                                                               StringComparison.OrdinalIgnoreCase));
+            var botHeader = _antiDosConfig.Value.BadBotsRequestHeaders.FirstOrDefault(badBotHeader
+                => headerValue.ToString().Contains(badBotHeader, StringComparison.OrdinalIgnoreCase) ||
+                   headerkey.Contains(badBotHeader, StringComparison.OrdinalIgnoreCase));
+
             if (!string.IsNullOrWhiteSpace(botHeader))
             {
                 return (true, new ThrottleInfo
-                              {
-                                  ExpiresAt = GetCacheExpiresAt(),
-                                  RequestsCount = _antiDosConfig.Value.AllowedRequests,
-                                  BanReason = $"BadBotRequestHeader: {botHeader}.",
-                              });
+                {
+                    ExpiresAt = GetCacheExpiresAt(),
+                    RequestsCount = _antiDosConfig.Value.AllowedRequests,
+                    BanReason = $"BadBotRequestHeader: {botHeader}."
+                });
             }
         }
 
@@ -215,29 +212,29 @@ public class AntiDosFirewall : IAntiDosFirewall
             return (false, null);
         }
 
-        var userAgent = _antiDosConfig.Value.BadBotsUserAgents
-                                      .FirstOrDefault(badBot =>
-                                                          requestInfo.UserAgent.Contains(badBot,
-                                                           StringComparison.OrdinalIgnoreCase));
+        var userAgent = _antiDosConfig.Value.BadBotsUserAgents.FirstOrDefault(badBot
+            => requestInfo.UserAgent.Contains(badBot, StringComparison.OrdinalIgnoreCase));
+
         if (!string.IsNullOrWhiteSpace(userAgent))
         {
             return (true, new ThrottleInfo
-                          {
-                              ExpiresAt = GetCacheExpiresAt(),
-                              RequestsCount = _antiDosConfig.Value.AllowedRequests,
-                              BanReason = $"BadBotUserAgent: {userAgent}.",
-                          });
+            {
+                ExpiresAt = GetCacheExpiresAt(),
+                RequestsCount = _antiDosConfig.Value.AllowedRequests,
+                BanReason = $"BadBotUserAgent: {userAgent}."
+            });
         }
 
         var isLocal = IsFromRemoteLocalhost(requestInfo);
+
         if (isLocal == true)
         {
             return (true, new ThrottleInfo
-                          {
-                              ExpiresAt = GetCacheExpiresAt(),
-                              RequestsCount = _antiDosConfig.Value.AllowedRequests,
-                              BanReason = "IsFromRemoteLocalhost.",
-                          });
+            {
+                ExpiresAt = GetCacheExpiresAt(),
+                RequestsCount = _antiDosConfig.Value.AllowedRequests,
+                BanReason = "IsFromRemoteLocalhost."
+            });
         }
 
         return (false, null);
@@ -255,6 +252,7 @@ public class AntiDosFirewall : IAntiDosFirewall
         }
 
         var shouldBanIpResult = ShouldBanIp(requestInfo);
+
         if (shouldBanIpResult.ShouldBlockClient)
         {
             return (true, shouldBanIpResult.ThrottleInfo);
@@ -266,12 +264,14 @@ public class AntiDosFirewall : IAntiDosFirewall
         }
 
         var hasUrlAttackVectorsResult = HasUrlAttackVectors(requestInfo);
+
         if (hasUrlAttackVectorsResult.ShouldBlockClient)
         {
             return (true, hasUrlAttackVectorsResult.ThrottleInfo);
         }
 
         var isBadBotResult = IsBadBot(requestInfo);
+
         if (isBadBotResult.ShouldBlockClient)
         {
             return (true, isBadBotResult.ThrottleInfo);
@@ -283,6 +283,7 @@ public class AntiDosFirewall : IAntiDosFirewall
         }
 
         var isDosAttackResult = IsDosAttack(requestInfo);
+
         if (isDosAttackResult.ShouldBlockClient)
         {
             return (true, isDosAttackResult.ThrottleInfo);
@@ -316,14 +317,15 @@ public class AntiDosFirewall : IAntiDosFirewall
         foreach (var range in _antiDosConfig.Value.BannedIPAddressRanges)
         {
             var ipRange = IPAddressRange.Parse(range);
+
             if (ipRange.Contains(iPAddress))
             {
                 return (true, new ThrottleInfo
-                              {
-                                  ExpiresAt = GetCacheExpiresAt(),
-                                  RequestsCount = _antiDosConfig.Value.AllowedRequests,
-                                  BanReason = $"IP: {requestInfo.IP} is in the `{range}` range.",
-                              });
+                {
+                    ExpiresAt = GetCacheExpiresAt(),
+                    RequestsCount = _antiDosConfig.Value.AllowedRequests,
+                    BanReason = $"IP: {requestInfo.IP} is in the `{range}` range."
+                });
             }
         }
 
@@ -337,29 +339,39 @@ public class AntiDosFirewall : IAntiDosFirewall
     {
         var key = GetCacheKey(requestInfo);
         var expiresAt = GetCacheExpiresAt();
+
         if (!_cacheService.TryGetValue<ThrottleInfo>(key, out var clientThrottleInfo) || clientThrottleInfo is null)
         {
-            clientThrottleInfo = new ThrottleInfo { RequestsCount = 1, ExpiresAt = expiresAt };
-            _cacheService.Add(key, clientThrottleInfo, expiresAt, 1);
+            clientThrottleInfo = new ThrottleInfo
+            {
+                RequestsCount = 1,
+                ExpiresAt = expiresAt
+            };
+
+            _cacheService.Add(key, clientThrottleInfo, expiresAt);
+
             return (false, clientThrottleInfo);
         }
 
         if (clientThrottleInfo.RequestsCount > _antiDosConfig.Value.AllowedRequests)
         {
             clientThrottleInfo.BanReason = "IsDosAttack";
-            _cacheService.Add(key, clientThrottleInfo, expiresAt, 1);
+            _cacheService.Add(key, clientThrottleInfo, expiresAt);
+
             return (true, clientThrottleInfo);
         }
 
         clientThrottleInfo.RequestsCount++;
-        _cacheService.Add(key, clientThrottleInfo, expiresAt, 1);
+        _cacheService.Add(key, clientThrottleInfo, expiresAt);
+
         return (false, clientThrottleInfo);
     }
 
     /// <summary>
     ///     Returns cache's expirations date
     /// </summary>
-    public DateTimeOffset GetCacheExpiresAt() => DateTimeOffset.UtcNow.AddMinutes(_antiDosConfig.Value.DurationMin);
+    public DateTimeOffset GetCacheExpiresAt()
+        => DateTimeOffset.UtcNow.AddMinutes(_antiDosConfig.Value.DurationMin);
 
     /// <summary>
     ///     Returns cache's key
@@ -394,8 +406,10 @@ public class AntiDosFirewall : IAntiDosFirewall
             return;
         }
 
-        _logger.LogWarning($"Banned IP: {requestInfo.IP}, UserAgent: {requestInfo.UserAgent}. {throttleInfo}");
+        _logger.LogWarning("Banned IP: {RequestInfoIP}, UserAgent: {RequestInfoUserAgent}. {ThrottleInfo}",
+            requestInfo.IP, requestInfo.UserAgent, throttleInfo);
+
         throttleInfo.IsLogged = true;
-        _cacheService.Add(GetCacheKey(requestInfo), throttleInfo, GetCacheExpiresAt(), 1);
+        _cacheService.Add(GetCacheKey(requestInfo), throttleInfo, GetCacheExpiresAt());
     }
 }

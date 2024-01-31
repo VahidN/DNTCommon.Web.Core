@@ -14,8 +14,8 @@ public class HtmlReaderService : IHtmlReaderService
     /// <summary>
     ///     Html Reader Service
     /// </summary>
-    public HtmlReaderService(ILogger<HtmlReaderService> logger) =>
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    public HtmlReaderService(ILogger<HtmlReaderService> logger)
+        => _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     /// <summary>
     ///     ‍Creates a properly initialized new HtmlDocument.
@@ -23,19 +23,22 @@ public class HtmlReaderService : IHtmlReaderService
     public HtmlDocument CreateHtmlDocument(string html)
     {
         var doc = new HtmlDocument
-                  {
-                      OptionCheckSyntax = true,
-                      OptionFixNestedTags = true,
-                      OptionAutoCloseOnEnd = true,
-                      OptionDefaultStreamEncoding = Encoding.UTF8,
-                  };
+        {
+            OptionCheckSyntax = true,
+            OptionFixNestedTags = true,
+            OptionAutoCloseOnEnd = true,
+            OptionDefaultStreamEncoding = Encoding.UTF8
+        };
+
         doc.LoadHtml(html);
 
         if (doc.ParseErrors?.Any() == true)
         {
             foreach (var error in doc.ParseErrors)
             {
-                _logger.LogWarning($"LoadHtml Error. SourceText: {error.SourceText} -> Code: {error.Code} -> Reason: {error.Reason}");
+                _logger.LogWarning(
+                    "LoadHtml Error. SourceText: {ErrorSourceText} -> Code: {ErrorCode} -> Reason: {ErrorReason}",
+                    error.SourceText, error.Code, error.Reason);
             }
         }
 
@@ -53,6 +56,7 @@ public class HtmlReaderService : IHtmlReaderService
         }
 
         var doc = CreateHtmlDocument(html);
+
         return (doc, handleChildren(doc.DocumentNode.ChildNodes));
     }
 
@@ -63,6 +67,7 @@ public class HtmlReaderService : IHtmlReaderService
             if (node.Name.Equals("html", StringComparison.OrdinalIgnoreCase))
             {
                 var body = node.Element("body");
+
                 if (body != null)
                 {
                     foreach (var bodyNode in handleChildren(body.ChildNodes))
@@ -74,6 +79,7 @@ public class HtmlReaderService : IHtmlReaderService
             else
             {
                 yield return node;
+
                 foreach (var childNode in handleChildren(node.ChildNodes))
                 {
                     yield return childNode;
