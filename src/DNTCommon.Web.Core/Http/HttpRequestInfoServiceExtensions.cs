@@ -1,8 +1,11 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -27,13 +30,15 @@ public static class HttpRequestInfoServiceExtensions
             var actionContext = serviceProvider.GetRequiredService<IActionContextAccessor>().ActionContext;
             var urlHelperFactory = serviceProvider.GetRequiredService<IUrlHelperFactory>();
 
-            if (actionContext == null)
+            if (actionContext != null)
             {
-                throw new InvalidOperationException(
-                    "actionContext is nul. This code should be called within the MVC pipeline.");
+                return urlHelperFactory.GetUrlHelper(actionContext);
             }
 
-            return urlHelperFactory.GetUrlHelper(actionContext);
+            return urlHelperFactory.GetUrlHelper(new ActionContext(new DefaultHttpContext
+            {
+                RequestServices = serviceProvider
+            }, new RouteData(), new ActionDescriptor()));
         });
 
         services.AddScoped<IHttpRequestInfoService, HttpRequestInfoService>();

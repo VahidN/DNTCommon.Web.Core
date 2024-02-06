@@ -142,14 +142,17 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
 
     private void runTask(ScheduledTaskStatus taskStatus, DateTime now)
     {
-        using (var serviceScope = _serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope())
-        {
-            var scheduledTask = (IScheduledTask)serviceScope.ServiceProvider.GetRequiredService(taskStatus.TaskType);
-            taskStatus.TaskInstance = scheduledTask;
-            var name = scheduledTask.GetType().GetTypeInfo().FullName;
+        var name = taskStatus.TaskType.FullName;
 
-            try
+        try
+        {
+            using (var serviceScope = _serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
+                var scheduledTask =
+                    (IScheduledTask)serviceScope.ServiceProvider.GetRequiredService(taskStatus.TaskType);
+
+                taskStatus.TaskInstance = scheduledTask;
+
                 if (_isShuttingDown)
                 {
                     return;
@@ -164,18 +167,18 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
                 _logger.LogInformation("Finished running `{Name}` task @ {Now}.", name, now);
                 taskStatus.IsLastRunSuccessful = true;
             }
-            catch (Exception ex)
-            {
-                var exception = ex.Demystify();
-                _logger.LogCritical(0, exception, "Failed running {Name}", name);
-                taskStatus.IsLastRunSuccessful = false;
-                taskStatus.LastException = exception;
-            }
-            finally
-            {
-                taskStatus.IsRunning = false;
-                taskStatus.TaskInstance = null;
-            }
+        }
+        catch (Exception ex)
+        {
+            var exception = ex.Demystify();
+            _logger.LogCritical(0, exception, "Failed running {Name}", name);
+            taskStatus.IsLastRunSuccessful = false;
+            taskStatus.LastException = exception;
+        }
+        finally
+        {
+            taskStatus.IsRunning = false;
+            taskStatus.TaskInstance = null;
         }
     }
 }
