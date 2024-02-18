@@ -8,6 +8,7 @@
 
 To install DNTCommon.Web.Core, run the following command in the Package Manager Console:
 
+[![Nuget](https://img.shields.io/nuget/v/DNTCommon.Web.Core)](http://www.nuget.org/packages/DNTCommon.Web.Core/)
 ```powershell
 PM> Install-Package DNTCommon.Web.Core
 ```
