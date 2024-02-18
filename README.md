@@ -141,7 +141,7 @@ namespace MyWebApp
 
     - [IBlazorStaticRendererService](https://github.com/VahidN/DNTCommon.Web.Core/tree/master/src/DNTCommon.Web.Core/Blazor/IBlazorStaticRendererService.cs)
       helps rendering a razor component as an string. It's useful for creating razor based email templates.
-    - [IBlazorRenderingContext](https://github.com/VahidN/DNTCommon.Web.Core/tree/master/src/DNTCommon.Web.Core/Blazor/IBlazorRenderingContext)
+    - [IBlazorRenderingContext](https://github.com/VahidN/DNTCommon.Web.Core/tree/master/src/DNTCommon.Web.Core/Blazor/IBlazorRenderingContext.cs)
       helps detecting the current rendering mode of a razor component.
 
 
