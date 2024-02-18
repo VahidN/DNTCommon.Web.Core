@@ -11,7 +11,7 @@ public static class BlazorServicesExtensions
 {
 #if NET_8
     /// <summary>
-    ///     Adds IQueueBackgroundWorkItem to IServiceCollection.
+    ///     Adds services to IServiceCollection.
     /// </summary>
     public static IServiceCollection AddBlazorStaticRendererService(this IServiceCollection services)
     {
@@ -20,4 +20,13 @@ public static class BlazorServicesExtensions
         return services;
     }
 #endif
+
+    /// <summary>
+    ///     Adds services to IServiceCollection.
+    /// </summary>
+    public static IServiceCollection AddBlazorRenderingContextService(this IServiceCollection services)
+    {
+        services.TryAddScoped<IBlazorRenderingContext, BlazorRenderingContext>();
+        return services;
+    }
 }

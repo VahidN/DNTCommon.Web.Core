@@ -46,6 +46,7 @@ public static class DntCommonWebServiceCollectionExtensions
 #if NET_8
         services.AddBlazorStaticRendererService();
 #endif
+        services.AddBlazorRenderingContextService();
 
         return services;
     }
