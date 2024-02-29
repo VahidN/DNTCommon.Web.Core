@@ -1,4 +1,6 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Text;
+using System.Text.RegularExpressions;
+using System.Web;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 
@@ -264,6 +266,38 @@ public class HtmlHelperService : IHtmlHelperService
         var innerText = doc.DocumentNode.InnerText;
 
         return string.IsNullOrWhiteSpace(innerText) ? string.Empty : _htmlSpacesPattern.Replace(innerText, " ").Trim();
+    }
+
+    /// <summary>
+    ///     An enhanced version of HttpUtility.HtmlEncode method
+    /// </summary>
+    /// <param name="text"></param>
+    /// <returns></returns>
+    public string? FullHtmlEncode(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return text;
+        }
+
+        var chars = HttpUtility.HtmlEncode(text).ToCharArray();
+        var result = new StringBuilder(text.Length + (int)(text.Length * 0.1));
+
+        foreach (var c in chars)
+        {
+            var value = Convert.ToInt32(c);
+
+            if (value > 127)
+            {
+                result.Append(CultureInfo.InvariantCulture, $"&#{value};");
+            }
+            else
+            {
+                result.Append(c);
+            }
+        }
+
+        return result.ToString();
     }
 
     /// <summary>
