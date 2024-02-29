@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Description>DNTCommon.Web.Core provides common scenarios' solutions for ASP.NET Core applications.</Description>
-        <VersionPrefix>3.9.0</VersionPrefix>
+        <VersionPrefix>3.9.1</VersionPrefix>
         <Authors>Vahid Nasiri</Authors>
         <TargetFrameworks>net8.0;net7.0;net6.0;</TargetFrameworks>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -89,7 +89,7 @@
         <PackageReference Include="Ben.Demystifier" Version="0.4.1"/>
     </ItemGroup>
     <ItemGroup>
-        <None Include="../../README.md" Link="README.md" Pack="true" PackagePath="/" Visible="false" />
+        <None Include="../../README.md" Link="README.md" Pack="true" PackagePath="/" Visible="false"/>
     </ItemGroup>
     <PropertyGroup Condition="('$(TargetFramework)' == 'net6.0')">
         <DefineConstants>NET_6</DefineConstants>
