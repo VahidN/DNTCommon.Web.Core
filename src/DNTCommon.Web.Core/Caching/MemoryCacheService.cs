@@ -32,17 +32,24 @@ public class MemoryCacheService : ICacheService
     ///     It will use the factory method to get the value and then inserts it.
     /// </summary>
     public void Add<T>(string cacheKey, Func<T> factory, DateTimeOffset absoluteExpiration, int size = 1)
+        => Add(cacheKey, factory, new MemoryCacheEntryOptions
+        {
+            AbsoluteExpiration = absoluteExpiration,
+            Size = size // the size limit is the count of entries
+        });
+
+    /// <summary>
+    ///     Adds a key-value to the cache.
+    ///     It will use the factory method to get the value and then inserts it.
+    /// </summary>
+    public void Add<T>(string cacheKey, Func<T> factory, MemoryCacheEntryOptions memoryCacheEntryOptions)
     {
         if (factory == null)
         {
             throw new ArgumentNullException(nameof(factory));
         }
 
-        _memoryCache.Set(cacheKey, factory(), new MemoryCacheEntryOptions
-        {
-            AbsoluteExpiration = absoluteExpiration,
-            Size = size // the size limit is the count of entries
-        });
+        _memoryCache.Set(cacheKey, factory(), memoryCacheEntryOptions);
     }
 
     /// <summary>
@@ -50,18 +57,11 @@ public class MemoryCacheService : ICacheService
     ///     It will use the factory method to get the value and then inserts it.
     /// </summary>
     public void Add<T>(string cacheKey, Func<T> factory, TimeSpan absoluteExpirationRelativeToNow, int size = 1)
-    {
-        if (factory == null)
-        {
-            throw new ArgumentNullException(nameof(factory));
-        }
-
-        _memoryCache.Set(cacheKey, factory(), new MemoryCacheEntryOptions
+        => Add(cacheKey, factory, new MemoryCacheEntryOptions
         {
             AbsoluteExpirationRelativeToNow = absoluteExpirationRelativeToNow,
             Size = size // the size limit is the count of entries
         });
-    }
 
     /// <summary>
     ///     Adds a key-value to the cache.
@@ -93,6 +93,12 @@ public class MemoryCacheService : ICacheService
         });
 
     /// <summary>
+    ///     Adds a key-value to the cache.
+    /// </summary>
+    public void Add<T>(string cacheKey, T value, MemoryCacheEntryOptions memoryCacheEntryOptions)
+        => _memoryCache.Set(cacheKey, value, memoryCacheEntryOptions);
+
+    /// <summary>
     ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache.
     ///     Otherwise it will use the factory method to get the value and then inserts it.
     /// </summary>
@@ -115,12 +121,10 @@ public class MemoryCacheService : ICacheService
         });
 
     /// <summary>
-    ///     Removes the object associated with the given key.
+    ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache.
+    ///     Otherwise it will use the factory method to get the value and then inserts it.
     /// </summary>
-    public void Remove(string cacheKey)
-        => _memoryCache.Remove(cacheKey);
-
-    private T? GetOrAdd<T>(string cacheKey, Func<T> factory, MemoryCacheEntryOptions options)
+    public T? GetOrAdd<T>(string cacheKey, Func<T> factory, MemoryCacheEntryOptions options)
     {
         if (factory == null)
         {
@@ -147,6 +151,12 @@ public class MemoryCacheService : ICacheService
             return result;
         }
     }
+
+    /// <summary>
+    ///     Removes the object associated with the given key.
+    /// </summary>
+    public void Remove(string cacheKey)
+        => _memoryCache.Remove(cacheKey);
 
     private static class TypeLock<T>
     {

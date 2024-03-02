@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Caching.Memory;
+
 namespace DNTCommon.Web.Core;
 
 /// <summary>
@@ -24,6 +26,12 @@ public interface ICacheService
     ///     Otherwise it will use the factory method to get the value and then inserts it.
     /// </summary>
     T? GetOrAdd<T>(string cacheKey, Func<T> factory, TimeSpan absoluteExpirationRelativeToNow, int size = 1);
+
+    /// <summary>
+    ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache.
+    ///     Otherwise it will use the factory method to get the value and then inserts it.
+    /// </summary>
+    T? GetOrAdd<T>(string cacheKey, Func<T> factory, MemoryCacheEntryOptions options);
 
     /// <summary>
     ///     Gets the key's value from the cache.
@@ -56,8 +64,19 @@ public interface ICacheService
 
     /// <summary>
     ///     Adds a key-value to the cache.
+    ///     It will use the factory method to get the value and then inserts it.
+    /// </summary>
+    void Add<T>(string cacheKey, Func<T> factory, MemoryCacheEntryOptions memoryCacheEntryOptions);
+
+    /// <summary>
+    ///     Adds a key-value to the cache.
     /// </summary>
     void Add<T>(string cacheKey, T value, TimeSpan absoluteExpirationRelativeToNow, int size = 1);
+
+    /// <summary>
+    ///     Adds a key-value to the cache.
+    /// </summary>
+    void Add<T>(string cacheKey, T value, MemoryCacheEntryOptions memoryCacheEntryOptions);
 
     /// <summary>
     ///     Adds a key-value to the cache.
