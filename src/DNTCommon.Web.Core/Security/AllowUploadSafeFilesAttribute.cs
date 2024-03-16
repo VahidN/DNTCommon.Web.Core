@@ -9,31 +9,60 @@ namespace DNTCommon.Web.Core;
 public sealed class AllowUploadSafeFilesAttribute : ValidationAttribute
 {
     private readonly HashSet<string> _extensionsToFilter = new(StringComparer.OrdinalIgnoreCase)
-                                                           {
-                                                               ".aspx", ".asax", ".asp", ".ashx", ".asmx", ".axd",
-                                                               ".master", ".svc", ".php",
-                                                               ".php3", ".php4", ".ph3", ".ph4", ".php4", ".ph5",
-                                                               ".sphp", ".cfm", ".ps", ".stm",
-                                                               ".htaccess", ".htpasswd", ".php5", ".phtml", ".cgi",
-                                                               ".pl", ".plx", ".py", ".rb", ".sh", ".jsp",
-                                                               ".cshtml", ".vbhtml", ".swf", ".xap", ".asptxt",
-                                                               ".xamlx",
-                                                           };
+    {
+        ".aspx",
+        ".asax",
+        ".asp",
+        ".ashx",
+        ".asmx",
+        ".axd",
+        ".master",
+        ".svc",
+        ".php",
+        ".php3",
+        ".php4",
+        ".ph3",
+        ".ph4",
+        ".php4",
+        ".ph5",
+        ".sphp",
+        ".cfm",
+        ".ps",
+        ".stm",
+        ".htaccess",
+        ".htpasswd",
+        ".php5",
+        ".phtml",
+        ".cgi",
+        ".pl",
+        ".plx",
+        ".py",
+        ".rb",
+        ".sh",
+        ".jsp",
+        ".cshtml",
+        ".vbhtml",
+        ".swf",
+        ".xap",
+        ".asptxt",
+        ".xamlx"
+    };
 
     private readonly HashSet<string> _namesToFilter = new(StringComparer.OrdinalIgnoreCase)
-                                                      {
-                                                          "web.config", "htaccess", "htpasswd", "web~1.con",
-                                                          "desktop.ini",
-                                                      };
+    {
+        "web.config",
+        "htaccess",
+        "htpasswd",
+        "web~1.con",
+        "desktop.ini"
+    };
 
     /// <summary>
     ///     Disallows uploading dangerous files such as .aspx, web.config and .asp files.
     /// </summary>
     /// <param name="extensionsToFilter">Disallowed file extensions such as .asp</param>
     /// <param name="namesToFilter">Disallowed names such as web.config</param>
-    public AllowUploadSafeFilesAttribute(
-        string[]? extensionsToFilter = null,
-        string[]? namesToFilter = null)
+    public AllowUploadSafeFilesAttribute(string[]? extensionsToFilter = null, string[]? namesToFilter = null)
     {
         if (extensionsToFilter != null)
         {
@@ -79,26 +108,26 @@ public sealed class AllowUploadSafeFilesAttribute : ValidationAttribute
 
         if (value is IFormFile file)
         {
-            return isValidFile(file);
+            return IsValidFile(file);
         }
 
-        if (value is not IList<IFormFile> files)
+        if (value is IList<IFormFile> files)
         {
-            return false;
+            return AreValidFiles(files);
         }
 
-        foreach (var postedFile in files)
+        if (value is IFormFileCollection fileCollection)
         {
-            if (!isValidFile(postedFile))
-            {
-                return false;
-            }
+            return AreValidFiles(fileCollection);
         }
 
-        return true;
+        return false;
     }
 
-    private bool isValidFile(IFormFile file)
+    private bool AreValidFiles(IEnumerable<IFormFile> files)
+        => files.All(IsValidFile);
+
+    private bool IsValidFile(IFormFile? file)
     {
         if (file == null || file.Length == 0)
         {
@@ -106,6 +135,7 @@ public sealed class AllowUploadSafeFilesAttribute : ValidationAttribute
         }
 
         var fileName = file.FileName;
+
         if (string.IsNullOrWhiteSpace(fileName))
         {
             return false;
@@ -123,6 +153,7 @@ public sealed class AllowUploadSafeFilesAttribute : ValidationAttribute
         return !_extensionsToFilter.Contains(ext, StringComparer.OrdinalIgnoreCase) &&
                !_namesToFilter.Contains(name, StringComparer.OrdinalIgnoreCase) &&
                !_namesToFilter.Contains(ext, StringComparer.OrdinalIgnoreCase) &&
+
                //for "file.asp;.jpg" files --> run as an ASP file
                _extensionsToFilter.All(item => !name.Contains(item, StringComparison.OrdinalIgnoreCase));
     }

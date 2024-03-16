@@ -8,7 +8,11 @@ namespace DNTCommon.Web.Core;
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
 public sealed class UploadFileExtensionsAttribute : ValidationAttribute
 {
-    private static readonly char[] Separator = { ',' };
+    private static readonly char[] Separator =
+    {
+        ','
+    };
+
     private readonly IList<string> _allowedExtensions;
 
     /// <summary>
@@ -44,26 +48,26 @@ public sealed class UploadFileExtensionsAttribute : ValidationAttribute
 
         if (value is IFormFile file)
         {
-            return isValidFile(file);
+            return IsValidFile(file);
         }
 
-        if (value is not IList<IFormFile> files)
+        if (value is IList<IFormFile> files)
         {
-            return false;
+            return AreValidFiles(files);
         }
 
-        foreach (var postedFile in files)
+        if (value is IFormFileCollection fileCollection)
         {
-            if (!isValidFile(postedFile))
-            {
-                return false;
-            }
+            return AreValidFiles(fileCollection);
         }
 
-        return true;
+        return false;
     }
 
-    private bool isValidFile(IFormFile file)
+    private bool AreValidFiles(IEnumerable<IFormFile> files)
+        => files.All(IsValidFile);
+
+    private bool IsValidFile(IFormFile? file)
     {
         if (file == null || file.Length == 0)
         {
@@ -71,6 +75,7 @@ public sealed class UploadFileExtensionsAttribute : ValidationAttribute
         }
 
         var fileExtension = Path.GetExtension(file.FileName);
+
         return !string.IsNullOrWhiteSpace(fileExtension) &&
                _allowedExtensions.Any(ext => fileExtension.Equals(ext, StringComparison.OrdinalIgnoreCase));
     }

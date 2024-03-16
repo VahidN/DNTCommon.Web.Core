@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Description>DNTCommon.Web.Core provides common scenarios' solutions for ASP.NET Core applications.</Description>
-        <VersionPrefix>3.9.2</VersionPrefix>
+        <VersionPrefix>4.0.0</VersionPrefix>
         <Authors>Vahid Nasiri</Authors>
         <TargetFrameworks>net8.0;net7.0;net6.0;</TargetFrameworks>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -54,7 +54,7 @@
         <Using Include="System.Net.Http.Headers"/>
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Meziantou.Analyzer" Version="2.0.141">
+        <PackageReference Include="Meziantou.Analyzer" Version="2.0.146">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
@@ -70,7 +70,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="SonarAnalyzer.CSharp" Version="9.19.0.84025">
+        <PackageReference Include="SonarAnalyzer.CSharp" Version="9.21.0.86780">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
@@ -80,7 +80,7 @@
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
         <PackageReference Include="Microsoft.SyndicationFeed.ReaderWriter" Version="1.0.2"/>
         <PackageReference Include="DNTPersianUtils.Core" Version="5.9.0"/>
-        <PackageReference Include="MailKit" Version="4.3.0"/>
+        <PackageReference Include="MailKit" Version="4.4.0"/>
         <PackageReference Include="HtmlAgilityPack" Version="1.11.59"/>
         <PackageReference Include="IPAddressRange" Version="6.0.0"/>
         <PackageReference Include="SkiaSharp" Version="2.88.7"/>
