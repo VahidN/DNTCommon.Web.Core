@@ -46,7 +46,7 @@ public class UploadFileService : IUploadFileService
             }
         }
 
-        return await SavePostedFileAsync(formFile, allowOverwrite, uploadsRootFolder);
+        return await SavePostedFileAsync(formFile, uploadsRootFolder, allowOverwrite);
     }
 
     /// <summary>
