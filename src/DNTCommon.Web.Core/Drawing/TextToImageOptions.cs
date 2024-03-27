@@ -23,12 +23,12 @@ public class TextToImageOptions
     public int FontSize { set; get; } = 13;
 
     /// <summary>
-    ///     Its default value is `Color.Black`.
+    ///     Its default value is `SKColors.Black`.
     /// </summary>
     public SKColor FontColor { set; get; } = SKColors.Black;
 
     /// <summary>
-    ///     Its default value is `Color.White`.
+    ///     Its default value is `SKColors.White`.
     /// </summary>
     public SKColor BgColor { set; get; } = SKColors.White;
 
@@ -43,14 +43,12 @@ public class TextToImageOptions
     public SKFontStyle FontStyle { set; get; } = SKFontStyle.Normal;
 
     /// <summary>
-    ///     It's a number between 1 to 4.
-    ///     Its default value is `0`.
-    ///     Set it to zero to disable it.
+    ///     Adds a random drop shadow
     /// </summary>
-    public int DropShadowLevel { set; get; }
+    public bool AddDropShadow { set; get; }
 
     /// <summary>
-    ///     Its default value is `Color.LightGray`.
+    ///     Its default value is `SKColors.LightGray`.
     /// </summary>
     public SKColor ShadowColor { set; get; } = SKColors.LightGray;
 
@@ -63,4 +61,9 @@ public class TextToImageOptions
     ///     Its default value is `true`.
     /// </summary>
     public bool Rectangle { set; get; } = true;
+
+    /// <summary>
+    ///     Defines options of the captcha's noise
+    /// </summary>
+    public CaptchaNoise? CaptchaNoise { set; get; }
 }

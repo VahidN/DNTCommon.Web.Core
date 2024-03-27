@@ -26,29 +26,84 @@ public static class TextToImageExtensions
 
         var fontType = GetFont(options);
         using var shaper = new SKShaper(fontType);
+
         using var textPaint = new SKPaint
-                              {
-                                  IsAntialias = options.AntiAlias,
-                                  FilterQuality = SKFilterQuality.High,
-                                  TextSize = options.FontSize,
-                                  Color = options.FontColor,
-                                  TextAlign = SKTextAlign.Left,
-                                  Typeface = fontType,
-                                  SubpixelText = true,
-                              };
+        {
+            IsAntialias = options.AntiAlias,
+            FilterQuality = SKFilterQuality.High,
+            TextSize = options.FontSize,
+            Color = options.FontColor,
+            TextAlign = SKTextAlign.Left,
+            Typeface = fontType,
+            SubpixelText = true
+        };
 
         var textBounds = GetTextBounds(text, textPaint);
         var width = GetTextWidth(text, options, textPaint);
 
-        var info = new SKImageInfo((int)width + 2 * options.TextMargin,
-                                   (int)textBounds.Height + 2 * options.TextMargin);
-        using var surface = SKSurface.Create(info);
-        var canvas = surface.Canvas;
+        var imageWidth = (int)width + 2 * options.TextMargin;
+        var imageHeight = (int)textBounds.Height + 2 * options.TextMargin;
+
+        using var sKBitmap = new SKBitmap(imageWidth, imageHeight);
+        using var canvas = new SKCanvas(sKBitmap);
         canvas.Clear(options.BgColor);
 
-        DrawRectangle(options, canvas, width, textBounds.Height);
         DrawText(text, options, canvas, shaper, textPaint, textBounds);
-        return ToPng(surface);
+
+        if (options.CaptchaNoise is not null)
+        {
+            AddWaves(imageWidth, imageHeight, sKBitmap);
+            CreateNoises(canvas, options);
+        }
+
+        DrawRectangle(options, canvas, width, textBounds.Height);
+
+        return ToPng(sKBitmap);
+    }
+
+    private static void AddWaves(int width, int height, SKBitmap pic)
+    {
+        using var copy = new SKBitmap();
+        pic.CopyTo(copy);
+
+        double distort = RandomNumberGenerator.GetInt32(1, 6) * (RandomNumberGenerator.GetInt32(1, 3) == 1 ? 1 : -1);
+
+        for (var y = 0; y < height; y++)
+        {
+            for (var x = 0; x < width; x++)
+            {
+                // Adds a simple wave
+                var newX = (int)(x + distort * Math.Sin(Math.PI * y / 84.0));
+                var newY = (int)(y + distort * Math.Cos(Math.PI * x / 44.0));
+
+                if (newX < 0 || newX >= width)
+                {
+                    newX = 0;
+                }
+
+                if (newY < 0 || newY >= height)
+                {
+                    newY = 0;
+                }
+
+                pic.SetPixel(x, y, copy.GetPixel(newX, newY));
+            }
+        }
+    }
+
+    private static void CreateNoises(SKCanvas canvas, TextToImageOptions options)
+    {
+        if (options.CaptchaNoise is null)
+        {
+            return;
+        }
+
+        using var shader = SKShader.CreatePerlinNoiseTurbulence(options.CaptchaNoise.BaseFrequencyX,
+            options.CaptchaNoise.BaseFrequencyY, options.CaptchaNoise.NumOctaves, options.CaptchaNoise.Seed);
+
+        using var paint = new SKPaint();
+        paint.Shader = shader;
+        canvas.DrawPaint(paint);
     }
 
     private static float GetTextWidth(string text, TextToImageOptions options, SKPaint textPaint)
@@ -64,6 +119,7 @@ public static class TextToImageExtensions
         hbFont.GetScale(out var xScale, out _);
         var scale = options.FontSize / (float)xScale;
         var width = buffer.GlyphPositions.Sum(position => position.XAdvance) * scale;
+
         return width;
     }
 
@@ -71,40 +127,49 @@ public static class TextToImageExtensions
     {
         var textBounds = new SKRect();
         textPaint.MeasureText(text, ref textBounds);
+
         return textBounds;
     }
 
-    private static void DrawText(string text, TextToImageOptions options, SKCanvas canvas, SKShaper shaper,
-                                 SKPaint textPaint, SKRect textBounds)
+    private static void DrawText(string text,
+        TextToImageOptions options,
+        SKCanvas canvas,
+        SKShaper shaper,
+        SKPaint textPaint,
+        SKRect textBounds)
     {
         var x = options.TextMargin + textBounds.Left;
         var y = Math.Abs(textBounds.Top) + options.TextMargin;
 
         canvas.DrawShapedText(shaper, text, x, y, textPaint);
 
-        if (options.DropShadowLevel <= 0)
+        if (!options.AddDropShadow)
         {
             return;
         }
 
         textPaint.Color = options.ShadowColor;
 
-        switch (options.DropShadowLevel)
+        switch (RandomNumberGenerator.GetInt32(1, 5))
         {
             case 1:
                 canvas.DrawShapedText(shaper, text, x - 1, y - 1, textPaint);
+
                 break;
 
             case 2:
                 canvas.DrawShapedText(shaper, text, x + 1, y - 1, textPaint);
+
                 break;
 
             case 3:
                 canvas.DrawShapedText(shaper, text, x - 1, y + 1, textPaint);
+
                 break;
 
             case 4:
                 canvas.DrawShapedText(shaper, text, x + 1, y + 1, textPaint);
+
                 break;
         }
     }
@@ -114,13 +179,14 @@ public static class TextToImageExtensions
         if (options.Rectangle)
         {
             using var skPaint = new SKPaint
-                                {
-                                    Color = SKColors.LightGray,
-                                    IsStroke = true,
-                                    StrokeWidth = 1f,
-                                };
-            canvas.DrawRect(new SKRect(0, 0, width + 2 * options.TextMargin - 1,
-                                       height + 2 * options.TextMargin - 1), skPaint);
+            {
+                Color = SKColors.LightGray,
+                IsStroke = true,
+                StrokeWidth = 1f
+            };
+
+            canvas.DrawRect(new SKRect(0, 0, width + 2 * options.TextMargin - 1, height + 2 * options.TextMargin - 1),
+                skPaint);
         }
     }
 
@@ -129,23 +195,23 @@ public static class TextToImageExtensions
         if (string.IsNullOrWhiteSpace(options.CustomFontPath))
         {
             return FontsTypeface.GetOrAdd(options.FontName,
-                                          _ => SKTypeface.FromFamilyName(options.FontName, options.FontStyle));
+                SKTypeface.FromFamilyName(options.FontName, options.FontStyle));
         }
 
-        return FontsTypeface.GetOrAdd(options.CustomFontPath,
-                                      _ =>
-                                      {
-                                          using var embeddedFont = File.OpenRead(options.CustomFontPath);
-                                          return SKTypeface.FromStream(File.OpenRead(options.CustomFontPath));
-                                      });
+        return FontsTypeface.GetOrAdd(options.CustomFontPath, key =>
+        {
+            using var embeddedFont = File.OpenRead(key);
+
+            return SKTypeface.FromStream(File.OpenRead(key));
+        });
     }
 
-    private static byte[] ToPng(this SKSurface surface)
+    private static byte[] ToPng(SKBitmap bitmap)
     {
-        using var image = surface.Snapshot();
-        using var data = image.Encode(SKEncodedImageFormat.Png, 100);
+        using var data = bitmap.Encode(SKEncodedImageFormat.Png, 100);
         using var memory = new MemoryStream();
         data.SaveTo(memory);
+
         return memory.ToArray();
     }
 }
