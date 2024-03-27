@@ -14,9 +14,17 @@ public sealed class AllowUploadOnlyImageFilesAttribute : ValidationAttribute
     ///     Allowing only image files are safe to be uploaded.
     ///     This validation attribute, checks the content of the uploaded file.
     /// </summary>
+    public AllowUploadOnlyImageFilesAttribute()
+    {
+    }
+
+    /// <summary>
+    ///     Allowing only image files are safe to be uploaded.
+    ///     This validation attribute, checks the content of the uploaded file.
+    /// </summary>
     /// <param name="maxWidth">maximum allowed width</param>
     /// <param name="maxHeight">maximum allowed height</param>
-    public AllowUploadOnlyImageFilesAttribute(int? maxWidth = null, int? maxHeight = null)
+    public AllowUploadOnlyImageFilesAttribute(int maxWidth, int maxHeight)
     {
         MaxWidth = maxWidth;
         MaxHeight = maxHeight;

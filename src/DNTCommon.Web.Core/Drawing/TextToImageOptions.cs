@@ -63,7 +63,8 @@ public class TextToImageOptions
     public bool Rectangle { set; get; } = true;
 
     /// <summary>
-    ///     Defines options of the captcha's noise
+    ///     Defines options of the captcha's noise.
+    ///     This is an optional property. If you don't set it, a normal image without any noises will be displayed.
     /// </summary>
     public CaptchaNoise? CaptchaNoise { set; get; }
 }

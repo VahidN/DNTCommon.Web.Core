@@ -15,6 +15,17 @@ public static class TextToImageExtensions
         new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
+    ///     Draws a text on a bitmap and then returns it as a data:image/png;base64.
+    /// </summary>
+    public static string TextToBase64DataImage(this string text, TextToImageOptions options)
+    {
+        var dataBytes = text.TextToImage(options);
+        var imageBase64Data = Convert.ToBase64String(dataBytes);
+
+        return $"data:image/png;base64,{imageBase64Data}";
+    }
+
+    /// <summary>
     ///     Draws a text on a bitmap and then returns it as a png byte array.
     /// </summary>
     public static byte[] TextToImage(this string text, TextToImageOptions options)
