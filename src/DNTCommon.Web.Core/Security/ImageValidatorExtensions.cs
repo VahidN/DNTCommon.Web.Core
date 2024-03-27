@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Http;
 using SkiaSharp;
 
@@ -15,7 +14,9 @@ public static class ImageValidatorExtensions
     /// <param name="filePath">The absolute path of the file</param>
     /// <param name="maxWidth">maximum allowed width</param>
     /// <param name="maxHeight">maximum allowed height</param>
-    public static bool IsValidImageFile([NotNullWhen(true)] this string? filePath, int maxWidth, int maxHeight)
+    public static bool IsValidImageFile([NotNullWhen(true)] this string? filePath,
+        int? maxWidth = null,
+        int? maxHeight = null)
     {
         if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
         {
@@ -26,7 +27,7 @@ public static class ImageValidatorExtensions
         {
             using var bitmap = SKBitmap.Decode(filePath);
 
-            return bitmap != null && bitmap.Info.Width <= maxWidth && bitmap.Info.Height <= maxHeight;
+            return bitmap != null && bitmap.Info.HasValidImageInfo(maxWidth, maxHeight);
         }
         catch
         {
@@ -40,7 +41,9 @@ public static class ImageValidatorExtensions
     /// <param name="data">The provided content</param>
     /// <param name="maxWidth">maximum allowed width</param>
     /// <param name="maxHeight">maximum allowed height</param>
-    public static bool IsValidImageFile([NotNullWhen(true)] this byte[]? data, int maxWidth, int maxHeight)
+    public static bool IsValidImageFile([NotNullWhen(true)] this byte[]? data,
+        int? maxWidth = null,
+        int? maxHeight = null)
     {
         if (data == null || data.Length == 0)
         {
@@ -51,7 +54,7 @@ public static class ImageValidatorExtensions
         {
             using var bitmap = SKBitmap.Decode(data);
 
-            return bitmap != null && bitmap.Info.Width <= maxWidth && bitmap.Info.Height <= maxHeight;
+            return bitmap != null && bitmap.Info.HasValidImageInfo(maxWidth, maxHeight);
         }
         catch
         {
@@ -65,7 +68,9 @@ public static class ImageValidatorExtensions
     /// <param name="stream">The stream of a given data</param>
     /// <param name="maxWidth">maximum allowed width</param>
     /// <param name="maxHeight">maximum allowed height</param>
-    public static bool IsValidImageFile([NotNullWhen(true)] this Stream? stream, int maxWidth, int maxHeight)
+    public static bool IsValidImageFile([NotNullWhen(true)] this Stream? stream,
+        int? maxWidth = null,
+        int? maxHeight = null)
     {
         if (stream is null)
         {
@@ -78,7 +83,7 @@ public static class ImageValidatorExtensions
             using var codec = SKCodec.Create(inputStream);
             using var bitmap = SKBitmap.Decode(codec);
 
-            return bitmap != null && bitmap.Info.Width <= maxWidth && bitmap.Info.Height <= maxHeight;
+            return bitmap != null && bitmap.Info.HasValidImageInfo(maxWidth, maxHeight);
         }
         catch
         {
@@ -92,7 +97,9 @@ public static class ImageValidatorExtensions
     /// <param name="fromFile">Represents a file sent with the HttpRequest</param>
     /// <param name="maxWidth">maximum allowed width</param>
     /// <param name="maxHeight">maximum allowed height</param>
-    public static bool IsValidImageFile([NotNullWhen(true)] this IFormFile? fromFile, int maxWidth, int maxHeight)
+    public static bool IsValidImageFile([NotNullWhen(true)] this IFormFile? fromFile,
+        int? maxWidth = null,
+        int? maxHeight = null)
     {
         if (fromFile is null || fromFile.Length == 0)
         {
@@ -109,7 +116,7 @@ public static class ImageValidatorExtensions
             using var codec = SKCodec.Create(inputStream);
             using var bitmap = SKBitmap.Decode(codec);
 
-            return bitmap != null && bitmap.Info.Width <= maxWidth && bitmap.Info.Height <= maxHeight;
+            return bitmap != null && bitmap.Info.HasValidImageInfo(maxWidth, maxHeight);
         }
         catch
         {
@@ -124,8 +131,8 @@ public static class ImageValidatorExtensions
     /// <param name="maxWidth">maximum allowed width</param>
     /// <param name="maxHeight">maximum allowed height</param>
     public static bool AreValidImageFiles([NotNullWhen(true)] this IFormFileCollection? fromFiles,
-        int maxWidth,
-        int maxHeight)
+        int? maxWidth = null,
+        int? maxHeight = null)
     {
         if (fromFiles is null || fromFiles.Count == 0)
         {
@@ -134,4 +141,8 @@ public static class ImageValidatorExtensions
 
         return fromFiles.All(fromFile => fromFile.IsValidImageFile(maxWidth, maxHeight));
     }
+
+    private static bool HasValidImageInfo(this SKImageInfo info, int? maxWidth, int? maxHeight)
+        => (!maxWidth.HasValue || info.Width <= maxWidth.Value) &&
+           (!maxHeight.HasValue || info.Height <= maxHeight.Value);
 }

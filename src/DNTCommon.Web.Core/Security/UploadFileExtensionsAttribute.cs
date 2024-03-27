@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 namespace DNTCommon.Web.Core;
 
 /// <summary>
+///     Allowing only selected file extensions are safe to be uploaded.
 ///     More info: http://www.dotnettips.info/post/2555
 /// </summary>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]

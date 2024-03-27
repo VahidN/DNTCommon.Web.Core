@@ -8,7 +8,7 @@ public class TextToImageController : Controller
     public IActionResult Index() => View();
 
     public IActionResult EmailToImage() =>
-        new TextToImageResult("name@site.com",
+        new TextToImageResult("name@site.com + پنج به علاوه 2",
                               new TextToImageOptions
                               {
                                   FontName = "Tahoma",
