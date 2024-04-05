@@ -44,4 +44,19 @@ public class BlazorRenderingContext(IHttpContextAccessor httpContextAccessor, IJ
 
         return BlazorRenderingEnvironment.Unknown;
     }
+
+    /// <summary>
+    ///     Is current request a Blazor Enhanced Navigation
+    /// </summary>
+    public bool IsBlazorEnhancedNavigation
+    {
+        get
+        {
+            var request = httpContextAccessor.HttpContext?.Request;
+
+            return request is not null && (request.Headers.ContainsKey("blazor-enhanced-nav") ||
+                                           request.Headers.ContainsKey("Sec-Fetch-Mode") ||
+                                           request.Headers.Values.Contains("text/html; blazor-enhanced-nav=on"));
+        }
+    }
 }

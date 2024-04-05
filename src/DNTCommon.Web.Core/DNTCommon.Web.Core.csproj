@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Description>DNTCommon.Web.Core provides common scenarios' solutions for ASP.NET Core applications.</Description>
-        <VersionPrefix>4.2.1</VersionPrefix>
+        <VersionPrefix>4.3.0</VersionPrefix>
         <Authors>Vahid Nasiri</Authors>
         <TargetFrameworks>net8.0;net7.0;net6.0;</TargetFrameworks>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -70,7 +70,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="SonarAnalyzer.CSharp" Version="9.23.0.88079">
+        <PackageReference Include="SonarAnalyzer.CSharp" Version="9.23.1.88495">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
@@ -81,7 +81,7 @@
         <PackageReference Include="Microsoft.SyndicationFeed.ReaderWriter" Version="1.0.2"/>
         <PackageReference Include="DNTPersianUtils.Core" Version="5.9.1"/>
         <PackageReference Include="MailKit" Version="4.4.0"/>
-        <PackageReference Include="HtmlAgilityPack" Version="1.11.59"/>
+        <PackageReference Include="HtmlAgilityPack" Version="1.11.60"/>
         <PackageReference Include="IPAddressRange" Version="6.0.0"/>
         <PackageReference Include="SkiaSharp" Version="2.88.7"/>
         <PackageReference Include="SkiaSharp.HarfBuzz" Version="2.88.7"/>
