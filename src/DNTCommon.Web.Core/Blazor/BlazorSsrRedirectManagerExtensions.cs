@@ -71,8 +71,14 @@ public static class BlazorSsrRedirectManagerExtensions
     {
         ArgumentNullException.ThrowIfNull(httpContext);
 
-        httpContext.Response.Headers.Append("blazor-enhanced-nav-redirect-location", redirectionUrl);
-        httpContext.Response.StatusCode = statusCode;
+        httpContext.Response.OnStarting(() =>
+        {
+            var response = httpContext.Response;
+            response.Headers.Append("blazor-enhanced-nav-redirect-location", redirectionUrl);
+            response.StatusCode = statusCode;
+
+            return Task.CompletedTask;
+        });
     }
 
     /// <summary>

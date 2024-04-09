@@ -20,15 +20,16 @@ public class ContentSecurityPolicyMiddleware
     /// </summary>
     public ContentSecurityPolicyMiddleware(RequestDelegate next) => _next = next;
 
-    private static string getContentSecurityPolicyValue(ContentSecurityPolicyConfig config, string errorLogUri)
+    private static string GetContentSecurityPolicyValue(ContentSecurityPolicyConfig config, string errorLogUri)
     {
         if (config.Options == null || config.Options.Count == 0)
         {
-            throw new
-                InvalidOperationException("Please set the `ContentSecurityPolicyConfig:Options` value in `appsettings.json` file.");
+            throw new InvalidOperationException(
+                "Please set the `ContentSecurityPolicyConfig:Options` value in `appsettings.json` file.");
         }
 
         var options = string.Join("; ", config.Options);
+
         return $"{options}; report-uri {errorLogUri}";
     }
 
@@ -37,47 +38,48 @@ public class ContentSecurityPolicyMiddleware
     /// </summary>
     public Task Invoke(HttpContext context, IOptionsSnapshot<ContentSecurityPolicyConfig> config)
     {
-        if (config == null || config.Value == null || config.Value.Options == null)
+        if (config?.Value?.Options == null)
         {
             throw new ArgumentNullException(nameof(config),
-                                            "Please add ContentSecurityPolicyConfig to your appsettings.json file.");
+                "Please add ContentSecurityPolicyConfig to your appsettings.json file.");
         }
 
-        if (context == null)
-        {
-            throw new ArgumentNullException(nameof(context));
-        }
+        ArgumentNullException.ThrowIfNull(context);
 
-        if (!context.Response.Headers.ContainsKey(XFrameOptions))
+        context.Response.OnStarting(() =>
         {
-            context.Response.Headers.Append(XFrameOptions, "SAMEORIGIN");
-        }
+            var response = context.Response;
 
-        if (!context.Response.Headers.ContainsKey(XXssProtection))
-        {
-            context.Response.Headers.Append(XXssProtection, "1; mode=block");
-        }
-
-        if (!context.Response.Headers.ContainsKey(XContentTypeOptions))
-        {
-            context.Response.Headers.Append(XContentTypeOptions,
-                                            "nosniff"); // Refused to execute script from '<URL>' because its MIME type ('') is not executable, and strict MIME type checking is enabled.
-        }
-
-        if (!context.Response.Headers.ContainsKey(ContentSecurityPolicy))
-        {
-            var errorLogUri = context.GetGenericActionUrl(
-                                                          nameof(CspReportController.Log),
-                                                          nameof(CspReportController)
-                                                              .Replace("Controller",
-                                                                       string.Empty,
-                                                                       StringComparison.Ordinal));
-            if (errorLogUri is not null)
+            if (!response.Headers.ContainsKey(XFrameOptions))
             {
-                context.Response.Headers.Append(ContentSecurityPolicy,
-                                                getContentSecurityPolicyValue(config.Value, errorLogUri));
+                response.Headers.Append(XFrameOptions, "SAMEORIGIN");
             }
-        }
+
+            if (!response.Headers.ContainsKey(XXssProtection))
+            {
+                response.Headers.Append(XXssProtection, "1; mode=block");
+            }
+
+            if (!response.Headers.ContainsKey(XContentTypeOptions))
+            {
+                response.Headers.Append(XContentTypeOptions,
+                    "nosniff"); // Refused to execute script from '<URL>' because its MIME type ('') is not executable, and strict MIME type checking is enabled.
+            }
+
+            if (!response.Headers.ContainsKey(ContentSecurityPolicy))
+            {
+                var errorLogUri = context.GetGenericActionUrl(nameof(CspReportController.Log),
+                    nameof(CspReportController).Replace("Controller", string.Empty, StringComparison.Ordinal));
+
+                if (errorLogUri is not null)
+                {
+                    response.Headers.Append(ContentSecurityPolicy,
+                        GetContentSecurityPolicyValue(config.Value, errorLogUri));
+                }
+            }
+
+            return Task.CompletedTask;
+        });
 
         return _next(context);
     }
