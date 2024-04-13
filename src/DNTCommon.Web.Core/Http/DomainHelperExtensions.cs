@@ -22,14 +22,15 @@ public static class DomainHelperExtensions
     {
         var domain2 = uri2.GetUrlDomain().Domain;
         var domain1 = uri1.GetUrlDomain().Domain;
+
         return domain2.Equals(domain1, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
     ///     Determines whether uri1 and uri2 have the same domain.
     /// </summary>
-    public static bool HaveTheSameDomain(this string uri1, string uri2) =>
-        HaveTheSameDomain(new Uri(uri1), new Uri(uri2));
+    public static bool HaveTheSameDomain(this string uri1, string uri2)
+        => HaveTheSameDomain(new Uri(uri1), new Uri(uri2));
 
     /// <summary>
     ///     Determines whether the url has no extension.
@@ -87,6 +88,7 @@ public static class DomainHelperExtensions
         }
 
         var host = url.Host.TrimEnd('.');
+
         if (host.Split('.').Length <= 2)
         {
             return null;
@@ -94,6 +96,7 @@ public static class DomainHelperExtensions
 
         var lastIndex = host.LastIndexOf('.');
         var index = host.LastIndexOf('.', lastIndex - 1);
+
         return host.Substring(0, index);
     }
 
@@ -117,12 +120,11 @@ public static class DomainHelperExtensions
     {
         var subdomain = GetSubDomain(url);
         var host = url.Host.TrimEnd('.');
+
         if (subdomain != null)
         {
-            host = host.Replace(
-                                string.Format(CultureInfo.InvariantCulture, "{0}.", subdomain),
-                                string.Empty,
-                                StringComparison.OrdinalIgnoreCase);
+            host = host.Replace(string.Format(CultureInfo.InvariantCulture, "{0}.", subdomain), string.Empty,
+                StringComparison.OrdinalIgnoreCase);
         }
 
         return host;
@@ -149,6 +151,7 @@ public static class DomainHelperExtensions
         }
 
         var dotBits = url.Host.Split('.');
+
         switch (dotBits.Length)
         {
             case 1:
@@ -157,6 +160,7 @@ public static class DomainHelperExtensions
         }
 
         var bestMatch = "";
+
         foreach (var tld in Tlds)
         {
             if (url.Host.EndsWith(tld, StringComparison.OrdinalIgnoreCase) && tld.Length > bestMatch.Length)
@@ -175,6 +179,7 @@ public static class DomainHelperExtensions
         var inputBits = url.Host.Split('.');
         var getLastBits = bestBits.Length + 1;
         var bestMatchBuilder = new StringBuilder();
+
         for (var c = inputBits.Length - getLastBits; c < inputBits.Length; c++)
         {
             if (bestMatchBuilder.Length > 0)
@@ -203,15 +208,15 @@ public static class DomainHelperExtensions
             throw new ArgumentNullException(nameof(url));
         }
 
-        return referrer.Host.TrimEnd('.').Equals(url.Host.TrimEnd('.'), StringComparison.OrdinalIgnoreCase)
-               || HaveTheSameDomain(referrer, url);
+        return referrer.Host.TrimEnd('.').Equals(url.Host.TrimEnd('.'), StringComparison.OrdinalIgnoreCase) ||
+               HaveTheSameDomain(referrer, url);
     }
 
     /// <summary>
     ///     Determines whether the `referrer` has the same host or domain as `url`.
     /// </summary>
-    public static bool IsLocalReferrer(this string referrer, string url) =>
-        IsLocalReferrer(new Uri(referrer), new Uri(url));
+    public static bool IsLocalReferrer(this string referrer, string url)
+        => IsLocalReferrer(new Uri(referrer), new Uri(url));
 
     /// <summary>
     ///     Determines whether the `destUri` has the same domain as `siteRootUrl`.
@@ -225,14 +230,15 @@ public static class DomainHelperExtensions
 
         var siteDomain = siteRootUrl.GetUrlDomain().Domain;
         var destDomain = GetUrlDomain(destUri).Domain;
+
         return destDomain.Equals(siteDomain, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
     ///     Determines whether the `destUri` has the same domain as `siteRootUrl`.
     /// </summary>
-    public static bool IsReferrerToThisSite(this string destUri, string siteRootUrl) =>
-        IsReferrerToThisSite(new Uri(destUri), siteRootUrl);
+    public static bool IsReferrerToThisSite(this string destUri, string siteRootUrl)
+        => IsReferrerToThisSite(new Uri(destUri), siteRootUrl);
 
     private static List<string> defaultTlds()
     {
@@ -240,6 +246,7 @@ public static class DomainHelperExtensions
         tlds.AddRange(TldPatterns.EXACT);
         tlds.AddRange(TldPatterns.UNDER);
         tlds.AddRange(TldPatterns.EXCLUDED);
+
         return tlds;
     }
 
@@ -247,6 +254,36 @@ public static class DomainHelperExtensions
     ///     Path.Combine for URLs
     /// </summary>
     public static string CombineUrl(this string baseUrl, string relativeUrl)
+    {
+        var baseUri = new UriBuilder(baseUrl);
+
+        if (Uri.TryCreate(baseUri.Uri, relativeUrl, out var newUri))
+        {
+            return newUri.ToString();
+        }
+
+        throw new InvalidOperationException($"Unable to combine {baseUrl} with {relativeUrl}.");
+    }
+
+    /// <summary>
+    ///     Path.Combine for URLs
+    /// </summary>
+    public static string CombineUrl(this Uri baseUrl, Uri relativeUrl)
+    {
+        var baseUri = new UriBuilder(baseUrl);
+
+        if (Uri.TryCreate(baseUri.Uri, relativeUrl, out var newUri))
+        {
+            return newUri.ToString();
+        }
+
+        throw new InvalidOperationException($"Unable to combine {baseUrl} with {relativeUrl}.");
+    }
+
+    /// <summary>
+    ///     Path.Combine for URLs
+    /// </summary>
+    public static string CombineUrl(this Uri baseUrl, string relativeUrl)
     {
         var baseUri = new UriBuilder(baseUrl);
 
