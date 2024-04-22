@@ -275,53 +275,76 @@ public static class HttpRequestExtensions
         }
 
         var sb = new StringBuilder();
-        sb.AppendLine("An error occurred while processing this request.");
 
-        sb.AppendLine(CultureInfo.InvariantCulture,
-            $"--- REQUEST[{responseCode}] {httpContext.TraceIdentifier}: BEGIN ---");
+        sb.AppendLine(HtmlExtensions.CreateHtmlTable("Request Info", ["Key", "Value"],
+        [
+            [
+                "Response Code",
+                !responseCode.HasValue ? "unknown" : responseCode.Value.ToString(CultureInfo.InvariantCulture)
+            ],
+            ["Trace Identifier", httpContext.TraceIdentifier], ["Protocol", httpRequest.Protocol],
+            ["Http Method", httpRequest.Method], ["Url", httpContext.GetCurrentUrl()],
+            ["Is Authenticated", httpContext.User.IsAuthenticated().ToString()]
+        ]));
 
-        var statusCodeReExecuteFeature = httpContext.Features.Get<IStatusCodeReExecuteFeature>();
-        var httpRequestPath = statusCodeReExecuteFeature?.OriginalPath ?? httpRequest.Path;
-        var queryString = statusCodeReExecuteFeature?.OriginalQueryString ?? httpRequest.QueryString.ToUriComponent();
-
-        sb.AppendLine(CultureInfo.InvariantCulture,
-            $"{httpRequest.Method} {httpRequestPath}{queryString} {httpRequest.Protocol}");
+        if (httpRequest.Query.Count != 0)
+        {
+            sb.AppendLine(HtmlExtensions.CreateHtmlTable("Request Query", ["Key", "Value"],
+                httpRequest.Query.Select(header => (List<string>) [header.Key, header.Value.ToString()]).ToList()));
+        }
 
         if (httpRequest.Headers.Any())
         {
-            foreach (var header in httpRequest.Headers)
-            {
-                sb.AppendLine(CultureInfo.InvariantCulture, $"{header.Key}: {header.Value}");
-            }
+            sb.AppendLine(HtmlExtensions.CreateHtmlTable("Request Headers", ["Key", "Value"],
+                httpRequest.Headers.Select(header => (List<string>) [header.Key, header.Value.ToString()]).ToList()));
         }
-
-        sb.AppendLine();
-
-        sb.AppendLine(CultureInfo.InvariantCulture, $"IsAuthenticated: {httpContext.User.IsAuthenticated()}");
 
         if (httpContext.User.Claims.Any())
         {
-            sb.AppendLine("User's Claims:");
-
-            foreach (var claim in httpContext.User.Claims)
-            {
-                sb.AppendLine(CultureInfo.InvariantCulture, $"{claim.Type}: {claim.Value}");
-            }
+            sb.AppendLine(HtmlExtensions.CreateHtmlTable("User Claims", ["Key", "Value"],
+                httpContext.User.Claims.Select(header => (List<string>) [header.Type, header.Value]).ToList()));
         }
 
-        sb.AppendLine();
+        if (httpRequest is { HasFormContentType: true, Form.Count: > 0 })
+        {
+            sb.AppendLine(HtmlExtensions.CreateHtmlTable("User Claims", ["Key", "Value"],
+                httpRequest.Form.Select(header => (List<string>) [header.Key, header.Value.ToString()]).ToList()));
+        }
 
         var exceptionHandlerFeature = httpContext.Features.Get<IExceptionHandlerFeature>();
 
         if (exceptionHandlerFeature?.Error is not null)
         {
             var exception = exceptionHandlerFeature.Error.Demystify();
-            sb.AppendLine("Exception: ").Append(exception.FormatException()).AppendLine(exception.StackTrace);
+
+            sb.AppendLine(HtmlExtensions.CreateHtmlTable("Exception", ["Key", "Value"],
+            [
+                ["Message", $"<pre>{exception.FormatException()}</pre>"],
+                ["StackTrace", $"<pre>{exception.StackTrace}</pre>"]
+            ]));
         }
 
-        sb.AppendLine(CultureInfo.InvariantCulture, $"--- REQUEST {httpContext.TraceIdentifier}: END ---");
-        var result = sb.ToString();
+        return sb.ToString();
+    }
 
-        return result;
+    /// <summary>
+    ///     Returns the current page's addres. It uses IStatusCodeReExecuteFeature for better results.
+    /// </summary>
+    /// <param name="httpContext"></param>
+    /// <returns></returns>
+    public static string GetCurrentUrl(this HttpContext? httpContext)
+    {
+        if (httpContext is null)
+        {
+            return "";
+        }
+
+        var statusCodeReExecuteFeature = httpContext.Features.Get<IStatusCodeReExecuteFeature>();
+        var httpRequestPath = statusCodeReExecuteFeature?.OriginalPath ?? httpContext.Request.Path;
+
+        var queryString = statusCodeReExecuteFeature?.OriginalQueryString ??
+                          httpContext.Request.QueryString.ToUriComponent();
+
+        return $"{httpRequestPath}{queryString}";
     }
 }
