@@ -290,25 +290,28 @@ public static class HttpRequestExtensions
         if (httpRequest.Query.Count != 0)
         {
             sb.AppendLine(HtmlExtensions.CreateHtmlTable("Request Query", ["Key", "Value"],
-                httpRequest.Query.Select(header => (List<string>) [header.Key, header.Value.ToString()]).ToList()));
+                httpRequest.Query.Select(header => (List<string>) [header.Key, $"<pre>{header.Value}</pre>"])
+                    .ToList()));
         }
 
         if (httpRequest.Headers.Any())
         {
             sb.AppendLine(HtmlExtensions.CreateHtmlTable("Request Headers", ["Key", "Value"],
-                httpRequest.Headers.Select(header => (List<string>) [header.Key, header.Value.ToString()]).ToList()));
+                httpRequest.Headers.Select(header => (List<string>) [header.Key, $"<pre>{header.Value}</pre>"])
+                    .ToList()));
         }
 
         if (httpContext.User.Claims.Any())
         {
             sb.AppendLine(HtmlExtensions.CreateHtmlTable("User Claims", ["Key", "Value"],
-                httpContext.User.Claims.Select(header => (List<string>) [header.Type, header.Value]).ToList()));
+                httpContext.User.Claims.Select(header => (List<string>) [header.Type, $"<pre>{header.Value}</pre>"])
+                    .ToList()));
         }
 
         if (httpRequest is { HasFormContentType: true, Form.Count: > 0 })
         {
             sb.AppendLine(HtmlExtensions.CreateHtmlTable("User Claims", ["Key", "Value"],
-                httpRequest.Form.Select(header => (List<string>) [header.Key, header.Value.ToString()]).ToList()));
+                httpRequest.Form.Select(header => (List<string>) [header.Key, $"<pre>{header.Value}</pre>"]).ToList()));
         }
 
         var exceptionHandlerFeature = httpContext.Features.Get<IExceptionHandlerFeature>();

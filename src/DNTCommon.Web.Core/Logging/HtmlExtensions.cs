@@ -49,8 +49,7 @@ public static class HtmlExtensions
         }
 
         sb.AppendLine("</tbody>");
-
-        sb.AppendLine("<br/>");
+        sb.AppendLine("</table>");
 
         return sb.ToString();
     }
