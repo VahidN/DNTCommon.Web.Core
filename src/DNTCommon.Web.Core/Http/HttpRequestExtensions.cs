@@ -18,8 +18,7 @@ public static class HttpRequestExtensions
     /// <summary>
     ///     Gets the current HttpContext.Request's UserAgent.
     /// </summary>
-    public static string GetUserAgent(this HttpContext httpContext)
-        => httpContext.GetHeaderValue("User-Agent");
+    public static string GetUserAgent(this HttpContext httpContext) => httpContext.GetHeaderValue("User-Agent");
 
     /// <summary>
     ///     Gets the current HttpContext.Request's Referrer.
@@ -145,8 +144,7 @@ public static class HttpRequestExtensions
     /// <summary>
     ///     Gets the current HttpContext.Request's root address.
     /// </summary>
-    public static Uri GetBaseUri(this HttpContext httpContext)
-        => new(httpContext.GetBaseUrl());
+    public static Uri GetBaseUri(this HttpContext httpContext) => new(httpContext.GetBaseUrl());
 
     /// <summary>
     ///     Gets the current HttpContext.Request's root address.
@@ -172,8 +170,7 @@ public static class HttpRequestExtensions
     /// <summary>
     ///     Gets the current HttpContext.Request's address.
     /// </summary>
-    public static Uri GetRawUri(this HttpContext httpContext)
-        => new(GetRawUrl(httpContext));
+    public static Uri GetRawUri(this HttpContext httpContext) => new(GetRawUrl(httpContext));
 
     /// <summary>
     ///     Gets the current HttpContext.Request's IUrlHelper.
@@ -270,7 +267,9 @@ public static class HttpRequestExtensions
     /// </summary>
     public static string LogRequest(this HttpRequest? httpRequest, int? responseCode)
     {
-        if (httpRequest is null)
+        var httpContext = httpRequest?.HttpContext;
+
+        if (httpRequest is null || httpContext is null)
         {
             return string.Empty;
         }
@@ -279,9 +278,9 @@ public static class HttpRequestExtensions
         sb.AppendLine("An error occurred while processing this request.");
 
         sb.AppendLine(CultureInfo.InvariantCulture,
-            $"--- REQUEST[{responseCode}] {httpRequest.HttpContext.TraceIdentifier}: BEGIN ---");
+            $"--- REQUEST[{responseCode}] {httpContext.TraceIdentifier}: BEGIN ---");
 
-        var statusCodeReExecuteFeature = httpRequest.HttpContext?.Features.Get<IStatusCodeReExecuteFeature>();
+        var statusCodeReExecuteFeature = httpContext.Features.Get<IStatusCodeReExecuteFeature>();
         var httpRequestPath = statusCodeReExecuteFeature?.OriginalPath ?? httpRequest.Path;
         var queryString = statusCodeReExecuteFeature?.OriginalQueryString ?? httpRequest.QueryString.ToUriComponent();
 
@@ -298,15 +297,29 @@ public static class HttpRequestExtensions
 
         sb.AppendLine();
 
-        var exceptionHandlerFeature = httpRequest.HttpContext?.Features.Get<IExceptionHandlerFeature>();
+        sb.AppendLine(CultureInfo.InvariantCulture, $"IsAuthenticated: {httpContext.User.IsAuthenticated()}");
+
+        if (httpContext.User.Claims.Any())
+        {
+            sb.AppendLine("User's Claims:");
+
+            foreach (var claim in httpContext.User.Claims)
+            {
+                sb.AppendLine(CultureInfo.InvariantCulture, $"{claim.Type}: {claim.Value}");
+            }
+        }
+
+        sb.AppendLine();
+
+        var exceptionHandlerFeature = httpContext.Features.Get<IExceptionHandlerFeature>();
 
         if (exceptionHandlerFeature?.Error is not null)
         {
-            var exception = exceptionHandlerFeature.Error;
-            sb.AppendLine("Exception: ").Append(exception.Message).AppendLine(exception.StackTrace);
+            var exception = exceptionHandlerFeature.Error.Demystify();
+            sb.AppendLine("Exception: ").Append(exception.FormatException()).AppendLine(exception.StackTrace);
         }
 
-        sb.AppendLine(CultureInfo.InvariantCulture, $"--- REQUEST {httpRequest.HttpContext?.TraceIdentifier}: END ---");
+        sb.AppendLine(CultureInfo.InvariantCulture, $"--- REQUEST {httpContext.TraceIdentifier}: END ---");
         var result = sb.ToString();
 
         return result;
