@@ -22,6 +22,9 @@ namespace DNTCommon.Web.Core;
 ///     Note:
 ///     You shouldn't use `@inject UsersService MyUsersService` anymore! These types of scoped services will be shared and
 ///     kept alive during the lifetime of the components.
+///     Also, if you are overriding the `OnInitialized()` method of your component, make sure to call the
+///     `base.OnInitialized();` method first. Otherwise, initialization of your `[InjectComponentScoped]` properties and
+///     services will not happen.
 /// </summary>
 public class BlazorScopedComponentBase : OwningComponentBase
 {
