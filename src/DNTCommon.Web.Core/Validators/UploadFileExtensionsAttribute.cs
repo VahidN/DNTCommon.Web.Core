@@ -4,7 +4,7 @@ namespace DNTCommon.Web.Core;
 
 /// <summary>
 ///     Allowing only selected file extensions are safe to be uploaded.
-///     More info: http://www.dotnettips.info/post/2555
+///     More info: http://www.dntips.ir/post/2555
 /// </summary>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
 public sealed class UploadFileExtensionsAttribute : ValidationAttribute
@@ -65,8 +65,7 @@ public sealed class UploadFileExtensionsAttribute : ValidationAttribute
         return false;
     }
 
-    private bool AreValidFiles(IEnumerable<IFormFile> files)
-        => files.All(IsValidFile);
+    private bool AreValidFiles(IEnumerable<IFormFile> files) => files.All(IsValidFile);
 
     private bool IsValidFile(IFormFile? file)
     {

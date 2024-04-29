@@ -11,5 +11,5 @@ public interface IAntiXssService
     /// <param name="html">Html source</param>
     /// <param name="allowDataAttributes">Allow HTML5 data attributes prefixed with data-</param>
     /// <returns>Clean output</returns>
-    string GetSanitizedHtml(string html, bool allowDataAttributes = true);
+    string GetSanitizedHtml(string? html, bool allowDataAttributes = true);
 }

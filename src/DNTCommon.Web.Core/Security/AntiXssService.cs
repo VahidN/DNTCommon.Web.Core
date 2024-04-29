@@ -40,8 +40,13 @@ public class AntiXssService : IAntiXssService
     /// <param name="html">Html source</param>
     /// <param name="allowDataAttributes">Allow HTML5 data attributes prefixed with data-</param>
     /// <returns>Clean output</returns>
-    public string GetSanitizedHtml(string html, bool allowDataAttributes = true)
+    public string GetSanitizedHtml(string? html, bool allowDataAttributes = true)
     {
+        if (string.IsNullOrWhiteSpace(html))
+        {
+            return string.Empty;
+        }
+
         var parser = _htmlReaderService.ParseHtml(html);
 
         var whitelistTags =
@@ -196,8 +201,10 @@ public class AntiXssService : IAntiXssService
     private (bool HasUnsafeValue, string UnsafeItem) checkAttributeValue(string attributeValue)
     {
         attributeValue = attributeValue.Replace("\n", "", StringComparison.Ordinal)
-            .Replace("\r", "", StringComparison.Ordinal).Replace("\t", "", StringComparison.Ordinal)
-            .Replace("`", "", StringComparison.Ordinal).Replace("\0", "", StringComparison.Ordinal);
+            .Replace("\r", "", StringComparison.Ordinal)
+            .Replace("\t", "", StringComparison.Ordinal)
+            .Replace("`", "", StringComparison.Ordinal)
+            .Replace("\0", "", StringComparison.Ordinal);
 
         foreach (var item in _antiXssConfig.Value.UnsafeAttributeValueCharacters)
         {

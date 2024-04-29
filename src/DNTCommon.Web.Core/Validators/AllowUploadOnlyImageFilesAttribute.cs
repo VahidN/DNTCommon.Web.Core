@@ -5,7 +5,7 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     Allowing only image files are safe to be uploaded.
 ///     This validation attribute, checks the content of the uploaded file.
-///     More info: http://www.dotnettips.info/post/2555
+///     More info: http://www.dntips.ir/post/2555
 /// </summary>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
 public sealed class AllowUploadOnlyImageFilesAttribute : ValidationAttribute
@@ -70,8 +70,7 @@ public sealed class AllowUploadOnlyImageFilesAttribute : ValidationAttribute
         return false;
     }
 
-    private bool AreValidImageFiles(IEnumerable<IFormFile> files)
-        => files.All(IsValidImageFile);
+    private bool AreValidImageFiles(IEnumerable<IFormFile> files) => files.All(IsValidImageFile);
 
     private bool IsValidImageFile(IFormFile? file)
     {

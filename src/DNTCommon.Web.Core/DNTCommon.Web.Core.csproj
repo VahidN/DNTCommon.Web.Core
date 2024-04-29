@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Description>DNTCommon.Web.Core provides common scenarios' solutions for ASP.NET Core applications.</Description>
-        <VersionPrefix>4.9.0</VersionPrefix>
+        <VersionPrefix>5.0.0</VersionPrefix>
         <Authors>Vahid Nasiri</Authors>
         <TargetFrameworks>net8.0;net7.0;net6.0;</TargetFrameworks>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -54,7 +54,7 @@
         <Using Include="System.Net.Http.Headers"/>
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Meziantou.Analyzer" Version="2.0.149">
+        <PackageReference Include="Meziantou.Analyzer" Version="2.0.150">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
@@ -70,7 +70,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="SonarAnalyzer.CSharp" Version="9.23.2.88755">
+        <PackageReference Include="SonarAnalyzer.CSharp" Version="9.24.0.89429">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
@@ -79,7 +79,7 @@
         <FrameworkReference Include="Microsoft.AspNetCore.App"/>
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
         <PackageReference Include="Microsoft.SyndicationFeed.ReaderWriter" Version="1.0.2"/>
-        <PackageReference Include="DNTPersianUtils.Core" Version="6.2.0"/>
+        <PackageReference Include="DNTPersianUtils.Core" Version="6.3.0"/>
         <PackageReference Include="MailKit" Version="4.5.0"/>
         <PackageReference Include="HtmlAgilityPack" Version="1.11.60"/>
         <PackageReference Include="IPAddressRange" Version="6.0.0"/>
