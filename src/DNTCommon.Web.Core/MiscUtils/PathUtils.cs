@@ -1,3 +1,6 @@
+using System.Text.RegularExpressions;
+using DNTPersianUtils.Core;
+
 namespace DNTCommon.Web.Core;
 
 /// <summary>
@@ -5,6 +8,8 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public static class PathUtils
 {
+    private static readonly TimeSpan MatchTimeout = TimeSpan.FromSeconds(3);
+
     /// <summary>
     ///     Find files by their extensions
     /// </summary>
@@ -43,5 +48,23 @@ public static class PathUtils
         {
             file.Delete();
         }
+    }
+
+    /// <summary>
+    ///     Removes InvalidFileNameChars and InvalidPathChars from the given input
+    /// </summary>
+    public static string RemoveIllegalCharactersFromFileName(this string fileName)
+    {
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            return string.Empty;
+        }
+
+        var regexSearch = $"{new string(Path.GetInvalidFileNameChars())}{new string(Path.GetInvalidPathChars())}";
+
+        var r = new Regex($"[{Regex.Escape(regexSearch)}]", RegexOptions.Compiled | RegexOptions.IgnoreCase,
+            MatchTimeout);
+
+        return r.Replace(fileName, ".").GetPostSlug()!;
     }
 }
