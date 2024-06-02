@@ -39,6 +39,26 @@ public class UrlNormalizationService : IUrlNormalizationService
         return url1.Equals(url2, StringComparison.OrdinalIgnoreCase);
     }
 
+    /// <summary>
+    /// Uses NormalizeUrl method to find the normalized URLs and then compares them.
+    /// </summary>
+    public bool AreTheSameUrls(Uri uri1, Uri uri2)
+    {
+        var url1 = NormalizeUrl(uri1);
+        var url2 = NormalizeUrl(uri2);
+        return url1.Equals(url2, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Uses NormalizeUrl method to find the normalized URLs and then compares them.
+    /// </summary>
+    public bool AreTheSameUrls(string url1, string url2)
+    {
+        url1 = NormalizeUrl(new Uri(url1));
+        url2 = NormalizeUrl(new Uri(url2));
+        return url1.Equals(url2, StringComparison.OrdinalIgnoreCase);
+    }
+
     private static readonly string[] DefaultDirectoryIndexes =
     {
         "default.asp",
@@ -58,6 +78,27 @@ public class UrlNormalizationService : IUrlNormalizationService
         {
             uri = await _locationFinder.GetRedirectUrlAsync(uri) ?? uri;
         }
+		
+        return NormalizeUrl(uri);
+    }
+
+    /// <summary>
+    /// URL normalization is the process by which URLs are modified and standardized in a consistent manner. The goal of the normalization process is to transform a URL into a normalized URL so it is possible to determine if two syntactically different URLs may be equivalent.
+    /// https://en.wikipedia.org/wiki/URL_normalization
+    /// </summary>
+    public Task<string> NormalizeUrlAsync(string url, bool findRedirectUrl)
+    {
+        return NormalizeUrlAsync(new Uri(url), findRedirectUrl);
+    }
+
+    /// <summary>
+    /// URL normalization is the process by which URLs are modified and standardized in a consistent manner. The goal of the normalization process is to transform a URL into a normalized URL so it is possible to determine if two syntactically different URLs may be equivalent.
+    /// https://en.wikipedia.org/wiki/URL_normalization
+    /// </summary>
+    public string NormalizeUrl(Uri uri)
+    {
+		ArgumentNullException.ThrowIfNull(uri);
+		
         var url = urlToLower(uri);
         url = limitProtocols(url);
         url = removeDefaultDirectoryIndexes(url);
@@ -73,9 +114,9 @@ public class UrlNormalizationService : IUrlNormalizationService
     /// URL normalization is the process by which URLs are modified and standardized in a consistent manner. The goal of the normalization process is to transform a URL into a normalized URL so it is possible to determine if two syntactically different URLs may be equivalent.
     /// https://en.wikipedia.org/wiki/URL_normalization
     /// </summary>
-    public Task<string> NormalizeUrlAsync(string url, bool findRedirectUrl)
+    public string NormalizeUrl(string url)
     {
-        return NormalizeUrlAsync(new Uri(url), findRedirectUrl);
+        return NormalizeUrl(new Uri(url));
     }
 
     private static string removeFeedburnerPart1(string url)

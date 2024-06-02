@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Description>DNTCommon.Web.Core provides common scenarios' solutions for ASP.NET Core applications.</Description>
-        <VersionPrefix>5.3.0</VersionPrefix>
+        <VersionPrefix>5.3.1</VersionPrefix>
         <Authors>Vahid Nasiri</Authors>
         <TargetFrameworks>net8.0;net7.0;net6.0;</TargetFrameworks>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -54,7 +54,7 @@
         <Using Include="System.Net.Http.Headers"/>
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Meziantou.Analyzer" Version="2.0.150">
+        <PackageReference Include="Meziantou.Analyzer" Version="2.0.155">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
@@ -70,7 +70,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="SonarAnalyzer.CSharp" Version="9.25.0.90414">
+        <PackageReference Include="SonarAnalyzer.CSharp" Version="9.26.0.92422">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
@@ -80,14 +80,14 @@
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
         <PackageReference Include="Microsoft.SyndicationFeed.ReaderWriter" Version="1.0.2"/>
         <PackageReference Include="DNTPersianUtils.Core" Version="6.3.0"/>
-        <PackageReference Include="MailKit" Version="4.5.0"/>
+        <PackageReference Include="MailKit" Version="4.6.0"/>
         <PackageReference Include="HtmlAgilityPack" Version="1.11.61"/>
         <PackageReference Include="IPAddressRange" Version="6.0.0"/>
         <PackageReference Include="SkiaSharp" Version="2.88.8"/>
         <PackageReference Include="SkiaSharp.HarfBuzz" Version="2.88.8"/>
         <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="2.88.8"/>
         <PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" Version="7.3.0.2"/>
-        <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.4"/>
+        <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.6"/>
         <PackageReference Include="Ben.Demystifier" Version="0.4.1"/>
     </ItemGroup>
     <ItemGroup>
