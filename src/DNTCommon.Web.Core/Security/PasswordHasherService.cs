@@ -25,6 +25,15 @@ public class PasswordHasherService : IPasswordHasherService
         return Convert.ToBase64String(byteHash);
     }
 
+    /// <summary>
+    ///     Creates a custom hash based on SHA1 CryptoServiceProvider.
+    /// </summary>
+    public string GetSha1Hash(string input)
+    {
+        var byteValue = Encoding.UTF8.GetBytes(input);
+        var byteHash = SHA1.HashData(byteValue);
+        return BitConverter.ToString(byteHash).Replace("-", "", StringComparison.OrdinalIgnoreCase).ToUpperInvariant();
+    }
 
     /// <summary>
     ///     A cryptographic random number generator

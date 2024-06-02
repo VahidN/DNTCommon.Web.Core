@@ -11,6 +11,11 @@ public interface IPasswordHasherService
     string GetSha256Hash(string input);
 
     /// <summary>
+    ///     Creates a custom hash based on SHA1 CryptoServiceProvider.
+    /// </summary>
+    string GetSha1Hash(string input);
+
+    /// <summary>
     ///     Computes a salted Pbkdf2 hash. Use IsValidPbkdf2Hash method to validate it.
     /// </summary>
     /// <param name="password"></param>
