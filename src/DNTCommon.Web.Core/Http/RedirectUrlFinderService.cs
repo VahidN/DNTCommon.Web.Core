@@ -55,6 +55,7 @@ public class RedirectUrlFinderService : IRedirectUrlFinderService
         }
 
         var redirectUri = siteUri;
+        var hops = 1;		
 
         try
         {
@@ -64,7 +65,6 @@ public class RedirectUrlFinderService : IRedirectUrlFinderService
             }
 
             setHeaders(siteUri);
-            var hops = 1;
 
             do
             {
@@ -107,15 +107,10 @@ public class RedirectUrlFinderService : IRedirectUrlFinderService
 
             throw new InvalidOperationException("Too many redirects detected.");
         }
-        catch (HttpRequestException ex)
+        catch (Exception ex)
         {
-            _logger.LogError(ex.Demystify(), "LocationFinderService error. Couldn't find redirect of {SiteUri}",
-                siteUri);
-        }
-        catch (Exception ex) when (ex.IsNetworkError())
-        {
-            _logger.LogError(ex.Demystify(), "LocationFinderService error. Couldn't find redirect of {SiteUri}",
-                siteUri);
+            _logger.LogError(ex.Demystify(), "LocationFinderService error. Couldn't find redirect of {SiteUri} after {Hops} tries.",
+                siteUri, hops);
         }
 
         return cacheReturn(siteUri, redirectUri);
