@@ -8,48 +8,57 @@ namespace DNTCommon.Web.Core;
 public static class HtmlExtensions
 {
     /// <summary>
+    ///     Creates a `strong` html tag
+    /// </summary>
+    public static string MakeItStrong(this string text) => $"<strong>{text}</strong>";
+
+    /// <summary>
     ///     Creates a simple bootstrap table
     /// </summary>
-    /// <param name="caption"></param>
-    /// <param name="headers"></param>
-    /// <param name="rows"></param>
-    /// <returns></returns>
-    public static string CreateHtmlTable(string caption,
-        IEnumerable<string> headers,
-        IEnumerable<IEnumerable<string>> rows)
+    public static string CreateHtmlTable(string? caption,
+        IList<string>? headers,
+        IEnumerable<IEnumerable<string>> rows,
+        string tableClass = "table table-bordered table-sm caption-top table-striped table-hover w-auto mx-auto",
+        string? tableAttributes = null)
     {
-        ArgumentNullException.ThrowIfNull(headers);
         ArgumentNullException.ThrowIfNull(rows);
 
         var sb = new StringBuilder();
-        sb.AppendLine("<br/>");
-        sb.AppendLine("<table class=\"table table-sm caption-top table-striped table-hover\">");
-        sb.AppendLine(CultureInfo.InvariantCulture, $"<caption>{caption}</caption>");
-        sb.AppendLine("<thead><tr>");
+        sb.AppendLine(CultureInfo.InvariantCulture, $"<table {tableAttributes} class='{tableClass}'>");
 
-        foreach (var header in headers)
+        if (!string.IsNullOrWhiteSpace(caption))
         {
-            sb.AppendLine(CultureInfo.InvariantCulture, $"<th scope=\"col\">{header}</th>");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"<caption>{caption}</caption>");
         }
 
-        sb.AppendLine("</tr></thead>");
+        if (headers?.Count > 0)
+        {
+            sb.AppendLine(value: "<thead><tr>");
 
-        sb.AppendLine("<tbody class=\"table-group-divider\">");
+            foreach (var header in headers)
+            {
+                sb.AppendLine(CultureInfo.InvariantCulture, $"<th scope=\"col\">{header}</th>");
+            }
+
+            sb.AppendLine(value: "</tr></thead>");
+        }
+
+        sb.AppendLine(value: "<tbody class=\"table-group-divider\">");
 
         foreach (var row in rows)
         {
-            sb.AppendLine("<tr>");
+            sb.AppendLine(value: "<tr>");
 
             foreach (var item in row)
             {
                 sb.AppendLine(CultureInfo.InvariantCulture, $"<td>{item}</td>");
             }
 
-            sb.AppendLine("</tr>");
+            sb.AppendLine(value: "</tr>");
         }
 
-        sb.AppendLine("</tbody>");
-        sb.AppendLine("</table>");
+        sb.AppendLine(value: "</tbody>");
+        sb.AppendLine(value: "</table>");
 
         return sb.ToString();
     }
