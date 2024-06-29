@@ -8,7 +8,12 @@ public static class DisplayNameExtensions
     /// <summary>
     ///     Gets the DisplayName of the provided expression
     /// </summary>
-    public static string GetDisplayName<TEntity>(this Expression<Func<TEntity>>? expression)
+    public static string GetDisplayName<TEntity>(this Expression<Func<TEntity>>? expression) => expression.GetDisplayName();
+
+    /// <summary>
+    ///     Gets the DisplayName of the provided expression
+    /// </summary>
+    public static string GetDisplayName(this Expression? expression)
     {
         var memberExp = expression.GetMemberExpression();
 
