@@ -87,17 +87,17 @@ public static class DomainHelperExtensions
             return null;
         }
 
-        var host = url.Host.TrimEnd('.');
+        var host = url.Host.TrimEnd(trimChar: '.');
 
-        if (host.Split('.').Length <= 2)
+        if (host.Split(separator: '.').Length <= 2)
         {
             return null;
         }
 
-        var lastIndex = host.LastIndexOf('.');
-        var index = host.LastIndexOf('.', lastIndex - 1);
+        var lastIndex = host.LastIndexOf(value: '.');
+        var index = host.LastIndexOf(value: '.', lastIndex - 1);
 
-        return host.Substring(0, index);
+        return host.Substring(startIndex: 0, index);
     }
 
     /// <summary>
@@ -119,11 +119,11 @@ public static class DomainHelperExtensions
     public static string GetHostWithoutSubDomain(this Uri url)
     {
         var subdomain = GetSubDomain(url);
-        var host = url.Host.TrimEnd('.');
+        var host = url.Host.TrimEnd(trimChar: '.');
 
         if (subdomain != null)
         {
-            host = host.Replace(string.Format(CultureInfo.InvariantCulture, "{0}.", subdomain), string.Empty,
+            host = host.Replace(string.Format(CultureInfo.InvariantCulture, format: "{0}.", subdomain), string.Empty,
                 StringComparison.OrdinalIgnoreCase);
         }
 
@@ -150,7 +150,7 @@ public static class DomainHelperExtensions
             return (string.Empty, false);
         }
 
-        var dotBits = url.Host.Split('.');
+        var dotBits = url.Host.Split(separator: '.');
 
         switch (dotBits.Length)
         {
@@ -175,8 +175,8 @@ public static class DomainHelperExtensions
         }
 
         //add the domain name onto tld
-        var bestBits = bestMatch.Split('.');
-        var inputBits = url.Host.Split('.');
+        var bestBits = bestMatch.Split(separator: '.');
+        var inputBits = url.Host.Split(separator: '.');
         var getLastBits = bestBits.Length + 1;
         var bestMatchBuilder = new StringBuilder();
 
@@ -184,7 +184,7 @@ public static class DomainHelperExtensions
         {
             if (bestMatchBuilder.Length > 0)
             {
-                bestMatchBuilder.Append('.');
+                bestMatchBuilder.Append(value: '.');
             }
 
             bestMatchBuilder.Append(inputBits[c]);
@@ -208,7 +208,8 @@ public static class DomainHelperExtensions
             throw new ArgumentNullException(nameof(url));
         }
 
-        return referrer.Host.TrimEnd('.').Equals(url.Host.TrimEnd('.'), StringComparison.OrdinalIgnoreCase) ||
+        return referrer.Host.TrimEnd(trimChar: '.')
+                   .Equals(url.Host.TrimEnd(trimChar: '.'), StringComparison.OrdinalIgnoreCase) ||
                HaveTheSameDomain(referrer, url);
     }
 
@@ -251,47 +252,68 @@ public static class DomainHelperExtensions
     }
 
     /// <summary>
-    ///     Path.Combine for URLs
+    ///     Path.Combine for URLs. The `relativeUrl` doesn't necessarily need a `/` at the beginning of it.
     /// </summary>
-    public static string CombineUrl(this string baseUrl, string relativeUrl)
+    public static string CombineUrl(this string baseUrl, string? relativeUrl)
     {
-        var baseUri = new UriBuilder(baseUrl);
-
-        if (Uri.TryCreate(baseUri.Uri, relativeUrl, out var newUri))
+        if (string.IsNullOrWhiteSpace(baseUrl))
         {
-            return newUri.ToString();
+            throw new ArgumentNullException(nameof(baseUrl));
         }
 
-        throw new InvalidOperationException($"Unable to combine {baseUrl} with {relativeUrl}.");
+        if (string.IsNullOrWhiteSpace(relativeUrl))
+        {
+            return baseUrl;
+        }
+
+        baseUrl = baseUrl.TrimEnd(trimChar: '/');
+        relativeUrl = relativeUrl.TrimStart(trimChar: '/');
+
+        return $"{baseUrl}/{relativeUrl}";
     }
 
     /// <summary>
-    ///     Path.Combine for URLs
+    ///     Path.Combine for URLs. The `relativeUrl` doesn't necessarily need a `/` at the beginning of it.
     /// </summary>
-    public static string CombineUrl(this Uri baseUrl, Uri relativeUrl)
+    public static string CombineUrl(this Uri baseUri, string? relativeUrl)
     {
-        var baseUri = new UriBuilder(baseUrl);
+        ArgumentNullException.ThrowIfNull(baseUri);
 
-        if (Uri.TryCreate(baseUri.Uri, relativeUrl, out var newUri))
-        {
-            return newUri.ToString();
-        }
-
-        throw new InvalidOperationException($"Unable to combine {baseUrl} with {relativeUrl}.");
+        return baseUri.AbsoluteUri.CombineUrl(relativeUrl);
     }
 
     /// <summary>
-    ///     Path.Combine for URLs
+    ///     Path.Combine for URLs. The `relativeUrls` don't necessarily need a `/` at the beginning of them.
     /// </summary>
-    public static string CombineUrl(this Uri baseUrl, string relativeUrl)
+    public static string CombineUrls(this Uri baseUri, params string[]? relativePaths)
     {
-        var baseUri = new UriBuilder(baseUrl);
+        ArgumentNullException.ThrowIfNull(baseUri);
 
-        if (Uri.TryCreate(baseUri.Uri, relativeUrl, out var newUri))
+        return baseUri.AbsoluteUri.CombineUrls(relativePaths);
+    }
+
+    /// <summary>
+    ///     Path.Combine for URLs. The `relativeUrls` don't necessarily need a `/` at the beginning of them.
+    /// </summary>
+    public static string CombineUrls(this string baseUrl, params string[]? relativePaths)
+    {
+        if (string.IsNullOrWhiteSpace(baseUrl))
         {
-            return newUri.ToString();
+            throw new ArgumentNullException(nameof(baseUrl));
         }
 
-        throw new InvalidOperationException($"Unable to combine {baseUrl} with {relativeUrl}.");
+        if (relativePaths is null)
+        {
+            return baseUrl;
+        }
+
+        if (relativePaths.Length == 0)
+        {
+            return baseUrl;
+        }
+
+        var currentUrl = baseUrl.CombineUrl(relativePaths[0]);
+
+        return currentUrl.CombineUrls(relativePaths.Skip(count: 1).ToArray());
     }
 }
