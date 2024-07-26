@@ -1,6 +1,10 @@
 using System.Collections;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DNTCommon.Web.Core;
 
@@ -9,6 +13,36 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public static class WebServerInfoProvider
 {
+    /// <summary>
+    ///     Gets the addresses used by the server.
+    /// </summary>
+    public static ICollection<string> GetKestrelListeningAddresses(this WebApplication webApplication)
+    {
+        ArgumentNullException.ThrowIfNull(webApplication);
+
+        ICollection<string>? addresses;
+
+        try
+        {
+            var server = webApplication.Services.GetRequiredService<IServer>();
+            addresses = server.Features.Get<IServerAddressesFeature>()?.Addresses;
+        }
+        catch
+        {
+            addresses = null;
+        }
+
+        if (addresses is null || addresses.Count == 0)
+        {
+            addresses = new List<string>
+            {
+                "http://localhost:5000"
+            };
+        }
+
+        return addresses;
+    }
+
     /// <summary>
     ///     Returns the current server's basic hardware and software info
     /// </summary>
@@ -31,7 +65,7 @@ public static class WebServerInfoProvider
         {
             Process = new ApplicationProcess
             {
-                ProcessArguments = string.Join(' ', Environment.GetCommandLineArgs()),
+                ProcessArguments = string.Join(separator: ' ', Environment.GetCommandLineArgs()),
                 ProcessPath = Environment.ProcessPath ?? "",
                 ProcessName = process.MainModule?.ModuleName ?? process.ProcessName,
                 ProcessId = process.Id.ToString(CultureInfo.InvariantCulture),
@@ -53,7 +87,7 @@ public static class WebServerInfoProvider
                 ServerTime = DateTime.UtcNow,
                 UserName = Environment.UserName,
                 HostName = hostName,
-                HostAddresses = string.Join(", ", addresses)
+                HostAddresses = string.Join(separator: ", ", addresses)
             },
             DriveInfo = GetDriveInfo(),
             TimeZone = GetTimezoneDetails(),
@@ -85,7 +119,7 @@ public static class WebServerInfoProvider
         var startTime = DateTime.UtcNow;
         var startCpuUsage = process.TotalProcessorTime;
 
-        await Task.Delay(500);
+        await Task.Delay(millisecondsDelay: 500);
 
         var endTime = DateTime.UtcNow;
         var endCpuUsage = process.TotalProcessorTime;
