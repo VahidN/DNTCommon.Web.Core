@@ -1,18 +1,16 @@
-﻿using System;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-///  DNTScheduler ServiceCollection Extensions
+///     DNTScheduler ServiceCollection Extensions
 /// </summary>
 public static class SchedulerServiceCollectionExtensions
 {
     /// <summary>
-    /// Adds default DNTScheduler providers.
+    ///     Adds default DNTScheduler providers.
     /// </summary>
     public static void AddDNTScheduler(this IServiceCollection services, Action<ScheduledTasksStorage> options)
     {
@@ -53,13 +51,17 @@ public static class SchedulerServiceCollectionExtensions
         }
 
         services.AddHttpClient<MySitePingClient>(client =>
-        {
-            client.BaseAddress = new Uri(storage.SiteRootUrl);
-            client.DefaultRequestHeaders.ConnectionClose = true;
-            client.DefaultRequestHeaders.Add("User-Agent", "DNTScheduler 1.0");
-        });
+            {
+                client.BaseAddress = new Uri(storage.SiteRootUrl);
+                client.DefaultRequestHeaders.ConnectionClose = true;
+                client.DefaultRequestHeaders.Add(name: "User-Agent", value: "DNTScheduler 1.0");
+            })
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                AutomaticDecompression = DecompressionMethods.All
+            });
 
-        storage.AddScheduledTask<PingTask>(runAt: utcNow => utcNow.Second == 1);
+        storage.AddScheduledTask<PingTask>(utcNow => utcNow.Second == 1);
         services.TryAddSingleton<PingTask>();
     }
 }

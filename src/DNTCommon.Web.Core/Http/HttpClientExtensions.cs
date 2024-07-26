@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace DNTCommon.Web.Core;
 
@@ -49,7 +50,7 @@ public static class HttpClientExtensions
 
         using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri)
         {
-            Content = new StringContent(JsonSerializer.Serialize(value), Encoding.UTF8, "application/json")
+            Content = new StringContent(JsonSerializer.Serialize(value), Encoding.UTF8, mediaType: "application/json")
         };
 
         configRequest?.Invoke(httpRequestMessage);
@@ -166,7 +167,7 @@ public static class HttpClientExtensions
             outputFileInfo.Delete();
         }
 
-        var tempFilePath = Path.ChangeExtension(outputFileNamePath, ".tmp");
+        var tempFilePath = Path.ChangeExtension(outputFileNamePath, extension: ".tmp");
 
         if (File.Exists(tempFilePath))
         {
@@ -192,21 +193,21 @@ public static class HttpClientExtensions
         using (var inputStream = await response.Content.ReadAsStreamAsync())
         {
             using (var fileStream = new FileStream(tempFilePath, FileMode.CreateNew, FileAccess.Write, FileShare.None,
-                       maxBufferSize, true))
+                       maxBufferSize, useAsync: true))
             {
                 var buffer = new byte[maxBufferSize];
                 int read;
                 var bytesTransferred = 0;
                 var readCount = 0L;
 
-                while ((read = await inputStream.ReadAsync(buffer.AsMemory(0, buffer.Length))) > 0)
+                while ((read = await inputStream.ReadAsync(buffer.AsMemory(start: 0, buffer.Length))) > 0)
                 {
                     bytesTransferred += read;
                     readCount++;
 
                     if (remoteFileSize > 0 && bytesTransferred > 0)
                     {
-                        var percentComplete = Math.Round((decimal)bytesTransferred * 100 / remoteFileSize, 2);
+                        var percentComplete = Math.Round((decimal)bytesTransferred * 100 / remoteFileSize, decimals: 2);
 
                         if (readCount % 100 == 0)
                         {
@@ -214,10 +215,10 @@ public static class HttpClientExtensions
                         }
                     }
 
-                    await fileStream.WriteAsync(buffer.AsMemory(0, read));
+                    await fileStream.WriteAsync(buffer.AsMemory(start: 0, read));
                 }
 
-                logger?.Invoke("\rProgress: 100%   \n");
+                logger?.Invoke(obj: "\rProgress: 100%   \n");
             }
         }
 
@@ -227,22 +228,21 @@ public static class HttpClientExtensions
     /// <summary>
     ///     Gets the status code of the HTTP response.
     /// </summary>
-    /// <param name="httpClient"></param>
-    /// <param name="siteUrl"></param>
-    /// <returns></returns>
-    public static async Task<HttpStatusCode?> GetHttpStatusCodeAsync(this HttpClient httpClient, string siteUrl)
+    public static async Task<HttpStatusCode?> GetHttpStatusCodeAsync(this HttpClient httpClient,
+        string siteUrl,
+        ILogger logger)
     {
         try
         {
-            var responseMessage = await httpClient.GetAsync(siteUrl, false);
+            var responseMessage = await httpClient.GetAsync(siteUrl, ensureSuccess: false);
 
             return responseMessage.StatusCode;
         }
         catch (Exception ex)
         {
-            var requestException = ex as HttpRequestException;
+            logger.LogError(ex.Demystify(), message: "Failed to GetHttpStatusCodeAsync({URL})", siteUrl);
 
-            return requestException?.StatusCode;
+            return (ex as HttpRequestException)?.StatusCode;
         }
     }
 }
