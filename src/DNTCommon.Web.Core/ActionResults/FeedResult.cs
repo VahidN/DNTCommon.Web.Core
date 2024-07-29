@@ -137,8 +137,9 @@ public class FeedResult : ActionResult
                     new TextSyndicationContent(item.Title.ApplyRle().RemoveHexadecimalSymbols().SanitizeXmlString()),
                 Id = uri.ToString(),
                 Content = new TextSyndicationContent(
-                    item.Content.WrapInDirectionalDiv().RemoveHexadecimalSymbols().SanitizeXmlString(),
-                    TextSyndicationContentKind.Html),
+                    item.Content.WrapInDirectionalDiv(fontSize: "inherit")
+                        .RemoveHexadecimalSymbols()
+                        .SanitizeXmlString(), TextSyndicationContentKind.Html),
                 Links =
                 {
                     SyndicationLink.CreateAlternateLink(uri)
