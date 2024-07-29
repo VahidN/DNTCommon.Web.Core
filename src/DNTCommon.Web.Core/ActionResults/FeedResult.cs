@@ -39,28 +39,35 @@ public class FeedResult : ActionResult
         return WriteSyndicationFeedToResponseAsync(context);
     }
 
-    private async Task WriteSyndicationFeedToResponseAsync(ActionContext context)
+    private Task WriteSyndicationFeedToResponseAsync(ActionContext context)
     {
         var response = context.HttpContext.Response;
 
-        var mediaType = new MediaTypeHeaderValue(mediaType: "application/atom+xml")
+        response.ContentType = new MediaTypeHeaderValue(mediaType: "application/atom+xml")
         {
             CharSet = Encoding.UTF8.WebName
-        };
+        }.ToString();
 
-        response.ContentType = mediaType.ToString();
+        var data = GetFeedData();
 
-        var xws = new XmlWriterSettings
+        return response.Body.WriteAsync(data.AsMemory(start: 0, data.Length)).AsTask();
+    }
+
+    private byte[] GetFeedData()
+    {
+        using var memoryStream = new MemoryStream();
+
+        using (var xmlWriter = XmlWriter.Create(memoryStream, new XmlWriterSettings
+               {
+                   Indent = true,
+                   Encoding = Encoding.UTF8
+               }))
         {
-            Indent = true,
-            Encoding = Encoding.UTF8,
-            Async = true
-        };
+            var feedFormatter = new Atom10FeedFormatter(GetSyndicationFeed());
+            feedFormatter.WriteTo(xmlWriter);
+        }
 
-        await using var xmlWriter = XmlWriter.Create(response.Body, xws);
-        var feedFormatter = new Atom10FeedFormatter(GetSyndicationFeed());
-        feedFormatter.WriteTo(xmlWriter);
-        await xmlWriter.FlushAsync();
+        return memoryStream.ToArray();
     }
 
     private SyndicationFeed GetSyndicationFeed()
