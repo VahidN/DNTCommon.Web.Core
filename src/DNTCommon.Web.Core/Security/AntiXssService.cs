@@ -28,7 +28,7 @@ public class AntiXssService : IAntiXssService
         if (_antiXssConfig.Value == null || _antiXssConfig.Value.ValidHtmlTags == null)
         {
             throw new ArgumentNullException(nameof(antiXssConfig),
-                "Please add AntiXssConfig to your appsettings.json file.");
+                message: "Please add AntiXssConfig to your appsettings.json file.");
         }
 
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -55,34 +55,35 @@ public class AntiXssService : IAntiXssService
 
         foreach (var node in parser.HtmlNodes.ToList())
         {
-            fixCodeTag(node);
+            FixCodeTag(node);
 
-            if (cleanTags(whitelistTags, node))
+            if (CleanTags(whitelistTags, node))
             {
                 continue;
             }
 
-            if (cleanWhitespacesBetweenTags(node))
+            if (CleanWhitespacesBetweenTags(node))
             {
                 continue;
             }
 
-            if (cleanComments(node))
+            if (CleanComments(node))
             {
                 continue;
             }
 
-            cleanAttributes(node, allowDataAttributes);
+            CleanAttributes(node, allowDataAttributes);
         }
 
         return parser.HtmlDocument.DocumentNode.OuterHtml;
     }
 
-    private void fixCodeTag(HtmlNode node)
+    private void FixCodeTag(HtmlNode node)
     {
         if (node.NodeType == HtmlNodeType.Element &&
-            (string.Equals(node.Name, "pre", StringComparison.Ordinal) ||
-             string.Equals(node.Name, "code", StringComparison.Ordinal)) && !string.IsNullOrWhiteSpace(node.InnerHtml))
+            (string.Equals(node.Name, b: "pre", StringComparison.Ordinal) ||
+             string.Equals(node.Name, b: "code", StringComparison.Ordinal)) &&
+            !string.IsNullOrWhiteSpace(node.InnerHtml))
         {
             var decodedHtml = WebUtility.HtmlDecode(node.InnerHtml);
             var encodedHtml = WebUtility.HtmlEncode(decodedHtml);
@@ -91,13 +92,18 @@ public class AntiXssService : IAntiXssService
             {
                 node.InnerHtml = encodedHtml;
 
-                _logger.LogWarning("Fixed a non-encoded `{NodeName}` tag: `{NodeOuterHtml}`.", node.Name,
+                _logger.LogWarning(message: "Fixed a non-encoded `{NodeName}` tag: `{NodeOuterHtml}`.", node.Name,
                     node.OuterHtml);
             }
+
+            node.SetAttributeValue(name: "dir", value: "ltr");
+
+            node.SetAttributeValue(name: "style",
+                value: "white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left;");
         }
     }
 
-    private static bool cleanWhitespacesBetweenTags(HtmlNode node)
+    private static bool CleanWhitespacesBetweenTags(HtmlNode node)
     {
         if (node.NodeType == HtmlNodeType.Text &&
             (string.IsNullOrWhiteSpace(node.InnerText) || string.IsNullOrEmpty(node.InnerText.Trim())))
@@ -110,7 +116,7 @@ public class AntiXssService : IAntiXssService
         return false;
     }
 
-    private void cleanAttributes(HtmlNode node, bool allowDataAttributes)
+    private void CleanAttributes(HtmlNode node, bool allowDataAttributes)
     {
         if (!node.HasAttributes)
         {
@@ -121,7 +127,7 @@ public class AntiXssService : IAntiXssService
         {
             if (string.IsNullOrWhiteSpace(attribute.Value))
             {
-                _logger.LogWarning("Removed an empty attribute: `{AttributeName}` from `{NodeOuterHtml}`.",
+                _logger.LogWarning(message: "Removed an empty attribute: `{AttributeName}` from `{NodeOuterHtml}`.",
                     attribute.Name, node.OuterHtml);
 
                 attribute.Remove();
@@ -129,9 +135,9 @@ public class AntiXssService : IAntiXssService
                 continue;
             }
 
-            if (!isAllowedAttribute(attribute, allowDataAttributes))
+            if (!IsAllowedAttribute(attribute, allowDataAttributes))
             {
-                _logger.LogWarning("Removed a not valid attribute: `{AttributeName}` from `{NodeOuterHtml}`.",
+                _logger.LogWarning(message: "Removed a not valid attribute: `{AttributeName}` from `{NodeOuterHtml}`.",
                     attribute.Name, node.OuterHtml);
 
                 attribute.Remove();
@@ -141,11 +147,12 @@ public class AntiXssService : IAntiXssService
 
             attribute.Value = attribute.Value.Trim();
 
-            var result = checkAttributeValue(attribute.Value);
+            var result = CheckAttributeValue(attribute.Value);
 
             if (result.HasUnsafeValue)
             {
                 _logger.LogWarning(
+                    message:
                     "Removed an unsafe[`{ResultUnsafeItem}`] attribute: `{AttributeName}` from `{NodeOuterHtml}`.",
                     result.UnsafeItem, attribute.Name, node.OuterHtml);
 
@@ -154,11 +161,12 @@ public class AntiXssService : IAntiXssService
                 continue;
             }
 
-            result = checkAttributeValue(attribute.DeEntitizeValue);
+            result = CheckAttributeValue(attribute.DeEntitizeValue);
 
             if (result.HasUnsafeValue)
             {
                 _logger.LogWarning(
+                    message:
                     "Removed an unsafe[`{ResultUnsafeItem}`] attribute: `{AttributeName}` from `{NodeOuterHtml}`.",
                     result.UnsafeItem, attribute.Name, node.OuterHtml);
 
@@ -167,16 +175,17 @@ public class AntiXssService : IAntiXssService
         }
     }
 
-    private bool isAllowedAttribute(HtmlAttribute attribute, bool allowDataAttributes)
-        => (allowDataAttributes && attribute.Name?.StartsWith("data-", StringComparison.OrdinalIgnoreCase) == true) ||
+    private bool IsAllowedAttribute(HtmlAttribute attribute, bool allowDataAttributes)
+        => (allowDataAttributes &&
+            attribute.Name?.StartsWith(value: "data-", StringComparison.OrdinalIgnoreCase) == true) ||
            _antiXssConfig.Value.ValidHtmlTags.Any(tag
                => attribute.Name != null && tag.Attributes.Contains(attribute.Name, StringComparer.OrdinalIgnoreCase));
 
-    private bool cleanComments(HtmlNode node)
+    private bool CleanComments(HtmlNode node)
     {
         if (node.NodeType == HtmlNodeType.Comment)
         {
-            _logger.LogWarning("Removed a comment: `{NodeOuterHtml}`.", node.OuterHtml);
+            _logger.LogWarning(message: "Removed a comment: `{NodeOuterHtml}`.", node.OuterHtml);
             node.ParentNode?.RemoveChild(node);
 
             return true;
@@ -185,11 +194,11 @@ public class AntiXssService : IAntiXssService
         return false;
     }
 
-    private bool cleanTags(HashSet<string> whitelistTags, HtmlNode node)
+    private bool CleanTags(HashSet<string> whitelistTags, HtmlNode node)
     {
         if (node.NodeType == HtmlNodeType.Element && !whitelistTags.Contains(node.Name))
         {
-            _logger.LogWarning("Removed a not valid tag: `{NodeOuterHtml}`.", node.OuterHtml);
+            _logger.LogWarning(message: "Removed a not valid tag: `{NodeOuterHtml}`.", node.OuterHtml);
             node.ParentNode?.RemoveChild(node);
 
             return true;
@@ -198,13 +207,13 @@ public class AntiXssService : IAntiXssService
         return false;
     }
 
-    private (bool HasUnsafeValue, string UnsafeItem) checkAttributeValue(string attributeValue)
+    private (bool HasUnsafeValue, string UnsafeItem) CheckAttributeValue(string attributeValue)
     {
-        attributeValue = attributeValue.Replace("\n", "", StringComparison.Ordinal)
-            .Replace("\r", "", StringComparison.Ordinal)
-            .Replace("\t", "", StringComparison.Ordinal)
-            .Replace("`", "", StringComparison.Ordinal)
-            .Replace("\0", "", StringComparison.Ordinal);
+        attributeValue = attributeValue.Replace(oldValue: "\n", newValue: "", StringComparison.Ordinal)
+            .Replace(oldValue: "\r", newValue: "", StringComparison.Ordinal)
+            .Replace(oldValue: "\t", newValue: "", StringComparison.Ordinal)
+            .Replace(oldValue: "`", newValue: "", StringComparison.Ordinal)
+            .Replace(oldValue: "\0", newValue: "", StringComparison.Ordinal);
 
         foreach (var item in _antiXssConfig.Value.UnsafeAttributeValueCharacters)
         {
