@@ -10,7 +10,7 @@ public class FeedResultController : Controller
 
     public IActionResult RssFeed()
     {
-        var rssItems = new List<FeedItem>
+        var rssItems = new List<WhatsNewItemModel>
         {
             new()
             {
@@ -48,7 +48,7 @@ public class FeedResultController : Controller
             }
         };
 
-        var channel = new FeedChannel
+        var channel = new WhatsNewFeedChannel
         {
             FeedTitle = ".NET Core News",
             FeedDescription = "Latest .NET Core News",
@@ -59,8 +59,17 @@ public class FeedResultController : Controller
             CultureName = "fa-IR"
         };
 
-        return new FeedResult(channel);
+        return new FeedResult<WhatsNewItemModel>(channel);
     }
 
     public IActionResult Article(int? id) => Content(id == null ? "" : id.ToString());
+}
+
+public class WhatsNewFeedChannel : FeedChannel<WhatsNewItemModel>
+{
+}
+
+public class WhatsNewItemModel : FeedItem
+{
+    public int UserId { set; get; }
 }

@@ -13,17 +13,13 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     An ASP.NET Core RSS Feed Renderer.
 /// </summary>
-public class FeedResult : ActionResult
+/// <remarks>
+///     An ASP.NET Core RSS Feed Renderer.
+/// </remarks>
+/// <param name="feedChannel">Channel's info</param>
+public class FeedResult<TFeedItem>(FeedChannel<TFeedItem> feedChannel) : ActionResult
+    where TFeedItem : FeedItem
 {
-    private readonly FeedChannel _feedChannel;
-    private IHttpRequestInfoService? _httpContextInfo;
-
-    /// <summary>
-    ///     An ASP.NET Core RSS Feed Renderer.
-    /// </summary>
-    /// <param name="feedChannel">Channel's info</param>
-    public FeedResult(FeedChannel feedChannel) => _feedChannel = feedChannel;
-
     /// <summary>
     ///     Executes the result operation of the action method asynchronously.
     /// </summary>
@@ -34,12 +30,17 @@ public class FeedResult : ActionResult
             throw new ArgumentNullException(nameof(context));
         }
 
-        _httpContextInfo = context.HttpContext.RequestServices.GetRequiredService<IHttpRequestInfoService>();
+        var httpContextInfo = context.HttpContext.RequestServices.GetRequiredService<IHttpRequestInfoService>();
 
-        return WriteSyndicationFeedToResponseAsync(context);
+        if (httpContextInfo == null)
+        {
+            throw new InvalidOperationException(message: "httpContextInfo is null.");
+        }
+
+        return WriteSyndicationFeedToResponseAsync(context, httpContextInfo);
     }
 
-    private Task WriteSyndicationFeedToResponseAsync(ActionContext context)
+    private Task WriteSyndicationFeedToResponseAsync(ActionContext context, IHttpRequestInfoService httpContextInfo)
     {
         var response = context.HttpContext.Response;
 
@@ -48,12 +49,12 @@ public class FeedResult : ActionResult
             CharSet = Encoding.UTF8.WebName
         }.ToString();
 
-        var data = GetFeedData();
+        var data = GetFeedData(httpContextInfo);
 
         return response.Body.WriteAsync(data.AsMemory(start: 0, data.Length)).AsTask();
     }
 
-    private byte[] GetFeedData()
+    private byte[] GetFeedData(IHttpRequestInfoService httpContextInfo)
     {
         using var memoryStream = new MemoryStream();
 
@@ -63,63 +64,60 @@ public class FeedResult : ActionResult
                    Encoding = Encoding.UTF8
                }))
         {
-            var feedFormatter = new Atom10FeedFormatter(GetSyndicationFeed());
+            var feedFormatter = new Atom10FeedFormatter(GetSyndicationFeed(httpContextInfo));
             feedFormatter.WriteTo(xmlWriter);
         }
 
         return memoryStream.ToArray();
     }
 
-    private SyndicationFeed GetSyndicationFeed()
+    private SyndicationFeed GetSyndicationFeed(IHttpRequestInfoService httpContextInfo)
     {
-        if (_httpContextInfo == null)
-        {
-            throw new InvalidOperationException(message: "_httpContextInfo is null.");
-        }
+        var rawUri = httpContextInfo.GetRawUri();
+        var baseUri = httpContextInfo.GetBaseUri();
 
         var feed = new SyndicationFeed
         {
-            Id = _httpContextInfo.GetRawUri()?.ToString(),
-            Title = new TextSyndicationContent(_feedChannel.FeedTitle.ApplyRle()
+            Id = rawUri?.ToString(),
+            Title = new TextSyndicationContent(feedChannel.FeedTitle.ApplyRle()
                 .RemoveHexadecimalSymbols()
                 .SanitizeXmlString()),
-            Description = new TextSyndicationContent(_feedChannel.FeedDescription.ApplyRle()
+            Description = new TextSyndicationContent(feedChannel.FeedDescription.ApplyRle()
                 .RemoveHexadecimalSymbols()
                 .SanitizeXmlString()),
-            Items = GetSyndicationItems(),
-            Language = _feedChannel.CultureName,
-            Copyright = new TextSyndicationContent(_feedChannel.FeedCopyright.ApplyRle()
+            Items = GetSyndicationItems(baseUri?.ToString() ?? "/"),
+            Language = feedChannel.CultureName,
+            Copyright = new TextSyndicationContent(feedChannel.FeedCopyright.ApplyRle()
                 .RemoveHexadecimalSymbols()
                 .SanitizeXmlString()),
-            TimeToLive = _feedChannel.TimeToLive,
-            LastUpdatedTime = _feedChannel.RssItems.MaxBy(x => x.LastUpdatedTime)?.LastUpdatedTime ??
+            TimeToLive = feedChannel.TimeToLive,
+            LastUpdatedTime = feedChannel.RssItems?.MaxBy(x => x.LastUpdatedTime)?.LastUpdatedTime ??
                               DateTimeOffset.UtcNow
         };
 
-        feed.Links.Add(SyndicationLink.CreateAlternateLink(_httpContextInfo.GetRawUri()));
+        feed.Links.Add(SyndicationLink.CreateAlternateLink(rawUri));
 
-        if (!string.IsNullOrWhiteSpace(_feedChannel.FeedImageContentPath))
+        if (!string.IsNullOrWhiteSpace(feedChannel.FeedImageContentPath))
         {
-            feed.Links.Add(new SyndicationLink(_httpContextInfo.AbsoluteContent(_feedChannel.FeedImageContentPath)));
+            feed.Links.Add(new SyndicationLink(httpContextInfo.AbsoluteContent(feedChannel.FeedImageContentPath)));
         }
 
         XNamespace atom = "http://www.w3.org/2005/Atom";
 
-        feed.ElementExtensions.Add(new XElement(atom + "link",
-            new XAttribute(name: "href", _httpContextInfo.GetRawUri()?.ToString() ?? ""),
+        feed.ElementExtensions.Add(new XElement(atom + "link", new XAttribute(name: "href", rawUri?.ToString() ?? ""),
             new XAttribute(name: "rel", value: "self"), new XAttribute(name: "type", value: "application/rss+xml")));
 
         return feed;
     }
 
-    private IEnumerable<SyndicationItem> GetSyndicationItems()
+    private IEnumerable<SyndicationItem> GetSyndicationItems(string baseUri)
     {
-        if (_httpContextInfo == null)
+        if (feedChannel.RssItems is null)
         {
-            throw new InvalidOperationException(message: "_httpContextInfo is null.");
+            yield break;
         }
 
-        foreach (var item in _feedChannel.RssItems)
+        foreach (var item in feedChannel.RssItems)
         {
             var uri = new Uri(QueryHelpers.AddQueryString(item.Url,
                 new Dictionary<string, string?>(StringComparer.Ordinal)
@@ -160,7 +158,7 @@ public class FeedResult : ActionResult
                 syndicationItem.Authors.Add(new SyndicationPerson
                 {
                     Name = item.AuthorName,
-                    Uri = _httpContextInfo.GetBaseUri()?.ToString()
+                    Uri = baseUri
                 });
             }
 

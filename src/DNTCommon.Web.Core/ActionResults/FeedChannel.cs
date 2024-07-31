@@ -3,7 +3,8 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     Represents a feed channel
 /// </summary>
-public class FeedChannel
+public class FeedChannel<TFeedItem>
+    where TFeedItem : FeedItem
 {
     /// <summary>
     ///     Feed's Title
@@ -33,7 +34,7 @@ public class FeedChannel
     /// <summary>
     ///     Feed's RSS Items
     /// </summary>
-    public IEnumerable<FeedItem> RssItems { set; get; } = Enumerable.Empty<FeedItem>();
+    public IEnumerable<TFeedItem>? RssItems { set; get; }
 
     /// <summary>
     ///     Feed language's culture name such as en-US or fa-IR
