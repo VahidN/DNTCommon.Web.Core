@@ -161,7 +161,7 @@ public class WebMailService(
                 }
             }
 
-            await client.DisconnectAsync(true);
+            await client.DisconnectAsync(quit: true);
         }
     }
 
@@ -190,8 +190,9 @@ public class WebMailService(
         foreach (var email in emails)
         {
             await using var stream =
-                new FileStream(Path.Combine(smtpConfig.PickupFolder, $"email-{Guid.NewGuid().ToString("N")}.eml"),
-                    FileMode.CreateNew, FileAccess.Write, FileShare.None, maxBufferSize, true);
+                new FileStream(
+                    Path.Combine(smtpConfig.PickupFolder, $"email-{Guid.NewGuid().ToString(format: "N")}.eml"),
+                    FileMode.CreateNew, FileAccess.Write, FileShare.None, maxBufferSize, useAsync: true);
 
             using var emailMessage = getEmailMessage(email.ToName, email.ToAddress, subject, message, attachmentFiles,
                 smtpConfig, headers, blindCarpbonCopies, carpbonCopies, replyTos);
@@ -253,7 +254,7 @@ public class WebMailService(
             return;
         }
 
-        var host = fromAddress.Split('@')[^1];
+        var host = fromAddress.Split(separator: '@')[^1];
 
         if (!string.IsNullOrWhiteSpace(headers.MessageId))
         {
@@ -268,6 +269,12 @@ public class WebMailService(
         if (!string.IsNullOrWhiteSpace(headers.References))
         {
             emailMessage.References.Add($"<{headers.References}@{host}>");
+        }
+
+        if (!string.IsNullOrWhiteSpace(headers.UnSubscribeUrl))
+        {
+            emailMessage.Headers.Add(field: "List-Unsubscribe",
+                string.Format(CultureInfo.InvariantCulture, format: "<{0}>", headers.UnSubscribeUrl));
         }
     }
 
