@@ -96,6 +96,8 @@ public class AntiXssService : IAntiXssService
                     node.OuterHtml);
             }
 
+            node.InnerHtml = node.InnerHtml.Trim();
+
             node.SetAttributeValue(name: "dir", value: "ltr");
 
             node.SetAttributeValue(name: "style",

@@ -7,27 +7,40 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     Logs the ContentSecurityPolicy errors
 /// </summary>
-[ApiController, AllowAnonymous, Route("api/[controller]")]
-public class CspReportController : ControllerBase
+/// <remarks>
+///     Logs the ContentSecurityPolicy errors
+/// </remarks>
+[ApiController]
+[AllowAnonymous]
+[Route(template: "api/[controller]")]
+public class CspReportController(
+    ILogger<CspReportController> logger,
+    IAntiXssService antiXssService,
+    ICacheService cacheService) : ControllerBase
 {
-    private readonly ILogger<CspReportController> _logger;
-
     /// <summary>
     ///     Logs the ContentSecurityPolicy errors
     /// </summary>
-    public CspReportController(ILogger<CspReportController> logger)
-        => _logger = logger;
-
-    /// <summary>
-    ///     Logs the ContentSecurityPolicy errors
-    /// </summary>
-    [HttpPost("[action]"), EnableReadableBodyStream]
+    [HttpPost(template: "[action]")]
+    [EnableReadableBodyStream]
     public async Task<IActionResult> Log()
     {
         using (var bodyReader = new StreamReader(HttpContext.Request.Body))
         {
             var body = await bodyReader.ReadToEndAsync();
-            _logger.LogError("Content Security Policy Error: {Body}", body);
+
+            if (string.IsNullOrWhiteSpace(body))
+            {
+                return Ok();
+            }
+
+            cacheService.GetOrAdd(body.Md5Hash(), () =>
+            {
+                logger.LogError(message: "Content Security Policy Error: {Body}, {Request}",
+                    antiXssService.GetSanitizedHtml(body), HttpContext.Request.LogRequest(responseCode: 200));
+
+                return body;
+            }, DateTimeOffset.UtcNow.AddMinutes(minutes: 7));
         }
 
         return Ok();

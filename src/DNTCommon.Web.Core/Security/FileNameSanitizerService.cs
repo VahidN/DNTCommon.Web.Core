@@ -5,15 +5,14 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     SafeFile Download Service
 /// </summary>
-public class FileNameSanitizerService : IFileNameSanitizerService
+/// <remarks>
+///     SafeFile Download Service
+/// </remarks>
+public class FileNameSanitizerService(ILogger<FileNameSanitizerService> logger, IAntiXssService antiXssService)
+    : IFileNameSanitizerService
 {
-    private readonly ILogger<FileNameSanitizerService> _logger;
-
-    /// <summary>
-    ///     SafeFile Download Service
-    /// </summary>
-    public FileNameSanitizerService(ILogger<FileNameSanitizerService> logger)
-        => _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ILogger<FileNameSanitizerService> _logger =
+        logger ?? throw new ArgumentNullException(nameof(logger));
 
     /// <summary>
     ///     Determines whether the requested file is safe to download.
@@ -30,8 +29,9 @@ public class FileNameSanitizerService : IFileNameSanitizerService
         if (!string.Equals(fileName, requestedFileName, StringComparison.Ordinal))
         {
             _logger.LogWarning(
+                message:
                 "Bad file request. Sanitized file name is different than the actual name. `{FileName}` != `{RequestedFileName}`",
-                fileName, requestedFileName);
+                antiXssService.GetSanitizedHtml(fileName), antiXssService.GetSanitizedHtml(requestedFileName));
 
             return new SafeFile();
         }
@@ -40,7 +40,8 @@ public class FileNameSanitizerService : IFileNameSanitizerService
 
         if (!File.Exists(filePath))
         {
-            _logger.LogWarning("Requested file not found: `{FilePath}`", filePath);
+            _logger.LogWarning(message: "Requested file not found: `{FilePath}`",
+                antiXssService.GetSanitizedHtml(filePath));
 
             return new SafeFile();
         }
@@ -48,8 +49,9 @@ public class FileNameSanitizerService : IFileNameSanitizerService
         if (isOutsideOfRootPath(filePath, folderPath))
         {
             _logger.LogWarning(
+                message:
                 "Bad file request. The requested file path `{FilePath}` is outside of the root path `{FolderPath}`.",
-                filePath, folderPath);
+                antiXssService.GetSanitizedHtml(filePath), antiXssService.GetSanitizedHtml(folderPath));
 
             return new SafeFile();
         }

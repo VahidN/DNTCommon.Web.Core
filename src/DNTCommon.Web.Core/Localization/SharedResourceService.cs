@@ -7,23 +7,22 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     A better IStringLocalizer provider with errors logging.
 /// </summary>
-public class SharedResourceService : ISharedResourceService
+/// <remarks>
+///     A better IStringLocalizer provider with errors logging.
+/// </remarks>
+public class SharedResourceService(
+    IStringLocalizer sharedHtmlLocalizer,
+    IHttpContextAccessor httpContextAccessor,
+    ILogger<SharedResourceService> logger,
+    IAntiXssService antiXssService) : ISharedResourceService
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly ILogger<SharedResourceService> _logger;
-    private readonly IStringLocalizer _sharedLocalizer;
+    private readonly IHttpContextAccessor _httpContextAccessor =
+        httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
 
-    /// <summary>
-    ///     A better IStringLocalizer provider with errors logging.
-    /// </summary>
-    public SharedResourceService(IStringLocalizer sharedHtmlLocalizer,
-        IHttpContextAccessor httpContextAccessor,
-        ILogger<SharedResourceService> logger)
-    {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _sharedLocalizer = sharedHtmlLocalizer ?? throw new ArgumentNullException(nameof(sharedHtmlLocalizer));
-        _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
-    }
+    private readonly ILogger<SharedResourceService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+    private readonly IStringLocalizer _sharedLocalizer =
+        sharedHtmlLocalizer ?? throw new ArgumentNullException(nameof(sharedHtmlLocalizer));
 
     /// <summary>
     ///     Gets all string resources.
@@ -62,11 +61,12 @@ public class SharedResourceService : ISharedResourceService
     {
         if (result.ResourceNotFound)
         {
-            var acceptLanguage = _httpContextAccessor?.HttpContext?.Request?.Headers["Accept-Language"];
+            var acceptLanguage = _httpContextAccessor?.HttpContext?.Request?.Headers[key: "Accept-Language"];
 
             _logger.LogError(
+                message:
                 "The localization resource with Accept-Language:`{AcceptLanguage}` & ID:`{Name}` not found. SearchedLocation: `{ResultSearchedLocation}`.",
-                acceptLanguage, name, result.SearchedLocation);
+                antiXssService.GetSanitizedHtml(acceptLanguage), name, result.SearchedLocation);
         }
     }
 }

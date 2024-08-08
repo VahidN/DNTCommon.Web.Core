@@ -9,34 +9,31 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     Html Helper Service
 /// </summary>
-public class HtmlHelperService : IHtmlHelperService
+/// <remarks>
+///     Html Helper Service
+/// </remarks>
+public class HtmlHelperService(
+    ILogger<HtmlHelperService> logger,
+    IDownloaderService downloaderService,
+    IHttpRequestInfoService httpRequestInfoService,
+    IHtmlReaderService htmlReaderService,
+    IAntiXssService antiXssService) : IHtmlHelperService
 {
-    private static readonly TimeSpan oneMinute = TimeSpan.FromMinutes(1);
+    private static readonly TimeSpan oneMinute = TimeSpan.FromMinutes(value: 1);
 
-    private static readonly Regex _htmlSpacesPattern = new(@"&nbsp;|&zwnj;|(\n)\s*", RegexOptions.Compiled, oneMinute);
+    private static readonly Regex _htmlSpacesPattern =
+        new(pattern: @"&nbsp;|&zwnj;|(\n)\s*", RegexOptions.Compiled, oneMinute);
 
-    private readonly IDownloaderService _downloaderService;
-    private readonly IHtmlReaderService _htmlReaderService;
-    private readonly IHttpRequestInfoService _httpRequestInfoService;
+    private readonly IDownloaderService _downloaderService =
+        downloaderService ?? throw new ArgumentNullException(nameof(downloaderService));
 
-    private readonly ILogger<HtmlHelperService> _logger;
+    private readonly IHtmlReaderService _htmlReaderService =
+        htmlReaderService ?? throw new ArgumentNullException(nameof(htmlReaderService));
 
-    /// <summary>
-    ///     Html Helper Service
-    /// </summary>
-    public HtmlHelperService(ILogger<HtmlHelperService> logger,
-        IDownloaderService downloaderService,
-        IHttpRequestInfoService httpRequestInfoService,
-        IHtmlReaderService htmlReaderService)
-    {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _downloaderService = downloaderService ?? throw new ArgumentNullException(nameof(downloaderService));
+    private readonly IHttpRequestInfoService _httpRequestInfoService =
+        httpRequestInfoService ?? throw new ArgumentNullException(nameof(httpRequestInfoService));
 
-        _httpRequestInfoService =
-            httpRequestInfoService ?? throw new ArgumentNullException(nameof(httpRequestInfoService));
-
-        _htmlReaderService = htmlReaderService ?? throw new ArgumentNullException(nameof(htmlReaderService));
-    }
+    private readonly ILogger<HtmlHelperService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     /// <summary>
     ///     Returns the src list of img tags.
@@ -44,7 +41,7 @@ public class HtmlHelperService : IHtmlHelperService
     public IEnumerable<string> ExtractImagesLinks(string html)
     {
         var doc = _htmlReaderService.CreateHtmlDocument(html);
-        var nodes = doc.DocumentNode.SelectNodes("//img[@src]");
+        var nodes = doc.DocumentNode.SelectNodes(xpath: "//img[@src]");
 
         if (nodes == null)
         {
@@ -54,7 +51,7 @@ public class HtmlHelperService : IHtmlHelperService
         foreach (var image in nodes)
         {
             foreach (var attribute in image.Attributes.Where(attr
-                         => attr.Name.Equals("src", StringComparison.OrdinalIgnoreCase)))
+                         => attr.Name.Equals(value: "src", StringComparison.OrdinalIgnoreCase)))
             {
                 yield return attribute.Value;
             }
@@ -67,7 +64,7 @@ public class HtmlHelperService : IHtmlHelperService
     public IEnumerable<string> ExtractLinks(string html)
     {
         var doc = _htmlReaderService.CreateHtmlDocument(html);
-        var nodes = doc.DocumentNode.SelectNodes("//a[@href]");
+        var nodes = doc.DocumentNode.SelectNodes(xpath: "//a[@href]");
 
         if (nodes == null)
         {
@@ -77,7 +74,7 @@ public class HtmlHelperService : IHtmlHelperService
         foreach (var image in nodes)
         {
             foreach (var attribute in image.Attributes.Where(attr
-                         => attr.Name.Equals("href", StringComparison.OrdinalIgnoreCase)))
+                         => attr.Name.Equals(value: "href", StringComparison.OrdinalIgnoreCase)))
             {
                 yield return attribute.Value;
             }
@@ -90,7 +87,7 @@ public class HtmlHelperService : IHtmlHelperService
     public string FixRelativeUrls(string html, string imageNotFoundPath, string siteBaseUrl)
     {
         var doc = _htmlReaderService.CreateHtmlDocument(html);
-        var nodes = doc.DocumentNode.SelectNodes("//@background|//@lowsrc|//@src|//@href");
+        var nodes = doc.DocumentNode.SelectNodes(xpath: "//@background|//@lowsrc|//@src|//@href");
 
         if (nodes == null)
         {
@@ -100,30 +97,33 @@ public class HtmlHelperService : IHtmlHelperService
         foreach (var image in nodes)
         {
             foreach (var attribute in image.Attributes.Where(attr
-                         => attr.Name.Equals("background", StringComparison.OrdinalIgnoreCase) ||
-                            attr.Name.Equals("lowsrc", StringComparison.OrdinalIgnoreCase) ||
-                            attr.Name.Equals("src", StringComparison.OrdinalIgnoreCase) ||
-                            attr.Name.Equals("href", StringComparison.OrdinalIgnoreCase)))
+                         => attr.Name.Equals(value: "background", StringComparison.OrdinalIgnoreCase) ||
+                            attr.Name.Equals(value: "lowsrc", StringComparison.OrdinalIgnoreCase) ||
+                            attr.Name.Equals(value: "src", StringComparison.OrdinalIgnoreCase) ||
+                            attr.Name.Equals(value: "href", StringComparison.OrdinalIgnoreCase)))
             {
                 var originalUrl = attribute.Value;
 
                 if (string.IsNullOrWhiteSpace(originalUrl))
                 {
                     attribute.Value = siteBaseUrl.CombineUrl(imageNotFoundPath);
-                    _logger.LogWarning("Changed URL: '' to '{AttributeValue}'.", attribute.Value);
+
+                    _logger.LogWarning(message: "Changed URL: '' to '{AttributeValue}'.",
+                        antiXssService.GetSanitizedHtml(attribute.Value));
 
                     continue;
                 }
 
                 originalUrl = originalUrl.Trim();
 
-                if (originalUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase) ||
-                    originalUrl.StartsWith("https", StringComparison.OrdinalIgnoreCase))
+                if (originalUrl.StartsWith(value: "http", StringComparison.OrdinalIgnoreCase) ||
+                    originalUrl.StartsWith(value: "https", StringComparison.OrdinalIgnoreCase))
                 {
                     if (!attribute.Value.Equals(originalUrl, StringComparison.OrdinalIgnoreCase))
                     {
-                        _logger.LogWarning("Changed URL: '{AttributeValue}' to '{OriginalUrl}'.", attribute.Value,
-                            originalUrl);
+                        _logger.LogWarning(message: "Changed URL: '{AttributeValue}' to '{OriginalUrl}'.",
+                            antiXssService.GetSanitizedHtml(attribute.Value),
+                            antiXssService.GetSanitizedHtml(originalUrl));
 
                         attribute.Value = originalUrl;
                     }
@@ -131,7 +131,7 @@ public class HtmlHelperService : IHtmlHelperService
                     continue;
                 }
 
-                var idx = originalUrl.IndexOf("data:image/", StringComparison.OrdinalIgnoreCase);
+                var idx = originalUrl.IndexOf(value: "data:image/", StringComparison.OrdinalIgnoreCase);
 
                 if (idx != -1)
                 {
@@ -141,24 +141,27 @@ public class HtmlHelperService : IHtmlHelperService
                     {
                         attribute.Value = newImage;
 
-                        _logger.LogWarning("Changed Image: '{OriginalUrl}' to '{AttributeValue}'.", originalUrl,
-                            attribute.Value);
+                        _logger.LogWarning(message: "Changed Image: '{OriginalUrl}' to '{AttributeValue}'.",
+                            antiXssService.GetSanitizedHtml(originalUrl),
+                            antiXssService.GetSanitizedHtml(attribute.Value));
                     }
 
                     continue;
                 }
 
-                if (originalUrl.StartsWith("file:/", StringComparison.OrdinalIgnoreCase))
+                if (originalUrl.StartsWith(value: "file:/", StringComparison.OrdinalIgnoreCase))
                 {
                     attribute.Value = siteBaseUrl.CombineUrl(imageNotFoundPath);
 
-                    _logger.LogWarning("Changed URL: '{OriginalUrl}' to '{AttributeValue}'.", originalUrl,
-                        attribute.Value);
+                    _logger.LogWarning(message: "Changed URL: '{OriginalUrl}' to '{AttributeValue}'.",
+                        antiXssService.GetSanitizedHtml(originalUrl), antiXssService.GetSanitizedHtml(attribute.Value));
 
                     continue;
                 }
 
-                originalUrl = originalUrl.Replace("\\", "/", StringComparison.Ordinal).TrimStart('.').TrimStart('/')
+                originalUrl = originalUrl.Replace(oldValue: "\\", newValue: "/", StringComparison.Ordinal)
+                    .TrimStart(trimChar: '.')
+                    .TrimStart(trimChar: '/')
                     .Trim();
 
                 var newUrl = $"http://{originalUrl}";
@@ -167,7 +170,9 @@ public class HtmlHelperService : IHtmlHelperService
                 if (!string.IsNullOrWhiteSpace(urlDomain) && hasBestMatch)
                 {
                     attribute.Value = newUrl;
-                    _logger.LogWarning("Changed URL: '{OriginalUrl}' to '{NewUrl}'.", originalUrl, newUrl);
+
+                    _logger.LogWarning(message: "Changed URL: '{OriginalUrl}' to '{NewUrl}'.",
+                        antiXssService.GetSanitizedHtml(originalUrl), antiXssService.GetSanitizedHtml(newUrl));
 
                     continue;
                 }
@@ -177,7 +182,9 @@ public class HtmlHelperService : IHtmlHelperService
                 if (!newUrl.Equals(attribute.Value, StringComparison.OrdinalIgnoreCase))
                 {
                     attribute.Value = newUrl;
-                    _logger.LogWarning("Changed URL: '{OriginalUrl}' to '{NewUrl}'.", originalUrl, newUrl);
+
+                    _logger.LogWarning(message: "Changed URL: '{OriginalUrl}' to '{NewUrl}'.",
+                        antiXssService.GetSanitizedHtml(originalUrl), antiXssService.GetSanitizedHtml(newUrl));
                 }
             }
         }
@@ -194,7 +201,7 @@ public class HtmlHelperService : IHtmlHelperService
 
         if (string.IsNullOrWhiteSpace(siteBaseUrl))
         {
-            throw new InvalidOperationException("`siteBaseUrl` is null.");
+            throw new InvalidOperationException(message: "`siteBaseUrl` is null.");
         }
 
         return FixRelativeUrls(html, imageNotFoundPath, siteBaseUrl);
@@ -218,8 +225,7 @@ public class HtmlHelperService : IHtmlHelperService
     /// <summary>
     ///     Download the given uri and then extracts its title.
     /// </summary>
-    public Task<string> GetUrlTitleAsync(string url)
-        => GetUrlTitleAsync(new Uri(url));
+    public Task<string> GetUrlTitleAsync(string url) => GetUrlTitleAsync(new Uri(url));
 
     /// <summary>
     ///     Extracts the given HTML page's title.
@@ -232,7 +238,7 @@ public class HtmlHelperService : IHtmlHelperService
         }
 
         var doc = _htmlReaderService.CreateHtmlDocument(html);
-        var title = doc.DocumentNode.SelectSingleNode("//head/title");
+        var title = doc.DocumentNode.SelectSingleNode(xpath: "//head/title");
 
         if (title == null)
         {
@@ -246,8 +252,10 @@ public class HtmlHelperService : IHtmlHelperService
             return string.Empty;
         }
 
-        titleText = titleText.Trim().Replace(Environment.NewLine, " ", StringComparison.Ordinal)
-            .Replace("\t", " ", StringComparison.Ordinal).Replace("\n", " ", StringComparison.Ordinal);
+        titleText = titleText.Trim()
+            .Replace(Environment.NewLine, newValue: " ", StringComparison.Ordinal)
+            .Replace(oldValue: "\t", newValue: " ", StringComparison.Ordinal)
+            .Replace(oldValue: "\n", newValue: " ", StringComparison.Ordinal);
 
         return WebUtility.HtmlDecode(titleText.Trim());
     }
@@ -265,7 +273,9 @@ public class HtmlHelperService : IHtmlHelperService
         var doc = _htmlReaderService.CreateHtmlDocument(html);
         var innerText = doc.DocumentNode.InnerText;
 
-        return string.IsNullOrWhiteSpace(innerText) ? string.Empty : _htmlSpacesPattern.Replace(innerText, " ").Trim();
+        return string.IsNullOrWhiteSpace(innerText)
+            ? string.Empty
+            : _htmlSpacesPattern.Replace(innerText, replacement: " ").Trim();
     }
 
     /// <summary>
