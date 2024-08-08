@@ -77,7 +77,8 @@ public static class TextToImageExtensions
         using var copy = new SKBitmap();
         pic.CopyTo(copy);
 
-        double distort = RandomNumberGenerator.GetInt32(1, 6) * (RandomNumberGenerator.GetInt32(1, 3) == 1 ? 1 : -1);
+        double distort = RandomNumberGenerator.GetInt32(fromInclusive: 1, toExclusive: 6) *
+                         (RandomNumberGenerator.GetInt32(fromInclusive: 1, toExclusive: 3) == 1 ? 1 : -1);
 
         for (var y = 0; y < height; y++)
         {
@@ -120,7 +121,7 @@ public static class TextToImageExtensions
     private static float GetTextWidth(string text, TextToImageOptions options, SKPaint textPaint)
     {
         using var blob = textPaint.Typeface.OpenStream().ToHarfBuzzBlob();
-        using var hbFace = new Face(blob, 0);
+        using var hbFace = new Face(blob, index: 0);
         using var hbFont = new Font(hbFace);
         using var buffer = new Buffer();
         buffer.AddUtf16(text);
@@ -161,7 +162,7 @@ public static class TextToImageExtensions
 
         textPaint.Color = options.ShadowColor;
 
-        switch (RandomNumberGenerator.GetInt32(1, 5))
+        switch (RandomNumberGenerator.GetInt32(fromInclusive: 1, toExclusive: 5))
         {
             case 1:
                 canvas.DrawShapedText(shaper, text, x - 1, y - 1, textPaint);
@@ -196,8 +197,9 @@ public static class TextToImageExtensions
                 StrokeWidth = 1f
             };
 
-            canvas.DrawRect(new SKRect(0, 0, width + 2 * options.TextMargin - 1, height + 2 * options.TextMargin - 1),
-                skPaint);
+            canvas.DrawRect(
+                new SKRect(left: 0, top: 0, width + 2 * (float)options.TextMargin - 1,
+                    height + 2 * (float)options.TextMargin - 1), skPaint);
         }
     }
 
@@ -219,7 +221,7 @@ public static class TextToImageExtensions
 
     private static byte[] ToPng(SKBitmap bitmap)
     {
-        using var data = bitmap.Encode(SKEncodedImageFormat.Png, 100);
+        using var data = bitmap.Encode(SKEncodedImageFormat.Png, quality: 100);
         using var memory = new MemoryStream();
         data.SaveTo(memory);
 
