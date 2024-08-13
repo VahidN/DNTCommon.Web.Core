@@ -36,7 +36,8 @@ public class HtmlReaderService : IHtmlReaderService
         {
             foreach (var error in doc.ParseErrors)
             {
-                _logger.LogWarning(
+                _logger.LogInformation(
+                    message:
                     "LoadHtml Error. SourceText: {ErrorSourceText} -> Code: {ErrorCode} -> Reason: {ErrorReason}",
                     error.SourceText, error.Code, error.Reason);
             }
@@ -64,9 +65,9 @@ public class HtmlReaderService : IHtmlReaderService
     {
         foreach (var node in nodes)
         {
-            if (node.Name.Equals("html", StringComparison.OrdinalIgnoreCase))
+            if (node.Name.Equals(value: "html", StringComparison.OrdinalIgnoreCase))
             {
-                var body = node.Element("body");
+                var body = node.Element(name: "body");
 
                 if (body != null)
                 {
