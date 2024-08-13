@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
+using Microsoft.Net.Http.Headers;
 
 namespace DNTCommon.Web.Core;
 
@@ -18,13 +20,20 @@ public static class HttpRequestExtensions
     /// <summary>
     ///     Gets the current HttpContext.Request's UserAgent.
     /// </summary>
-    public static string GetUserAgent(this HttpContext httpContext) => httpContext.GetHeaderValue("User-Agent");
+    public static string GetUserAgent(this HttpContext httpContext)
+        => httpContext.GetHeaderValue(HeaderNames.UserAgent);
+
+    /// <summary>
+    ///     Does this route has an AuthorizeAttribute?
+    /// </summary>
+    public static bool IsProtectedRoute(this HttpContext? context)
+        => context?.GetEndpoint()?.Metadata?.GetMetadata<AuthorizeAttribute>() is not null;
 
     /// <summary>
     ///     Gets the current HttpContext.Request's Referrer.
     /// </summary>
     public static string GetReferrerUrl(this HttpContext httpContext)
-        => httpContext.GetHeaderValue("Referer"); // The HTTP referer (originally a misspelling of referrer)
+        => httpContext.GetHeaderValue(HeaderNames.Referer); // The HTTP referer (originally a misspelling of referrer)
 
     /// <summary>
     ///     Gets the current HttpContext.Request's Referrer.
@@ -62,7 +71,7 @@ public static class HttpRequestExtensions
         //
         if (tryUseXForwardHeader)
         {
-            ip = SplitCsv(httpContext.GetHeaderValue("X-Forwarded-For")).FirstOrDefault();
+            ip = SplitCsv(httpContext.GetHeaderValue(headerName: "X-Forwarded-For")).FirstOrDefault();
         }
 
         // RemoteIpAddress is always null in DNX RC1 Update1 (bug).
@@ -73,7 +82,7 @@ public static class HttpRequestExtensions
 
         if (string.IsNullOrWhiteSpace(ip))
         {
-            ip = httpContext.GetHeaderValue("REMOTE_ADDR");
+            ip = httpContext.GetHeaderValue(headerName: "REMOTE_ADDR");
         }
 
         return ip;
@@ -106,7 +115,7 @@ public static class HttpRequestExtensions
             return new List<string>();
         }
 
-        return csvList.TrimEnd(',').Split(',').AsEnumerable().Select(s => s.Trim()).ToList();
+        return csvList.TrimEnd(trimChar: ',').Split(separator: ',').AsEnumerable().Select(s => s.Trim()).ToList();
     }
 
     /// <summary>
@@ -207,7 +216,7 @@ public static class HttpRequestExtensions
 
         if (httpContext.Request == null)
         {
-            throw new InvalidOperationException("HttpContext.Request is null.");
+            throw new InvalidOperationException(message: "HttpContext.Request is null.");
         }
     }
 
@@ -238,13 +247,16 @@ public static class HttpRequestExtensions
         else
         {
             throw new InvalidOperationException(
+                message:
                 "To read the request stream's body, please apply [EnableReadableBodyStream] attribute to the current action method.");
         }
 
         using (var bodyReader = new StreamReader(request.Body, Encoding.UTF8))
         {
             var body = await bodyReader.ReadToEndAsync();
-            request.Body.Seek(0, SeekOrigin.Begin); // this is required, otherwise model binding will return null
+
+            request.Body.Seek(offset: 0,
+                SeekOrigin.Begin); // this is required, otherwise model binding will return null
 
             return body;
         }
@@ -276,7 +288,7 @@ public static class HttpRequestExtensions
 
         var sb = new StringBuilder();
 
-        sb.AppendLine(HtmlExtensions.CreateHtmlTable("Request Info", ["Key", "Value"],
+        sb.AppendLine(HtmlExtensions.CreateHtmlTable(caption: "Request Info", ["Key", "Value"],
         [
             [
                 "Response Code",
@@ -289,28 +301,28 @@ public static class HttpRequestExtensions
 
         if (httpRequest.Query.Count != 0)
         {
-            sb.AppendLine(HtmlExtensions.CreateHtmlTable("Request Query", ["Key", "Value"],
+            sb.AppendLine(HtmlExtensions.CreateHtmlTable(caption: "Request Query", ["Key", "Value"],
                 httpRequest.Query.Select(header => (List<string>) [header.Key, $"<pre>{header.Value}</pre>"])
                     .ToList()));
         }
 
         if (httpRequest.Headers.Any())
         {
-            sb.AppendLine(HtmlExtensions.CreateHtmlTable("Request Headers", ["Key", "Value"],
+            sb.AppendLine(HtmlExtensions.CreateHtmlTable(caption: "Request Headers", ["Key", "Value"],
                 httpRequest.Headers.Select(header => (List<string>) [header.Key, $"<pre>{header.Value}</pre>"])
                     .ToList()));
         }
 
         if (httpContext.User.Claims.Any())
         {
-            sb.AppendLine(HtmlExtensions.CreateHtmlTable("User Claims", ["Key", "Value"],
+            sb.AppendLine(HtmlExtensions.CreateHtmlTable(caption: "User Claims", ["Key", "Value"],
                 httpContext.User.Claims.Select(header => (List<string>) [header.Type, $"<pre>{header.Value}</pre>"])
                     .ToList()));
         }
 
         if (httpRequest is { HasFormContentType: true, Form.Count: > 0 })
         {
-            sb.AppendLine(HtmlExtensions.CreateHtmlTable("User Claims", ["Key", "Value"],
+            sb.AppendLine(HtmlExtensions.CreateHtmlTable(caption: "User Claims", ["Key", "Value"],
                 httpRequest.Form.Select(header => (List<string>) [header.Key, $"<pre>{header.Value}</pre>"]).ToList()));
         }
 
@@ -320,7 +332,7 @@ public static class HttpRequestExtensions
         {
             var exception = exceptionHandlerFeature.Error.Demystify();
 
-            sb.AppendLine(HtmlExtensions.CreateHtmlTable("Exception", ["Key", "Value"],
+            sb.AppendLine(HtmlExtensions.CreateHtmlTable(caption: "Exception", ["Key", "Value"],
             [
                 ["Message", $"<pre>{exception.FormatException()}</pre>"],
                 ["StackTrace", $"<pre>{exception.StackTrace}</pre>"]

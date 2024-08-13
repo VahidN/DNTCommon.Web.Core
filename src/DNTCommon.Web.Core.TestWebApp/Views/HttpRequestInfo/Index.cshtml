@@ -1,14 +1,14 @@
 ﻿@using DNTCommon.Web.Core
-
+@model DNTCommon.Web.Core.TestWebApp.Controllers.HttpRequestInfoModel
 @{
-    ViewData["Title"] = "Http Request Info";
-    var url = Url.Action("Index", "Home", null, ViewContext.HttpContext.Request.Scheme);
+    ViewData[index: "Title"] = "Http Request Info";
+    var url = Url.Action(action: "Index", controller: "Home", values: null, ViewContext.HttpContext.Request.Scheme);
 }
 
 @inject IHttpRequestInfoService HttpRequestInfoService
 @inject IHtmlHelperService HtmlHelperService
 
-<h1>@ViewData["Title"]</h1>
+<h1>@ViewData[index: "Title"]</h1>
 
 <div class="panel panel-default">
     <div class="panel-heading">
@@ -17,17 +17,24 @@
     <div class="panel-body">
         <ul>
             <li>HttpRequestInfoService.GetIP(): @HttpRequestInfoService.GetIP()</li>
-            <li>HttpRequestInfoService.GetHeaderValue("Accept-Language"): @HttpRequestInfoService.GetHeaderValue("Accept-Language")</li>
+            <li>HttpRequestInfoService.GetHeaderValue("Accept-Language"): @HttpRequestInfoService.GetHeaderValue(headerName: "Accept-Language")</li>
             <li>HttpRequestInfoService.GetUserAgent(): @HttpRequestInfoService.GetUserAgent()</li>
-            <li>HttpRequestInfoService.AbsoluteContent("~/"): @HttpRequestInfoService.AbsoluteContent("~/")</li>
+            <li>HttpRequestInfoService.AbsoluteContent("~/"): @HttpRequestInfoService.AbsoluteContent(contentPath: "~/")</li>
             <li>HttpRequestInfoService.GetBaseUrl(): @HttpRequestInfoService.GetBaseUrl()</li>
             <li>HttpRequestInfoService.GetRawUrl(): @HttpRequestInfoService.GetRawUrl()</li>
-            <li>HtmlHelperService.GetUrlTitleAsync("@url"): @{ @await HtmlHelperService.GetUrlTitleAsync(url); }</li>
-            <li>HttpRequestInfoService.GetUrlHelper().Content("~/"): @HttpRequestInfoService.GetUrlHelper().Content("~/")</li>
+            <li>
+                HtmlHelperService.GetUrlTitleAsync("@url"):
+                @{
+                    @await HtmlHelperService.GetUrlTitleAsync(url)
+                }
+            </li>
+            <li>HttpRequestInfoService.GetUrlHelper().Content("~/"): @HttpRequestInfoService.GetUrlHelper().Content(contentPath: "~/")</li>
+            <li>IsSpiderClient: @Model.IsSpiderClient</li>
+
         </ul>
 
         <button type="submit" onclick="postData()" class="btn btn-info">
-             HttpRequestInfoService.ReadRequestBodyAsStringAsync()
+            HttpRequestInfoService.ReadRequestBodyAsStringAsync()
         </button>
     </div>
 </div>
@@ -38,7 +45,7 @@
         function postData() {
             $.ajax({
                 type: 'POST',
-                url: '@Url.Action("Index","HttpRequestInfo")',
+                url: '@Url.Action(action: "Index", controller: "HttpRequestInfo")',
                 dataType: 'json',
                 contentType: 'application/json; charset=utf-8',
                 data: JSON.stringify({

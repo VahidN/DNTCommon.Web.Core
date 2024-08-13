@@ -104,6 +104,7 @@ namespace MyWebApp
       equivalent.
     - [IHtmlReaderService](https://github.com/VahidN/DNTCommon.Web.Core/tree/master/src/DNTCommon.Web.Core.Tests/HtmlReaderServiceTests.cs)
       reads the HTML document's nodes recursively.
+    - `IUAParserService` is the updated version of the UAParser library with the latest regexes.yaml file.
 
 - Mail
 

@@ -4,18 +4,17 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DNTCommon.Web.Core.TestWebApp.Controllers;
 
-public class HttpRequestInfoController : Controller
+public class HttpRequestInfoController(IHttpRequestInfoService httpRequestInfoService, IUAParserService uaParserService)
+    : Controller
 {
-    private readonly IHttpRequestInfoService _httpRequestInfoService;
-
-    public HttpRequestInfoController(IHttpRequestInfoService httpRequestInfoService)
+    public async Task<IActionResult> Index()
     {
-        _httpRequestInfoService = httpRequestInfoService;
-    }
+        var isSpiderClient = await uaParserService.IsSpiderClientAsync(HttpContext);
 
-    public IActionResult Index()
-    {
-        return View();
+        return View(new HttpRequestInfoModel
+        {
+            IsSpiderClient = isSpiderClient
+        });
     }
 
     [HttpPost]
@@ -23,11 +22,18 @@ public class HttpRequestInfoController : Controller
     public async Task<IActionResult> Index([FromBody] RoleViewModel model)
     {
         var requestBody = string.Empty;
-        if (Request.IsAjaxRequest() && Request.ContentType.Contains("application/json"))
+
+        if (Request.IsAjaxRequest() && Request.ContentType.Contains(value: "application/json"))
         {
             //var roleModel = await _httpRequestInfoService.DeserializeRequestJsonBodyAsAsync<RoleViewModel>();
-            requestBody = await _httpRequestInfoService.ReadRequestBodyAsStringAsync();
+            requestBody = await httpRequestInfoService.ReadRequestBodyAsStringAsync();
         }
+
         return Content(requestBody);
     }
+}
+
+public class HttpRequestInfoModel
+{
+    public bool IsSpiderClient { set; get; }
 }

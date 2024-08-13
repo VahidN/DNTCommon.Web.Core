@@ -1,13 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
 
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-/// Http Request Info
+///     Http Request Info
 /// </summary>
 public class HttpRequestInfoService : IHttpRequestInfoService
 {
@@ -15,7 +13,7 @@ public class HttpRequestInfoService : IHttpRequestInfoService
     private readonly IUrlHelper _urlHelper;
 
     /// <summary>
-    /// Http Request Info
+    ///     Http Request Info
     /// </summary>
     public HttpRequestInfoService(IHttpContextAccessor httpContextAccessor, IUrlHelper urlHelper)
     {
@@ -24,99 +22,80 @@ public class HttpRequestInfoService : IHttpRequestInfoService
     }
 
     /// <summary>
-    /// Gets the current HttpContext.Request's UserAgent.
+    ///     Gets the current HttpContext.Request's UserAgent.
     /// </summary>
-    public string? GetUserAgent()
-    {
-        return GetHeaderValue("User-Agent");
-    }
+    public string? GetUserAgent() => GetHeaderValue(HeaderNames.UserAgent);
 
     /// <summary>
-    /// Gets the current HttpContext.Request's Referrer.
+    ///     Gets the current HttpContext.Request's Referrer.
     /// </summary>
-    public string? GetReferrerUrl()
-    {
-        return _httpContextAccessor.HttpContext?.GetReferrerUrl();
-    }
+    public string? GetReferrerUrl() => _httpContextAccessor.HttpContext?.GetReferrerUrl();
 
     /// <summary>
-    /// Gets the current HttpContext.Request's Referrer.
+    ///     Gets the current HttpContext.Request's Referrer.
     /// </summary>
-    public Uri? GetReferrerUri()
-    {
-        return _httpContextAccessor.HttpContext?.GetReferrerUri();
-    }
+    public Uri? GetReferrerUri() => _httpContextAccessor.HttpContext?.GetReferrerUri();
 
     /// <summary>
-    /// Gets the current HttpContext.Request's IP.
+    ///     Gets the current HttpContext.Request's IP.
     /// </summary>
     public string? GetIP(bool tryUseXForwardHeader = true)
-    {
-        return _httpContextAccessor.HttpContext?.GetIP(tryUseXForwardHeader);
-    }
+        => _httpContextAccessor.HttpContext?.GetIP(tryUseXForwardHeader);
 
     /// <summary>
-    /// Gets a current HttpContext.Request's header value.
+    ///     Gets a current HttpContext.Request's header value.
     /// </summary>
-    public string? GetHeaderValue(string headerName)
-    {
-        return _httpContextAccessor.HttpContext?.GetHeaderValue(headerName);
-    }
+    public string? GetHeaderValue(string headerName) => _httpContextAccessor.HttpContext?.GetHeaderValue(headerName);
 
     /// <summary>
-    /// Gets the current HttpContext.Request content's absolute path.
-    /// If the specified content path does not start with the tilde (~) character, this method returns contentPath unchanged.
+    ///     Gets the current HttpContext.Request content's absolute path.
+    ///     If the specified content path does not start with the tilde (~) character, this method returns contentPath
+    ///     unchanged.
     /// </summary>
     public Uri? AbsoluteContent(string contentPath)
     {
         var baseUri = GetBaseUri();
+
         return baseUri == null ? null : new Uri(baseUri, _urlHelper.Content(contentPath));
     }
 
     /// <summary>
-    /// Gets the current HttpContext.Request's root address.
+    ///     Gets the current HttpContext.Request's root address.
     /// </summary>
     public Uri? GetBaseUri()
     {
         var uriString = GetBaseUrl();
+
         return uriString == null ? null : new Uri(uriString);
     }
 
     /// <summary>
-    /// Gets the current HttpContext.Request's root address.
+    ///     Gets the current HttpContext.Request's root address.
     /// </summary>
-    public string? GetBaseUrl()
-    {
-        return _httpContextAccessor.HttpContext?.GetBaseUrl();
-    }
+    public string? GetBaseUrl() => _httpContextAccessor.HttpContext?.GetBaseUrl();
 
     /// <summary>
-    /// Gets the current HttpContext.Request's address.
+    ///     Gets the current HttpContext.Request's address.
     /// </summary>
-    public string? GetRawUrl()
-    {
-        return _httpContextAccessor.HttpContext?.GetRawUrl();
-    }
+    public string? GetRawUrl() => _httpContextAccessor.HttpContext?.GetRawUrl();
 
     /// <summary>
-    /// Gets the current HttpContext.Request's address.
+    ///     Gets the current HttpContext.Request's address.
     /// </summary>
     public Uri? GetRawUri()
     {
         var uriString = GetRawUrl();
+
         return uriString == null ? null : new Uri(uriString);
     }
 
     /// <summary>
-    /// Gets the current HttpContext.Request's IUrlHelper.
+    ///     Gets the current HttpContext.Request's IUrlHelper.
     /// </summary>
-    public IUrlHelper GetUrlHelper()
-    {
-        return _urlHelper;
-    }
+    public IUrlHelper GetUrlHelper() => _urlHelper;
 
     /// <summary>
-    /// Deserialize `request.Body` as a JSON content.
+    ///     Deserialize `request.Body` as a JSON content.
     /// </summary>
     public Task<T?> DeserializeRequestJsonBodyAsAsync<T>()
     {
@@ -129,7 +108,7 @@ public class HttpRequestInfoService : IHttpRequestInfoService
     }
 
     /// <summary>
-    /// Reads `request.Body` as string.
+    ///     Reads `request.Body` as string.
     /// </summary>
     public Task<string> ReadRequestBodyAsStringAsync()
     {
@@ -142,13 +121,13 @@ public class HttpRequestInfoService : IHttpRequestInfoService
     }
 
     /// <summary>
-    /// Deserialize `request.Body` as a JSON content.
+    ///     Deserialize `request.Body` as a JSON content.
     /// </summary>
     public Task<IDictionary<string, string>?> DeserializeRequestJsonBodyAsDictionaryAsync()
     {
         if (_httpContextAccessor.HttpContext == null)
         {
-            return Task.FromResult<IDictionary<string, string>?>(null);
+            return Task.FromResult<IDictionary<string, string>?>(result: null);
         }
 
         return _httpContextAccessor.HttpContext.DeserializeRequestJsonBodyAsDictionaryAsync();

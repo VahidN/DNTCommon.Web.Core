@@ -10,8 +10,7 @@ public static class DntCommonWebServiceCollectionExtensions
     /// <summary>
     ///     Adds all of the default providers of DNTCommon.Web.Core at once.
     /// </summary>
-    public static IServiceCollection AddDNTCommonWeb(
-        this IServiceCollection services,
+    public static IServiceCollection AddDNTCommonWeb(this IServiceCollection services,
         Action<ScheduledTasksStorage>? scheduledTasksOptions = null)
     {
         services.AddBackgroundQueueService();
@@ -28,6 +27,7 @@ public static class DntCommonWebServiceCollectionExtensions
         services.AddProtectionProviderService();
         services.AddPasswordHasherService();
         services.AddHtmlHelperService();
+        services.AddUAParserService();
         services.AddFileNameSanitizerService();
         services.AddUrlNormalizationService();
         services.AddRazorViewRenderer();
