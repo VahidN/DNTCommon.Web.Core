@@ -43,6 +43,16 @@ public static class DomainHelperExtensions
     public static bool IsMvcPage(this string url) => IsMvcPage(new Uri(url));
 
     /// <summary>
+    ///     Determines whether the url has an extension.
+    /// </summary>
+    public static bool IsStaticFileUrl(this Uri url) => !string.IsNullOrWhiteSpace(url.GetUriExtension());
+
+    /// <summary>
+    ///     Determines whether the url has an extension.
+    /// </summary>
+    public static bool IsStaticFileUrl(this string url) => IsStaticFileUrl(new Uri(url));
+
+    /// <summary>
     ///     Returns the extension of the uri.
     /// </summary>
     public static string GetUriExtension(this Uri uri, bool throwOnException = false)
