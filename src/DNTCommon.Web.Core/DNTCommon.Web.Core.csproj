@@ -59,7 +59,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.10.48">
+        <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.11.20">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
@@ -71,7 +71,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="SonarAnalyzer.CSharp" Version="9.31.0.96804">
+        <PackageReference Include="SonarAnalyzer.CSharp" Version="9.32.0.97167">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
@@ -82,13 +82,13 @@
         <PackageReference Include="System.ServiceModel.Syndication" Version="8.0.0"/>
         <PackageReference Include="DNTPersianUtils.Core" Version="6.3.1"/>
         <PackageReference Include="MailKit" Version="4.7.1.1"/>
-        <PackageReference Include="HtmlAgilityPack" Version="1.11.62"/>
+        <PackageReference Include="HtmlAgilityPack" Version="1.11.63"/>
         <PackageReference Include="IPAddressRange" Version="6.0.0"/>
         <PackageReference Include="SkiaSharp" Version="2.88.8"/>
         <PackageReference Include="SkiaSharp.HarfBuzz" Version="2.88.8"/>
         <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="2.88.8"/>
         <PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" Version="7.3.0.2"/>
-        <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.7"/>
+        <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.8"/>
         <PackageReference Include="Ben.Demystifier" Version="0.4.1"/>
         <PackageReference Include="UAParser" Version="3.1.47"/>
     </ItemGroup>
