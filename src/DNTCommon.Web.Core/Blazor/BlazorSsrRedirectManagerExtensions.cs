@@ -60,6 +60,11 @@ public static class BlazorSsrRedirectManagerExtensions
         {
             uri = navigationManager.ToBaseRelativePath(uri);
         }
+		
+        if (string.IsNullOrWhiteSpace(uri))
+        {
+            uri = "/";
+        }		
 
         return uri;
     }
