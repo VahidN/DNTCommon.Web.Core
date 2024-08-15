@@ -23,10 +23,10 @@ public static class BaseHttpClientExtensions
     {
         var httpClientBuilder = services.AddHttpClient<BaseHttpClient>(client =>
             {
-                client.Timeout = TimeSpan.FromMinutes(value: 3);
+                client.Timeout = TimeSpan.FromSeconds(value: 20);
 
                 client.DefaultRequestHeaders.Add(name: "User-Agent",
-                    value: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0");
+                    value: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36");
 
                 client.DefaultRequestHeaders.Add(name: "Keep-Alive", value: "true");
 
