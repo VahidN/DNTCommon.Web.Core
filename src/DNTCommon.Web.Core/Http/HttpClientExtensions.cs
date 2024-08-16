@@ -1,6 +1,5 @@
 using System.Text;
 using System.Text.Json;
-using Microsoft.Extensions.Logging;
 
 namespace DNTCommon.Web.Core;
 
@@ -230,7 +229,7 @@ public static class HttpClientExtensions
     /// </summary>
     public static async Task<HttpStatusCode?> GetHttpStatusCodeAsync(this HttpClient httpClient,
         string siteUrl,
-        ILogger logger)
+        bool throwOnException)
     {
         try
         {
@@ -240,7 +239,10 @@ public static class HttpClientExtensions
         }
         catch (Exception ex)
         {
-            logger.LogError(ex.Demystify(), message: "Failed to GetHttpStatusCodeAsync({URL})", siteUrl);
+            if (throwOnException)
+            {
+                throw;
+            }
 
             return (ex as HttpRequestException)?.StatusCode;
         }

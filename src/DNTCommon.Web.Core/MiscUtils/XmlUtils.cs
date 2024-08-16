@@ -12,9 +12,7 @@ public static class XmlUtils
     /// <summary>
     ///     Pretty prints the given XML
     /// </summary>
-    /// <param name="xml"></param>
-    /// <returns></returns>
-    public static string FormatXml(this string xml)
+    public static string FormatXml(this string xml, bool throwOnException)
     {
         try
         {
@@ -24,6 +22,11 @@ public static class XmlUtils
         }
         catch (Exception)
         {
+            if (throwOnException)
+            {
+                throw;
+            }
+
             return xml;
         }
     }
