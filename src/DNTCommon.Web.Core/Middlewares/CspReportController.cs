@@ -36,6 +36,11 @@ public class CspReportController(
 
             cacheService.GetOrAdd(body.Md5Hash(), () =>
             {
+                if (ShouldBeIgnored(body))
+                {
+                    return body;
+                }
+
                 logger.LogError(message: "Content Security Policy Error: {Body}, {Request}",
                     antiXssService.GetSanitizedHtml(body), HttpContext.Request.LogRequest(responseCode: 200));
 
@@ -44,5 +49,12 @@ public class CspReportController(
         }
 
         return Ok();
+    }
+
+    private static bool ShouldBeIgnored(string message)
+    {
+        string[] errors = ["\"violated-directive\":\"font-src\""];
+
+        return errors.Any(error => message.Contains(error, StringComparison.OrdinalIgnoreCase));
     }
 }
