@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Description>DNTCommon.Web.Core provides common scenarios' solutions for ASP.NET Core applications.</Description>
-        <VersionPrefix>6.0.3</VersionPrefix>
+        <VersionPrefix>6.1.0</VersionPrefix>
         <Authors>Vahid Nasiri</Authors>
         <TargetFrameworks>net8.0;net7.0;net6.0;</TargetFrameworks>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -91,6 +91,7 @@
         <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.8"/>
         <PackageReference Include="Ben.Demystifier" Version="0.4.1"/>
         <PackageReference Include="UAParser" Version="3.1.47"/>
+        <PackageReference Include="System.IO.Hashing" Version="8.0.0"/>
     </ItemGroup>
     <ItemGroup>
         <None Include="../../README.md" Link="README.md" Pack="true" PackagePath="/" Visible="false"/>
