@@ -1,7 +1,4 @@
-﻿using System.Text;
-using System.Text.RegularExpressions;
-using System.Web;
-using HtmlAgilityPack;
+﻿using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 
 namespace DNTCommon.Web.Core;
@@ -19,11 +16,6 @@ public class HtmlHelperService(
     IHtmlReaderService htmlReaderService,
     IAntiXssService antiXssService) : IHtmlHelperService
 {
-    private static readonly TimeSpan oneMinute = TimeSpan.FromMinutes(value: 1);
-
-    private static readonly Regex _htmlSpacesPattern =
-        new(pattern: @"&nbsp;|&zwnj;|(\n)\s*", RegexOptions.Compiled, oneMinute);
-
     private readonly IDownloaderService _downloaderService =
         downloaderService ?? throw new ArgumentNullException(nameof(downloaderService));
 
@@ -38,48 +30,12 @@ public class HtmlHelperService(
     /// <summary>
     ///     Returns the src list of img tags.
     /// </summary>
-    public IEnumerable<string> ExtractImagesLinks(string html)
-    {
-        var doc = _htmlReaderService.CreateHtmlDocument(html);
-        var nodes = doc.DocumentNode.SelectNodes(xpath: "//img[@src]");
-
-        if (nodes == null)
-        {
-            yield break;
-        }
-
-        foreach (var image in nodes)
-        {
-            foreach (var attribute in image.Attributes.Where(attr
-                         => attr.Name.Equals(value: "src", StringComparison.OrdinalIgnoreCase)))
-            {
-                yield return attribute.Value;
-            }
-        }
-    }
+    public IEnumerable<string> ExtractImagesLinks(string html) => html.ExtractImagesLinks(_logger);
 
     /// <summary>
     ///     Returns the href list of anchor tags.
     /// </summary>
-    public IEnumerable<string> ExtractLinks(string html)
-    {
-        var doc = _htmlReaderService.CreateHtmlDocument(html);
-        var nodes = doc.DocumentNode.SelectNodes(xpath: "//a[@href]");
-
-        if (nodes == null)
-        {
-            yield break;
-        }
-
-        foreach (var image in nodes)
-        {
-            foreach (var attribute in image.Attributes.Where(attr
-                         => attr.Name.Equals(value: "href", StringComparison.OrdinalIgnoreCase)))
-            {
-                yield return attribute.Value;
-            }
-        }
-    }
+    public IEnumerable<string> ExtractLinks(string html) => html.ExtractLinks(_logger);
 
     /// <summary>
     ///     Parses an HTML content and tries to convert its relative URLs to absolute urls based on the siteBaseUrl.
@@ -230,102 +186,23 @@ public class HtmlHelperService(
     /// <summary>
     ///     Extracts the given HTML page's title.
     /// </summary>
-    public string GetHtmlPageTitle(string html)
-    {
-        if (string.IsNullOrWhiteSpace(html))
-        {
-            return string.Empty;
-        }
-
-        var doc = _htmlReaderService.CreateHtmlDocument(html);
-        var title = doc.DocumentNode.SelectSingleNode(xpath: "//head/title");
-
-        if (title == null)
-        {
-            return string.Empty;
-        }
-
-        var titleText = title.InnerText;
-
-        if (string.IsNullOrWhiteSpace(titleText))
-        {
-            return string.Empty;
-        }
-
-        titleText = titleText.Trim()
-            .Replace(Environment.NewLine, newValue: " ", StringComparison.Ordinal)
-            .Replace(oldValue: "\t", newValue: " ", StringComparison.Ordinal)
-            .Replace(oldValue: "\n", newValue: " ", StringComparison.Ordinal);
-
-        return WebUtility.HtmlDecode(titleText.Trim());
-    }
+    public string GetHtmlPageTitle(string html) => html.GetHtmlPageTitle(_logger);
 
     /// <summary>
     ///     Removes all of the HTML tags.
     /// </summary>
-    public string RemoveHtmlTags(string html)
-    {
-        if (string.IsNullOrWhiteSpace(html))
-        {
-            return string.Empty;
-        }
-
-        var doc = _htmlReaderService.CreateHtmlDocument(html);
-        var innerText = doc.DocumentNode.InnerText;
-
-        return string.IsNullOrWhiteSpace(innerText)
-            ? string.Empty
-            : _htmlSpacesPattern.Replace(innerText, replacement: " ").Trim();
-    }
+    public string RemoveHtmlTags(string html) => html.RemoveHtmlTags(_logger);
 
     /// <summary>
     ///     An enhanced version of HttpUtility.HtmlEncode method
     /// </summary>
     /// <param name="text"></param>
     /// <returns></returns>
-    public string? FullHtmlEncode(string? text)
-    {
-        if (string.IsNullOrWhiteSpace(text))
-        {
-            return text;
-        }
-
-        var chars = HttpUtility.HtmlEncode(text).ToCharArray();
-        var result = new StringBuilder(text.Length + (int)(text.Length * 0.1));
-
-        foreach (var c in chars)
-        {
-            var value = Convert.ToInt32(c);
-
-            if (value > 127)
-            {
-                result.Append(CultureInfo.InvariantCulture, $"&#{value};");
-            }
-            else
-            {
-                result.Append(c);
-            }
-        }
-
-        return result.ToString();
-    }
+    public string? FullHtmlEncode(string? text) => text.FullHtmlEncode();
 
     /// <summary>
     ///     Returns HtmlAttribute's of the selected nodes.
     /// </summary>
     public IEnumerable<HtmlAttributeCollection> SelectNodes(string html, string xpath)
-    {
-        var doc = _htmlReaderService.CreateHtmlDocument(html);
-        var nodes = doc.DocumentNode.SelectNodes(xpath);
-
-        if (nodes == null)
-        {
-            yield break;
-        }
-
-        foreach (var item in nodes)
-        {
-            yield return item.Attributes;
-        }
-    }
+        => html.SelectNodes(xpath, _logger);
 }
