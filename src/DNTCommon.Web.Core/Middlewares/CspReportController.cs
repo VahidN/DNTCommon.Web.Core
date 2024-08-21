@@ -53,7 +53,7 @@ public class CspReportController(
 
     private static bool ShouldBeIgnored(string message)
     {
-        string[] errors = ["\"violated-directive\":\"font-src\""];
+        string[] errors = ["\"violated-directive\":\"font-src\"", "moz-extension", "chrome-extension", "ms-browser-extension"];
 
         return errors.Any(error => message.Contains(error, StringComparison.OrdinalIgnoreCase));
     }
