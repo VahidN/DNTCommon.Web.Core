@@ -6,6 +6,13 @@ namespace DNTCommon.Web.Core.Tests;
 public class CombineUrlsTests
 {
     [TestMethod]
+    public void CombineUrlShouldWorkWithRootUrls()
+    {
+        var result = "".CombineUrl(relativeUrl: "/path1").CombineUrl(relativeUrl: "/path2");
+        Assert.AreEqual(expected: "/path1/path2", result);
+    }
+
+    [TestMethod]
     public void CombineUrlShouldWorkWithRelativeUrls()
     {
         var result = "/site".CombineUrl(relativeUrl: "/path1").CombineUrl(relativeUrl: "/path2");

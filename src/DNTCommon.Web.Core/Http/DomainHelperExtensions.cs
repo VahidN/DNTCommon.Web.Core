@@ -268,7 +268,7 @@ public static class DomainHelperExtensions
     {
         if (string.IsNullOrWhiteSpace(baseUrl))
         {
-            throw new ArgumentNullException(nameof(baseUrl));
+            baseUrl = "/";
         }
 
         if (string.IsNullOrWhiteSpace(relativeUrl))
@@ -309,7 +309,7 @@ public static class DomainHelperExtensions
     {
         if (string.IsNullOrWhiteSpace(baseUrl))
         {
-            throw new ArgumentNullException(nameof(baseUrl));
+            baseUrl = "/";
         }
 
         if (relativePaths is null)
