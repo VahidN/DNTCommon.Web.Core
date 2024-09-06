@@ -41,5 +41,5 @@ public interface IUploadFileService
     /// <param name="formFile">The posted file.</param>
     /// <param name="uploadsRootFolder">The absolute path of the upload folder.</param>
     /// <returns></returns>
-    string GetUniqueFilePath(IFormFile? formFile, string uploadsRootFolder);
+    string? GetUniqueFilePath(IFormFile? formFile, string uploadsRootFolder);
 }
