@@ -83,6 +83,15 @@ public static class DomainHelperExtensions
     public static string GetUriExtension(this string uri) => GetUriExtension(new Uri(uri));
 
     /// <summary>
+    ///     Returns false when hostUri hase the same domain as url
+    /// </summary>
+    /// <param name="url"></param>
+    /// <param name="hostUri"></param>
+    /// <returns></returns>
+    public static bool IsRemoteUrl([NotNullWhen(returnValue: true)] this string? url, Uri hostUri)
+        => url.IsValidUrl() && !hostUri.HaveTheSameDomain(new Uri(url));
+
+    /// <summary>
     ///     Returns the SubDomain of the uri.
     /// </summary>
     public static string? GetSubDomain(this Uri url)

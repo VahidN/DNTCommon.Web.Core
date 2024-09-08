@@ -74,6 +74,54 @@ public static class HtmlHelperServiceExtensions
     }
 
     /// <summary>
+    ///     Is this node an HTML image
+    /// </summary>
+    /// <param name="node"></param>
+    /// <returns></returns>
+    public static bool IsImageNode([NotNullWhen(returnValue: true)] this HtmlNode? node)
+        => node is not null && node.NodeType == HtmlNodeType.Element &&
+           string.Equals(node.Name, b: "img", StringComparison.Ordinal);
+
+    /// <summary>
+    ///     Returns the src value of an HTML image element
+    /// </summary>
+    public static string? GetSrcAttributeValue([NotNullWhen(returnValue: true)] this HtmlNode? node)
+        => node?.Attributes.FirstOrDefault(attr => attr.Name.Equals(value: "src", StringComparison.OrdinalIgnoreCase))
+            ?.Value?.Trim();
+
+    /// <summary>
+    ///     Returns the src value of an HTML image element
+    /// </summary>
+    public static HtmlAttribute? GetSrcAttribute(this HtmlNode? node)
+        => node?.Attributes.FirstOrDefault(attr => attr.Name.Equals(value: "src", StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>
+    ///     Is Base64 encoded image?
+    /// </summary>
+    /// <param name="src"></param>
+    /// <returns></returns>
+    public static bool IsBase64EncodedImage([NotNullWhen(returnValue: true)] this string? src)
+        => src?.StartsWith(value: "data:image/", StringComparison.OrdinalIgnoreCase) == true;
+
+    /// <summary>
+    ///     Returns the image  bytes of the Base64 encoded image
+    /// </summary>
+    /// <param name="src"></param>
+    /// <returns></returns>
+    public static byte[]? GetBase64EncodedImageData(this string? src)
+    {
+        if (!src.IsBase64EncodedImage())
+        {
+            return null;
+        }
+
+        // data:[<MIME-type>][;charset=<encoding>][;base64],<data>
+        var base64Data = src.Substring(src.IndexOf(value: ',', StringComparison.OrdinalIgnoreCase) + 1);
+
+        return Convert.FromBase64String(base64Data);
+    }
+
+    /// <summary>
     ///     Extracts the given HTML page's title.
     /// </summary>
     public static string GetHtmlPageTitle(this string html, ILogger? logger = null)

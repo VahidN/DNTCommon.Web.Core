@@ -9,25 +9,30 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public class AntiXssService : IAntiXssService
 {
-    private readonly IOptionsSnapshot<AntiXssConfig> _antiXssConfig;
     private readonly IHtmlReaderService _htmlReaderService;
     private readonly ILogger<AntiXssService> _logger;
+    private readonly IReplaceRemoteImagesService _remoteImagesService;
+    private AntiXssConfig _antiXssConfig;
 
     /// <summary>
     ///     Anti Xss Library
     /// </summary>
     public AntiXssService(IHtmlReaderService htmlReaderService,
-        IOptionsSnapshot<AntiXssConfig> antiXssConfig,
+        IOptionsMonitor<AntiXssConfig> antiXssConfigMonitor,
+        IReplaceRemoteImagesService remoteImagesService,
         ILogger<AntiXssService> logger)
     {
+        ArgumentNullException.ThrowIfNull(antiXssConfigMonitor);
+
         _htmlReaderService = htmlReaderService ?? throw new ArgumentNullException(nameof(htmlReaderService));
-        _antiXssConfig = antiXssConfig;
+        _antiXssConfig = antiXssConfigMonitor.CurrentValue;
+        antiXssConfigMonitor.OnChange(options => { _antiXssConfig = options; });
 
-        _antiXssConfig = antiXssConfig ?? throw new ArgumentNullException(nameof(antiXssConfig));
+        _remoteImagesService = remoteImagesService;
 
-        if (_antiXssConfig.Value == null || _antiXssConfig.Value.ValidHtmlTags == null)
+        if (_antiXssConfig == null || _antiXssConfig.ValidHtmlTags == null)
         {
-            throw new ArgumentNullException(nameof(antiXssConfig),
+            throw new ArgumentNullException(nameof(antiXssConfigMonitor),
                 message: "Please add AntiXssConfig to your appsettings.json file.");
         }
 
@@ -39,8 +44,11 @@ public class AntiXssService : IAntiXssService
     /// </summary>
     /// <param name="html">Html source</param>
     /// <param name="allowDataAttributes">Allow HTML5 data attributes prefixed with data-</param>
+    /// <param name="options"></param>
     /// <returns>Clean output</returns>
-    public string GetSanitizedHtml(string? html, bool allowDataAttributes = true)
+    public string GetSanitizedHtml(string? html,
+        bool allowDataAttributes = true,
+        FixRemoteImagesOptions? options = null)
     {
         if (string.IsNullOrWhiteSpace(html))
         {
@@ -50,12 +58,14 @@ public class AntiXssService : IAntiXssService
         var parser = _htmlReaderService.ParseHtml(html);
 
         var whitelistTags =
-            new HashSet<string>(_antiXssConfig.Value.ValidHtmlTags.Select(x => x.Tag.ToLowerInvariant()).ToArray(),
+            new HashSet<string>(_antiXssConfig.ValidHtmlTags.Select(x => x.Tag.ToLowerInvariant()).ToArray(),
                 StringComparer.OrdinalIgnoreCase);
 
         foreach (var node in parser.HtmlNodes.ToList())
         {
             FixCodeTag(node);
+
+            _remoteImagesService.FixRemoteImages(node, options);
 
             if (CleanTags(whitelistTags, node))
             {
@@ -180,7 +190,7 @@ public class AntiXssService : IAntiXssService
     private bool IsAllowedAttribute(HtmlAttribute attribute, bool allowDataAttributes)
         => (allowDataAttributes &&
             attribute.Name?.StartsWith(value: "data-", StringComparison.OrdinalIgnoreCase) == true) ||
-           _antiXssConfig.Value.ValidHtmlTags.Any(tag
+           _antiXssConfig.ValidHtmlTags.Any(tag
                => attribute.Name != null && tag.Attributes.Contains(attribute.Name, StringComparer.OrdinalIgnoreCase));
 
     private bool CleanComments(HtmlNode node)
@@ -217,7 +227,7 @@ public class AntiXssService : IAntiXssService
             .Replace(oldValue: "`", newValue: "", StringComparison.Ordinal)
             .Replace(oldValue: "\0", newValue: "", StringComparison.Ordinal);
 
-        foreach (var item in _antiXssConfig.Value.UnsafeAttributeValueCharacters)
+        foreach (var item in _antiXssConfig.UnsafeAttributeValueCharacters)
         {
             if (attributeValue.Contains(item, StringComparison.OrdinalIgnoreCase))
             {

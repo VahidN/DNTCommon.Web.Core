@@ -15,7 +15,7 @@ public static class HtmlReaderServiceExtensions
     /// </summary>
     public static IServiceCollection AddHtmlReaderService(this IServiceCollection services)
     {
-        services.AddTransient<IHtmlReaderService, HtmlReaderService>();
+        services.AddSingleton<IHtmlReaderService, HtmlReaderService>();
 
         return services;
     }

@@ -14,7 +14,7 @@ public static class ImageValidatorExtensions
     /// <param name="filePath">The absolute path of the file</param>
     /// <param name="maxWidth">maximum allowed width</param>
     /// <param name="maxHeight">maximum allowed height</param>
-    public static bool IsValidImageFile([NotNullWhen(true)] this string? filePath,
+    public static bool IsValidImageFile([NotNullWhen(returnValue: true)] this string? filePath,
         int? maxWidth = null,
         int? maxHeight = null)
     {
@@ -41,7 +41,7 @@ public static class ImageValidatorExtensions
     /// <param name="data">The provided content</param>
     /// <param name="maxWidth">maximum allowed width</param>
     /// <param name="maxHeight">maximum allowed height</param>
-    public static bool IsValidImageFile([NotNullWhen(true)] this byte[]? data,
+    public static bool IsValidImageFile([NotNullWhen(returnValue: true)] this byte[]? data,
         int? maxWidth = null,
         int? maxHeight = null)
     {
@@ -68,7 +68,7 @@ public static class ImageValidatorExtensions
     /// <param name="stream">The stream of a given data</param>
     /// <param name="maxWidth">maximum allowed width</param>
     /// <param name="maxHeight">maximum allowed height</param>
-    public static bool IsValidImageFile([NotNullWhen(true)] this Stream? stream,
+    public static bool IsValidImageFile([NotNullWhen(returnValue: true)] this Stream? stream,
         int? maxWidth = null,
         int? maxHeight = null)
     {
@@ -97,7 +97,7 @@ public static class ImageValidatorExtensions
     /// <param name="fromFile">Represents a file sent with the HttpRequest</param>
     /// <param name="maxWidth">maximum allowed width</param>
     /// <param name="maxHeight">maximum allowed height</param>
-    public static bool IsValidImageFile([NotNullWhen(true)] this IFormFile? fromFile,
+    public static bool IsValidImageFile([NotNullWhen(returnValue: true)] this IFormFile? fromFile,
         int? maxWidth = null,
         int? maxHeight = null)
     {
@@ -110,7 +110,7 @@ public static class ImageValidatorExtensions
         {
             using var memoryStream = new MemoryStream();
             fromFile.CopyTo(memoryStream);
-            memoryStream.Seek(0, SeekOrigin.Begin);
+            memoryStream.Seek(offset: 0, SeekOrigin.Begin);
 
             using var inputStream = new SKManagedStream(memoryStream);
             using var codec = SKCodec.Create(inputStream);
@@ -130,7 +130,7 @@ public static class ImageValidatorExtensions
     /// <param name="fromFiles">Represents the files sent with the HttpRequest</param>
     /// <param name="maxWidth">maximum allowed width</param>
     /// <param name="maxHeight">maximum allowed height</param>
-    public static bool AreValidImageFiles([NotNullWhen(true)] this IFormFileCollection? fromFiles,
+    public static bool AreValidImageFiles([NotNullWhen(returnValue: true)] this IFormFileCollection? fromFiles,
         int? maxWidth = null,
         int? maxHeight = null)
     {
@@ -142,7 +142,10 @@ public static class ImageValidatorExtensions
         return fromFiles.All(fromFile => fromFile.IsValidImageFile(maxWidth, maxHeight));
     }
 
-    private static bool HasValidImageInfo(this SKImageInfo info, int? maxWidth, int? maxHeight)
+    /// <summary>
+    ///     Does this image has proper Width and Height
+    /// </summary>
+    public static bool HasValidImageInfo(this SKImageInfo info, int? maxWidth, int? maxHeight)
         => (!maxWidth.HasValue || info.Width <= maxWidth.Value) &&
            (!maxHeight.HasValue || info.Height <= maxHeight.Value);
 }

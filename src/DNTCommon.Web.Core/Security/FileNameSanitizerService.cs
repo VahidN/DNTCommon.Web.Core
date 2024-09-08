@@ -46,7 +46,7 @@ public class FileNameSanitizerService(ILogger<FileNameSanitizerService> logger, 
             return new SafeFile();
         }
 
-        if (isOutsideOfRootPath(filePath, folderPath))
+        if (IsOutsideOfRootPath(filePath, folderPath))
         {
             _logger.LogWarning(
                 message:
@@ -64,6 +64,6 @@ public class FileNameSanitizerService(ILogger<FileNameSanitizerService> logger, 
         };
     }
 
-    private static bool isOutsideOfRootPath(string filePath, string folder)
+    private static bool IsOutsideOfRootPath(string filePath, string folder)
         => !filePath.StartsWith(folder, StringComparison.OrdinalIgnoreCase);
 }

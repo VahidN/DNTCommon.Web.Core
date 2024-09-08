@@ -39,10 +39,14 @@ public static class PasswordHasherServiceExtensions
     /// <summary>
     ///     Creates a custom hash based on SHA1 CryptoServiceProvider.
     /// </summary>
-    public static string GetSha1Hash(this string input)
+    public static string GetSha1Hash(this string input) => Encoding.UTF8.GetBytes(input).GetSha1Hash();
+
+    /// <summary>
+    ///     Creates a custom hash based on SHA1 CryptoServiceProvider.
+    /// </summary>
+    public static string GetSha1Hash(this byte[] input)
     {
-        var byteValue = Encoding.UTF8.GetBytes(input);
-        var byteHash = SHA1.HashData(byteValue);
+        var byteHash = SHA1.HashData(input);
 
         return BitConverter.ToString(byteHash)
             .Replace(oldValue: "-", newValue: "", StringComparison.OrdinalIgnoreCase)

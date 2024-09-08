@@ -3,16 +3,17 @@ using Microsoft.Extensions.DependencyInjection;
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-/// Url Normalization Service Extensions
+///     Url Normalization Service Extensions
 /// </summary>
 public static class UrlNormalizationServiceExtensions
 {
     /// <summary>
-    /// Adds IUrlNormalizationService to IServiceCollection.
+    ///     Adds IUrlNormalizationService to IServiceCollection.
     /// </summary>
     public static IServiceCollection AddUrlNormalizationService(this IServiceCollection services)
     {
-        services.AddTransient<IUrlNormalizationService, UrlNormalizationService>();
+        services.AddSingleton<IUrlNormalizationService, UrlNormalizationService>();
+
         return services;
     }
 }
