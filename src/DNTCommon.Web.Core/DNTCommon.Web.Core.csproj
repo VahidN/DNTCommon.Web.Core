@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Description>DNTCommon.Web.Core provides common scenarios' solutions for ASP.NET Core applications.</Description>
-        <VersionPrefix>6.4.0</VersionPrefix>
+        <VersionPrefix>6.5.0</VersionPrefix>
         <Authors>Vahid Nasiri</Authors>
         <TargetFrameworks>net8.0;net7.0;net6.0;</TargetFrameworks>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -39,6 +39,14 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <NoWarn>NU5104</NoWarn>
         <NuGetAudit>false</NuGetAudit>
+    </PropertyGroup>
+    <PropertyGroup>
+        <NuGetAudit>true</NuGetAudit>
+        <NuGetAuditMode>all</NuGetAuditMode>
+        <NuGetAuditLevel>low</NuGetAuditLevel>
+        <WarningsNotAsErrors Condition="'$(Configuration)' != 'Release'">
+            $(WarningsNotAsErrors);NU1900;NU1901;NU1902;NU1903;NU1904
+        </WarningsNotAsErrors>
     </PropertyGroup>
     <ItemGroup>
         <Using Include="System.Globalization"/>

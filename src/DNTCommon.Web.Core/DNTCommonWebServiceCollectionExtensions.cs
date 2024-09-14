@@ -37,6 +37,7 @@ public static class DntCommonWebServiceCollectionExtensions
         services.AddHtmlReaderService();
         services.AddAntiXssService();
         services.AddSerializationProvider();
+        services.AddErrorBoundaryLoggerService();
 
         if (scheduledTasksOptions != null)
         {
