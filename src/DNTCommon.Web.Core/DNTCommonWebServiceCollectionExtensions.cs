@@ -38,6 +38,7 @@ public static class DntCommonWebServiceCollectionExtensions
         services.AddAntiXssService();
         services.AddSerializationProvider();
         services.AddErrorBoundaryLoggerService();
+        services.AddChromeHtmlToPngService();
 
         if (scheduledTasksOptions != null)
         {
