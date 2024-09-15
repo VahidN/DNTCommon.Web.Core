@@ -45,6 +45,11 @@ public class UAParserService(BaseHttpClient baseHttpClient, ILogger<UAParserServ
 
     private async Task<Parser> LoadLatestParserAsync(string regexesUrl)
     {
+        if (!NetworkExtensions.IsConnectedToInternet())
+        {
+            return Parser.GetDefault();
+        }
+
         try
         {
             var content = await baseHttpClient.HttpClient.GetStringAsync(regexesUrl);
