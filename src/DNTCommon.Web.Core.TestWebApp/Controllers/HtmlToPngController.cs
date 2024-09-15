@@ -10,11 +10,18 @@ public class HtmlToPngController(IHtmlToPngGenerator htmlToPngGenerator, IWebHos
 {
     public async Task<IActionResult> Index()
     {
+        var outputPngFile = Path.Combine(webHostEnvironment.WebRootPath, path2: "files", path3: "test.png");
+
         var log = await htmlToPngGenerator.GeneratePngFromHtmlAsync(new HtmlToPngGeneratorOptions
         {
             SourceHtmlFileOrUri = "https://localhost:5001/TextToImage",
-            OutputPngFile = Path.Combine(webHostEnvironment.WebRootPath, path2: "files", path3: "test.png")
+            OutputPngFile = outputPngFile
         });
+
+        var isBlankFile = Path.Combine(webHostEnvironment.WebRootPath, path2: "files", path3: "news-19169.jpg")
+            .IsBlankImage();
+
+        var isBlankImage = outputPngFile.IsBlankImage();
 
         ViewBag.ImageSrc = "/files/test.png";
 
