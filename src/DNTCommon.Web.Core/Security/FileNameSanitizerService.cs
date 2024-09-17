@@ -28,7 +28,7 @@ public class FileNameSanitizerService(ILogger<FileNameSanitizerService> logger, 
 
         if (!string.Equals(fileName, requestedFileName, StringComparison.Ordinal))
         {
-            _logger.LogWarning(
+            _logger.LogInformation(
                 message:
                 "Bad file request. Sanitized file name is different than the actual name. `{FileName}` != `{RequestedFileName}`",
                 antiXssService.GetSanitizedHtml(fileName), antiXssService.GetSanitizedHtml(requestedFileName));
@@ -40,7 +40,7 @@ public class FileNameSanitizerService(ILogger<FileNameSanitizerService> logger, 
 
         if (!File.Exists(filePath))
         {
-            _logger.LogWarning(message: "Requested file not found: `{FilePath}`",
+            _logger.LogInformation(message: "Requested file not found: `{FilePath}`",
                 antiXssService.GetSanitizedHtml(filePath));
 
             return new SafeFile();
@@ -48,7 +48,7 @@ public class FileNameSanitizerService(ILogger<FileNameSanitizerService> logger, 
 
         if (IsOutsideOfRootPath(filePath, folderPath))
         {
-            _logger.LogWarning(
+            _logger.LogInformation(
                 message:
                 "Bad file request. The requested file path `{FilePath}` is outside of the root path `{FolderPath}`.",
                 antiXssService.GetSanitizedHtml(filePath), antiXssService.GetSanitizedHtml(folderPath));
