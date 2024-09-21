@@ -669,4 +669,21 @@ Line2
             var expected = html;
             Assert.AreEqual(expected, actual);
         });
+
+    [TestMethod]
+    public void AntiXssServiceTestPToBrWorks()
+        => ServiceProvider.RunScopedService<IAntiXssService>(antiXssService =>
+        {
+            var actual = antiXssService.GetSanitizedHtml(
+                html: "<p>this is a test1</p> <p>this is a test2</p><div>this is a test3<div>test4</div></div>",
+                htmlModificationRules: new HtmlModificationRules
+                {
+                    ConvertPToDiv = true
+                });
+
+            var expected =
+                "<div>this is a test1</div><div>this is a test2</div><div>this is a test3<div>test4</div></div>";
+
+            Assert.AreEqual(expected, actual);
+        });
 }

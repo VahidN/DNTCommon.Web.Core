@@ -44,11 +44,13 @@ public class AntiXssService : IAntiXssService
     /// </summary>
     /// <param name="html">Html source</param>
     /// <param name="allowDataAttributes">Allow HTML5 data attributes prefixed with data-</param>
-    /// <param name="options"></param>
+    /// <param name="remoteImagesOptions"></param>
+    /// <param name="htmlModificationRules"></param>
     /// <returns>Clean output</returns>
     public string GetSanitizedHtml(string? html,
         bool allowDataAttributes = true,
-        FixRemoteImagesOptions? options = null)
+        FixRemoteImagesOptions? remoteImagesOptions = null,
+        HtmlModificationRules? htmlModificationRules = null)
     {
         if (string.IsNullOrWhiteSpace(html))
         {
@@ -65,7 +67,7 @@ public class AntiXssService : IAntiXssService
         {
             FixCodeTag(node);
 
-            _remoteImagesService.FixRemoteImages(node, options);
+            _remoteImagesService.FixRemoteImages(node, remoteImagesOptions);
 
             if (CleanTags(whitelistTags, node))
             {
@@ -83,9 +85,25 @@ public class AntiXssService : IAntiXssService
             }
 
             CleanAttributes(node, allowDataAttributes);
+
+            ApplyHtmlModificationRules(node, htmlModificationRules);
         }
 
         return parser.HtmlDocument.DocumentNode.OuterHtml;
+    }
+
+    private static void ApplyHtmlModificationRules(HtmlNode node, HtmlModificationRules? htmlModificationRules)
+    {
+        if (htmlModificationRules is null)
+        {
+            return;
+        }
+
+        if (htmlModificationRules.ConvertPToDiv && node.NodeType == HtmlNodeType.Element &&
+            string.Equals(node.Name, b: "p", StringComparison.Ordinal))
+        {
+            node.Name = "div";
+        }
     }
 
     private void FixCodeTag(HtmlNode node)
@@ -190,8 +208,7 @@ public class AntiXssService : IAntiXssService
     private bool IsAllowedAttribute(HtmlAttribute attribute, bool allowDataAttributes)
         => (allowDataAttributes &&
             attribute.Name?.StartsWith(value: "data-", StringComparison.OrdinalIgnoreCase) == true) ||
-           _antiXssConfig.ValidHtmlTags.Any(tag
-               => attribute.Name != null && tag.Attributes.Contains(attribute.Name, StringComparer.OrdinalIgnoreCase));
+           _antiXssConfig.ValidHtmlTags.Any(tag => attribute.Name != null && tag.Attributes.Contains(attribute.Name));
 
     private bool CleanComments(HtmlNode node)
     {

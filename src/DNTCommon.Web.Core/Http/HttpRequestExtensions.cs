@@ -19,22 +19,6 @@ namespace DNTCommon.Web.Core;
 public static partial class HttpRequestExtensions
 {
     /// <summary>
-    ///     Is this an aspx request?
-    ///     These extensions will be checked:
-    ///     .aspx|asax|htm|asp|ashx|asmx|axd|master|svc|php|ph|sphp|cfm|ps|stm|htaccess|htpasswd|phtml|cgi|pl|py|rb|sh|jsp|cshtml|vbhtml|swf|xap|asptxt|xamlx
-    /// </summary>
-    /// <param name="httpContext"></param>
-    /// <returns></returns>
-    public static bool IsNoneAspNetCoreRequest(this HttpContext? httpContext)
-        => httpContext is null || AllNoneAspNetCorePagesRegex().IsMatch(httpContext.GetCurrentUrl());
-
-    [GeneratedRegex(
-        pattern:
-        @".*\.aspx|asax|htm|asp|ashx|asmx|axd|master|svc|php|ph|sphp|cfm|ps|stm|htaccess|htpasswd|phtml|cgi|pl|py|rb|sh|jsp|cshtml|vbhtml|swf|xap|asptxt|xamlx(/.*)?",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase, matchTimeoutMilliseconds: 3000)]
-    private static partial Regex AllNoneAspNetCorePagesRegex();
-
-    /// <summary>
     ///     Gets the current HttpContext.Request's UserAgent.
     /// </summary>
     public static string GetUserAgent(this HttpContext httpContext)
@@ -379,4 +363,21 @@ public static partial class HttpRequestExtensions
 
         return $"{httpRequestPath}{queryString}";
     }
+#if !NET_6
+    /// <summary>
+    ///     Is this an aspx request?
+    ///     These extensions will be checked:
+    ///     .aspx|asax|htm|asp|ashx|asmx|axd|master|svc|php|ph|sphp|cfm|ps|stm|htaccess|htpasswd|phtml|cgi|pl|py|rb|sh|jsp|cshtml|vbhtml|swf|xap|asptxt|xamlx
+    /// </summary>
+    /// <param name="httpContext"></param>
+    /// <returns></returns>
+    public static bool IsNoneAspNetCoreRequest(this HttpContext? httpContext)
+        => httpContext is null || AllNoneAspNetCorePagesRegex().IsMatch(httpContext.GetCurrentUrl());
+
+    [GeneratedRegex(
+        pattern:
+        @".*\.aspx|asax|htm|asp|ashx|asmx|axd|master|svc|php|ph|sphp|cfm|ps|stm|htaccess|htpasswd|phtml|cgi|pl|py|rb|sh|jsp|cshtml|vbhtml|swf|xap|asptxt|xamlx(/.*)?",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex AllNoneAspNetCorePagesRegex();
+#endif
 }
