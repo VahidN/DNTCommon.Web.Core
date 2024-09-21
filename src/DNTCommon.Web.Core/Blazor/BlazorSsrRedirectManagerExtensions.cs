@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 
 namespace DNTCommon.Web.Core;
 
@@ -15,7 +16,7 @@ public static class BlazorSsrRedirectManagerExtensions
         SameSite = SameSiteMode.Strict,
         HttpOnly = true,
         IsEssential = true,
-        MaxAge = TimeSpan.FromSeconds(5)
+        MaxAge = TimeSpan.FromSeconds(value: 5)
     };
 
     /// <summary>
@@ -60,13 +61,13 @@ public static class BlazorSsrRedirectManagerExtensions
         {
             uri = navigationManager.ToBaseRelativePath(uri);
         }
-		
+
         if (string.IsNullOrWhiteSpace(uri))
         {
             uri = "/";
-        }		
+        }
 
-        return uri;
+        return UriHelper.Encode(new Uri(uri, UriKind.RelativeOrAbsolute));
     }
 
     /// <summary>
@@ -79,7 +80,7 @@ public static class BlazorSsrRedirectManagerExtensions
         httpContext.Response.OnStarting(() =>
         {
             var response = httpContext.Response;
-            response.Headers.Append("blazor-enhanced-nav-redirect-location", redirectionUrl);
+            response.Headers.Append(key: "blazor-enhanced-nav-redirect-location", redirectionUrl);
             response.StatusCode = statusCode;
 
             return Task.CompletedTask;
@@ -129,7 +130,7 @@ public static class BlazorSsrRedirectManagerExtensions
         // https://github.com/dotnet/aspnetcore/issues/53996
         // https://github.com/dotnet/aspnetcore/issues/13582#issuecomment-527383363
 
-        throw new InvalidOperationException("This method can only be used during static rendering.");
+        throw new InvalidOperationException(message: "This method can only be used during static rendering.");
     }
 
     /// <summary>

@@ -1,3 +1,5 @@
+using System;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DNTCommon.Web.Core.Tests;
@@ -31,5 +33,15 @@ public class RequestsHelperServiceTests : TestsBase
         var shouldSkip = isNullOrEmpty || isNotReferrer || isLocalReferrer;
 
         Assert.IsFalse(shouldSkip);
+    }
+
+    [TestMethod]
+    public void TestUriHelperEncode()
+    {
+        var url = "/post/3406/مشكل همزمان";
+        var encodeUrl = UriHelper.Encode(new Uri(url, UriKind.RelativeOrAbsolute));
+
+        Assert.AreEqual(expected: "/post/3406/%D9%85%D8%B4%D9%83%D9%84%20%D9%87%D9%85%D8%B2%D9%85%D8%A7%D9%86",
+            encodeUrl);
     }
 }
