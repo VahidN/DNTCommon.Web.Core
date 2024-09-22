@@ -65,7 +65,7 @@ public class AntiXssService : IAntiXssService
 
         foreach (var node in parser.HtmlNodes.ToList())
         {
-            FixCodeTag(node);
+            FixCodeTag(node, htmlModificationRules);
 
             _remoteImagesService.FixRemoteImages(node, remoteImagesOptions);
 
@@ -99,14 +99,34 @@ public class AntiXssService : IAntiXssService
             return;
         }
 
-        if (htmlModificationRules.ConvertPToDiv && node.NodeType == HtmlNodeType.Element &&
-            string.Equals(node.Name, b: "p", StringComparison.Ordinal))
+        ConvertPToDiv(node, htmlModificationRules);
+    }
+
+    private static void ConvertPToDiv(HtmlNode node, HtmlModificationRules htmlModificationRules)
+    {
+        if (!htmlModificationRules.ConvertPToDiv || node.NodeType != HtmlNodeType.Element)
+        {
+            return;
+        }
+
+        if (string.Equals(node.Name, b: "p", StringComparison.Ordinal))
         {
             node.Name = "div";
+
+            if (string.IsNullOrWhiteSpace(node.InnerHtml?.Trim()))
+            {
+                node.InnerHtml = "<br>";
+            }
+        }
+
+        if (string.Equals(node.Name, b: "div", StringComparison.Ordinal) &&
+            string.IsNullOrWhiteSpace(node.InnerHtml?.Trim()))
+        {
+            node.InnerHtml = "<br>";
         }
     }
 
-    private void FixCodeTag(HtmlNode node)
+    private void FixCodeTag(HtmlNode node, HtmlModificationRules? rules)
     {
         if (node.NodeType == HtmlNodeType.Element &&
             (string.Equals(node.Name, b: "pre", StringComparison.Ordinal) ||
@@ -127,9 +147,7 @@ public class AntiXssService : IAntiXssService
             node.InnerHtml = node.InnerHtml.Trim();
 
             node.SetAttributeValue(name: "dir", value: "ltr");
-
-            node.SetAttributeValue(name: "style",
-                value: "white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left;");
+            node.SetAttributeValue(name: "style", rules?.PreCodeStyles ?? "");
         }
     }
 

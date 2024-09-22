@@ -675,14 +675,15 @@ Line2
         => ServiceProvider.RunScopedService<IAntiXssService>(antiXssService =>
         {
             var actual = antiXssService.GetSanitizedHtml(
-                html: "<p>this is a test1</p> <p>this is a test2</p><div>this is a test3<div>test4</div></div>",
+                html:
+                "<p>this is a test1</p> <p>this is a test2</p><div>this is a test3<div>test4</div></div><p class=\"ql-direction-rtl ql-align-right\"><br></p><div class=\"ql-direction-rtl ql-align-right\"></div>",
                 htmlModificationRules: new HtmlModificationRules
                 {
                     ConvertPToDiv = true
                 });
 
             var expected =
-                "<div>this is a test1</div><div>this is a test2</div><div>this is a test3<div>test4</div></div>";
+                "<div>this is a test1</div><div>this is a test2</div><div>this is a test3<div>test4</div></div><div class=\"ql-direction-rtl ql-align-right\"><br></div><div class=\"ql-direction-rtl ql-align-right\"><br></div>";
 
             Assert.AreEqual(expected, actual);
         });
