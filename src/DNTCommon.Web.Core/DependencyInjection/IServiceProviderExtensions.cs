@@ -25,7 +25,6 @@ public static class IServiceProviderExtensions
     /// </summary>
     public static T RunScopedService<TS, T>(this IServiceScope serviceScope, Func<TS, T> callback)
         where TS : notnull
-        where T : notnull
     {
         if (serviceScope == null)
         {
@@ -38,6 +37,7 @@ public static class IServiceProviderExtensions
         }
 
         var context = serviceScope.ServiceProvider.GetRequiredService<TS>();
+
         return callback(context);
     }
 
@@ -47,7 +47,6 @@ public static class IServiceProviderExtensions
     /// </summary>
     public static T RunScopedService<TS, T>(this IServiceScopeFactory serviceScopeFactory, Func<TS, T> callback)
         where TS : notnull
-        where T : notnull
     {
         if (serviceScopeFactory == null)
         {
@@ -55,6 +54,7 @@ public static class IServiceProviderExtensions
         }
 
         using var serviceScope = serviceScopeFactory.CreateScope();
+
         return RunScopedService(serviceScope, callback);
     }
 
@@ -64,9 +64,9 @@ public static class IServiceProviderExtensions
     /// </summary>
     public static T RunScopedService<TS, T>(this IServiceProvider serviceProvider, Func<TS, T> callback)
         where TS : notnull
-        where T : notnull
     {
         using var serviceScope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
+
         return RunScopedService(serviceScope, callback);
     }
 
@@ -148,6 +148,7 @@ public static class IServiceProviderExtensions
         }
 
         var context = serviceScope.ServiceProvider.GetRequiredService<TS>();
+
         try
         {
             callback(context, serviceScope.ServiceProvider.GetRequiredService<T>());
@@ -183,7 +184,7 @@ public static class IServiceProviderExtensions
     ///     and then runs an associated callback.
     /// </summary>
     public static async Task RunScopedServiceAsync<TS, T>(this IServiceProvider serviceProvider,
-                                                          Func<TS, T, Task> callback)
+        Func<TS, T, Task> callback)
         where TS : notnull
         where T : notnull
     {
@@ -196,7 +197,7 @@ public static class IServiceProviderExtensions
     ///     and then runs an associated callback.
     /// </summary>
     public static async Task RunScopedServiceAsync<TS, T>(this IServiceScopeFactory serviceScopeFactory,
-                                                          Func<TS, T, Task> callback)
+        Func<TS, T, Task> callback)
         where TS : notnull
         where T : notnull
     {
@@ -228,6 +229,7 @@ public static class IServiceProviderExtensions
         }
 
         var context = serviceScope.ServiceProvider.GetRequiredService<TS>();
+
         try
         {
             await callback(context, serviceScope.ServiceProvider.GetRequiredService<T>());
@@ -257,7 +259,7 @@ public static class IServiceProviderExtensions
     ///     and then runs an associated callback.
     /// </summary>
     public static async Task RunScopedServiceAsync<TS>(this IServiceScopeFactory serviceScopeFactory,
-                                                       Func<TS, Task> callback)
+        Func<TS, Task> callback)
         where TS : notnull
     {
         if (serviceScopeFactory == null)
@@ -287,6 +289,7 @@ public static class IServiceProviderExtensions
         }
 
         var context = serviceScope.ServiceProvider.GetRequiredService<TS>();
+
         try
         {
             await callback(context);
@@ -305,11 +308,11 @@ public static class IServiceProviderExtensions
     ///     and then runs an associated callback.
     /// </summary>
     public static async Task<T> RunScopedServiceAsync<TS, T>(this IServiceProvider serviceProvider,
-                                                             Func<TS, Task<T>> callback)
+        Func<TS, Task<T>> callback)
         where TS : notnull
-        where T : notnull
     {
         using var serviceScope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
+
         return await RunScopedServiceAsync(serviceScope, callback);
     }
 
@@ -318,9 +321,8 @@ public static class IServiceProviderExtensions
     ///     and then runs an associated callback.
     /// </summary>
     public static async Task<T> RunScopedServiceAsync<TS, T>(this IServiceScopeFactory serviceScopeFactory,
-                                                             Func<TS, Task<T>> callback)
+        Func<TS, Task<T>> callback)
         where TS : notnull
-        where T : notnull
     {
         if (serviceScopeFactory == null)
         {
@@ -328,6 +330,7 @@ public static class IServiceProviderExtensions
         }
 
         using var serviceScope = serviceScopeFactory.CreateScope();
+
         return await RunScopedServiceAsync(serviceScope, callback);
     }
 
@@ -336,9 +339,8 @@ public static class IServiceProviderExtensions
     ///     and then runs an associated callback.
     /// </summary>
     public static async Task<T> RunScopedServiceAsync<TS, T>(this IServiceScope serviceScope,
-                                                             Func<TS, Task<T>> callback)
+        Func<TS, Task<T>> callback)
         where TS : notnull
-        where T : notnull
     {
         if (serviceScope == null)
         {
@@ -351,6 +353,7 @@ public static class IServiceProviderExtensions
         }
 
         var context = serviceScope.ServiceProvider.GetRequiredService<TS>();
+
         return await callback(context);
     }
 }
