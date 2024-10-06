@@ -28,5 +28,54 @@ public static class StringUtils
     /// </summary>
     /// <param name="str"></param>
     /// <returns></returns>
-    public static string? NullIfEmptyOrWhiteSpace(this string? str) => !string.IsNullOrWhiteSpace(str) ? str : null;
+    public static string? NullIfEmptyOrWhiteSpace([NotNullIfNotNull(nameof(str))] this string? str)
+        => !string.IsNullOrWhiteSpace(str) ? str : null;
+
+    /// <summary>
+    ///     Removes a substring from the start of the string
+    /// </summary>
+    public static string? TrimStart([NotNullIfNotNull(nameof(inputText))] this string? inputText,
+        string value,
+        StringComparison comparisonType)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            return inputText;
+        }
+
+        while (!string.IsNullOrEmpty(inputText) && inputText.StartsWith(value, comparisonType))
+        {
+            inputText = inputText[value.Length..];
+        }
+
+        return inputText?.Trim();
+    }
+
+    /// <summary>
+    ///     Removes a substring from the end of the string
+    /// </summary>
+    public static string? TrimEnd([NotNullIfNotNull(nameof(inputText))] this string? inputText,
+        string value,
+        StringComparison comparisonType)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            return inputText;
+        }
+
+        while (!string.IsNullOrEmpty(inputText) && inputText.EndsWith(value, comparisonType))
+        {
+            inputText = inputText[..^value.Length];
+        }
+
+        return inputText?.Trim();
+    }
+
+    /// <summary>
+    ///     Removes a substring from the end and start of the string
+    /// </summary>
+    public static string? Trim([NotNullIfNotNull(nameof(inputText))] this string? inputText,
+        string value,
+        StringComparison comparisonType)
+        => TrimStart(TrimEnd(inputText, value, comparisonType), value, comparisonType);
 }
