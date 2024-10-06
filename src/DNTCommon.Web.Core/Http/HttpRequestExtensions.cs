@@ -52,6 +52,31 @@ public static partial class HttpRequestExtensions
     }
 
     /// <summary>
+    ///     If page exists returns true
+    /// </summary>
+    /// <param name="hre"></param>
+    /// <returns></returns>
+    public static bool IgnoreIfUrlExists(this HttpRequestException? hre)
+    {
+        if (hre is null)
+        {
+            return true;
+        }
+
+        switch (hre.StatusCode)
+        {
+            case HttpStatusCode.Found: // 302 = HttpStatusCode.Redirect
+            case HttpStatusCode.Moved: // 301 = HttpStatusCode.MovedPermanently
+            case HttpStatusCode.Unauthorized:
+            case HttpStatusCode.Forbidden: // fine! they have banned this server, but the link is correct!
+            case HttpStatusCode.OK:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /// <summary>
     ///     Gets the current HttpContext.Request's IP.
     /// </summary>
     public static string? GetIP(this HttpContext httpContext, bool tryUseXForwardHeader = true)

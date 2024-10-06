@@ -1,4 +1,7 @@
 using System.Text;
+using System.Web;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace DNTCommon.Web.Core;
 
@@ -9,6 +12,8 @@ public static class DomainHelperExtensions
 {
     private static readonly Lazy<List<string>> _tldsBuilder =
         new(defaultTlds, LazyThreadSafetyMode.ExecutionAndPublication);
+
+    private static readonly string[] FeedKeys = ["utm_source", "utm_medium", "utm_campaign", "utm_updated", "updated"];
 
     /// <summary>
     ///     Tld Patterns
@@ -268,6 +273,65 @@ public static class DomainHelperExtensions
         tlds.AddRange(TldPatterns.EXCLUDED);
 
         return tlds;
+    }
+
+    /// <summary>
+    ///     Checks for "utm_source", "utm_medium", "utm_campaign", "utm_updated", "updated" in the Url
+    /// </summary>
+    /// <param name="navigationManager"></param>
+    /// <returns></returns>
+    public static bool IsFromFeed(this NavigationManager navigationManager)
+    {
+        ArgumentNullException.ThrowIfNull(navigationManager);
+        var uri = navigationManager.ToAbsoluteUri(navigationManager.Uri);
+        var keyValues = QueryHelpers.ParseQuery(uri.Query);
+
+        return FeedKeys.Any(key => keyValues.ContainsKey(key));
+    }
+
+    /// <summary>
+    ///     Removes the "utm_source", "utm_medium", "utm_campaign", "utm_updated", "updated" keys from the query strings of the
+    ///     url
+    /// </summary>
+    public static string? GetUrlWithoutRssQueryStrings(this string? url) => url.GetUrlWithoutQueryStrings(FeedKeys);
+
+    /// <summary>
+    ///     Removes the given keys from the query strings of the url
+    /// </summary>
+    public static string? GetUrlWithoutQueryStrings(this string? url, params string[]? keys)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            return null;
+        }
+
+        if (!url.IsValidUrl())
+        {
+            return null;
+        }
+
+        var uri = new Uri(url);
+
+        if (string.IsNullOrWhiteSpace(uri.Query))
+        {
+            return url;
+        }
+
+        var queryStrings = HttpUtility.ParseQueryString(uri.Query);
+
+        if (keys is not null)
+        {
+            foreach (var key in keys)
+            {
+                queryStrings.Remove(key);
+            }
+        }
+
+        var pagePathWithoutQueryString = uri.GetLeftPart(UriPartial.Path);
+
+        return queryStrings.Count > 0
+            ? string.Create(CultureInfo.InvariantCulture, $"{pagePathWithoutQueryString}?{queryStrings}")
+            : pagePathWithoutQueryString;
     }
 
     /// <summary>

@@ -44,4 +44,10 @@ public class RequestsHelperServiceTests : TestsBase
         Assert.AreEqual(expected: "/post/3406/%D9%85%D8%B4%D9%83%D9%84%20%D9%87%D9%85%D8%B2%D9%85%D8%A7%D9%86",
             encodeUrl);
     }
+
+    [TestMethod]
+    public void TestRemoveQueryStrings()
+        => Assert.AreEqual(expected: "https://www.dntips.ir/news/details/19377",
+            "https://www.dntips.ir/news/details/19377?utm_source=feed&utm_medium=rss&utm_campaign=featured&utm_updated=1403-07-15-07-30"
+                .GetUrlWithoutRssQueryStrings());
 }
