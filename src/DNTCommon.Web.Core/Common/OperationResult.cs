@@ -39,7 +39,12 @@ public class OperationResult
     public OperationStat Stat { set; get; }
 
     /// <summary>
-    ///     This will allows you to convert this object to a tuple.
+    ///     Represents a successful operation
+    /// </summary>
+    public bool IsSuccess => Stat == OperationStat.Succeeded;
+
+    /// <summary>
+    ///     This will allow you to convert this object to a tuple.
     /// </summary>
     /// <param name="message"></param>
     /// <param name="stat"></param>
@@ -81,14 +86,12 @@ public class OperationResult
     /// <summary>
     ///     Returns a default failed result.
     /// </summary>
-    public static OperationResult ToOperationResult()
-        => new();
+    public static OperationResult ToOperationResult() => new();
 
     /// <summary>
     ///     Creates a new succeeded operation result
     /// </summary>
-    public static OperationResult Succeeded(string? message = null)
-        => new(message, OperationStat.Succeeded);
+    public static OperationResult Succeeded(string? message = null) => new(message, OperationStat.Succeeded);
 
     /// <summary>
     ///     Creates a new succeeded operation result
@@ -99,14 +102,13 @@ public class OperationResult
     /// <summary>
     ///     Creates a new failed operation result
     /// </summary>
-    public static OperationResult Failed(string? message = null)
-        => new(message, OperationStat.Failed);
+    public static OperationResult Failed(string? message = null) => new(message, OperationStat.Failed);
 
     /// <summary>
     ///     Creates a new failed operation result
     /// </summary>
     public static OperationResult<TData> Failed<TData>(string? message = null)
-        => new(message, OperationStat.Failed, default);
+        => new(message, OperationStat.Failed, result: default);
 }
 
 /// <summary>
@@ -199,7 +201,7 @@ public class OperationResult<TData> : OperationResult
         };
 
     /// <summary>
-    ///     This will allows you to convert this object to a tuple.
+    ///     This will allow you to convert this object to a tuple.
     /// </summary>
     public void Deconstruct(out string? message, out OperationStat stat, out TData? result)
     {
@@ -211,6 +213,5 @@ public class OperationResult<TData> : OperationResult
     /// <summary>
     ///     Returns a default failed result.
     /// </summary>
-    public new OperationResult<TData> ToOperationResult()
-        => new();
+    public new OperationResult<TData> ToOperationResult() => new();
 }
