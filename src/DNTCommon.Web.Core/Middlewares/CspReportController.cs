@@ -22,9 +22,15 @@ public class CspReportController(
     ///     Logs the ContentSecurityPolicy errors
     /// </summary>
     [HttpPost(template: "[action]")]
+    [HttpGet(template: "[action]")]
     [EnableReadableBodyStream]
     public async Task<IActionResult> Log()
     {
+        if (HttpContext.IsGetRequest())
+        {
+            return Ok();
+        }
+
         using (var bodyReader = new StreamReader(HttpContext.Request.Body))
         {
             var body = await bodyReader.ReadToEndAsync();
