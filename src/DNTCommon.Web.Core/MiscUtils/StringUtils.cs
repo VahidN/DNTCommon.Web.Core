@@ -113,10 +113,24 @@ public static class StringUtils
     /// <summary>
     ///     Uses string.Split method to split given string by a given separator.
     /// </summary>
+    public static string[]? Split([NotNullIfNotNull(nameof(str))] this string? str, char separator)
+        => str?.Split(separator, StringSplitOptions.RemoveEmptyEntries);
+
+    /// <summary>
+    ///     Uses string.Split method to split given string by a given separator.
+    /// </summary>
     public static string[]? Split([NotNullIfNotNull(nameof(str))] this string? str,
         string separator,
         StringSplitOptions options)
         => str?.Split([separator], options);
+
+    /// <summary>
+    ///     Uses string.Split method to split given string by a given separator.
+    /// </summary>
+    public static string[]? Split([NotNullIfNotNull(nameof(str))] this string? str,
+        char separator,
+        StringSplitOptions options)
+        => str?.Split(separator, options);
 
     /// <summary>
     ///     Converts string to enum value.
