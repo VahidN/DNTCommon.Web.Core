@@ -10,20 +10,20 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public static class DomainHelperExtensions
 {
-    private static readonly Lazy<List<string>> _tldsBuilder =
-        new(defaultTlds, LazyThreadSafetyMode.ExecutionAndPublication);
+    private static readonly Lazy<List<string>> TldsBuilder = new(DefaultTlds,
+        LazyThreadSafetyMode.ExecutionAndPublication);
 
     private static readonly string[] FeedKeys = ["utm_source", "utm_medium", "utm_campaign", "utm_updated", "updated"];
 
     /// <summary>
     ///     Tld Patterns
     /// </summary>
-    public static IReadOnlyCollection<string> Tlds => _tldsBuilder.Value;
+    public static IReadOnlyCollection<string> Tlds => TldsBuilder.Value;
 
     /// <summary>
     ///     Determines whether uri1 and uri2 have the same domain.
     /// </summary>
-    public static bool HaveTheSameDomain(this Uri uri1, Uri uri2)
+    public static bool HaveTheSameDomain(this Uri? uri1, Uri? uri2)
     {
         var domain2 = uri2.GetUrlDomain().Domain;
         var domain1 = uri1.GetUrlDomain().Domain;
@@ -34,42 +34,37 @@ public static class DomainHelperExtensions
     /// <summary>
     ///     Determines whether uri1 and uri2 have the same domain.
     /// </summary>
-    public static bool HaveTheSameDomain(this string uri1, string uri2)
-        => HaveTheSameDomain(new Uri(uri1), new Uri(uri2));
+    public static bool HaveTheSameDomain(this string? uri1, string? uri2)
+        => uri1.IsValidUrl() && uri2.IsValidUrl() && HaveTheSameDomain(new Uri(uri1), new Uri(uri2));
 
     /// <summary>
     ///     Determines whether the url has no extension.
     /// </summary>
-    public static bool IsMvcPage(this Uri url) => string.IsNullOrWhiteSpace(url.GetUriExtension());
+    public static bool IsMvcPage(this Uri? url) => string.IsNullOrWhiteSpace(url.GetUriExtension());
 
     /// <summary>
     ///     Determines whether the url has no extension.
     /// </summary>
-    public static bool IsMvcPage(this string url) => IsMvcPage(new Uri(url));
+    public static bool IsMvcPage(this string? url) => url.IsValidUrl() && IsMvcPage(new Uri(url));
 
     /// <summary>
     ///     Determines whether the url has an extension.
     /// </summary>
-    public static bool IsStaticFileUrl(this Uri url) => !string.IsNullOrWhiteSpace(url.GetUriExtension());
+    public static bool IsStaticFileUrl(this Uri? url) => !string.IsNullOrWhiteSpace(url.GetUriExtension());
 
     /// <summary>
     ///     Determines whether the url has an extension.
     /// </summary>
-    public static bool IsStaticFileUrl(this string url) => IsStaticFileUrl(new Uri(url));
+    public static bool IsStaticFileUrl(this string? url) => url.IsValidUrl() && IsStaticFileUrl(new Uri(url));
 
     /// <summary>
     ///     Returns the extension of the uri.
     /// </summary>
-    public static string GetUriExtension(this Uri uri, bool throwOnException = false)
+    public static string? GetUriExtension(this Uri? uri, bool throwOnException = false)
     {
         try
         {
-            if (uri == null)
-            {
-                throw new ArgumentNullException(nameof(uri));
-            }
-
-            return Path.GetExtension(uri.PathAndQuery);
+            return uri == null ? null : Path.GetExtension(uri.PathAndQuery);
         }
         catch
         {
@@ -78,14 +73,14 @@ public static class DomainHelperExtensions
                 throw;
             }
 
-            return string.Empty;
+            return null;
         }
     }
 
     /// <summary>
     ///     Returns the extension of the uri.
     /// </summary>
-    public static string GetUriExtension(this string uri) => GetUriExtension(new Uri(uri));
+    public static string? GetUriExtension(this string? uri) => !uri.IsValidUrl() ? null : GetUriExtension(new Uri(uri));
 
     /// <summary>
     ///     Returns false when hostUri hase the same domain as url
@@ -99,11 +94,11 @@ public static class DomainHelperExtensions
     /// <summary>
     ///     Returns the SubDomain of the uri.
     /// </summary>
-    public static string? GetSubDomain(this Uri url)
+    public static string? GetSubDomain(this Uri? url)
     {
         if (url == null)
         {
-            throw new ArgumentNullException(nameof(url));
+            return null;
         }
 
         if (url.HostNameType != UriHostNameType.Dns)
@@ -127,21 +122,18 @@ public static class DomainHelperExtensions
     /// <summary>
     ///     Returns the SubDomain of the uri.
     /// </summary>
-    public static string? GetSubDomain(this string url)
-    {
-        if (url == null)
-        {
-            throw new ArgumentNullException(nameof(url));
-        }
-
-        return GetSubDomain(new Uri(url));
-    }
+    public static string? GetSubDomain(this string? url) => url.IsValidUrl() ? GetSubDomain(new Uri(url)) : null;
 
     /// <summary>
     ///     Returns the host part without its SubDomain.
     /// </summary>
-    public static string GetHostWithoutSubDomain(this Uri url)
+    public static string? GetHostWithoutSubDomain(this Uri? url)
     {
+        if (url is null)
+        {
+            return null;
+        }
+
         var subdomain = GetSubDomain(url);
         var host = url.Host.TrimEnd(trimChar: '.');
 
@@ -157,17 +149,19 @@ public static class DomainHelperExtensions
     /// <summary>
     ///     Returns the host part without its SubDomain.
     /// </summary>
-    public static string GetHostWithoutSubDomain(this string url) => GetHostWithoutSubDomain(new Uri(url));
+    public static string? GetHostWithoutSubDomain(this string? url)
+        => !url.IsValidUrl() ? null : GetHostWithoutSubDomain(new Uri(url));
 
     /// <summary>
     ///     Returns the domain part of the url.
     /// </summary>
-    public static (string Domain, bool HasBestMatch) GetUrlDomain(this string url) => GetUrlDomain(new Uri(url));
+    public static (string Domain, bool HasBestMatch) GetUrlDomain(this string? url)
+        => url is null ? (string.Empty, false) : GetUrlDomain(new Uri(url));
 
     /// <summary>
     ///     Returns the domain part of the url.
     /// </summary>
-    public static (string Domain, bool HasBestMatch) GetUrlDomain(this Uri url)
+    public static (string Domain, bool HasBestMatch) GetUrlDomain(this Uri? url)
     {
         if (url == null)
         {
@@ -220,33 +214,21 @@ public static class DomainHelperExtensions
     /// <summary>
     ///     Determines whether the `referrer` has the same host or domain as `url`.
     /// </summary>
-    public static bool IsLocalReferrer(this Uri referrer, Uri url)
-    {
-        if (referrer == null)
-        {
-            throw new ArgumentNullException(nameof(referrer));
-        }
-
-        if (url == null)
-        {
-            throw new ArgumentNullException(nameof(url));
-        }
-
-        return referrer.Host.TrimEnd(trimChar: '.')
-                   .Equals(url.Host.TrimEnd(trimChar: '.'), StringComparison.OrdinalIgnoreCase) ||
-               HaveTheSameDomain(referrer, url);
-    }
+    public static bool IsLocalReferrer(this Uri? referrer, Uri? url)
+        => (referrer is not null && url is not null && referrer.Host.TrimEnd(trimChar: '.')
+               .Equals(url.Host.TrimEnd(trimChar: '.'), StringComparison.OrdinalIgnoreCase)) ||
+           HaveTheSameDomain(referrer, url);
 
     /// <summary>
     ///     Determines whether the `referrer` has the same host or domain as `url`.
     /// </summary>
-    public static bool IsLocalReferrer(this string referrer, string url)
-        => IsLocalReferrer(new Uri(referrer), new Uri(url));
+    public static bool IsLocalReferrer(this string? referrer, string? url)
+        => referrer.IsValidUrl() && url.IsValidUrl() && IsLocalReferrer(new Uri(referrer), new Uri(url));
 
     /// <summary>
     ///     Determines whether the `destUri` has the same domain as `siteRootUrl`.
     /// </summary>
-    public static bool IsReferrerToThisSite(this Uri destUri, string siteRootUrl)
+    public static bool IsReferrerToThisSite(this Uri? destUri, string siteRootUrl)
     {
         if (destUri == null || string.IsNullOrWhiteSpace(siteRootUrl))
         {
@@ -265,7 +247,7 @@ public static class DomainHelperExtensions
     public static bool IsReferrerToThisSite(this string destUri, string siteRootUrl)
         => IsReferrerToThisSite(new Uri(destUri), siteRootUrl);
 
-    private static List<string> defaultTlds()
+    private static List<string> DefaultTlds()
     {
         var tlds = new List<string>();
         tlds.AddRange(TldPatterns.EXACT);
@@ -280,10 +262,28 @@ public static class DomainHelperExtensions
     /// </summary>
     /// <param name="navigationManager"></param>
     /// <returns></returns>
-    public static bool IsFromFeed(this NavigationManager navigationManager)
+    public static bool IsFromFeed(this NavigationManager? navigationManager)
     {
-        ArgumentNullException.ThrowIfNull(navigationManager);
+        if (navigationManager is null)
+        {
+            return false;
+        }
+
         var uri = navigationManager.ToAbsoluteUri(navigationManager.Uri);
+
+        return IsFromFeed(uri);
+    }
+
+    /// <summary>
+    ///     Checks for "utm_source", "utm_medium", "utm_campaign", "utm_updated", "updated" in the Url
+    /// </summary>
+    public static bool IsFromFeed(this Uri? uri)
+    {
+        if (uri is null)
+        {
+            return false;
+        }
+
         var keyValues = QueryHelpers.ParseQuery(uri.Query);
 
         return FeedKeys.Any(key => keyValues.ContainsKey(key));
@@ -337,7 +337,7 @@ public static class DomainHelperExtensions
     /// <summary>
     ///     Path.Combine for URLs. The `relativeUrl` doesn't necessarily need a `/` at the beginning of it.
     /// </summary>
-    public static string CombineUrl(this string baseUrl, string? relativeUrl)
+    public static string CombineUrl(this string? baseUrl, string? relativeUrl)
     {
         if (string.IsNullOrWhiteSpace(baseUrl))
         {
@@ -358,27 +358,19 @@ public static class DomainHelperExtensions
     /// <summary>
     ///     Path.Combine for URLs. The `relativeUrl` doesn't necessarily need a `/` at the beginning of it.
     /// </summary>
-    public static string CombineUrl(this Uri baseUri, string? relativeUrl)
-    {
-        ArgumentNullException.ThrowIfNull(baseUri);
-
-        return baseUri.AbsoluteUri.CombineUrl(relativeUrl);
-    }
+    public static string? CombineUrl(this Uri? baseUri, string? relativeUrl)
+        => baseUri?.AbsoluteUri.CombineUrl(relativeUrl);
 
     /// <summary>
     ///     Path.Combine for URLs. The `relativeUrls` don't necessarily need a `/` at the beginning of them.
     /// </summary>
-    public static string CombineUrls(this Uri baseUri, params string[]? relativePaths)
-    {
-        ArgumentNullException.ThrowIfNull(baseUri);
-
-        return baseUri.AbsoluteUri.CombineUrls(relativePaths);
-    }
+    public static string? CombineUrls(this Uri? baseUri, params string[]? relativePaths)
+        => baseUri?.AbsoluteUri.CombineUrls(relativePaths);
 
     /// <summary>
     ///     Path.Combine for URLs. The `relativeUrls` don't necessarily need a `/` at the beginning of them.
     /// </summary>
-    public static string CombineUrls(this string baseUrl, params string[]? relativePaths)
+    public static string CombineUrls(this string? baseUrl, params string[]? relativePaths)
     {
         if (string.IsNullOrWhiteSpace(baseUrl))
         {

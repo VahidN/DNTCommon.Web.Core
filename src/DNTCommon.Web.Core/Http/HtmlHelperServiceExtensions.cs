@@ -85,7 +85,7 @@ public static class HtmlHelperServiceExtensions
     /// <summary>
     ///     Returns the src value of an HTML image element
     /// </summary>
-    public static string? GetSrcAttributeValue([NotNullWhen(returnValue: true)] this HtmlNode? node)
+    public static string? GetSrcAttributeValue(this HtmlNode? node)
         => node?.Attributes.FirstOrDefault(attr => attr.Name.Equals(value: "src", StringComparison.OrdinalIgnoreCase))
             ?.Value?.Trim();
 
@@ -108,7 +108,7 @@ public static class HtmlHelperServiceExtensions
     /// </summary>
     /// <param name="src"></param>
     /// <returns></returns>
-    public static byte[]? GetBase64EncodedImageData(this string? src)
+    public static byte[]? GetBase64EncodedImageData([NotNullIfNotNull(nameof(src))] this string? src)
     {
         if (!src.IsBase64EncodedImage())
         {
