@@ -12,24 +12,22 @@ namespace DNTCommon.Web.Core;
 /// <remarks>
 ///     BackgroundQueue Service
 /// </remarks>
-public class BackgroundQueueService(ILogger<BackgroundQueueService> logger, IServiceScopeFactory serviceScopeFactory)
-    : BackgroundService, IBackgroundQueueService
+public class BackgroundQueueService(IServiceProvider serviceProvider) : BackgroundService, IBackgroundQueueService
 {
     private readonly BlockingCollection<Func<CancellationToken, IServiceProvider, Task>> _asyncTasksQueue =
         new(new ConcurrentQueue<Func<CancellationToken, IServiceProvider, Task>>());
 
     private readonly TimeSpan _interval = TimeSpan.FromSeconds(value: 0.5);
 
-    private readonly ILogger<BackgroundQueueService>
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
-    private readonly IServiceScopeFactory _serviceScopeFactory =
-        serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
-
     private readonly BlockingCollection<Action<CancellationToken, IServiceProvider>> _syncTasksQueue =
         new(new ConcurrentQueue<Action<CancellationToken, IServiceProvider>>());
 
     private bool _isDisposed;
+
+    // we want to prevent a circular dependency between ILoggerFactory and CustomLoggers
+    private ILoggerFactory? _loggerFactory;
+
+    private ILoggerFactory LoggerFactory => _loggerFactory ??= serviceProvider.GetRequiredService<ILoggerFactory>();
 
     /// <summary>
     ///     Queues a background Task
@@ -71,7 +69,8 @@ public class BackgroundQueueService(ILogger<BackgroundQueueService> logger, ISer
     /// </summary>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogDebug(message: "Background Queue Service is starting.");
+        var logger = LoggerFactory.CreateLogger<BackgroundQueueService>();
+        logger.LogDebug(message: "Background Queue Service is starting.");
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -79,13 +78,13 @@ public class BackgroundQueueService(ILogger<BackgroundQueueService> logger, ISer
             {
                 if (_asyncTasksQueue.TryTake(out var asyncWorkItem))
                 {
-                    using var serviceScope = _serviceScopeFactory.CreateScope();
+                    using var serviceScope = GetServiceScope();
                     await asyncWorkItem(stoppingToken, serviceScope.ServiceProvider);
                 }
 
                 if (_syncTasksQueue.TryTake(out var workItem))
                 {
-                    using var serviceScope = _serviceScopeFactory.CreateScope();
+                    using var serviceScope = GetServiceScope();
                     workItem(stoppingToken, serviceScope.ServiceProvider);
                 }
 
@@ -93,10 +92,12 @@ public class BackgroundQueueService(ILogger<BackgroundQueueService> logger, ISer
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Demystify(), message: "An error occurred executing the background job.");
+                logger.LogError(ex.Demystify(), message: "An error occurred executing the background job.");
             }
         }
     }
+
+    private IServiceScope GetServiceScope() => serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
 
     /// <summary>
     ///     Triggered when the application host is performing a graceful shutdown.
