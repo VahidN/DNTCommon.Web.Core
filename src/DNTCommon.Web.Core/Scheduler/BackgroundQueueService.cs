@@ -9,37 +9,39 @@ namespace DNTCommon.Web.Core;
 ///     BackgroundQueue Service
 ///     A .NET Core replacement for the old HostingEnvironment.QueueBackgroundWorkItem.
 /// </summary>
-public class BackgroundQueueService : BackgroundService, IBackgroundQueueService
+/// <remarks>
+///     BackgroundQueue Service
+/// </remarks>
+public class BackgroundQueueService(ILogger<BackgroundQueueService> logger, IServiceScopeFactory serviceScopeFactory)
+    : BackgroundService, IBackgroundQueueService
 {
-    private readonly ConcurrentQueue<Func<CancellationToken, IServiceProvider, Task>> _asyncTasksQueue = new();
-    private readonly IJobsRunnerTimer _jobsRunnerTimer;
-    private readonly ILogger<BackgroundQueueService> _logger;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly ConcurrentQueue<Action<CancellationToken, IServiceProvider>> _syncTasksQueue = new();
+    private readonly BlockingCollection<Func<CancellationToken, IServiceProvider, Task>> _asyncTasksQueue =
+        new(new ConcurrentQueue<Func<CancellationToken, IServiceProvider, Task>>());
 
-    /// <summary>
-    ///     BackgroundQueue Service
-    /// </summary>
-    public BackgroundQueueService(ILogger<BackgroundQueueService> logger,
-        IServiceScopeFactory serviceScopeFactory,
-        IJobsRunnerTimer jobsRunnerTimer)
-    {
+    private readonly TimeSpan _interval = TimeSpan.FromSeconds(value: 0.5);
+
+    private readonly ILogger<BackgroundQueueService>
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
-        _jobsRunnerTimer = jobsRunnerTimer ?? throw new ArgumentNullException(nameof(jobsRunnerTimer));
-    }
+
+    private readonly IServiceScopeFactory _serviceScopeFactory =
+        serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
+
+    private readonly BlockingCollection<Action<CancellationToken, IServiceProvider>> _syncTasksQueue =
+        new(new ConcurrentQueue<Action<CancellationToken, IServiceProvider>>());
+
+    private bool _isDisposed;
 
     /// <summary>
     ///     Queues a background Task
     /// </summary>
     public void QueueBackgroundWorkItem(Func<CancellationToken, IServiceProvider, Task> workItem)
     {
-        if (workItem == null)
-        {
-            throw new ArgumentNullException(nameof(workItem));
-        }
+        ArgumentNullException.ThrowIfNull(workItem);
 
-        _asyncTasksQueue.Enqueue(workItem);
+        if (!_asyncTasksQueue.IsAddingCompleted)
+        {
+            _asyncTasksQueue.Add(workItem);
+        }
     }
 
     /// <summary>
@@ -47,60 +49,53 @@ public class BackgroundQueueService : BackgroundService, IBackgroundQueueService
     /// </summary>
     public void QueueBackgroundWorkItem(Action<CancellationToken, IServiceProvider> workItem)
     {
-        if (workItem == null)
-        {
-            throw new ArgumentNullException(nameof(workItem));
-        }
+        ArgumentNullException.ThrowIfNull(workItem);
 
-        _syncTasksQueue.Enqueue(workItem);
+        if (!_syncTasksQueue.IsAddingCompleted)
+        {
+            _syncTasksQueue.Add(workItem);
+        }
+    }
+
+    /// <summary>
+    ///     Free resources
+    /// </summary>
+    public new void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 
     /// <summary>
     ///     This method is called when the IHostedService starts.
     /// </summary>
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogDebug("Background Queue Service is starting.");
+        _logger.LogDebug(message: "Background Queue Service is starting.");
 
-        if (_jobsRunnerTimer.IsRunning)
+        while (!stoppingToken.IsCancellationRequested)
         {
-            return Task.CompletedTask;
+            try
+            {
+                if (_asyncTasksQueue.TryTake(out var asyncWorkItem))
+                {
+                    using var serviceScope = _serviceScopeFactory.CreateScope();
+                    await asyncWorkItem(stoppingToken, serviceScope.ServiceProvider);
+                }
+
+                if (_syncTasksQueue.TryTake(out var workItem))
+                {
+                    using var serviceScope = _serviceScopeFactory.CreateScope();
+                    workItem(stoppingToken, serviceScope.ServiceProvider);
+                }
+
+                await Task.Delay(_interval, stoppingToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Demystify(), message: "An error occurred executing the background job.");
+            }
         }
-
-        _jobsRunnerTimer.OnThreadPoolTimerCallback = () =>
-        {
-            if (stoppingToken.IsCancellationRequested)
-            {
-                return;
-            }
-
-            var tasks = new List<Task>();
-
-            while (!_asyncTasksQueue.IsEmpty)
-            {
-                if (_asyncTasksQueue.TryDequeue(out var asyncWorkItem))
-                {
-                    tasks.Add(runTaskAsync(asyncWorkItem, stoppingToken));
-                }
-            }
-
-            while (!_syncTasksQueue.IsEmpty)
-            {
-                if (_syncTasksQueue.TryDequeue(out var workItem))
-                {
-                    tasks.Add(Task.Run(() => runTaskSync(workItem, stoppingToken)));
-                }
-            }
-
-            if (tasks.Count != 0)
-            {
-                Task.WaitAll(tasks.ToArray());
-            }
-        };
-
-        _jobsRunnerTimer.StartJobs();
-
-        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -108,36 +103,43 @@ public class BackgroundQueueService : BackgroundService, IBackgroundQueueService
     /// </summary>
     public override Task StopAsync(CancellationToken cancellationToken)
     {
-        _jobsRunnerTimer.StopJobs();
+        Stop();
 
         return Task.CompletedTask;
     }
 
-    private async Task runTaskAsync(Func<CancellationToken, IServiceProvider, Task> workItem, CancellationToken ct)
+    private void Stop()
     {
-        using var serviceScope = _serviceScopeFactory.CreateScope();
-
-        try
-        {
-            await workItem(ct, serviceScope.ServiceProvider);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex.Demystify(), "Error occurred executing {Name}.", nameof(workItem));
-        }
+        _asyncTasksQueue.CompleteAdding();
+        _syncTasksQueue.CompleteAdding();
     }
 
-    private void runTaskSync(Action<CancellationToken, IServiceProvider> workItem, CancellationToken ct)
+    /// <summary>
+    ///     Free resources
+    /// </summary>
+    protected virtual void Dispose(bool disposing)
     {
-        using var serviceScope = _serviceScopeFactory.CreateScope();
+        if (_isDisposed)
+        {
+            return;
+        }
 
         try
         {
-            workItem(ct, serviceScope.ServiceProvider);
+            if (!disposing)
+            {
+                return;
+            }
+
+            Stop();
+            _asyncTasksQueue.Dispose();
+            _syncTasksQueue.Dispose();
         }
-        catch (Exception ex)
+        finally
         {
-            _logger.LogError(ex.Demystify(), "Error occurred executing {Name}.", nameof(workItem));
+            _isDisposed = true;
         }
+
+        base.Dispose();
     }
 }

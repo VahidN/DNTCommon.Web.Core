@@ -28,7 +28,7 @@ public static class BackgroundQueueServiceExtensions
     /// </summary>
     public static IServiceCollection AddBackgroundQueueService(this IServiceCollection services)
     {
-        services.TryAddTransient<IJobsRunnerTimer, JobsRunnerTimer>();
+        services.AddSingleton<IJobsRunnerTimer, JobsRunnerTimer>();
         services.AddHostedApiService<IBackgroundQueueService, BackgroundQueueService>();
         return services;
     }
