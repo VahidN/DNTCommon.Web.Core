@@ -100,7 +100,7 @@
         <PackageReference Include="Ben.Demystifier" Version="0.4.1"/>
         <PackageReference Include="UAParser" Version="3.1.47"/>
         <PackageReference Include="System.IO.Hashing" Version="8.0.0"/>
-        <PackageReference Include="AsyncKeyedLock" Version="7.0.1"/>
+        <PackageReference Include="AsyncKeyedLock" Version="7.0.2"/>
     </ItemGroup>
     <ItemGroup>
         <None Include="../../README.md" Link="README.md" Pack="true" PackagePath="/" Visible="false"/>
