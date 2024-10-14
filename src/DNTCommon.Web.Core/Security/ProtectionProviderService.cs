@@ -33,9 +33,12 @@ public class ProtectionProviderService : IProtectionProviderService
     /// <summary>
     ///     Decrypts the message
     /// </summary>
-    public string? Decrypt(string inputText)
+    public string? Decrypt(string? inputText)
     {
-        ArgumentNullException.ThrowIfNull(inputText);
+        if (inputText is null)
+        {
+            return null;
+        }
 
         try
         {
@@ -56,22 +59,19 @@ public class ProtectionProviderService : IProtectionProviderService
     /// <summary>
     ///     Encrypts the message
     /// </summary>
-    public string Encrypt(string inputText)
-    {
-        ArgumentNullException.ThrowIfNull(inputText);
-
-        return _dataProtector.Protect(inputText);
-    }
+    public string? Encrypt([NotNullIfNotNull(nameof(inputText))] string? inputText)
+        => inputText is null ? null : _dataProtector.Protect(inputText);
 
     /// <summary>
     ///     It will serialize an object as a JSON string and then encrypt it as a Base64UrlEncode string.
     /// </summary>
-    public string EncryptObject(object data) => Encrypt(_serializationProvider.Serialize(data));
+    public string? EncryptObject([NotNullIfNotNull(nameof(data))] object? data)
+        => data is null ? null : Encrypt(_serializationProvider.Serialize(data));
 
     /// <summary>
     ///     It will decrypt a Base64UrlEncode encrypted JSON string and then deserialize it as an object.
     /// </summary>
-    public T? DecryptObject<T>(string data)
+    public T? DecryptObject<T>(string? data)
     {
         var decryptData = Decrypt(data);
 
