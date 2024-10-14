@@ -62,7 +62,7 @@ public class HtmlHelperService(
 
                 if (string.IsNullOrWhiteSpace(originalUrl))
                 {
-                    attribute.Value = siteBaseUrl.CombineUrl(imageNotFoundPath);
+                    attribute.Value = siteBaseUrl.CombineUrl(imageNotFoundPath, escapeRelativeUrl: false);
 
                     _logger.LogWarning(message: "Changed URL: '' to '{AttributeValue}'.",
                         antiXssService.GetSanitizedHtml(attribute.Value));
@@ -107,7 +107,7 @@ public class HtmlHelperService(
 
                 if (originalUrl.StartsWith(value: "file:/", StringComparison.OrdinalIgnoreCase))
                 {
-                    attribute.Value = siteBaseUrl.CombineUrl(imageNotFoundPath);
+                    attribute.Value = siteBaseUrl.CombineUrl(imageNotFoundPath, escapeRelativeUrl: false);
 
                     _logger.LogWarning(message: "Changed URL: '{OriginalUrl}' to '{AttributeValue}'.",
                         antiXssService.GetSanitizedHtml(originalUrl), antiXssService.GetSanitizedHtml(attribute.Value));
@@ -133,7 +133,7 @@ public class HtmlHelperService(
                     continue;
                 }
 
-                newUrl = siteBaseUrl.CombineUrl(originalUrl);
+                newUrl = siteBaseUrl.CombineUrl(originalUrl, escapeRelativeUrl: false);
 
                 if (!newUrl.Equals(attribute.Value, StringComparison.OrdinalIgnoreCase))
                 {

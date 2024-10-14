@@ -20,7 +20,7 @@ public class AntiXssController(IAntiXssService antiXssService, IWebHostEnvironme
             OutputImageFolder = Path.Combine(webHostEnvironment.WebRootPath, path2: "files"),
             HostUri = HttpContext.GetBaseUri(),
             ImageUrlBuilder = savedFileName => HttpContext.GetBaseUrl()
-                .CombineUrl($"files?name={Uri.EscapeDataString(savedFileName)}")
+                .CombineUrl($"files?name={Uri.EscapeDataString(savedFileName)}", escapeRelativeUrl: false)
         });
 
         return View();

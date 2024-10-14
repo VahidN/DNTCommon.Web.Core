@@ -337,7 +337,7 @@ public static class DomainHelperExtensions
     /// <summary>
     ///     Path.Combine for URLs. The `relativeUrl` doesn't necessarily need a `/` at the beginning of it.
     /// </summary>
-    public static string CombineUrl(this string? baseUrl, string? relativeUrl)
+    public static string CombineUrl(this string? baseUrl, string? relativeUrl, bool escapeRelativeUrl)
     {
         if (string.IsNullOrWhiteSpace(baseUrl))
         {
@@ -352,43 +352,42 @@ public static class DomainHelperExtensions
         baseUrl = baseUrl.TrimEnd(trimChar: '/');
         relativeUrl = relativeUrl.TrimStart(trimChar: '/');
 
-        return $"{baseUrl}/{relativeUrl}";
+        return escapeRelativeUrl ? $"{baseUrl}/{Uri.EscapeDataString(relativeUrl)}" : $"{baseUrl}/{relativeUrl}";
     }
 
     /// <summary>
     ///     Path.Combine for URLs. The `relativeUrl` doesn't necessarily need a `/` at the beginning of it.
     /// </summary>
-    public static string? CombineUrl(this Uri? baseUri, string? relativeUrl)
-        => baseUri?.AbsoluteUri.CombineUrl(relativeUrl);
+    public static string? CombineUrl([NotNullIfNotNull(nameof(baseUri))] this Uri? baseUri,
+        string? relativeUrl,
+        bool escapeRelativeUrl)
+        => baseUri?.AbsoluteUri.CombineUrl(relativeUrl, escapeRelativeUrl);
 
     /// <summary>
     ///     Path.Combine for URLs. The `relativeUrls` don't necessarily need a `/` at the beginning of them.
     /// </summary>
-    public static string? CombineUrls(this Uri? baseUri, params string[]? relativePaths)
-        => baseUri?.AbsoluteUri.CombineUrls(relativePaths);
+    public static string? CombineUrls([NotNullIfNotNull(nameof(baseUri))] this Uri? baseUri,
+        bool escapeRelativeUrl,
+        params string[]? relativePaths)
+        => baseUri?.AbsoluteUri.CombineUrls(escapeRelativeUrl, relativePaths);
 
     /// <summary>
     ///     Path.Combine for URLs. The `relativeUrls` don't necessarily need a `/` at the beginning of them.
     /// </summary>
-    public static string CombineUrls(this string? baseUrl, params string[]? relativePaths)
+    public static string CombineUrls(this string? baseUrl, bool escapeRelativeUrl, params string[]? relativePaths)
     {
         if (string.IsNullOrWhiteSpace(baseUrl))
         {
             baseUrl = "/";
         }
 
-        if (relativePaths is null)
+        if (relativePaths is null || relativePaths.Length == 0)
         {
             return baseUrl;
         }
 
-        if (relativePaths.Length == 0)
-        {
-            return baseUrl;
-        }
+        var currentUrl = baseUrl.CombineUrl(relativePaths[0], escapeRelativeUrl);
 
-        var currentUrl = baseUrl.CombineUrl(relativePaths[0]);
-
-        return currentUrl.CombineUrls(relativePaths.Skip(count: 1).ToArray());
+        return currentUrl.CombineUrls(escapeRelativeUrl, relativePaths.Skip(count: 1).ToArray());
     }
 }
