@@ -62,4 +62,38 @@ public static class CollectionsExtensions
 
         return !source.Where((t, i) => !comparer.Equals(t, destination[i])).Any();
     }
+
+    /// <summary>
+    ///     Adds non-null items to the list
+    /// </summary>
+    public static void AddIfNotNull<T>(this ICollection<T> list, IEnumerable<T>? items)
+    {
+        if (items == null)
+        {
+            return;
+        }
+
+        foreach (var item in items)
+        {
+            AddIfNotNull(list, item);
+        }
+    }
+
+    /// <summary>
+    ///     Adds a non-null item to the list
+    /// </summary>
+    public static void AddIfNotNull<T>(this ICollection<T>? list, T? item)
+    {
+        if (list == null)
+        {
+            return;
+        }
+
+        if (item is null)
+        {
+            return;
+        }
+
+        list.Add(item);
+    }
 }
