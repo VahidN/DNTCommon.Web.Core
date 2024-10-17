@@ -1,3 +1,5 @@
+using System.ComponentModel;
+
 namespace DNTCommon.Web.Core;
 
 /// <summary>
@@ -171,4 +173,126 @@ public static class TypeExtensions
 	/// </summary>
 	public static bool IsConcreteType([NotNullWhen(returnValue: true)] this Type? type)
         => type?.GetTypeInfo() is { IsAbstract: false, IsInterface: false };
+
+	/// <summary>
+	///     Gets the specified attribute from the PropertyDescriptor.
+	/// </summary>
+	public static T? GetAttribute<T>(this PropertyDescriptor? prop)
+        where T : Attribute
+    {
+        if (prop is null)
+        {
+            return null;
+        }
+
+        foreach (Attribute att in prop.Attributes)
+        {
+            if (att is T tAtt)
+            {
+                return tAtt;
+            }
+        }
+
+        return null;
+    }
+
+	/// <summary>
+	///     Gets the specified attribute from the PropertyDescriptor.
+	/// </summary>
+	public static T? GetAttribute<T>(this PropertyInfo? prop, bool inherit)
+        where T : Attribute
+        => prop?.GetCustomAttributes(typeof(T), inherit).GetAttributeType<T>();
+
+	/// <summary>
+	///     Gets the specified attribute from the type.
+	/// </summary>
+	public static T? GetAttribute<T>(this Type? type, bool inherit)
+        where T : Attribute
+        => type?.GetCustomAttributes(typeof(T), inherit).GetAttributeType<T>();
+
+	/// <summary>
+	///     Gets the specified attribute for the assembly.
+	/// </summary>
+	public static T? GetAttribute<T>(this Assembly? asm)
+        where T : Attribute
+        => asm?.GetCustomAttributes(typeof(T), inherit: false).GetAttributeType<T>();
+
+	/// <summary>
+	///     Gets the specified attribute from the PropertyDescriptor.
+	/// </summary>
+	public static T? GetAttribute<T>(this object? obj, bool inherit)
+        where T : Attribute
+    {
+        if (obj == null)
+        {
+            return null;
+        }
+
+        var type = obj.GetType();
+
+        if (type.IsDerivedFrom(typeof(PropertyDescriptor)))
+        {
+            return GetAttribute<T>((PropertyDescriptor)obj);
+        }
+
+        if (type.IsDerivedFrom(typeof(PropertyInfo)))
+        {
+            return GetAttribute<T>((PropertyInfo)obj, inherit);
+        }
+
+        if (type.IsDerivedFrom(typeof(Assembly)))
+        {
+            return (obj as Assembly)?.GetCustomAttributes(typeof(T), inherit: false).GetAttributeType<T>();
+        }
+
+        if (type.IsDerivedFrom(typeof(Type)))
+        {
+            return GetAttribute<T>((Type)obj, inherit);
+        }
+
+        return GetAttribute<T>(type, inherit);
+    }
+
+	/// <summary>
+	///     Gets the specified attribute from the Enum.
+	/// </summary>
+	public static T? GetAttribute<T>(this Enum? val)
+        where T : Attribute
+        => val?.GetType()
+            .GetField(val.ToString())
+            ?.GetCustomAttributes(typeof(T), inherit: false)
+            .GetAttributeType<T>();
+
+    private static T? GetAttributeType<T>(this object[]? attributes)
+        where T : Attribute
+        => attributes is null || attributes.Length == 0 ? null : (T)attributes[0];
+
+    /// <summary>
+    ///     Gets the value from the DescriptionAttribute for the given enumeration value.
+    /// </summary>
+    public static string? GetDescription(this Enum? e) => GetAttribute<DescriptionAttribute>(e)?.Description;
+
+    /// <summary>
+    ///     Gets the specified attributes from the PropertyDescriptor.
+    /// </summary>
+    public static IList<T>? GetAttributes<T>(this PropertyDescriptor? prop)
+        where T : Attribute
+    {
+        if (prop is null)
+        {
+            return null;
+        }
+
+        var attributes = new List<T>();
+
+        foreach (Attribute att in prop.Attributes)
+        {
+            if (att is T tAtt)
+            {
+                attributes.Add(tAtt);
+            }
+        }
+
+        return attributes;
+    }
 }
