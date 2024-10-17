@@ -6,9 +6,19 @@
 public class HtmlModificationRules
 {
     /// <summary>
+    ///     The current Request's root address
+    /// </summary>
+    public Uri? HostUri { set; get; }
+
+    /// <summary>
     ///     Convert all the HTML Ps to DIVs
     /// </summary>
     public bool ConvertPToDiv { set; get; }
+
+    /// <summary>
+    ///     Removes 'rel' = 'noopener noreferrer' and 'target' = '_blank' from internal links
+    /// </summary>
+    public bool RemoveRelAndTargetFromInternalUrls { set; get; }
 
     /// <summary>
     ///     Default style of the pre and code elemets

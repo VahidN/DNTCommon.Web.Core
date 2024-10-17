@@ -38,6 +38,12 @@ public static class DomainHelperExtensions
         => uri1.IsValidUrl() && uri2.IsValidUrl() && HaveTheSameDomain(new Uri(uri1), new Uri(uri2));
 
     /// <summary>
+    ///     Determines whether uri1 and uri2 have the same domain.
+    /// </summary>
+    public static bool HaveTheSameDomain(this string? uri1, Uri? uri2)
+        => uri1.IsValidUrl() && HaveTheSameDomain(new Uri(uri1), uri2);
+
+    /// <summary>
     ///     Determines whether the url has no extension.
     /// </summary>
     public static bool IsMvcPage(this Uri? url) => string.IsNullOrWhiteSpace(url.GetUriExtension());

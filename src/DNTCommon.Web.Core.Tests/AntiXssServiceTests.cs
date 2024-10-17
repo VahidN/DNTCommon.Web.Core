@@ -1,3 +1,4 @@
+using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DNTCommon.Web.Core.Tests;
@@ -684,6 +685,25 @@ Line2
 
             var expected =
                 "<div>this is a test1</div><div>this is a test2</div><div>this is a test3<div>test4</div></div><div class=\"ql-direction-rtl ql-align-right\"><br></div><div class=\"ql-direction-rtl ql-align-right\"><br></div>";
+
+            Assert.AreEqual(expected, actual);
+        });
+
+    [TestMethod]
+    public void AntiXssServiceTestRemoveNoReferrerWorks()
+        => ServiceProvider.RunScopedService<IAntiXssService>(antiXssService =>
+        {
+            var actual = antiXssService.GetSanitizedHtml(
+                html:
+                "<div><a href=\"https://learn.microsoft.com/1\" rel=\"noopener noreferrer\" target=\"_blank\">Text</a></div><a href=\"https://learn.microsoft2.com/1\" rel=\"noopener noreferrer\" target=\"_blank\">Text</a>",
+                htmlModificationRules: new HtmlModificationRules
+                {
+                    RemoveRelAndTargetFromInternalUrls = true,
+                    HostUri = new Uri(uriString: "https://learn.microsoft.com")
+                });
+
+            var expected =
+                "<div><a href=\"https://learn.microsoft.com/1\">Text</a></div><a href=\"https://learn.microsoft2.com/1\" rel=\"noopener noreferrer\" target=\"_blank\">Text</a>";
 
             Assert.AreEqual(expected, actual);
         });

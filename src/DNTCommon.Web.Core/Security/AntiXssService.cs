@@ -100,6 +100,49 @@ public class AntiXssService : IAntiXssService
         }
 
         ConvertPToDiv(node, htmlModificationRules);
+        RemoveRelAndTargetFromInternalUrls(node, htmlModificationRules);
+    }
+
+    private static void RemoveRelAndTargetFromInternalUrls(HtmlNode node, HtmlModificationRules htmlModificationRules)
+    {
+        if (!htmlModificationRules.RemoveRelAndTargetFromInternalUrls || node.NodeType != HtmlNodeType.Element ||
+            htmlModificationRules.HostUri == null)
+        {
+            return;
+        }
+
+        if (string.Equals(node.Name, b: "a", StringComparison.Ordinal))
+        {
+            var href = node.Attributes
+                .FirstOrDefault(attr => attr.Name.Equals(value: "href", StringComparison.OrdinalIgnoreCase))
+                ?.Value;
+
+            if (href.IsEmpty())
+            {
+                node.Remove();
+
+                return;
+            }
+
+            if (!href.HaveTheSameDomain(htmlModificationRules.HostUri))
+            {
+                return;
+            }
+
+            foreach (var attribute in node.Attributes.ToList())
+            {
+                if (attribute.Value.IsEmpty())
+                {
+                    continue;
+                }
+
+                if (string.Equals(attribute.Name, b: "rel", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(attribute.Name, b: "target", StringComparison.OrdinalIgnoreCase))
+                {
+                    attribute.Remove();
+                }
+            }
+        }
     }
 
     private static void ConvertPToDiv(HtmlNode node, HtmlModificationRules htmlModificationRules)
