@@ -1,3 +1,7 @@
+using System.Collections;
+using System.Collections.ObjectModel;
+using System.Text;
+
 namespace DNTCommon.Web.Core;
 
 /// <summary>
@@ -95,5 +99,64 @@ public static class CollectionsExtensions
         }
 
         list.Add(item);
+    }
+
+    /// <summary>
+    ///     Gets a value from the dictionary with the given key. Returns default value if it can not find.
+    /// </summary>
+    public static TValue? GetOrDefault<TKey, TValue>(this IDictionary<TKey, TValue>? dictionary,
+        TKey key,
+        TValue? defaultValue = default)
+        => dictionary is not null && dictionary.TryGetValue(key, out var obj) ? obj : defaultValue;
+
+    /// <summary>
+    ///     Initializes a new instance of the ReadOnlyDictionary class that is a wrapper around the specified dictionary.
+    /// </summary>
+    public static IReadOnlyDictionary<TKey, TValue> AsReadOnly<TKey, TValue>(this IDictionary<TKey, TValue> dictionary)
+        where TKey : notnull
+        => new ReadOnlyDictionary<TKey, TValue>(dictionary);
+
+    /// <summary>
+    ///     Converts the collection of bytes into a hex strings (no prefix).
+    /// </summary>
+    /// <param name="buffer"></param>
+    /// <returns></returns>
+    public static string? ToHex([NotNullIfNotNull(nameof(buffer))] this byte[]? buffer)
+    {
+        if (buffer is null)
+        {
+            return null;
+        }
+
+        var sb = new StringBuilder(buffer.Length * 2);
+
+        foreach (var @byte in buffer)
+        {
+            sb.Append(@byte.ToString(format: "X2", CultureInfo.InvariantCulture));
+        }
+
+        return sb.ToString();
+    }
+
+    /// <summary>
+    ///     Counts the number of elements.
+    /// </summary>
+    public static int Count(this IEnumerable? values)
+    {
+        if (values is null)
+        {
+            return 0;
+        }
+
+        var count = 0;
+        var enumerator = values.GetEnumerator();
+        using var enumerator1 = enumerator as IDisposable;
+
+        while (enumerator.MoveNext())
+        {
+            count++;
+        }
+
+        return count;
     }
 }
