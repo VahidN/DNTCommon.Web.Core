@@ -19,6 +19,29 @@ namespace DNTCommon.Web.Core;
 public static partial class HttpRequestExtensions
 {
     /// <summary>
+    ///     Determines whether the requested URL is reachable or not.
+    /// </summary>
+    public static bool IsOutdatedUrl(this Exception? exception)
+    {
+        if (exception is null)
+        {
+            return false;
+        }
+
+        string[] errors =
+        [
+            "Name or service not known", "The SSL connection could not be established", "Connection refused",
+            "The remote certificate is invalid because of errors in the certificate chain",
+            "System.Threading.Tasks.TaskCanceledException", "System.TimeoutException",
+            "The request was canceled due to the configured HttpClient", "A task was canceled"
+        ];
+
+        var message = exception.Demystify().ToString();
+
+        return errors.Any(error => message.Contains(error, StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
     ///     Gets the current HttpContext.Request's UserAgent.
     /// </summary>
     public static string GetUserAgent(this HttpContext httpContext)
