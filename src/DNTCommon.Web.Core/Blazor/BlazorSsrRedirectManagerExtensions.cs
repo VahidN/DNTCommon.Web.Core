@@ -50,6 +50,17 @@ public static class BlazorSsrRedirectManagerExtensions
     }
 
     /// <summary>
+    ///     Returns Path of the BaseUri
+    /// </summary>
+    public static string GetBasePath(this NavigationManager navigationManager)
+    {
+        ArgumentNullException.ThrowIfNull(navigationManager);
+
+        return new Uri(navigationManager.BaseUri).GetComponents(UriComponents.Path | UriComponents.KeepDelimiter,
+            UriFormat.UriEscaped);
+    }
+
+    /// <summary>
     ///     Prevents open redirect attacks
     /// </summary>
     public static string GetSafeRedirectUri(this NavigationManager navigationManager, string? uri)
