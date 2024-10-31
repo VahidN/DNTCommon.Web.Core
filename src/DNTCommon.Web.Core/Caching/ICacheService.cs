@@ -11,6 +11,28 @@ public interface ICacheService
     ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache.
     ///     Otherwise it will use the factory method to get the value and then inserts it.
     /// </summary>
+    Task<T?> GetOrAddAsync<T>(string cacheKey, Func<Task<T>> factory, DateTimeOffset absoluteExpiration, int size = 1);
+
+    /// <summary>
+    ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache.
+    ///     Otherwise it will use the factory method to get the value and then inserts it.
+    /// </summary>
+    Task<T?> GetOrAddAsync<T>(string cacheKey,
+        Func<Task<T>> factory,
+        TimeSpan absoluteExpirationRelativeToNow,
+        int size = 1);
+
+    /// <summary>
+    ///     A thread-safe way (`asynchronously` blocks) of working with memory cache. First tries to get the key's value from
+    ///     the cache.
+    ///     Otherwise it will use the factory method to get the value and then inserts it.
+    /// </summary>
+    Task<T?> GetOrAddAsync<T>(string cacheKey, Func<Task<T>> factory, MemoryCacheEntryOptions options);
+
+    /// <summary>
+    ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache.
+    ///     Otherwise it will use the factory method to get the value and then inserts it.
+    /// </summary>
     /// <param name="cacheKey"></param>
     /// <param name="factory"></param>
     /// <param name="absoluteExpiration"></param>

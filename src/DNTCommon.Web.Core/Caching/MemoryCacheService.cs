@@ -111,7 +111,8 @@ public class MemoryCacheService(IMemoryCache memoryCache, ILockerService lockerS
         });
 
     /// <summary>
-    ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache.
+    ///     A thread-safe way (`synchronously` blocks) of working with memory cache. First tries to get the key's value from
+    ///     the cache.
     ///     Otherwise it will use the factory method to get the value and then inserts it.
     /// </summary>
     public T? GetOrAdd<T>(string cacheKey, Func<T> factory, MemoryCacheEntryOptions options)
@@ -137,4 +138,56 @@ public class MemoryCacheService(IMemoryCache memoryCache, ILockerService lockerS
     ///     Removes the object associated with the given key.
     /// </summary>
     public void Remove(string cacheKey) => memoryCache.Remove(cacheKey);
+
+    /// <summary>
+    ///     A thread-safe way (`asynchronously` blocks) of working with memory cache. First tries to get the key's value from
+    ///     the cache.
+    ///     Otherwise it will use the factory method to get the value and then inserts it.
+    /// </summary>
+    public async Task<T?> GetOrAddAsync<T>(string cacheKey, Func<Task<T>> factory, MemoryCacheEntryOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(factory);
+
+        // locks get and set internally
+
+        using var locker = await lockerService.LockAsync<MemoryCacheService>();
+
+        if (memoryCache.TryGetValue<T>(cacheKey, out var result))
+        {
+            return result;
+        }
+
+        result = await factory();
+        memoryCache.Set(cacheKey, result, options);
+
+        return result;
+    }
+
+    /// <summary>
+    ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache.
+    ///     Otherwise it will use the factory method to get the value and then inserts it.
+    /// </summary>
+    public Task<T?> GetOrAddAsync<T>(string cacheKey,
+        Func<Task<T>> factory,
+        DateTimeOffset absoluteExpiration,
+        int size = 1)
+        => GetOrAddAsync(cacheKey, factory, new MemoryCacheEntryOptions
+        {
+            AbsoluteExpiration = absoluteExpiration,
+            Size = size // the size limit is the count of entries
+        });
+
+    /// <summary>
+    ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache.
+    ///     Otherwise it will use the factory method to get the value and then inserts it.
+    /// </summary>
+    public Task<T?> GetOrAddAsync<T>(string cacheKey,
+        Func<Task<T>> factory,
+        TimeSpan absoluteExpirationRelativeToNow,
+        int size = 1)
+        => GetOrAddAsync(cacheKey, factory, new MemoryCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = absoluteExpirationRelativeToNow,
+            Size = size // the size limit is the count of entries
+        });
 }
