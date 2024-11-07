@@ -1,68 +1,68 @@
-using System;
-using System.Globalization;
-using System.Net;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-/// AntiDos Middleware
+///     AntiDos Middleware
 /// </summary>
 public class AntiDosMiddleware
 {
+    private readonly IAntiDosFirewall _antiDosFirewall;
     private readonly RequestDelegate _next;
-    private IOptionsSnapshot<AntiDosConfig>? _antiDosConfig;
+    private AntiDosConfig _antiDosConfig;
 
     /// <summary>
-    /// AntiDos Middleware
+    ///     AntiDos Middleware
     /// </summary>
-    public AntiDosMiddleware(RequestDelegate next)
+    public AntiDosMiddleware(RequestDelegate next,
+        IOptionsMonitor<AntiDosConfig> antiDosConfig,
+        IAntiDosFirewall antiDosFirewall)
     {
+        ArgumentNullException.ThrowIfNull(next);
+        ArgumentNullException.ThrowIfNull(antiDosFirewall);
+        ArgumentNullException.ThrowIfNull(antiDosConfig);
+
         _next = next;
+        _antiDosFirewall = antiDosFirewall;
+        _antiDosConfig = antiDosConfig.CurrentValue;
+
+        if (_antiDosConfig == null)
+        {
+            throw new ArgumentNullException(nameof(antiDosConfig),
+                message: "Please add AntiDosConfig to your appsettings.json file.");
+        }
+
+        antiDosConfig.OnChange(options => { _antiDosConfig = options; });
     }
 
     /// <summary>
-    /// AntiDos Middleware Pipeline
+    ///     AntiDos Middleware Pipeline
     /// </summary>
-    public async Task Invoke(
-         HttpContext context,
-         IOptionsSnapshot<AntiDosConfig> antiDosConfig,
-         IAntiDosFirewall antiDosFirewall)
+    public async Task Invoke(HttpContext context)
     {
-        if (context == null)
+        ArgumentNullException.ThrowIfNull(context);
+
+        if (!_antiDosConfig.Disable)
         {
-            throw new ArgumentNullException(nameof(context));
+            var requestInfo = GetHeadersInfo(context);
+            var validationResult = _antiDosFirewall.ShouldBlockClient(requestInfo);
+
+            if (validationResult.ShouldBlockClient)
+            {
+                _antiDosFirewall.LogIt(validationResult.ThrottleInfo, requestInfo);
+                AddResetHeaders(context, validationResult.ThrottleInfo);
+                await BlockClient(context);
+
+                return;
+            }
         }
 
-        if (antiDosFirewall == null)
-        {
-            throw new ArgumentNullException(nameof(antiDosFirewall));
-        }
-
-        _antiDosConfig = antiDosConfig ?? throw new ArgumentNullException(nameof(antiDosConfig));
-        if (_antiDosConfig.Value == null)
-        {
-            throw new ArgumentNullException(nameof(antiDosConfig), "Please add AntiDosConfig to your appsettings.json file.");
-        }
-
-        var requestInfo = getHeadersInfo(context);
-
-        var validationResult = antiDosFirewall.ShouldBlockClient(requestInfo);
-        if (validationResult.ShouldBlockClient)
-        {
-            antiDosFirewall.LogIt(validationResult.ThrottleInfo, requestInfo);
-            addResetHeaders(context, validationResult.ThrottleInfo);
-            await blockClient(context);
-            return;
-        }
         await _next(context);
     }
 
-    private static AntiDosFirewallRequestInfo getHeadersInfo(HttpContext context)
-    {
-        return new AntiDosFirewallRequestInfo(context.Request.Headers)
+    private static AntiDosFirewallRequestInfo GetHeadersInfo(HttpContext context)
+        => new(context.Request.Headers)
         {
             IP = context.GetIP(),
             UserAgent = context.GetUserAgent(),
@@ -70,25 +70,32 @@ public class AntiDosMiddleware
             RawUrl = context.GetRawUrl(),
             IsLocal = context.IsLocal()
         };
-    }
 
-    private Task blockClient(HttpContext context)
+    private Task BlockClient(HttpContext context)
     {
-        // see 409 - http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
-        context.Response.StatusCode = (int)HttpStatusCode.Conflict;
-        return context.Response.WriteAsync(_antiDosConfig?.Value?.ErrorMessage ?? "The server is busy!");
+        context.Response.StatusCode = (int)HttpStatusCode.TooManyRequests;
+
+        return context.Response.WriteAsync(_antiDosConfig?.ErrorMessage ?? "The server is busy!");
     }
 
-    private void addResetHeaders(HttpContext context, ThrottleInfo? throttleInfo)
+    private void AddResetHeaders(HttpContext context, ThrottleInfo? throttleInfo)
     {
         if (throttleInfo == null || _antiDosConfig == null)
         {
             return;
         }
-        context.Response.Headers["X-RateLimit-Limit"] = _antiDosConfig.Value.AllowedRequests.ToString(CultureInfo.InvariantCulture);
-        var requestsRemaining = Math.Max(_antiDosConfig.Value.AllowedRequests - throttleInfo.RequestsCount, 0);
-        context.Response.Headers["X-RateLimit-Remaining"] = requestsRemaining.ToString(CultureInfo.InvariantCulture);
-        context.Response.Headers["X-RateLimit-Reset"] = throttleInfo.ExpiresAt.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture);
-        context.Response.Headers["Retry-After"] = context.Response.Headers["X-RateLimit-Reset"];
+
+        context.Response.Headers[key: "X-RateLimit-Limit"] =
+            _antiDosConfig.AllowedRequests.ToString(CultureInfo.InvariantCulture);
+
+        var requestsRemaining = Math.Max(_antiDosConfig.AllowedRequests - throttleInfo.RequestsCount, val2: 0);
+
+        context.Response.Headers[key: "X-RateLimit-Remaining"] =
+            requestsRemaining.ToString(CultureInfo.InvariantCulture);
+
+        context.Response.Headers[key: "X-RateLimit-Reset"] =
+            throttleInfo.ExpiresAt.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture);
+
+        context.Response.Headers[key: "Retry-After"] = context.Response.Headers[key: "X-RateLimit-Reset"];
     }
 }
