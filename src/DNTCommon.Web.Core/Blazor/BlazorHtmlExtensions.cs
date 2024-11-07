@@ -11,7 +11,20 @@ public static class BlazorHtmlExtensions
     ///     Renders the string value as a markup such as HTML.
     /// </summary>
     /// <param name="text"></param>
+    /// <param name="wrapInSpanWithDir">Sets direction of the text based on its characters. It can be ltr or rtl.</param>
     /// <returns></returns>
-    public static MarkupString HtmlRaw(this string? text)
-        => string.IsNullOrWhiteSpace(text) ? (MarkupString)"" : (MarkupString)text;
+    public static MarkupString HtmlRaw(this string? text, bool wrapInSpanWithDir)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return (MarkupString)"";
+        }
+
+        if (wrapInSpanWithDir)
+        {
+            text = $"<span dir='{text.GetDir()}'>{text}</span>";
+        }
+
+        return (MarkupString)text;
+    }
 }
