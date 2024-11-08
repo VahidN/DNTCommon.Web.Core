@@ -12,11 +12,13 @@ public class MemoryCacheService(IMemoryCache memoryCache, ILockerService lockerS
 {
     /// <summary>
     ///     Gets the key's value from the cache.
+    ///     Return the value associated with this key, or default(TItem) if the key is not present.
     /// </summary>
     public T? GetValue<T>(string cacheKey) => memoryCache.Get<T>(cacheKey);
 
     /// <summary>
     ///     Tries to get the key's value from the cache.
+    ///     Returns true if the key was found. false otherwise.
     /// </summary>
     public bool TryGetValue<T>(string cacheKey, out T? result) => memoryCache.TryGetValue(cacheKey, out result);
 
@@ -91,6 +93,7 @@ public class MemoryCacheService(IMemoryCache memoryCache, ILockerService lockerS
     /// <summary>
     ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache.
     ///     Otherwise it will use the factory method to get the value and then inserts it.
+    ///     The returned value is a found item in cache or the result of calling factory().
     /// </summary>
     public T? GetOrAdd<T>(string cacheKey, Func<T> factory, DateTimeOffset absoluteExpiration, int size = 1)
         => GetOrAdd(cacheKey, factory, new MemoryCacheEntryOptions
@@ -102,6 +105,7 @@ public class MemoryCacheService(IMemoryCache memoryCache, ILockerService lockerS
     /// <summary>
     ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache.
     ///     Otherwise it will use the factory method to get the value and then inserts it.
+    ///     The returned value is a found item in cache or the result of calling factory().
     /// </summary>
     public T? GetOrAdd<T>(string cacheKey, Func<T> factory, TimeSpan absoluteExpirationRelativeToNow, int size = 1)
         => GetOrAdd(cacheKey, factory, new MemoryCacheEntryOptions
@@ -114,6 +118,7 @@ public class MemoryCacheService(IMemoryCache memoryCache, ILockerService lockerS
     ///     A thread-safe way (`synchronously` blocks) of working with memory cache. First tries to get the key's value from
     ///     the cache.
     ///     Otherwise it will use the factory method to get the value and then inserts it.
+    ///     The returned value is a found item in cache or the result of calling factory().
     /// </summary>
     public T? GetOrAdd<T>(string cacheKey, Func<T> factory, MemoryCacheEntryOptions options)
     {
@@ -143,6 +148,7 @@ public class MemoryCacheService(IMemoryCache memoryCache, ILockerService lockerS
     ///     A thread-safe way (`asynchronously` blocks) of working with memory cache. First tries to get the key's value from
     ///     the cache.
     ///     Otherwise it will use the factory method to get the value and then inserts it.
+    ///     The returned values is a found item in cache or the result of calling await factory().
     /// </summary>
     public async Task<T?> GetOrAddAsync<T>(string cacheKey, Func<Task<T>> factory, MemoryCacheEntryOptions options)
     {
@@ -166,6 +172,7 @@ public class MemoryCacheService(IMemoryCache memoryCache, ILockerService lockerS
     /// <summary>
     ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache.
     ///     Otherwise it will use the factory method to get the value and then inserts it.
+    ///     The returned values is a found item in cache or the result of calling await factory().
     /// </summary>
     public Task<T?> GetOrAddAsync<T>(string cacheKey,
         Func<Task<T>> factory,
@@ -180,6 +187,7 @@ public class MemoryCacheService(IMemoryCache memoryCache, ILockerService lockerS
     /// <summary>
     ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache.
     ///     Otherwise it will use the factory method to get the value and then inserts it.
+    ///     The returned values is a found item in cache or the result of calling await factory().
     /// </summary>
     public Task<T?> GetOrAddAsync<T>(string cacheKey,
         Func<Task<T>> factory,

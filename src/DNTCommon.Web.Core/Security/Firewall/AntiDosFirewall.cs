@@ -385,23 +385,15 @@ public class AntiDosFirewall : IAntiDosFirewall
             return;
         }
 
-        if (IsClientLoggedToday(requestInfo.IP ?? "", requestInfo.UserAgent))
+        _cacheService.GetOrAdd($"__Anti_Dos__{$"{requestInfo.IP}_{requestInfo.UserAgent}".GetSha1Hash()}", () =>
         {
-            return;
-        }
+            _logger.LogWarning(message: "Banned IP: {RequestInfoIP}, UserAgent: {RequestInfoUserAgent}. {ThrottleInfo}",
+                requestInfo.IP, requestInfo.UserAgent, throttleInfo);
 
-        _logger.LogWarning(message: "Banned IP: {RequestInfoIP}, UserAgent: {RequestInfoUserAgent}. {ThrottleInfo}",
-            requestInfo.IP, requestInfo.UserAgent, throttleInfo);
+            throttleInfo.IsLogged = true;
+            _cacheService.Add(GetCacheKey(requestInfo), throttleInfo, GetCacheExpiresAt());
 
-        throttleInfo.IsLogged = true;
-        _cacheService.Add(GetCacheKey(requestInfo), throttleInfo, GetCacheExpiresAt());
-    }
-
-    private bool IsClientLoggedToday(string ip, string userAgent)
-    {
-        var hasRecord = _cacheService.GetOrAdd($"__Anti_Dos__{$"{ip}_{userAgent}".GetSha1Hash()}", () => ip + userAgent,
-            DateTimeOffset.UtcNow.AddDays(days: 1));
-
-        return !hasRecord.IsEmpty();
+            return $"{requestInfo.IP}_{requestInfo.UserAgent}";
+        }, DateTimeOffset.UtcNow.AddDays(days: 1));
     }
 }

@@ -8,14 +8,18 @@ namespace DNTCommon.Web.Core;
 public interface ICacheService
 {
     /// <summary>
-    ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache.
-    ///     Otherwise it will use the factory method to get the value and then inserts it.
+    ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache,
+    ///     otherwise it will use the factory method to get the value and then inserts it.
+    ///     The returned value is a found item in cache or the result of calling await factory().
+    ///     The factory argument will be called if there is no item in cache.
     /// </summary>
     Task<T?> GetOrAddAsync<T>(string cacheKey, Func<Task<T>> factory, DateTimeOffset absoluteExpiration, int size = 1);
 
     /// <summary>
-    ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache.
-    ///     Otherwise it will use the factory method to get the value and then inserts it.
+    ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache,
+    ///     otherwise it will use the factory method to get the value and then inserts it.
+    ///     The returned value is a found item in cache or the result of calling await factory().
+    ///     The factory argument will be called if there is no item in cache.
     /// </summary>
     Task<T?> GetOrAddAsync<T>(string cacheKey,
         Func<Task<T>> factory,
@@ -24,14 +28,17 @@ public interface ICacheService
 
     /// <summary>
     ///     A thread-safe way (`asynchronously` blocks) of working with memory cache. First tries to get the key's value from
-    ///     the cache.
-    ///     Otherwise it will use the factory method to get the value and then inserts it.
+    ///     the cache, otherwise it will use the factory method to get the value and then inserts it.
+    ///     The returned value is a found item in cache or the result of calling await factory().
+    ///     The factory argument will be called if there is no item in cache.
     /// </summary>
     Task<T?> GetOrAddAsync<T>(string cacheKey, Func<Task<T>> factory, MemoryCacheEntryOptions options);
 
     /// <summary>
-    ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache.
-    ///     Otherwise it will use the factory method to get the value and then inserts it.
+    ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache,
+    ///     otherwise it will use the factory method to get the value and then inserts it.
+    ///     The returned value is a found item in cache or the result of calling factory().
+    ///     The factory argument will be called if there is no item in cache.
     /// </summary>
     /// <param name="cacheKey"></param>
     /// <param name="factory"></param>
@@ -44,24 +51,30 @@ public interface ICacheService
     T? GetOrAdd<T>(string cacheKey, Func<T> factory, DateTimeOffset absoluteExpiration, int size = 1);
 
     /// <summary>
-    ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache.
-    ///     Otherwise it will use the factory method to get the value and then inserts it.
+    ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache,
+    ///     otherwise it will use the factory method to get the value and then inserts it.
+    ///     The returned value is a found item in cache or the result of calling factory().
+    ///     The factory argument will be called if there is no item in cache.
     /// </summary>
     T? GetOrAdd<T>(string cacheKey, Func<T> factory, TimeSpan absoluteExpirationRelativeToNow, int size = 1);
 
     /// <summary>
-    ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache.
-    ///     Otherwise it will use the factory method to get the value and then inserts it.
+    ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache,
+    ///     otherwise it will use the factory method to get the value and then inserts it.
+    ///     The returned value is a found item in cache or the result of calling factory().
+    ///     The factory argument will be called if there is no item in cache.
     /// </summary>
     T? GetOrAdd<T>(string cacheKey, Func<T> factory, MemoryCacheEntryOptions options);
 
     /// <summary>
     ///     Gets the key's value from the cache.
+    ///     Return the value associated with this key, or default(TItem) if the key is not present.
     /// </summary>
     T? GetValue<T>(string cacheKey);
 
     /// <summary>
     ///     Tries to get the key's value from the cache.
+    ///     Returns true if the key was found. false otherwise.
     /// </summary>
     bool TryGetValue<T>(string cacheKey, out T? result);
 
