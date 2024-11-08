@@ -54,4 +54,9 @@ public class AntiDosConfig
     ///     Should we disable this middleware?
     /// </summary>
     public bool Disable { set; get; }
+
+    /// <summary>
+    ///     Should we log errors?
+    /// </summary>
+    public bool LogErrors { set; get; }
 }

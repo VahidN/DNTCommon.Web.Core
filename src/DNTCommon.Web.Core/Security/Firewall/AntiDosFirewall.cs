@@ -380,6 +380,11 @@ public class AntiDosFirewall : IAntiDosFirewall
             return;
         }
 
+        if (!_antiDosConfig.LogErrors)
+        {
+            return;
+        }
+
         if (throttleInfo.IsLogged)
         {
             return;
