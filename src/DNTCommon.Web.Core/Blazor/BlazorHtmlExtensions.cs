@@ -1,3 +1,4 @@
+using DNTPersianUtils.Core;
 using Microsoft.AspNetCore.Components;
 
 namespace DNTCommon.Web.Core;
@@ -23,7 +24,10 @@ public static class BlazorHtmlExtensions
 
         if (wrapItWithDir)
         {
-            text = $"<{wrapperElementName} dir='{text.GetDir()}'>{text}</{wrapperElementName}>";
+            var hasRtl = text.ContainsFarsi(allowWhitespace: true);
+            var dir = hasRtl ? "rtl" : "ltr";
+            var align = hasRtl ? "right" : "left";
+            text = $"<{wrapperElementName} style='text-align: {align}' dir='{dir}'>{text}</{wrapperElementName}>";
         }
 
         return (MarkupString)text;
