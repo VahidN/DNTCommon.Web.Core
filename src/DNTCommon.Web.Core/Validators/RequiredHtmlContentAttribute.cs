@@ -1,5 +1,3 @@
-using DNTPersianUtils.Core;
-
 namespace DNTCommon.Web.Core;
 
 /// <summary>
@@ -11,22 +9,7 @@ public sealed class RequiredHtmlContentAttribute : ValidationAttribute
     /// <summary>
     ///     Determines whether the specified value of the object has an HTML content.
     /// </summary>
-    public override bool IsValid(object? value)
-    {
-        if (value is null)
-        {
-            return true; // returning false, makes this field required.
-        }
-
-        var valStr = value.ToString();
-
-        if (string.IsNullOrWhiteSpace(valStr))
-        {
-            return true; // returning false, makes this field required.
-        }
-
-        return !valStr.StripHtmlTags().Trim().IsEmpty();
-    }
+    public override bool IsValid(object? value) => value is not null && !value.ToString().RemoveHtmlTags().IsEmpty();
 
     /// <summary>
     ///     Determines whether the specified value of the object is valid.

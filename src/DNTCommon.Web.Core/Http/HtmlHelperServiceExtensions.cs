@@ -157,19 +157,17 @@ public static class HtmlHelperServiceExtensions
     /// <summary>
     ///     Removes all of the HTML tags.
     /// </summary>
-    public static string RemoveHtmlTags(this string html, ILogger? logger = null)
+    public static string RemoveHtmlTags(this string? html, ILogger? logger = null)
     {
-        if (string.IsNullOrWhiteSpace(html))
+        if (html.IsEmpty())
         {
             return string.Empty;
         }
 
         var doc = html.CreateHtmlDocument(logger);
-        var innerText = doc.DocumentNode.InnerText;
+        var innerText = WebUtility.HtmlDecode(doc.DocumentNode.InnerText ?? "");
 
-        return string.IsNullOrWhiteSpace(innerText)
-            ? string.Empty
-            : HtmlSpacesPattern.Replace(innerText, replacement: " ").Trim();
+        return innerText.IsEmpty() ? string.Empty : HtmlSpacesPattern.Replace(innerText, replacement: " ").Trim();
     }
 
     /// <summary>
