@@ -92,9 +92,9 @@
         <PackageReference Include="MailKit" Version="4.8.0"/>
         <PackageReference Include="HtmlAgilityPack" Version="1.11.70"/>
         <PackageReference Include="IPAddressRange" Version="6.0.0"/>
-        <PackageReference Include="SkiaSharp" Version="2.88.8"/>
+        <PackageReference Include="SkiaSharp" Version="2.88.9"/>
         <PackageReference Include="SkiaSharp.HarfBuzz" Version="2.88.8"/>
-        <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="2.88.8"/>
+        <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="2.88.9"/>
         <PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" Version="7.3.0.2"/>
         <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.10"/>
         <PackageReference Include="Ben.Demystifier" Version="0.4.1"/>
