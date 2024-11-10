@@ -32,8 +32,6 @@ dotnet_diagnostic.S2583.severity = suggestion
 
 dotnet_diagnostic.CA1510.severity = suggestion
 
-dotnet_diagnostic.SYSLIB0021.severity = suggestion
-
 dotnet_diagnostic.NU5104.severity = suggestion
 
 dotnet_diagnostic.CA5350.severity = suggestion
@@ -51,8 +49,6 @@ dotnet_diagnostic.CA1031.severity = suggestion
 dotnet_diagnostic.S3267.severity = suggestion
 
 dotnet_diagnostic.CA2254.severity = error
-
-dotnet_diagnostic.SYSLIB0014.severity = suggestion
 
 dotnet_diagnostic.S2326.severity = suggestion
 

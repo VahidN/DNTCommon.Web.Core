@@ -16,21 +16,20 @@ public class LockerService : ILockerService
     ///     Tries to enter the async lock
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ValueTask<AsyncKeyedLockTimeoutReleaser<Type>> LockAsync<T>(TimeSpan timeout,
-        CancellationToken cancellationToken = default)
+    public ValueTask<IDisposable?> LockAsync<T>(TimeSpan timeout, CancellationToken cancellationToken = default)
         where T : notnull
-        => _lock.LockAsync(typeof(T), timeout, cancellationToken);
+        => _lock.LockOrNullAsync(typeof(T), timeout, cancellationToken);
 
     /// <summary>
     ///     Tries to enter the async lock
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ValueTask<AsyncKeyedLockTimeoutReleaser<Type>> LockAsync<T>(CancellationToken cancellationToken = default)
+    public ValueTask<IDisposable?> LockAsync<T>(CancellationToken cancellationToken = default)
         where T : notnull
-        => _lock.LockAsync(typeof(T), _lockTimeout, cancellationToken);
+        => _lock.LockOrNullAsync(typeof(T), _lockTimeout, cancellationToken);
 
     /// <summary>
-    ///     Dispose all of the locks
+    ///     Dispose all the locks
     /// </summary>
     public void Dispose()
     {
@@ -42,17 +41,17 @@ public class LockerService : ILockerService
     ///     Tries to enter the sync lock
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public IDisposable Lock<T>(TimeSpan timeout, CancellationToken cancellationToken = default)
+    public IDisposable? Lock<T>(TimeSpan timeout, CancellationToken cancellationToken = default)
         where T : notnull
-        => _lock.Lock(typeof(T), timeout, cancellationToken, out _);
+        => _lock.LockOrNull(typeof(T), timeout, cancellationToken);
 
     /// <summary>
     ///     Tries to enter the sync lock
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public IDisposable Lock<T>(CancellationToken cancellationToken = default)
+    public IDisposable? Lock<T>(CancellationToken cancellationToken = default)
         where T : notnull
-        => _lock.Lock(typeof(T), _lockTimeout, cancellationToken, out _);
+        => _lock.LockOrNull(typeof(T), _lockTimeout, cancellationToken);
 
     /// <summary>
     ///     Dispose all of the locks
