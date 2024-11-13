@@ -63,11 +63,11 @@
         <Using Include="System.Net.Http.Headers"/>
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Meziantou.Analyzer" Version="2.0.177">
+        <PackageReference Include="Meziantou.Analyzer" Version="2.0.179">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.11.20">
+        <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.12.19">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
@@ -90,8 +90,8 @@
         <PackageReference Include="System.ServiceModel.Syndication" Version="8.0.0"/>
         <PackageReference Include="DNTPersianUtils.Core" Version="6.3.1"/>
         <PackageReference Include="MailKit" Version="4.8.0"/>
-        <PackageReference Include="HtmlAgilityPack" Version="1.11.70"/>
-        <PackageReference Include="IPAddressRange" Version="6.0.0"/>
+        <PackageReference Include="HtmlAgilityPack" Version="1.11.71"/>
+        <PackageReference Include="IPAddressRange" Version="6.1.0"/>
         <PackageReference Include="SkiaSharp" Version="2.88.9"/>
         <PackageReference Include="SkiaSharp.HarfBuzz" Version="2.88.9"/>
         <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="2.88.9"/>
