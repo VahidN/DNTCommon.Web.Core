@@ -62,7 +62,7 @@ public static class TypeExtensions
         => new List<Assembly>
         {
             assembly
-        }.GetAllDerivedConcreteTypes(typeof(TBaseType));
+        }.GetAllDerivedConcreteTypes<TBaseType>();
 
 	/// <summary>
 	///     Finds all the derived types of baseType in the given assemblies
@@ -132,7 +132,7 @@ public static class TypeExtensions
             return fieldsOf;
         }
 
-        fieldsOf.AddRange(type.GetFields(flags).Where(fld => fld.FieldType.IsDerivedFrom(typeof(T))));
+        fieldsOf.AddRange(type.GetFields(flags).Where(fld => fld.FieldType.IsDerivedFrom<T>()));
 
         return fieldsOf;
     }
@@ -149,7 +149,7 @@ public static class TypeExtensions
             return fieldsOf;
         }
 
-        fieldsOf.AddRange(type.GetProperties(flags).Where(fld => fld.PropertyType.IsDerivedFrom(typeof(T))));
+        fieldsOf.AddRange(type.GetProperties(flags).Where(fld => fld.PropertyType.IsDerivedFrom<T>()));
 
         return fieldsOf;
     }
@@ -230,22 +230,22 @@ public static class TypeExtensions
 
         var type = obj.GetType();
 
-        if (type.IsDerivedFrom(typeof(PropertyDescriptor)))
+        if (type.IsDerivedFrom<PropertyDescriptor>())
         {
             return GetAttribute<T>((PropertyDescriptor)obj);
         }
 
-        if (type.IsDerivedFrom(typeof(PropertyInfo)))
+        if (type.IsDerivedFrom<PropertyInfo>())
         {
             return GetAttribute<T>((PropertyInfo)obj, inherit);
         }
 
-        if (type.IsDerivedFrom(typeof(Assembly)))
+        if (type.IsDerivedFrom<Assembly>())
         {
             return (obj as Assembly)?.GetCustomAttributes(typeof(T), inherit: false).GetAttributeType<T>();
         }
 
-        if (type.IsDerivedFrom(typeof(Type)))
+        if (type.IsDerivedFrom<Type>())
         {
             return GetAttribute<T>((Type)obj, inherit);
         }

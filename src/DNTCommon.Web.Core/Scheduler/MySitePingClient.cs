@@ -1,32 +1,21 @@
-﻿using System;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-/// DNTScheduler needs a ping service to keep it alive.
-/// This class provides the SiteRootUrl for the PingTask.
+///     DNTScheduler needs a ping service to keep it alive.
+///     This class provides the SiteRootUrl for the PingTask.
 /// </summary>
-public class MySitePingClient
+/// <remarks>
+///     Pings the site's root url.
+/// </remarks>
+public class MySitePingClient(HttpClient httpClient, ILogger<MySitePingClient> logger)
 {
-    private readonly HttpClient _httpClient;
-    private readonly ILogger<MySitePingClient> _logger;
+    private readonly HttpClient _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+    private readonly ILogger<MySitePingClient> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     /// <summary>
-    /// Pings the site's root url.
-    /// </summary>
-    public MySitePingClient(HttpClient httpClient, ILogger<MySitePingClient> logger)
-    {
-        _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
-
-    /// <summary>
-    /// Pings the site's root url.
+    ///     Pings the site's root url.
     /// </summary>
     public async Task WakeUp()
     {
@@ -39,7 +28,7 @@ public class MySitePingClient
         }
         catch (Exception ex)
         {
-            _logger.LogCritical(0, ex.Demystify(), "Failed running the Ping task.");
+            _logger.LogCritical(eventId: 0, ex.Demystify(), message: "Failed running the Ping task.");
         }
     }
 }

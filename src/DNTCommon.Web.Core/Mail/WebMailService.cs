@@ -1,7 +1,9 @@
 using DNTPersianUtils.Core;
 using MailKit.Net.Smtp;
-using Microsoft.AspNetCore.Components;
 using MimeKit;
+#if NET9_0 || NET8_0
+using Microsoft.AspNetCore.Components;
+#endif
 
 namespace DNTCommon.Web.Core;
 
@@ -13,13 +15,13 @@ namespace DNTCommon.Web.Core;
 /// </remarks>
 public class WebMailService(
     IViewRendererService viewRendererService
-#if NET_8
+#if NET_9 || NET_8
     ,
     IBlazorStaticRendererService blazorStaticRendererService
 #endif
 ) : IWebMailService
 {
-#if NET_8
+#if NET_9 || NET_8
     private readonly IBlazorStaticRendererService _blazorStaticRendererService = blazorStaticRendererService ??
         throw new ArgumentNullException(nameof(blazorStaticRendererService));
 #endif
@@ -49,7 +51,7 @@ public class WebMailService(
             delayDelivery, attachmentFiles, headers, shouldValidateServerCertificate);
     }
 
-#if NET_8
+#if NET_9 || NET_8
     /// <summary>
     ///     Sends an email using the `MailKit` library.
     ///     This method converts a Blazor .razor template file to an string and then uses it as the email's message.
@@ -101,17 +103,17 @@ public class WebMailService(
 
         if (smtpConfig.UsePickupFolder && !string.IsNullOrWhiteSpace(smtpConfig.PickupFolder))
         {
-            await usePickupFolderAsync(smtpConfig, emails, subject, message, blindCarpbonCopies, carpbonCopies,
+            await UsePickupFolderAsync(smtpConfig, emails, subject, message, blindCarpbonCopies, carpbonCopies,
                 replyTos, attachmentFiles, headers);
         }
         else
         {
-            await sendEmailAsync(smtpConfig, emails, subject, message, blindCarpbonCopies, carpbonCopies, replyTos,
+            await SendThisEmailAsync(smtpConfig, emails, subject, message, blindCarpbonCopies, carpbonCopies, replyTos,
                 delayDelivery, attachmentFiles, headers, shouldValidateServerCertificate);
         }
     }
 
-    private static async Task sendEmailAsync(SmtpConfig smtpConfig,
+    private static async Task SendThisEmailAsync(SmtpConfig smtpConfig,
         IEnumerable<MailAddress> emails,
         string subject,
         string message,
@@ -123,49 +125,48 @@ public class WebMailService(
         MailHeaders? headers,
         bool shouldValidateServerCertificate)
     {
-        using (var client = new SmtpClient())
+        using var client = new SmtpClient();
+
+        if (!shouldValidateServerCertificate)
         {
-            if (!shouldValidateServerCertificate)
-            {
-                client.ServerCertificateValidationCallback = (_, _, _, _) => true;
-                client.CheckCertificateRevocation = false;
-            }
-
-            if (!string.IsNullOrWhiteSpace(smtpConfig.LocalDomain))
-            {
-                client.LocalDomain = smtpConfig.LocalDomain;
-            }
-
-            await client.ConnectAsync(smtpConfig.Server, smtpConfig.Port);
-
-            if (!string.IsNullOrWhiteSpace(smtpConfig.Username) && !string.IsNullOrWhiteSpace(smtpConfig.Password))
-            {
-                await client.AuthenticateAsync(smtpConfig.Username, smtpConfig.Password);
-            }
-
-            var count = 0;
-
-            foreach (var email in emails)
-            {
-                using (var emailMessage = getEmailMessage(email.ToName, email.ToAddress, subject, message,
-                           attachmentFiles, smtpConfig, headers, blindCarpbonCopies, carpbonCopies, replyTos))
-                {
-                    await client.SendAsync(emailMessage);
-                }
-
-                count++;
-
-                if (delayDelivery != null && count % delayDelivery.NumberOfMessages == 0)
-                {
-                    await Task.Delay(delayDelivery.Delay);
-                }
-            }
-
-            await client.DisconnectAsync(quit: true);
+            client.ServerCertificateValidationCallback = (_, _, _, _) => true;
+            client.CheckCertificateRevocation = false;
         }
+
+        if (!string.IsNullOrWhiteSpace(smtpConfig.LocalDomain))
+        {
+            client.LocalDomain = smtpConfig.LocalDomain;
+        }
+
+        await client.ConnectAsync(smtpConfig.Server, smtpConfig.Port);
+
+        if (!string.IsNullOrWhiteSpace(smtpConfig.Username) && !string.IsNullOrWhiteSpace(smtpConfig.Password))
+        {
+            await client.AuthenticateAsync(smtpConfig.Username, smtpConfig.Password);
+        }
+
+        var count = 0;
+
+        foreach (var email in emails)
+        {
+            using (var emailMessage = GetEmailMessage(email.ToName, email.ToAddress, subject, message, attachmentFiles,
+                       smtpConfig, headers, blindCarpbonCopies, carpbonCopies, replyTos))
+            {
+                await client.SendAsync(emailMessage);
+            }
+
+            count++;
+
+            if (delayDelivery != null && count % delayDelivery.NumberOfMessages == 0)
+            {
+                await Task.Delay(delayDelivery.Delay);
+            }
+        }
+
+        await client.DisconnectAsync(quit: true);
     }
 
-    private static async Task usePickupFolderAsync(SmtpConfig smtpConfig,
+    private static async Task UsePickupFolderAsync(SmtpConfig smtpConfig,
         IEnumerable<MailAddress> emails,
         string subject,
         string message,
@@ -190,18 +191,17 @@ public class WebMailService(
         foreach (var email in emails)
         {
             await using var stream =
-                new FileStream(
-                    Path.Combine(smtpConfig.PickupFolder, $"email-{Guid.NewGuid().ToString(format: "N")}.eml"),
+                new FileStream(Path.Combine(smtpConfig.PickupFolder, $"email-{Guid.NewGuid():N}.eml"),
                     FileMode.CreateNew, FileAccess.Write, FileShare.None, maxBufferSize, useAsync: true);
 
-            using var emailMessage = getEmailMessage(email.ToName, email.ToAddress, subject, message, attachmentFiles,
+            using var emailMessage = GetEmailMessage(email.ToName, email.ToAddress, subject, message, attachmentFiles,
                 smtpConfig, headers, blindCarpbonCopies, carpbonCopies, replyTos);
 
             await emailMessage.WriteToAsync(stream);
         }
     }
 
-    private static MimeMessage getEmailMessage(string toName,
+    private static MimeMessage GetEmailMessage(string toName,
         string toAddress,
         string subject,
         string message,
@@ -241,13 +241,13 @@ public class WebMailService(
             }
         }
 
-        emailMessage.Body = getMessageBody(message, attachmentFiles);
-        addHeaders(emailMessage, headers, smtpConfig.FromAddress);
+        emailMessage.Body = GetMessageBody(message, attachmentFiles);
+        AddHeaders(emailMessage, headers, smtpConfig.FromAddress);
 
         return emailMessage;
     }
 
-    private static void addHeaders(MimeMessage emailMessage, MailHeaders? headers, string fromAddress)
+    private static void AddHeaders(MimeMessage emailMessage, MailHeaders? headers, string fromAddress)
     {
         if (headers == null)
         {
@@ -278,7 +278,7 @@ public class WebMailService(
         }
     }
 
-    private static MimeEntity getMessageBody(string message, IEnumerable<string>? attachmentFiles)
+    private static MimeEntity GetMessageBody(string message, IEnumerable<string>? attachmentFiles)
     {
         var builder = new BodyBuilder
         {

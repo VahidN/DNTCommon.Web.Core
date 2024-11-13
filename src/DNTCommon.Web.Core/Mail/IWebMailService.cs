@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Components;
-
 namespace DNTCommon.Web.Core;
 
 /// <summary>
@@ -39,7 +37,7 @@ public interface IWebMailService
         MailHeaders? headers = null,
         bool shouldValidateServerCertificate = true);
 
-#if NET_8
+#if NET_9 || NET_8
     /// <summary>
     ///     Sends an email using the `MailKit` library.
     ///     This method converts a blazor .razor template file to an string and then uses it as the email's message.
@@ -55,6 +53,6 @@ public interface IWebMailService
         IEnumerable<string>? attachmentFiles = null,
         MailHeaders? headers = null,
         bool shouldValidateServerCertificate = true)
-        where T : IComponent;
+        where T : Microsoft.AspNetCore.Components.IComponent;
 #endif
 }

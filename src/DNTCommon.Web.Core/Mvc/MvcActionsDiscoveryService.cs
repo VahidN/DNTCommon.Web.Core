@@ -33,20 +33,21 @@ public class MvcActionsDiscoveryService : IMvcActionsDiscoveryService
         var apiControllers = new HashSet<MvcControllerViewModel>(new MvcControllerEqualityComparer());
 
         foreach (var descriptor in actionDescriptorCollectionProvider.ActionDescriptors.Items
-                                                                     .OfType<ControllerActionDescriptor>())
+                     .OfType<ControllerActionDescriptor>())
         {
             var controllerTypeInfo = descriptor.ControllerTypeInfo;
             var actionMethodInfo = descriptor.MethodInfo;
 
-            var controllerAttributes = controllerTypeInfo.GetCustomAttributes(true);
+            var controllerAttributes = controllerTypeInfo.GetCustomAttributes(inherit: true);
+
             var currentController = new MvcControllerViewModel
-                                    {
-                                        AreaName = controllerAttributes.OfType<AreaAttribute>().FirstOrDefault()
-                                                                       ?.RouteValue ?? string.Empty,
-                                        ControllerDisplayName = GetDisplayName(controllerAttributes),
-                                        ControllerName = descriptor.ControllerName,
-                                        ControllerAttributes = getAttributes(controllerTypeInfo),
-                                    };
+            {
+                AreaName = controllerAttributes.OfType<AreaAttribute>().FirstOrDefault()?.RouteValue ?? string.Empty,
+                ControllerDisplayName = GetDisplayName(controllerAttributes),
+                ControllerName = descriptor.ControllerName,
+                ControllerAttributes = GetAttributes(controllerTypeInfo)
+            };
+
             if (apiControllers.TryGetValue(currentController, out var actualController))
             {
                 currentController = actualController;
@@ -56,19 +57,20 @@ public class MvcActionsDiscoveryService : IMvcActionsDiscoveryService
                 apiControllers.Add(currentController);
             }
 
-            var actionMethodAttributes = actionMethodInfo.GetCustomAttributes(true);
+            var actionMethodAttributes = actionMethodInfo.GetCustomAttributes(inherit: true);
+
             var mvcActionItem = new MvcActionViewModel
-                                {
-                                    ControllerId = currentController.ControllerId,
-                                    ActionName = descriptor.ActionName,
-                                    ActionDisplayName = GetDisplayName(actionMethodAttributes),
-                                    IsSecuredAction = isSecuredAction(controllerTypeInfo, actionMethodInfo),
-                                    HttpMethods =
-                                        descriptor.ActionConstraints?.OfType<HttpMethodActionConstraint>()
-                                                  .FirstOrDefault()?.HttpMethods ??
-                                        new[] { "any" },
-                                    ActionAttributes = getAttributes(actionMethodInfo),
-                                };
+            {
+                ControllerId = currentController.ControllerId,
+                ActionName = descriptor.ActionName,
+                ActionDisplayName = GetDisplayName(actionMethodAttributes),
+                IsSecuredAction = IsSecuredAction(controllerTypeInfo, actionMethodInfo),
+                HttpMethods = descriptor.ActionConstraints?.OfType<HttpMethodActionConstraint>()
+                    .FirstOrDefault()
+                    ?.HttpMethods ?? ["any"],
+                ActionAttributes = GetAttributes(actionMethodInfo)
+            };
+
             currentController.MvcActions.Add(mvcActionItem);
         }
 
@@ -86,82 +88,73 @@ public class MvcActionsDiscoveryService : IMvcActionsDiscoveryService
     /// </summary>
     public ICollection<MvcControllerViewModel> GetAllSecuredControllerActionsWithPolicy(string policyName)
     {
-        var getter =
-            _allSecuredActionsWithPloicy.GetOrAdd(policyName,
-                                                  pn => new Lazy<ICollection<MvcControllerViewModel>>(
-                                                       () =>
-                                                       {
-                                                           var controllers =
-                                                               new List<
-                                                                   MvcControllerViewModel>(MvcControllers);
-                                                           foreach (var controller in controllers)
-                                                           {
-                                                               var securedOnes = controller.MvcActions.Where(
-                                                                    model => model.IsSecuredAction &&
-                                                                             (
-                                                                                 string.Equals(model
-                                                                                          .ActionAttributes
-                                                                                          .OfType<
-                                                                                              AuthorizeAttribute>()
-                                                                                          .FirstOrDefault()?.Policy,
-                                                                                      pn,
-                                                                                      StringComparison.Ordinal) ||
-                                                                                 string.Equals(controller
-                                                                                          .ControllerAttributes
-                                                                                          .OfType<
-                                                                                              AuthorizeAttribute>()
-                                                                                          .FirstOrDefault()?.Policy,
-                                                                                      pn,
-                                                                                      StringComparison.Ordinal)
-                                                                             )).ToList();
-                                                               controller.MvcActions.Clear();
-                                                               controller.MvcActions.AddRange(securedOnes);
-                                                           }
+        var getter = _allSecuredActionsWithPloicy.GetOrAdd(policyName, pn
+            => new Lazy<ICollection<MvcControllerViewModel>>(() =>
+            {
+                var controllers = new List<MvcControllerViewModel>(MvcControllers);
 
-                                                           return controllers
-                                                                  .Where(model => model.MvcActions.Any())
-                                                                  .ToList();
-                                                       }));
+                foreach (var controller in controllers)
+                {
+                    var securedOnes = controller.MvcActions.Where(model
+                            => model.IsSecuredAction &&
+                               (string.Equals(
+                                    model.ActionAttributes.OfType<AuthorizeAttribute>().FirstOrDefault()?.Policy,
+                                    pn, StringComparison.Ordinal) ||
+                                string.Equals(
+                                    controller.ControllerAttributes.OfType<AuthorizeAttribute>()
+                                        .FirstOrDefault()
+                                        ?.Policy,
+                                    pn, StringComparison.Ordinal)))
+                        .ToList();
+
+                    controller.MvcActions.Clear();
+                    controller.MvcActions.AddRange(securedOnes);
+                }
+
+                return controllers.Where(model => model.MvcActions.Any()).ToList();
+            }));
+
         return getter.Value;
     }
 
-    private static string GetDisplayName(object[] attributes) =>
-        attributes.OfType<DisplayNameAttribute>().FirstOrDefault()?.DisplayName ??
-        attributes.OfType<DisplayAttribute>().FirstOrDefault()?.Name ?? string.Empty;
+    private static string GetDisplayName(object[] attributes)
+        => attributes.OfType<DisplayNameAttribute>().FirstOrDefault()?.DisplayName ??
+           attributes.OfType<DisplayAttribute>().FirstOrDefault()?.Name ?? string.Empty;
 
-    private static List<Attribute> getAttributes(MemberInfo actionMethodInfo)
-    {
-        return actionMethodInfo.GetCustomAttributes(true)
-                               .Where(attribute =>
-                                      {
-                                          var attributeNamespace = attribute.GetType().Namespace;
-                                          return !string.Equals(attributeNamespace,
-                                                                typeof(CompilerGeneratedAttribute).Namespace,
-                                                                StringComparison.Ordinal) &&
-                                                 !string.Equals(attributeNamespace,
-                                                                typeof(DebuggerStepThroughAttribute).Namespace,
-                                                                StringComparison.Ordinal);
-                                      })
-                               .Cast<Attribute>()
-                               .ToList();
-    }
+    private static List<Attribute> GetAttributes(MemberInfo actionMethodInfo)
+        => actionMethodInfo.GetCustomAttributes(inherit: true)
+            .Where(attribute =>
+            {
+                var attributeNamespace = attribute.GetType().Namespace;
 
-    private static bool isSecuredAction(MemberInfo controllerTypeInfo, MemberInfo actionMethodInfo)
+                return !string.Equals(attributeNamespace, typeof(CompilerGeneratedAttribute).Namespace,
+                    StringComparison.Ordinal) && !string.Equals(attributeNamespace,
+                    typeof(DebuggerStepThroughAttribute).Namespace, StringComparison.Ordinal);
+            })
+            .Cast<Attribute>()
+            .ToList();
+
+    private static bool IsSecuredAction(MemberInfo controllerTypeInfo, MemberInfo actionMethodInfo)
     {
         var actionHasAllowAnonymousAttribute =
-            actionMethodInfo.GetCustomAttribute<AllowAnonymousAttribute>(true) != null;
+            actionMethodInfo.GetCustomAttribute<AllowAnonymousAttribute>(inherit: true) != null;
+
         if (actionHasAllowAnonymousAttribute)
         {
             return false;
         }
 
-        var controllerHasAuthorizeAttribute = controllerTypeInfo.GetCustomAttribute<AuthorizeAttribute>(true) != null;
+        var controllerHasAuthorizeAttribute =
+            controllerTypeInfo.GetCustomAttribute<AuthorizeAttribute>(inherit: true) != null;
+
         if (controllerHasAuthorizeAttribute)
         {
             return true;
         }
 
-        var actionMethodHasAuthorizeAttribute = actionMethodInfo.GetCustomAttribute<AuthorizeAttribute>(true) != null;
+        var actionMethodHasAuthorizeAttribute =
+            actionMethodInfo.GetCustomAttribute<AuthorizeAttribute>(inherit: true) != null;
+
         if (actionMethodHasAuthorizeAttribute)
         {
             return true;

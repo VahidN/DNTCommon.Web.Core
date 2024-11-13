@@ -6,15 +6,13 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     Upload File Service
 /// </summary>
-public class UploadFileService : IUploadFileService
+/// <remarks>
+///     Upload File Service
+/// </remarks>
+public class UploadFileService(IWebHostEnvironment environment) : IUploadFileService
 {
-    private readonly IWebHostEnvironment _environment;
-
-    /// <summary>
-    ///     Upload File Service
-    /// </summary>
-    public UploadFileService(IWebHostEnvironment environment)
-        => _environment = environment ?? throw new ArgumentNullException(nameof(environment));
+    private readonly IWebHostEnvironment _environment =
+        environment ?? throw new ArgumentNullException(nameof(environment));
 
     /// <summary>
     ///     Saves the posted IFormFile to the specified directory asynchronously.

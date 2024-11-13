@@ -46,7 +46,7 @@ public static class DntCommonWebServiceCollectionExtensions
             services.AddDNTScheduler(scheduledTasksOptions);
         }
 
-#if NET_8
+#if NET_9 || NET_8
         services.AddBlazorStaticRendererService();
 #endif
         services.AddBlazorRenderingContextService();

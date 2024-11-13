@@ -41,7 +41,7 @@ public class SharedResourceService(
     public string? GetString(string name, params object[] arguments)
     {
         var result = _sharedLocalizer.GetString(name, arguments);
-        logError(name, result);
+        LogError(name, result);
 
         return result;
     }
@@ -52,12 +52,12 @@ public class SharedResourceService(
     public string? GetString(string name)
     {
         var result = _sharedLocalizer.GetString(name);
-        logError(name, result);
+        LogError(name, result);
 
         return result;
     }
 
-    private void logError(string name, LocalizedString result)
+    private void LogError(string name, LocalizedString result)
     {
         if (result.ResourceNotFound)
         {

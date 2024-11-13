@@ -34,7 +34,7 @@ public class DownloaderService : IDownloaderService, IDisposable
     /// </summary>
     public void Dispose()
     {
-        Dispose(true);
+        Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
 
@@ -52,33 +52,28 @@ public class DownloaderService : IDownloaderService, IDisposable
     ///     Downloads a file from a given url and then stores it as a local file.
     /// </summary>
     public Task<DownloadStatus?> DownloadFileAsync(string url,
-                                                   string outputFilePath,
-                                                   AutoRetriesPolicy? autoRetries = null)
-    {
-        return downloadAsync(() => doDownloadFileAsync(url, outputFilePath), autoRetries);
-    }
+        string outputFilePath,
+        AutoRetriesPolicy? autoRetries = null)
+        => DownloadAsync(() => DoDownloadFileAsync(url, outputFilePath), autoRetries);
 
     /// <summary>
     ///     Downloads a file from a given url and then returns it as a byte array.
     /// </summary>
-    public Task<(byte[] Data, DownloadStatus DownloadStatus)> DownloadDataAsync(
-        string url,
+    public Task<(byte[] Data, DownloadStatus DownloadStatus)> DownloadDataAsync(string url,
         AutoRetriesPolicy? autoRetries = null)
-    {
-        return downloadAsync(() => doDownloadDataAsync(url), autoRetries);
-    }
+        => DownloadAsync(() => DoDownloadDataAsync(url), autoRetries);
 
     /// <summary>
     ///     Downloads a file from a given url and then returns it as a text.
     /// </summary>
-    public async Task<(string Data, DownloadStatus DownloadStatus)> DownloadPageAsync(
-        string url,
+    public async Task<(string Data, DownloadStatus DownloadStatus)> DownloadPageAsync(string url,
         AutoRetriesPolicy? autoRetries = null)
     {
         var result = await DownloadDataAsync(url, autoRetries);
+
         return result.Data == null
-                   ? (string.Empty, _downloadStatus)
-                   : (Encoding.UTF8.GetString(result.Data), _downloadStatus);
+            ? (string.Empty, _downloadStatus)
+            : (Encoding.UTF8.GetString(result.Data), _downloadStatus);
     }
 
     /// <summary>
@@ -91,23 +86,22 @@ public class DownloaderService : IDownloaderService, IDisposable
         _client.CancelPendingRequests();
     }
 
-    private async Task<T?> downloadAsync<T>(Func<Task<T>> task, AutoRetriesPolicy? autoRetries)
+    private async Task<T?> DownloadAsync<T>(Func<Task<T>> task, AutoRetriesPolicy? autoRetries)
     {
-        if (autoRetries == null)
+        autoRetries ??= new AutoRetriesPolicy
         {
-            autoRetries = new AutoRetriesPolicy
-                          {
-                              MaxRequestAutoRetries = 2,
-                              AutoRetriesDelay = TimeSpan.FromSeconds(2),
-                          };
-        }
+            MaxRequestAutoRetries = 2,
+            AutoRetriesDelay = TimeSpan.FromSeconds(value: 2)
+        };
 
         var exceptions = new List<Exception>();
 
         T? result = default;
+
         do
         {
             --autoRetries.MaxRequestAutoRetries;
+
             try
             {
                 result = await task();
@@ -133,20 +127,20 @@ public class DownloaderService : IDownloaderService, IDisposable
                 // Wait a bit and try again later
                 await Task.Delay(autoRetries.AutoRetriesDelay, _cancelSrc.Token);
             }
-        } while (autoRetries.MaxRequestAutoRetries > 0 &&
-                 _downloadStatus.Status != TaskStatus.RanToCompletion &&
-                 !_cancelSrc.IsCancellationRequested);
+        }
+        while (autoRetries.MaxRequestAutoRetries > 0 && _downloadStatus.Status != TaskStatus.RanToCompletion &&
+               !_cancelSrc.IsCancellationRequested);
 
         var uniqueExceptions = exceptions.Distinct(new ExceptionEqualityComparer()).ToList();
-        if (uniqueExceptions.Count != 0 &&
-            _downloadStatus.Status != TaskStatus.RanToCompletion)
+
+        if (uniqueExceptions.Count != 0 && _downloadStatus.Status != TaskStatus.RanToCompletion)
         {
             if (uniqueExceptions.Count() == 1)
             {
-                throw uniqueExceptions[0];
+                throw uniqueExceptions[index: 0];
             }
 
-            throw new AggregateException("Could not process the request.", uniqueExceptions);
+            throw new AggregateException(message: "Could not process the request.", uniqueExceptions);
         }
 
         return result;
@@ -173,13 +167,14 @@ public class DownloaderService : IDownloaderService, IDisposable
         }
     }
 
-    private async Task<DownloadStatus> doDownloadFileAsync(string url, string outputFilePath)
+    private async Task<DownloadStatus> DoDownloadFileAsync(string url, string outputFilePath)
     {
         _downloadStatus.StartTime = DateTimeOffset.UtcNow;
         _downloadStatus.BytesTransferred = 0;
 
         var fileMode = FileMode.CreateNew;
         var fileInfo = new FileInfo(outputFilePath);
+
         if (fileInfo.Exists)
         {
             _downloadStatus.BytesTransferred = fileInfo.Length;
@@ -188,52 +183,49 @@ public class DownloaderService : IDownloaderService, IDisposable
 
         if (_downloadStatus.BytesTransferred > 0)
         {
-            _client.DefaultRequestHeaders.Range = new RangeHeaderValue(_downloadStatus.BytesTransferred, null);
+            _client.DefaultRequestHeaders.Range = new RangeHeaderValue(_downloadStatus.BytesTransferred, to: null);
         }
 
-        var response = await readResponseHeadersAsync(url);
+        var response = await ReadResponseHeadersAsync(url);
 
-        if (_downloadStatus.BytesTransferred > 0 &&
-            _downloadStatus.RemoteFileSize == _downloadStatus.BytesTransferred)
+        if (_downloadStatus.BytesTransferred > 0 && _downloadStatus.RemoteFileSize == _downloadStatus.BytesTransferred)
         {
-            reportDownloadCompleted();
+            ReportDownloadCompleted();
+
             return _downloadStatus;
         }
 
-        using (var inputStream = await response.Content.ReadAsStreamAsync())
-        {
-            using (var fileStream = new FileStream(outputFilePath,
-                                                   fileMode,
-                                                   FileAccess.Write,
-                                                   FileShare.None,
-                                                   MaxBufferSize,
-                                                   // you have to explicitly open the FileStream as asynchronous
-                                                   // or else you're just doing synchronous operations on a background thread.
-                                                   true
-                                                  ))
-            {
-                if (response.Headers.AcceptRanges == null && fileStream.Length > 0)
-                {
-                    // Resume is not supported. Starting over.
-                    fileStream.SetLength(0);
-                    await fileStream.FlushAsync();
-                    _downloadStatus.BytesTransferred = 0;
-                }
+        await using var inputStream = await response.Content.ReadAsStreamAsync();
 
-                await readInputStreamAsync(inputStream, fileStream);
-            } // The Close() calls the Flush(), so you don't need to call it manually.
+        await using var fileStream = new FileStream(outputFilePath, fileMode, FileAccess.Write, FileShare.None,
+            MaxBufferSize,
+
+            // you have to explicitly open the FileStream as asynchronous
+            // or else you're just doing synchronous operations on a background thread.
+            useAsync: true);
+
+        if (response.Headers.AcceptRanges == null && fileStream.Length > 0)
+        {
+            // Resume is not supported. Starting over.
+            fileStream.SetLength(value: 0);
+            await fileStream.FlushAsync();
+            _downloadStatus.BytesTransferred = 0;
         }
 
-        reportDownloadCompleted();
+        await ReadInputStreamAsync(inputStream, fileStream);
+
+        ReportDownloadCompleted();
+
         return _downloadStatus;
     }
 
-    private async Task readInputStreamAsync(Stream inputStream, Stream outputStream)
+    private async Task ReadInputStreamAsync(Stream inputStream, Stream outputStream)
     {
         var buffer = new byte[MaxBufferSize];
         int read;
         var readCount = 0L;
-        while ((read = await inputStream.ReadAsync(buffer.AsMemory(0, buffer.Length), _cancelSrc.Token)) > 0 &&
+
+        while ((read = await inputStream.ReadAsync(buffer.AsMemory(start: 0, buffer.Length), _cancelSrc.Token)) > 0 &&
                !_cancelSrc.IsCancellationRequested)
         {
             _downloadStatus.BytesTransferred += read;
@@ -242,53 +234,51 @@ public class DownloaderService : IDownloaderService, IDisposable
 
             if (readCount % 100 == 0)
             {
-                updateDownloadStatus();
+                UpdateDownloadStatus();
             }
 
-            await outputStream.WriteAsync(buffer.AsMemory(0, read), _cancelSrc.Token);
+            await outputStream.WriteAsync(buffer.AsMemory(start: 0, read), _cancelSrc.Token);
         }
     }
 
-    private async Task<HttpResponseMessage> readResponseHeadersAsync(string url)
+    private async Task<HttpResponseMessage> ReadResponseHeadersAsync(string url)
     {
         _client.DefaultRequestHeaders.ExpectContinue = false;
-        _client.DefaultRequestHeaders.Add("Keep-Alive", "false");
-        _client.DefaultRequestHeaders.Add("User-Agent", typeof(DownloaderService).Namespace);
+        _client.DefaultRequestHeaders.Add(name: "Keep-Alive", value: "false");
+        _client.DefaultRequestHeaders.Add(name: "User-Agent", typeof(DownloaderService).Namespace);
         var uri = new Uri(url);
         _client.DefaultRequestHeaders.Referrer = uri;
 
         var response = await _client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, _cancelSrc.Token);
         await response.EnsureSuccessStatusCodeAsync();
 
-        _downloadStatus.RemoteFileSize =
-            response.Content.Headers?.ContentRange?.Length ?? response.Content?.Headers?.ContentLength ?? 0;
-        _downloadStatus.RemoteFileName =
-            response.Content?.Headers?.ContentDisposition?.FileName ?? string.Empty;
+        _downloadStatus.RemoteFileSize = response.Content.Headers?.ContentRange?.Length ??
+                                         response.Content?.Headers?.ContentLength ?? 0;
+
+        _downloadStatus.RemoteFileName = response.Content?.Headers?.ContentDisposition?.FileName ?? string.Empty;
+
         return response;
     }
 
-    private async Task<(byte[] Data, DownloadStatus DownloadStatus)> doDownloadDataAsync(string url)
+    private async Task<(byte[] Data, DownloadStatus DownloadStatus)> DoDownloadDataAsync(string url)
     {
         _downloadStatus.StartTime = DateTimeOffset.UtcNow;
         _downloadStatus.BytesTransferred = 0;
 
-        var response = await readResponseHeadersAsync(url);
+        var response = await ReadResponseHeadersAsync(url);
 
-        using (var inputStream = await response.Content.ReadAsStreamAsync())
-        {
-            using (var outputStream = new MemoryStream())
-            {
-                await readInputStreamAsync(inputStream, outputStream);
-                await outputStream.FlushAsync();
+        await using var inputStream = await response.Content.ReadAsStreamAsync();
+        using var outputStream = new MemoryStream();
 
-                reportDownloadCompleted();
+        await ReadInputStreamAsync(inputStream, outputStream);
+        await outputStream.FlushAsync();
 
-                return (outputStream.ToArray(), _downloadStatus);
-            }
-        }
+        ReportDownloadCompleted();
+
+        return (outputStream.ToArray(), _downloadStatus);
     }
 
-    private void reportDownloadCompleted()
+    private void ReportDownloadCompleted()
     {
         _downloadStatus.ElapsedDownloadTime = DateTimeOffset.UtcNow - _downloadStatus.StartTime;
         _downloadStatus.Status = _cancelSrc.IsCancellationRequested ? TaskStatus.Canceled : TaskStatus.RanToCompletion;
@@ -296,7 +286,7 @@ public class DownloaderService : IDownloaderService, IDisposable
         OnDownloadCompleted?.Invoke(_downloadStatus);
     }
 
-    private void updateDownloadStatus()
+    private void UpdateDownloadStatus()
     {
         if (_downloadStatus.RemoteFileSize <= 0 || _downloadStatus.BytesTransferred <= 0)
         {
@@ -304,7 +294,7 @@ public class DownloaderService : IDownloaderService, IDisposable
         }
 
         _downloadStatus.PercentComplete =
-            Math.Round((decimal)_downloadStatus.BytesTransferred * 100 / _downloadStatus.RemoteFileSize, 2);
+            Math.Round((decimal)_downloadStatus.BytesTransferred * 100 / _downloadStatus.RemoteFileSize, decimals: 2);
 
         var elapsedTime = DateTimeOffset.UtcNow - _downloadStatus.StartTime;
         _downloadStatus.BytesPerSecond = _downloadStatus.BytesTransferred / elapsedTime.TotalSeconds;

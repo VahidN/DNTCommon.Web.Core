@@ -76,7 +76,7 @@ public static class AuthenticationStateExtensions
             return false;
         }
 
-        var roles = allowedRoles.Split(',', StringSplitOptions.RemoveEmptyEntries);
+        var roles = allowedRoles.Split(separator: ',', StringSplitOptions.RemoveEmptyEntries);
 
         return roles.Any(user.IsInRole);
     }
@@ -144,12 +144,12 @@ public static class AuthenticationStateExtensions
 
         if (allowedRoles is null && allowedClaims is not null)
         {
-            return user.HasUserClaims(allowedClaims.ToArray());
+            return user.HasUserClaims([.. allowedClaims]);
         }
 
         if (allowedRoles is not null && allowedClaims is not null)
         {
-            return user.HasUserClaims(allowedClaims.ToArray()) && user.IsUserInRole(allowedRoles);
+            return user.HasUserClaims([.. allowedClaims]) && user.IsUserInRole(allowedRoles);
         }
 
         return user.IsAuthenticated();
@@ -234,10 +234,11 @@ public static class AuthenticationStateExtensions
     {
         if (user is null)
         {
-            return new List<string>();
+            return [];
         }
 
-        return user.Claims.Where(c => string.Equals(c.Type, claimType, StringComparison.Ordinal)).Select(c => c.Value)
+        return user.Claims.Where(c => string.Equals(c.Type, claimType, StringComparison.Ordinal))
+            .Select(c => c.Value)
             .ToList();
     }
 

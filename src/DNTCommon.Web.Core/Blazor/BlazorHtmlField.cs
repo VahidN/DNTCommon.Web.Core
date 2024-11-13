@@ -1,5 +1,4 @@
-#if NET_8
-using System.Linq.Expressions;
+#if NET_9 || NET_8
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 
@@ -30,11 +29,11 @@ public class BlazorHtmlField<T> : InputBase<T>
     /// </summary>
     public string FieldIdentifierName => !string.IsNullOrWhiteSpace(FieldIdentifier.FieldName)
         ? FieldIdentifier.FieldName
-        : Guid.NewGuid().ToString("N");
+        : Guid.NewGuid().ToString(format: "N");
 
     /// <summary>
-    /// Parses a string to create an instance of T. Derived classes can override this to change how
-    /// CurrentValueAsString interprets incoming values.
+    ///     Parses a string to create an instance of T. Derived classes can override this to change how
+    ///     CurrentValueAsString interprets incoming values.
     /// </summary>
     protected override bool TryParseValueFromString(string? value, out T result, out string validationErrorMessage)
         => throw new NotImplementedException();

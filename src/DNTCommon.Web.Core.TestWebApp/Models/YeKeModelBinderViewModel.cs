@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
-
 namespace DNTCommon.Web.Core.TestWebApp.Models;
 
 //[ModelBinder(BinderType = typeof(YeKeModelBinder))]

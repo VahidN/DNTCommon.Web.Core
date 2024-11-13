@@ -1,86 +1,81 @@
-﻿using System;
-using System.Threading;
+﻿using AsyncKeyedLock;
 using ThreadTimer = System.Threading.Timer;
 
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-/// Periodically invokes OnTimerCallback logic,
-/// and allows this periodic callback to be stopped in a thread-safe way.
+///     Periodically invokes OnTimerCallback logic,
+///     and allows this periodic callback to be stopped in a thread-safe way.
 /// </summary>
 public class JobsRunnerTimer : IJobsRunnerTimer
 {
-    private bool _isDisposed;
-
     // <summary>
     // Used to control multi-threaded accesses to this instance
     // </summary>
-    private readonly object _sync = new object();
+    private readonly AsyncKeyedLocker<Type> _lock = new(new AsyncKeyedLockOptions());
+
+    private readonly TimeSpan _lockTimeout = TimeSpan.FromSeconds(value: 5);
+    private bool _isDisposed;
 
     private ThreadTimer? _threadTimer; //keep it alive
 
     /// <summary>
-    /// Is timer alive?
+    ///     Is timer alive?
     /// </summary>
     public bool IsRunning { get; private set; }
 
     /// <summary>
-    /// The periodic callback. Executing a method on a thread pool thread at specified intervals.
+    ///     The periodic callback. Executing a method on a thread pool thread at specified intervals.
     /// </summary>
     public Action? OnThreadPoolTimerCallback { set; get; }
 
     /// <summary>
-    /// Starts the timer.
+    ///     Starts the timer.
     /// </summary>
     public void StartJobs(int startAfter = 1000, int interval = 1000)
     {
-        lock (_sync)
-        {
-            if (_threadTimer != null)
-            {
-                return;
-            }
+        using var @lock = _lock.LockOrNull(typeof(JobsRunnerTimer), _lockTimeout);
 
-            _threadTimer = new ThreadTimer(timerCallback, null, Timeout.Infinite, 1000);
-            _threadTimer.Change(startAfter, interval);
-            IsRunning = true;
+        if (_threadTimer != null)
+        {
+            return;
         }
+
+        _threadTimer = new ThreadTimer(TimerCallback, state: null, Timeout.Infinite, period: 1000);
+        _threadTimer.Change(startAfter, interval);
+        IsRunning = true;
     }
 
     /// <summary>
-    /// Permanently stops the timer.
+    ///     Permanently stops the timer.
     /// </summary>
     public void StopJobs()
     {
-        lock (_sync)
+        using var @lock = _lock.LockOrNull(typeof(JobsRunnerTimer), _lockTimeout);
+
+        if (_threadTimer == null)
         {
-            if (_threadTimer == null)
-            {
-                return;
-            }
-
-            _threadTimer.Dispose();
-            _threadTimer = null;
-            IsRunning = false;
+            return;
         }
-    }
 
-    private void timerCallback(object? state)
-    {
-        OnThreadPoolTimerCallback?.Invoke();
+        _threadTimer.Dispose();
+        _threadTimer = null;
+        IsRunning = false;
     }
 
     /// <summary>
-    /// Free resources
+    ///     Free resources
     /// </summary>
     public void Dispose()
     {
-        Dispose(true);
+        Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
 
+    private void TimerCallback(object? state) => OnThreadPoolTimerCallback?.Invoke();
+
     /// <summary>
-    /// Dispose all of the httpClients
+    ///     Dispose all of the httpClients
     /// </summary>
     protected virtual void Dispose(bool disposing)
     {
@@ -91,6 +86,7 @@ public class JobsRunnerTimer : IJobsRunnerTimer
                 if (disposing)
                 {
                     StopJobs();
+                    _lock.Dispose();
                 }
             }
             finally

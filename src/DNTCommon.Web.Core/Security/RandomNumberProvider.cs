@@ -11,8 +11,7 @@ public class RandomNumberProvider : IRandomNumberProvider
     ///     Fills an array of bytes with a cryptographically strong random sequence of values.
     /// </summary>
     /// <param name="randomBytes"></param>
-    public void NextBytes(byte[] randomBytes)
-        => _rand.GetBytes(randomBytes);
+    public void NextBytes(byte[] randomBytes) => _rand.GetBytes(randomBytes);
 
     /// <summary>
     ///     Generates a random non-negative number.
@@ -21,7 +20,7 @@ public class RandomNumberProvider : IRandomNumberProvider
     {
         var randb = new byte[4];
         _rand.GetBytes(randb);
-        var value = BitConverter.ToInt32(randb, 0);
+        var value = BitConverter.ToInt32(randb, startIndex: 0);
 
         if (value < 0)
         {
@@ -39,8 +38,8 @@ public class RandomNumberProvider : IRandomNumberProvider
     {
         var randb = new byte[4];
         _rand.GetBytes(randb);
-        var value = BitConverter.ToInt32(randb, 0);
-        value = value % (max + 1); // % calculates remainder
+        var value = BitConverter.ToInt32(randb, startIndex: 0);
+        value %= max + 1; // % calculates remainder
 
         if (value < 0)
         {
@@ -81,8 +80,7 @@ public class RandomNumberProvider : IRandomNumberProvider
     /// <param name="toExclusive">The exclusive upper bound of the random range.</param>
     /// <exception>The <paramref name="toExclusive" /> parameter is less than or equal to 0.</exception>
     /// <returns>A random integer between 0 (inclusive) and <paramref name="toExclusive" /> (exclusive).</returns>
-    public int GetSecureRandomInt32(int toExclusive)
-        => RandomNumberGenerator.GetInt32(toExclusive);
+    public int GetSecureRandomInt32(int toExclusive) => RandomNumberGenerator.GetInt32(toExclusive);
 
     /// <summary>
     ///     Generates a random integer between a specified inclusive lower bound and a specified exclusive upper bound

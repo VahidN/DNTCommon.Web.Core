@@ -9,10 +9,7 @@ namespace DNTCommon.Web.Core;
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
 public sealed class UploadFileExtensionsAttribute : ValidationAttribute
 {
-    private static readonly char[] Separator =
-    {
-        ','
-    };
+    private static readonly char[] Separator = [','];
 
     private readonly IList<string> _allowedExtensions;
 
@@ -28,7 +25,7 @@ public sealed class UploadFileExtensionsAttribute : ValidationAttribute
         }
 
         FileExtensions = fileExtensions;
-        _allowedExtensions = fileExtensions.Split(Separator, StringSplitOptions.RemoveEmptyEntries).ToList();
+        _allowedExtensions = [.. fileExtensions.Split(Separator, StringSplitOptions.RemoveEmptyEntries)];
     }
 
     /// <summary>

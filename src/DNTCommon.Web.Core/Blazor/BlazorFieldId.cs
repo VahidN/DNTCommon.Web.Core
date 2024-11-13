@@ -6,23 +6,14 @@ namespace DNTCommon.Web.Core;
 ///     Uniquely identifies a single field that can be edited.
 ///     This may correspond to a property on a model object, or can be any other named value.
 /// </summary>
-public class BlazorFieldId<T>
+public class BlazorFieldId<T>(Expression<Func<T>>? valueExpression)
 {
-    private readonly Expression<Func<T>>? _valueExpression;
-
-    /// <summary>
-    ///     Uniquely identifies a single field that can be edited.
-    ///     This may correspond to a property on a model object, or can be any other named value.
-    /// </summary>
-    public BlazorFieldId(Expression<Func<T>>? valueExpression)
-        => _valueExpression = valueExpression;
-
     /// <summary>
     ///     Uniquely identifies a single field that can be edited.
     ///     This may correspond to a property on a model object, or can be any other named value.
     /// </summary>
     public FieldIdentifier FieldIdentifier
-        => _valueExpression is null ? default : FieldIdentifier.Create(_valueExpression);
+        => valueExpression is null ? default : FieldIdentifier.Create(valueExpression);
 
     /// <summary>
     ///     Gets the name of the editable field.
@@ -33,7 +24,7 @@ public class BlazorFieldId<T>
         {
             var fieldName = FieldIdentifier.FieldName;
 
-            return string.IsNullOrWhiteSpace(fieldName) ? Guid.NewGuid().ToString("N") : fieldName;
+            return string.IsNullOrWhiteSpace(fieldName) ? Guid.NewGuid().ToString(format: "N") : fieldName;
         }
     }
 

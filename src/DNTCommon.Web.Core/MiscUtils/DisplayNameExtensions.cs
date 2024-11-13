@@ -21,13 +21,9 @@ public static class DisplayNameExtensions
     /// </summary>
     public static string GetDisplayName<TEntity>(this Expression<Func<TEntity>>? expression)
     {
-        var memberExp = expression.GetMemberExpression();
-
-        if (memberExp is null)
-        {
-            throw new ArgumentException($"The expression doesn't indicate a valid property. [ {expression} ]",
-                nameof(expression));
-        }
+        var memberExp = expression.GetMemberExpression() ??
+                        throw new ArgumentException(
+                            $"The expression doesn't indicate a valid property. [ {expression} ]", nameof(expression));
 
         var displayAttribute = memberExp.Member.GetCustomAttribute<DisplayAttribute>();
 

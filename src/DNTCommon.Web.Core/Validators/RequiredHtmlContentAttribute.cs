@@ -25,9 +25,6 @@ public sealed class RequiredHtmlContentAttribute : ValidationAttribute
 
         return string.IsNullOrWhiteSpace(validationContext.MemberName)
             ? new ValidationResult(ErrorMessage)
-            : new ValidationResult(ErrorMessage, new[]
-            {
-                validationContext.MemberName
-            });
+            : new ValidationResult(ErrorMessage, [validationContext.MemberName]);
     }
 }

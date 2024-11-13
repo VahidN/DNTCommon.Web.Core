@@ -9,7 +9,7 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public static class CacheManagerExtentions
 {
-    private static readonly string[] CacheControlValues = { "no-cache", "max-age=0", "must-revalidate", "no-store" };
+    private static readonly string[] CacheControlValues = ["no-cache", "max-age=0", "must-revalidate", "no-store"];
 
     /// <summary>
     ///     Sets `no-cache`, `must-revalidate`, `no-store` headers for the current `Response`.

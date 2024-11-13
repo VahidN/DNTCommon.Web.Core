@@ -5,7 +5,6 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public class MvcControllerEqualityComparer : IEqualityComparer<MvcControllerViewModel>
 {
-
     /// <summary>
     ///     A Controller Dto IEqualityComparer
     /// </summary>
@@ -16,12 +15,12 @@ public class MvcControllerEqualityComparer : IEqualityComparer<MvcControllerView
             return true;
         }
 
-        if (ReferenceEquals(x, null))
+        if (x is null)
         {
             return false;
         }
 
-        if (ReferenceEquals(y, null))
+        if (y is null)
         {
             return false;
         }

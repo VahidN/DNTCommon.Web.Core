@@ -116,7 +116,7 @@ public static class HtmlHelperServiceExtensions
         }
 
         // data:[<MIME-type>][;charset=<encoding>][;base64],<data>
-        var base64Data = src.Substring(src.IndexOf(value: ',', StringComparison.OrdinalIgnoreCase) + 1);
+        var base64Data = src[(src.IndexOf(value: ',', StringComparison.OrdinalIgnoreCase) + 1)..];
 
         return Convert.FromBase64String(base64Data);
     }

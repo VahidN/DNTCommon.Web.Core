@@ -1,6 +1,5 @@
 using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
@@ -10,6 +9,9 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
+#if !NET_6
+using System.Text.RegularExpressions;
+#endif
 
 namespace DNTCommon.Web.Core;
 
@@ -86,17 +88,15 @@ public static partial class HttpRequestExtensions
             return true;
         }
 
-        switch (hre.StatusCode)
+        return hre.StatusCode switch
         {
-            case HttpStatusCode.Found: // 302 = HttpStatusCode.Redirect
-            case HttpStatusCode.Moved: // 301 = HttpStatusCode.MovedPermanently
-            case HttpStatusCode.Unauthorized:
-            case HttpStatusCode.Forbidden: // fine! they have banned this server, but the link is correct!
-            case HttpStatusCode.OK:
-                return true;
-            default:
-                return false;
-        }
+            // fine! they have banned this server, but the link is correct!
+            // 301 = HttpStatusCode.MovedPermanently
+            // 302 = HttpStatusCode.Redirect            
+            HttpStatusCode.Found or HttpStatusCode.Moved or HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden or
+                HttpStatusCode.OK => true,
+            _ => false
+        };
     }
 
     /// <summary>
@@ -161,7 +161,7 @@ public static partial class HttpRequestExtensions
     {
         if (string.IsNullOrWhiteSpace(csvList))
         {
-            return new List<string>();
+            return [];
         }
 
         return csvList.TrimEnd(trimChar: ',').Split(separator: ',').AsEnumerable().Select(s => s.Trim()).ToList();
@@ -209,7 +209,7 @@ public static partial class HttpRequestExtensions
     /// </summary>
     public static string GetBaseUrl(this HttpContext httpContext)
     {
-        requestSanityCheck(httpContext);
+        RequestSanityCheck(httpContext);
         var request = httpContext.Request;
 
         return $"{request.Scheme}://{request.Host.ToUriComponent()}";
@@ -220,7 +220,7 @@ public static partial class HttpRequestExtensions
     /// </summary>
     public static string GetRawUrl(this HttpContext httpContext)
     {
-        requestSanityCheck(httpContext);
+        RequestSanityCheck(httpContext);
 
         return httpContext.Request.GetDisplayUrl();
     }
@@ -256,12 +256,9 @@ public static partial class HttpRequestExtensions
         return httpContext.RequestServices.GetRequiredService<LinkGenerator>();
     }
 
-    private static void requestSanityCheck(this HttpContext httpContext)
+    private static void RequestSanityCheck(this HttpContext httpContext)
     {
-        if (httpContext == null)
-        {
-            throw new ArgumentNullException(nameof(httpContext));
-        }
+        ArgumentNullException.ThrowIfNull(httpContext);
 
         if (httpContext.Request == null)
         {
@@ -286,7 +283,7 @@ public static partial class HttpRequestExtensions
     /// </summary>
     public static async Task<string> ReadRequestBodyAsStringAsync(this HttpContext httpContext)
     {
-        requestSanityCheck(httpContext);
+        RequestSanityCheck(httpContext);
         var request = httpContext.Request;
 
         if (request.Body.CanSeek)
@@ -300,15 +297,14 @@ public static partial class HttpRequestExtensions
                 "To read the request stream's body, please apply [EnableReadableBodyStream] attribute to the current action method.");
         }
 
-        using (var bodyReader = new StreamReader(request.Body, Encoding.UTF8))
-        {
-            var body = await bodyReader.ReadToEndAsync();
+        using var bodyReader = new StreamReader(request.Body, Encoding.UTF8);
 
-            request.Body.Seek(offset: 0,
-                SeekOrigin.Begin); // this is required, otherwise model binding will return null
+        var body = await bodyReader.ReadToEndAsync();
 
-            return body;
-        }
+        // this is required, otherwise model binding will return null
+        request.Body.Seek(offset: 0, SeekOrigin.Begin);
+
+        return body;
     }
 
     /// <summary>

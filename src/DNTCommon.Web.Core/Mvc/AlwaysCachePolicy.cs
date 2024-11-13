@@ -1,7 +1,7 @@
 #if !NET_6
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.Extensions.Primitives;
-using Microsoft.AspNetCore.Http;
 
 namespace DNTCommon.Web.Core;
 
@@ -13,7 +13,6 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public sealed class AlwaysCachePolicy : IOutputCachePolicy
 {
-
     /// <summary>
     ///     The name of the Policy which can be used as
     ///     .AddOutputCache(options => { options.AddPolicy(AlwaysCachePolicy.Name, AlwaysCachePolicy.Instance); })
@@ -60,8 +59,7 @@ public sealed class AlwaysCachePolicy : IOutputCachePolicy
         }
 
         // Check response code
-        if (response.StatusCode != StatusCodes.Status200OK &&
-            response.StatusCode != StatusCodes.Status301MovedPermanently)
+        if (response.StatusCode is not StatusCodes.Status200OK and not StatusCodes.Status301MovedPermanently)
         {
             context.AllowCacheStorage = false;
 

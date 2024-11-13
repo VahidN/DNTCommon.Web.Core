@@ -8,12 +8,12 @@ namespace DNTCommon.Web.Core;
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Parameter)]
 public sealed class ValidPasswordAttribute : ValidationAttribute
 {
-    private static readonly TimeSpan Timeout = TimeSpan.FromMinutes(1);
+    private static readonly TimeSpan Timeout = TimeSpan.FromMinutes(value: 1);
 
-    private static readonly Regex Lowercase = new("[a-z]+", RegexOptions.Compiled, Timeout);
-    private static readonly Regex Uppercase = new("[A-Z]+", RegexOptions.Compiled, Timeout);
-    private static readonly Regex Digit = new("(\\d)+", RegexOptions.Compiled, Timeout);
-    private static readonly Regex Symbol = new("(\\W)+", RegexOptions.Compiled, Timeout);
+    private static readonly Regex Lowercase = new(pattern: "[a-z]+", RegexOptions.Compiled, Timeout);
+    private static readonly Regex Uppercase = new(pattern: "[A-Z]+", RegexOptions.Compiled, Timeout);
+    private static readonly Regex Digit = new(pattern: "(\\d)+", RegexOptions.Compiled, Timeout);
+    private static readonly Regex Symbol = new(pattern: "(\\W)+", RegexOptions.Compiled, Timeout);
 
     /// <summary>
     ///     Its default value is true
@@ -69,10 +69,7 @@ public sealed class ValidPasswordAttribute : ValidationAttribute
 
         return string.IsNullOrWhiteSpace(validationContext.MemberName)
             ? new ValidationResult(ErrorMessage)
-            : new ValidationResult(ErrorMessage, new[]
-            {
-                validationContext.MemberName
-            });
+            : new ValidationResult(ErrorMessage, [validationContext.MemberName]);
     }
 
     private bool HasValidPassword(string password)

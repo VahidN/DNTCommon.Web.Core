@@ -10,37 +10,34 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     This filter encrypts the outgoing Models of action methods, before sending them to the client.
 /// </summary>
-public sealed class EncryptedFieldResultFilterAttribute : ResultFilterAttribute
+/// <remarks>
+///     This filter encrypts the outgoing Models of action methods, before sending them to the client.
+/// </remarks>
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+public sealed class EncryptedFieldResultFilterAttribute(
+    IProtectionProviderService protectionProviderService,
+    ILogger<EncryptedFieldResultFilterAttribute> logger) : ResultFilterAttribute
 {
-    private readonly ILogger<EncryptedFieldResultFilterAttribute> _logger;
+    private readonly ILogger<EncryptedFieldResultFilterAttribute> _logger =
+        logger ?? throw new ArgumentNullException(nameof(logger));
+
     private readonly ConcurrentDictionary<Type, bool> _modelsWithEncryptedFieldAttributes = new();
-    private readonly IProtectionProviderService _protectionProviderService;
 
-    /// <summary>
-    ///     This filter encrypts the outgoing Models of action methods, before sending them to the client.
-    /// </summary>
-    public EncryptedFieldResultFilterAttribute(IProtectionProviderService protectionProviderService,
-        ILogger<EncryptedFieldResultFilterAttribute> logger)
-    {
-        _protectionProviderService = protectionProviderService ??
-                                     throw new ArgumentNullException(nameof(protectionProviderService));
-
-        ProtectionProviderService = protectionProviderService;
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        Logger = logger;
-    }
+    private readonly IProtectionProviderService _protectionProviderService = protectionProviderService ??
+                                                                             throw new ArgumentNullException(
+                                                                                 nameof(protectionProviderService));
 
     /// <summary>
     ///     An IProtectionProvider
     /// </summary>
     /// <value></value>
-    public IProtectionProviderService ProtectionProviderService { get; }
+    public IProtectionProviderService ProtectionProviderService { get; } = protectionProviderService;
 
     /// <summary>
     ///     The current ILogger
     /// </summary>
     /// <value></value>
-    public ILogger<EncryptedFieldResultFilterAttribute> Logger { get; }
+    public ILogger<EncryptedFieldResultFilterAttribute> Logger { get; } = logger;
 
     /// <summary>
     ///     This filter encrypts the outgoing Models of action methods, before sending them to the client.
@@ -72,17 +69,17 @@ public sealed class EncryptedFieldResultFilterAttribute : ResultFilterAttribute
             {
                 foreach (var item in items)
                 {
-                    encryptProperties(item);
+                    EncryptProperties(item);
                 }
             }
         }
         else
         {
-            encryptProperties(model);
+            EncryptProperties(model);
         }
     }
 
-    private void encryptProperties(object? model)
+    private void EncryptProperties(object? model)
     {
         if (model == null)
         {
@@ -99,7 +96,8 @@ public sealed class EncryptedFieldResultFilterAttribute : ResultFilterAttribute
 
         foreach (var property in modelType.GetProperties())
         {
-            var attribute = property.GetCustomAttributes(typeof(EncryptedFieldAttribute), false).FirstOrDefault();
+            var attribute = property.GetCustomAttributes(typeof(EncryptedFieldAttribute), inherit: false)
+                .FirstOrDefault();
 
             if (attribute == null)
             {
@@ -118,6 +116,7 @@ public sealed class EncryptedFieldResultFilterAttribute : ResultFilterAttribute
             if (value is not string)
             {
                 _logger.LogWarning(
+                    message:
                     "[EncryptedField] should be applied to `string` properties, But type of `{PropertyDeclaringType}.{PropertyName}` is `{PropertyPropertyType}`.",
                     property.DeclaringType, property.Name, property.PropertyType);
 

@@ -21,19 +21,19 @@ public static class SchedulerServiceCollectionExtensions
 
         services.TryAddSingleton<IScheduledTasksCoordinator, ScheduledTasksCoordinator>();
 
-        configTasks(services, options);
+        ConfigTasks(services, options);
     }
 
-    private static void configTasks(IServiceCollection services, Action<ScheduledTasksStorage> options)
+    private static void ConfigTasks(IServiceCollection services, Action<ScheduledTasksStorage> options)
     {
         var storage = new ScheduledTasksStorage();
         options(storage);
-        registerTasks(services, storage);
-        addPingTask(services, storage);
+        RegisterTasks(services, storage);
+        AddPingTask(services, storage);
         services.TryAddSingleton(Options.Create(storage));
     }
 
-    private static void registerTasks(IServiceCollection services, ScheduledTasksStorage storage)
+    private static void RegisterTasks(IServiceCollection services, ScheduledTasksStorage storage)
     {
         foreach (var task in storage.Tasks)
         {
@@ -43,7 +43,7 @@ public static class SchedulerServiceCollectionExtensions
         services.AddHostedService<ScheduledTasksBackgroundService>();
     }
 
-    private static void addPingTask(IServiceCollection services, ScheduledTasksStorage storage)
+    private static void AddPingTask(IServiceCollection services, ScheduledTasksStorage storage)
     {
         if (string.IsNullOrWhiteSpace(storage.SiteRootUrl))
         {

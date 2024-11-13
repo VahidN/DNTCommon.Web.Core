@@ -7,20 +7,9 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     Http Request Info
 /// </summary>
-public class HttpRequestInfoService : IHttpRequestInfoService
+public class HttpRequestInfoService(IHttpContextAccessor httpContextAccessor, IUrlHelper urlHelper)
+    : IHttpRequestInfoService
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IUrlHelper _urlHelper;
-
-    /// <summary>
-    ///     Http Request Info
-    /// </summary>
-    public HttpRequestInfoService(IHttpContextAccessor httpContextAccessor, IUrlHelper urlHelper)
-    {
-        _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
-        _urlHelper = urlHelper ?? throw new ArgumentNullException(nameof(urlHelper));
-    }
-
     /// <summary>
     ///     Gets the current HttpContext.Request's UserAgent.
     /// </summary>
@@ -29,23 +18,23 @@ public class HttpRequestInfoService : IHttpRequestInfoService
     /// <summary>
     ///     Gets the current HttpContext.Request's Referrer.
     /// </summary>
-    public string? GetReferrerUrl() => _httpContextAccessor.HttpContext?.GetReferrerUrl();
+    public string? GetReferrerUrl() => httpContextAccessor.HttpContext?.GetReferrerUrl();
 
     /// <summary>
     ///     Gets the current HttpContext.Request's Referrer.
     /// </summary>
-    public Uri? GetReferrerUri() => _httpContextAccessor.HttpContext?.GetReferrerUri();
+    public Uri? GetReferrerUri() => httpContextAccessor.HttpContext?.GetReferrerUri();
 
     /// <summary>
     ///     Gets the current HttpContext.Request's IP.
     /// </summary>
     public string? GetIP(bool tryUseXForwardHeader = true)
-        => _httpContextAccessor.HttpContext?.GetIP(tryUseXForwardHeader);
+        => httpContextAccessor.HttpContext?.GetIP(tryUseXForwardHeader);
 
     /// <summary>
     ///     Gets a current HttpContext.Request's header value.
     /// </summary>
-    public string? GetHeaderValue(string headerName) => _httpContextAccessor.HttpContext?.GetHeaderValue(headerName);
+    public string? GetHeaderValue(string headerName) => httpContextAccessor.HttpContext?.GetHeaderValue(headerName);
 
     /// <summary>
     ///     Gets the current HttpContext.Request content's absolute path.
@@ -56,7 +45,7 @@ public class HttpRequestInfoService : IHttpRequestInfoService
     {
         var baseUri = GetBaseUri();
 
-        return baseUri == null ? null : new Uri(baseUri, _urlHelper.Content(contentPath));
+        return baseUri == null ? null : new Uri(baseUri, urlHelper.Content(contentPath));
     }
 
     /// <summary>
@@ -72,12 +61,12 @@ public class HttpRequestInfoService : IHttpRequestInfoService
     /// <summary>
     ///     Gets the current HttpContext.Request's root address.
     /// </summary>
-    public string? GetBaseUrl() => _httpContextAccessor.HttpContext?.GetBaseUrl();
+    public string? GetBaseUrl() => httpContextAccessor.HttpContext?.GetBaseUrl();
 
     /// <summary>
     ///     Gets the current HttpContext.Request's address.
     /// </summary>
-    public string? GetRawUrl() => _httpContextAccessor.HttpContext?.GetRawUrl();
+    public string? GetRawUrl() => httpContextAccessor.HttpContext?.GetRawUrl();
 
     /// <summary>
     ///     Gets the current HttpContext.Request's address.
@@ -92,19 +81,19 @@ public class HttpRequestInfoService : IHttpRequestInfoService
     /// <summary>
     ///     Gets the current HttpContext.Request's IUrlHelper.
     /// </summary>
-    public IUrlHelper GetUrlHelper() => _urlHelper;
+    public IUrlHelper GetUrlHelper() => urlHelper;
 
     /// <summary>
     ///     Deserialize `request.Body` as a JSON content.
     /// </summary>
     public Task<T?> DeserializeRequestJsonBodyAsAsync<T>()
     {
-        if (_httpContextAccessor.HttpContext == null)
+        if (httpContextAccessor.HttpContext == null)
         {
             return Task.FromResult(default(T));
         }
 
-        return _httpContextAccessor.HttpContext.DeserializeRequestJsonBodyAsAsync<T>();
+        return httpContextAccessor.HttpContext.DeserializeRequestJsonBodyAsAsync<T>();
     }
 
     /// <summary>
@@ -112,12 +101,12 @@ public class HttpRequestInfoService : IHttpRequestInfoService
     /// </summary>
     public Task<string> ReadRequestBodyAsStringAsync()
     {
-        if (_httpContextAccessor.HttpContext == null)
+        if (httpContextAccessor.HttpContext == null)
         {
             return Task.FromResult(string.Empty);
         }
 
-        return _httpContextAccessor.HttpContext.ReadRequestBodyAsStringAsync();
+        return httpContextAccessor.HttpContext.ReadRequestBodyAsStringAsync();
     }
 
     /// <summary>
@@ -125,11 +114,11 @@ public class HttpRequestInfoService : IHttpRequestInfoService
     /// </summary>
     public Task<IDictionary<string, string>?> DeserializeRequestJsonBodyAsDictionaryAsync()
     {
-        if (_httpContextAccessor.HttpContext == null)
+        if (httpContextAccessor.HttpContext == null)
         {
             return Task.FromResult<IDictionary<string, string>?>(result: null);
         }
 
-        return _httpContextAccessor.HttpContext.DeserializeRequestJsonBodyAsDictionaryAsync();
+        return httpContextAccessor.HttpContext.DeserializeRequestJsonBodyAsDictionaryAsync();
     }
 }

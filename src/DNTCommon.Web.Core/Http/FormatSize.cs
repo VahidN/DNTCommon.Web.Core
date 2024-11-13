@@ -1,25 +1,19 @@
-using System;
-using System.Globalization;
-
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-/// File Size Formatter
+///     File Size Formatter
 /// </summary>
 public static class FormatSize
 {
-    private static readonly string[] sizeSuffixes = { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
+    private static readonly string[] sizeSuffixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
 
     /// <summary>
-    /// Returns the file's size in KB/MB format
+    ///     Returns the file's size in KB/MB format
     /// </summary>
-    public static string ToFormattedFileSize(this int size)
-    {
-        return ToFormattedFileSize((long)size);
-    }
+    public static string ToFormattedFileSize(this int size) => ToFormattedFileSize((long)size);
 
     /// <summary>
-    /// Returns the file's size in KB/MB format
+    ///     Returns the file's size in KB/MB format
     /// </summary>
     public static string ToFormattedFileSize(this long size)
     {
@@ -27,20 +21,16 @@ public static class FormatSize
 
         if (size == 0)
         {
-            return string.Format(CultureInfo.InvariantCulture, formatTemplate, null, 0, sizeSuffixes[0]);
+            return string.Format(CultureInfo.InvariantCulture, formatTemplate, arg0: null, arg1: 0, sizeSuffixes[0]);
         }
 
         var absSize = Math.Abs((double)size);
-        var fpPower = Math.Log(absSize, 1000);
+        var fpPower = Math.Log(absSize, newBase: 1000);
         var intPower = (int)fpPower;
-        var iUnit = intPower >= sizeSuffixes.Length
-            ? sizeSuffixes.Length - 1
-            : intPower;
-        var normSize = absSize / Math.Pow(1000, iUnit);
+        var iUnit = intPower >= sizeSuffixes.Length ? sizeSuffixes.Length - 1 : intPower;
+        var normSize = absSize / Math.Pow(x: 1000, iUnit);
 
-        return string.Format(
-            CultureInfo.InvariantCulture,
-            formatTemplate,
-            size < 0 ? "-" : null, normSize, sizeSuffixes[iUnit]);
+        return string.Format(CultureInfo.InvariantCulture, formatTemplate, size < 0 ? "-" : null, normSize,
+            sizeSuffixes[iUnit]);
     }
 }

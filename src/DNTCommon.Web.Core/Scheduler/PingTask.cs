@@ -1,38 +1,29 @@
-﻿using System.Threading.Tasks;
-
-namespace DNTCommon.Web.Core;
+﻿namespace DNTCommon.Web.Core;
 
 /// <summary>
-/// DNTScheduler needs a ping service to keep it alive.
+///     DNTScheduler needs a ping service to keep it alive.
 /// </summary>
-public class PingTask : IScheduledTask
+/// <remarks>
+///     DNTScheduler needs a ping service to keep it alive.
+/// </remarks>
+public class PingTask(MySitePingClient pingClient) : IScheduledTask
 {
-    private readonly MySitePingClient _pingClient;
-
     /// <summary>
-    /// DNTScheduler needs a ping service to keep it alive.
-    /// </summary>
-    public PingTask(MySitePingClient pingClient)
-    {
-        _pingClient = pingClient;
-    }
-
-    /// <summary>
-    /// Is ASP.Net app domain tearing down?
-    /// If set to true by the coordinator, the task should cleanup and return.
+    ///     Is ASP.Net app domain tearing down?
+    ///     If set to true by the coordinator, the task should cleanup and return.
     /// </summary>
     public bool IsShuttingDown { get; set; }
 
     /// <summary>
-    /// Scheduled task's logic.
+    ///     Scheduled task's logic.
     /// </summary>
     public async Task RunAsync()
     {
-        if (this.IsShuttingDown)
+        if (IsShuttingDown)
         {
             return;
         }
 
-        await _pingClient.WakeUp();
+        await pingClient.WakeUp();
     }
 }

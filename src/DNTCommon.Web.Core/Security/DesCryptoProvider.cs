@@ -7,28 +7,19 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     The DES protection provider
 /// </summary>
-public class DesCryptoProvider : IDesCryptoProvider
+/// <remarks>
+///     The DES protection provider
+/// </remarks>
+public class DesCryptoProvider(ILogger<DesCryptoProvider> logger, ISerializationProvider serializationProvider)
+    : IDesCryptoProvider
 {
-    private readonly ILogger<DesCryptoProvider> _logger;
-    private readonly ISerializationProvider _serializationProvider;
-
-    /// <summary>
-    ///     The DES protection provider
-    /// </summary>
-    public DesCryptoProvider(
-        ILogger<DesCryptoProvider> logger,
-        ISerializationProvider serializationProvider)
-    {
-        _logger = logger;
-        _serializationProvider = serializationProvider;
-    }
-
     /// <summary>
     ///     Creates the hash of the message
     /// </summary>
     public (string HashString, byte[] HashBytes) Hash(string inputText)
     {
         var hash = SHA256.HashData(Encoding.UTF8.GetBytes(inputText));
+
         return (Encoding.UTF8.GetString(hash), hash);
     }
 
@@ -45,16 +36,17 @@ public class DesCryptoProvider : IDesCryptoProvider
         try
         {
             var inputBytes = WebEncoders.Base64UrlDecode(inputText);
-            var bytes = decrypt(inputBytes, key);
+            var bytes = DecryptIt(inputBytes, key);
+
             return Encoding.UTF8.GetString(bytes);
         }
         catch (FormatException ex)
         {
-            _logger.LogError(ex.Demystify(), "Invalid base 64 string. Fall through.");
+            logger.LogError(ex.Demystify(), message: "Invalid base 64 string. Fall through.");
         }
         catch (CryptographicException ex)
         {
-            _logger.LogError(ex.Demystify(), "Invalid protected payload. Fall through.");
+            logger.LogError(ex.Demystify(), message: "Invalid protected payload. Fall through.");
         }
 
         return null;
@@ -71,14 +63,15 @@ public class DesCryptoProvider : IDesCryptoProvider
         }
 
         var inputBytes = Encoding.UTF8.GetBytes(inputText);
-        var bytes = encrypt(inputBytes, key);
+        var bytes = EncryptIt(inputBytes, key);
+
         return WebEncoders.Base64UrlEncode(bytes);
     }
 
     /// <summary>
     ///     It will serialize an object as a JSON string and then encrypt it as a Base64UrlEncode string.
     /// </summary>
-    public string EncryptObject(object data, string key) => Encrypt(_serializationProvider.Serialize(data), key);
+    public string EncryptObject(object data, string key) => Encrypt(serializationProvider.Serialize(data), key);
 
     /// <summary>
     ///     It will decrypt a Base64UrlEncode encrypted JSON string and then deserialize it as an object.
@@ -86,68 +79,61 @@ public class DesCryptoProvider : IDesCryptoProvider
     public T? DecryptObject<T>(string data, string key)
     {
         var decryptedData = Decrypt(data, key);
-        return decryptedData == null ? default : _serializationProvider.Deserialize<T>(decryptedData);
+
+        return decryptedData == null ? default : serializationProvider.Deserialize<T>(decryptedData);
     }
 
-    private byte[] encrypt(byte[] data, string key)
+    private byte[] EncryptIt(byte[] data, string key)
     {
-        var desKey = getDesKey(key);
-        using (var des = new TripleDESCryptoServiceProvider
-                         {
-                             Key = desKey,
-                             Mode = CipherMode.CBC,
-                             Padding = PaddingMode.PKCS7,
-                         })
-        {
-            using var encryptor = des.CreateEncryptor();
-            using var cipherStream = new MemoryStream();
-            using (var cryptoStream = new CryptoStream(cipherStream, encryptor, CryptoStreamMode.Write))
-            {
-                using (var binaryWriter = new BinaryWriter(cryptoStream))
-                {
-                    // prepend IV to data
-                    cipherStream.Write(des.IV); // This is an auto-generated random key
-                    binaryWriter.Write(data);
-                    cryptoStream.FlushFinalBlock();
-                }
-            }
+        var desKey = GetDesKey(key);
 
-            return cipherStream.ToArray();
-        }
+        using var des = new TripleDESCryptoServiceProvider
+        {
+            Key = desKey,
+            Mode = CipherMode.CBC,
+            Padding = PaddingMode.PKCS7
+        };
+
+        using var encryptor = des.CreateEncryptor();
+        using var cipherStream = new MemoryStream();
+        using var cryptoStream = new CryptoStream(cipherStream, encryptor, CryptoStreamMode.Write);
+
+        using var binaryWriter = new BinaryWriter(cryptoStream);
+
+        // prepend IV to data
+        cipherStream.Write(des.IV); // This is an auto-generated random key
+        binaryWriter.Write(data);
+        cryptoStream.FlushFinalBlock();
+
+        return cipherStream.ToArray();
     }
 
-    private byte[] decrypt(byte[] data, string key)
+    private byte[] DecryptIt(byte[] data, string key)
     {
-        var desKey = getDesKey(key);
-        using (var des = new TripleDESCryptoServiceProvider
-                         {
-                             Key = desKey,
-                             Mode = CipherMode.CBC,
-                             Padding = PaddingMode.PKCS7,
-                         })
+        var desKey = GetDesKey(key);
+
+        using var des = new TripleDESCryptoServiceProvider
         {
-            var iv = new byte[8]; // 3DES-IV is always 8 bytes/64 bits because block size is always 64 bits
-            Array.Copy(data, 0, iv, 0, iv.Length);
+            Key = desKey,
+            Mode = CipherMode.CBC,
+            Padding = PaddingMode.PKCS7
+        };
 
-            using var ms = new MemoryStream();
-            using (var decryptor = new CryptoStream(ms, des.CreateDecryptor(desKey, iv), CryptoStreamMode.Write))
-            {
-                using (var binaryWriter = new BinaryWriter(decryptor))
-                {
-                    // decrypt cipher text from data, starting just past the IV
-                    binaryWriter.Write(
-                                       data,
-                                       iv.Length,
-                                       data.Length - iv.Length
-                                      );
-                }
-            }
+        var iv = new byte[8]; // 3DES-IV is always 8 bytes/64 bits because block size is always 64 bits
+        Array.Copy(data, sourceIndex: 0, iv, destinationIndex: 0, iv.Length);
 
-            return ms.ToArray();
-        }
+        using var ms = new MemoryStream();
+        using var decryptor = new CryptoStream(ms, des.CreateDecryptor(desKey, iv), CryptoStreamMode.Write);
+
+        using var binaryWriter = new BinaryWriter(decryptor);
+
+        // decrypt cipher text from data, starting just past the IV
+        binaryWriter.Write(data, iv.Length, data.Length - iv.Length);
+
+        return ms.ToArray();
     }
 
-    private byte[] getDesKey(string key)
+    private byte[] GetDesKey(string key)
     {
         if (string.IsNullOrWhiteSpace(key))
         {
@@ -158,6 +144,7 @@ public class DesCryptoProvider : IDesCryptoProvider
         // Last bit of each byte is not used (or used as version in some hardware).
         // Key len for TripleDES can also be 112 bits which is again stored in 128 bits or 16 bytes.
         var hashBytes = Hash(key).HashBytes;
-        return hashBytes.Take(24).ToArray();
+
+        return hashBytes.Take(count: 24).ToArray();
     }
 }

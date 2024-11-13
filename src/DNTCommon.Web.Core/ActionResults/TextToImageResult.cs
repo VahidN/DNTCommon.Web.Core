@@ -1,30 +1,14 @@
-using System;
-using System.Net.Http.Headers;
-using System.Runtime.Versioning;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-/// An ASP.NET Core text to image renderer.
+///     An ASP.NET Core text to image renderer.
 /// </summary>
-public class TextToImageResult : ActionResult
+public class TextToImageResult(string text, TextToImageOptions options) : ActionResult
 {
-    private readonly TextToImageOptions _options;
-    private readonly string _text;
-
     /// <summary>
-    /// An ASP.NET Core text to image renderer.
-    /// </summary>
-    public TextToImageResult(string text, TextToImageOptions options)
-    {
-        _options = options;
-        _text = text;
-    }
-
-    /// <summary>
-    /// Executes the result operation of the action method asynchronously.
+    ///     Executes the result operation of the action method asynchronously.
     /// </summary>
     public override Task ExecuteResultAsync(ActionContext context)
     {
@@ -32,15 +16,17 @@ public class TextToImageResult : ActionResult
         {
             throw new ArgumentNullException(nameof(context));
         }
-        return writeToResponseAsync(context);
+
+        return WriteToResponseAsync(context);
     }
 
-    private Task writeToResponseAsync(ActionContext context)
+    private Task WriteToResponseAsync(ActionContext context)
     {
         var response = context.HttpContext.Response;
-        response.ContentType = new MediaTypeHeaderValue("image/png").ToString();
+        response.ContentType = new MediaTypeHeaderValue(mediaType: "image/png").ToString();
         context.HttpContext.DisableBrowserCache();
-        var data = _text.TextToImage(_options);
-        return response.Body.WriteAsync(data.AsMemory(0, data.Length)).AsTask();
+        var data = text.TextToImage(options);
+
+        return response.Body.WriteAsync(data.AsMemory(start: 0, data.Length)).AsTask();
     }
 }

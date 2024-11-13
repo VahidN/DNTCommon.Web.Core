@@ -34,10 +34,7 @@ public static class WebServerInfoProvider
 
         if (addresses is null || addresses.Count == 0)
         {
-            addresses = new List<string>
-            {
-                "http://localhost:5000"
-            };
+            addresses = ["http://localhost:5000"];
         }
 
         return addresses;
@@ -51,8 +48,7 @@ public static class WebServerInfoProvider
     {
         var process = Process.GetCurrentProcess();
 
-        var version = (AssemblyInformationalVersionAttribute?)Assembly.GetExecutingAssembly()
-            .GetCustomAttribute(typeof(AssemblyInformationalVersionAttribute));
+        var version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>();
 
         var hostName = Dns.GetHostName();
 

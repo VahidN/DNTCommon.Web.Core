@@ -1,10 +1,8 @@
-﻿@using DNTCommon.Web.Core
-
-@{
-    ViewData["Title"] = "Persian Date ModelBinder";
+﻿@{
+    ViewData[index: "Title"] = "Persian Date ModelBinder";
 }
 
-<h1>@ViewData["Title"]</h1>
+<h1>@ViewData[index: "Title"]</h1>
 
 <button type="submit" onclick="postData()" class="btn btn-primary">Post Persian Date</button>
 
@@ -14,7 +12,7 @@
         function postData() {
             $.ajax({
                 type: 'POST',
-                url: '@Url.Action("Index","PersianDateModelBinder")',
+                url: '@Url.Action(action: "Index", controller: "PersianDateModelBinder")',
                 dataType: 'json',
                 contentType: 'application/x-www-form-urlencoded; charset=utf-8', //'application/json; charset=utf-8', doesn't work here
                 data: {

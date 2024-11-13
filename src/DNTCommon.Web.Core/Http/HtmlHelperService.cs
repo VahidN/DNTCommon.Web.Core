@@ -91,7 +91,7 @@ public class HtmlHelperService(
 
                 if (idx != -1)
                 {
-                    var newImage = originalUrl.Substring(idx);
+                    var newImage = originalUrl[idx..];
 
                     if (!attribute.Value.Equals(newImage, StringComparison.OrdinalIgnoreCase))
                     {

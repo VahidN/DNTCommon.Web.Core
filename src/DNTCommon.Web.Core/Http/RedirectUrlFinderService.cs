@@ -15,7 +15,7 @@ public class RedirectUrlFinderService : IRedirectUrlFinderService
     static RedirectUrlFinderService()
     {
         // Default is 2 minutes: https://msdn.microsoft.com/en-us/library/system.net.servicepointmanager.dnsrefreshtimeout(v=vs.110).aspx
-        ServicePointManager.DnsRefreshTimeout = (int)TimeSpan.FromMinutes(1).TotalMilliseconds;
+        ServicePointManager.DnsRefreshTimeout = (int)TimeSpan.FromMinutes(value: 1).TotalMilliseconds;
 
         // Increases the concurrent outbound connections
         ServicePointManager.DefaultConnectionLimit = 1024;
@@ -55,7 +55,7 @@ public class RedirectUrlFinderService : IRedirectUrlFinderService
         }
 
         var redirectUri = siteUri;
-        var hops = 1;		
+        var hops = 1;
 
         try
         {
@@ -64,7 +64,7 @@ public class RedirectUrlFinderService : IRedirectUrlFinderService
                 return new Uri(outUrl);
             }
 
-            setHeaders(siteUri);
+            SetHeaders(siteUri);
 
             do
             {
@@ -72,7 +72,7 @@ public class RedirectUrlFinderService : IRedirectUrlFinderService
 
                 if (webResp == null)
                 {
-                    return cacheReturn(siteUri, siteUri);
+                    return CacheReturn(siteUri, siteUri);
                 }
 
                 switch (webResp.StatusCode)
@@ -94,7 +94,7 @@ public class RedirectUrlFinderService : IRedirectUrlFinderService
                     case HttpStatusCode.Unauthorized:
                     case HttpStatusCode.Forbidden: // fine! they have banned this server, but the link is correct!
                     case HttpStatusCode.OK:
-                        return cacheReturn(siteUri, redirectUri);
+                        return CacheReturn(siteUri, redirectUri);
                     default:
                         await webResp.EnsureSuccessStatusCodeAsync();
 
@@ -105,29 +105,31 @@ public class RedirectUrlFinderService : IRedirectUrlFinderService
             }
             while (hops <= maxRedirects);
 
-            throw new InvalidOperationException("Too many redirects detected.");
+            throw new InvalidOperationException(message: "Too many redirects detected.");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.Demystify(), "LocationFinderService error. Couldn't find redirect of {SiteUri} after {Hops} tries.",
+            _logger.LogError(ex.Demystify(),
+                message: "LocationFinderService error. Couldn't find redirect of {SiteUri} after {Hops} tries.",
                 siteUri, hops);
         }
 
-        return cacheReturn(siteUri, redirectUri);
+        return CacheReturn(siteUri, redirectUri);
     }
 
-    private void setHeaders(Uri siteUri)
+    private void SetHeaders(Uri siteUri)
     {
-        _client.DefaultRequestHeaders.Add("User-Agent", typeof(RedirectUrlFinderService).Namespace);
-        _client.DefaultRequestHeaders.Add("Keep-Alive", "true");
+        _client.DefaultRequestHeaders.Add(name: "User-Agent", typeof(RedirectUrlFinderService).Namespace);
+        _client.DefaultRequestHeaders.Add(name: "Keep-Alive", value: "true");
         _client.DefaultRequestHeaders.Referrer = siteUri;
     }
 
-    private Uri? cacheReturn(Uri originalUrl, Uri? redirectUrl)
+    private Uri? CacheReturn(Uri originalUrl, Uri? redirectUrl)
     {
         if (redirectUrl != null)
         {
-            _cacheService.Add($"{CachePrefix}{originalUrl}", redirectUrl, DateTimeOffset.UtcNow.AddMinutes(15), 1);
+            _cacheService.Add($"{CachePrefix}{originalUrl}", redirectUrl,
+                DateTimeOffset.UtcNow.AddMinutes(minutes: 15));
         }
 
         return redirectUrl;

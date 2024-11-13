@@ -1,15 +1,12 @@
-using System;
-using System.Collections.Generic;
-
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-/// Exception EqualityComparer
+///     Exception EqualityComparer
 /// </summary>
 public class ExceptionEqualityComparer : IEqualityComparer<Exception>
 {
     /// <summary>
-    /// Checks if two exceptions are equal.
+    ///     Checks if two exceptions are equal.
     /// </summary>
     public bool Equals(Exception? x, Exception? y)
     {
@@ -23,12 +20,12 @@ public class ExceptionEqualityComparer : IEqualityComparer<Exception>
             return false;
         }
 
-        return x.GetType().Name.Equals(y.GetType().Name, StringComparison.Ordinal)
-                && x.Message.Equals(y.Message, StringComparison.Ordinal);
+        return x.GetType().Name.Equals(y.GetType().Name, StringComparison.Ordinal) &&
+               x.Message.Equals(y.Message, StringComparison.Ordinal);
     }
 
     /// <summary>
-    /// Gets the exception's hash.
+    ///     Gets the exception's hash.
     /// </summary>
     public int GetHashCode(Exception obj)
     {

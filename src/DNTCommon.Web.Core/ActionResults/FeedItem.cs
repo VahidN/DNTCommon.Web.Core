@@ -23,7 +23,7 @@ public class FeedItem
     /// <summary>
     ///     Item's Categories
     /// </summary>
-    public IEnumerable<string> Categories { set; get; } = Enumerable.Empty<string>();
+    public IEnumerable<string> Categories { set; get; } = [];
 
     /// <summary>
     ///     Item's absolute URL

@@ -15,20 +15,16 @@ public static class ExceptionHandlerExtension
     ///     A customized version of app.UseExceptionHandler
     /// </summary>
     public static void UseApiExceptionHandler(this IApplicationBuilder app, bool isDevelopment)
-    {
-        app.UseExceptionHandler(appBuilder =>
-                                {
-                                    appBuilder.Run(async context =>
-                                                   {
-                                                       await ExceptionHandlerAsync(isDevelopment, context);
-                                                   });
-                                });
-    }
+        => app.UseExceptionHandler(appBuilder =>
+        {
+            appBuilder.Run(async context => { await ExceptionHandlerAsync(isDevelopment, context); });
+        });
 
     private static async Task ExceptionHandlerAsync(bool isDevelopment, HttpContext context)
     {
         var error = context.Features.Get<IExceptionHandlerFeature>();
         var exception = error?.Error;
+
         if (exception is null)
         {
             return;
@@ -36,13 +32,13 @@ public static class ExceptionHandlerExtension
 
         switch (exception)
         {
-            case UnauthorizedAccessException _:
-                await showError(HttpStatusCode.Unauthorized,
-                                "You don't have access to this resource!");
+            case UnauthorizedAccessException:
+                await showError(HttpStatusCode.Unauthorized, message: "You don't have access to this resource!");
+
                 break;
             default:
-                await showError(HttpStatusCode.InternalServerError,
-                                "Unexpected error! Try again later.");
+                await showError(HttpStatusCode.InternalServerError, message: "Unexpected error! Try again later.");
+
                 break;
         }
 
@@ -52,59 +48,44 @@ public static class ExceptionHandlerExtension
 
             context.Response.StatusCode = (int)statusCode;
             context.Response.ContentType = "application/json";
-            return isDevelopment
-                       ? showDevelopmentError(statusCode, message)
-                       : showProductionError(statusCode, message);
+
+            return isDevelopment ? showDevelopmentError(statusCode, message) : showProductionError(statusCode, message);
         }
 
-        Task showDevelopmentError(
-            HttpStatusCode statusCode,
-            string message)
+        Task showDevelopmentError(HttpStatusCode statusCode, string message)
         {
-            var exceptionMessage =
-                exception.Demystify().ToString() ??
-                "Unexpected error! Try again later.";
-            return context.Response
-                          .WriteAsync(JsonSerializer
-                                          .Serialize(new ApiErrorDto
-                                                     {
-                                                         StatusCode =
-                                                             (int)statusCode,
-                                                         Message =
-                                                             $"{message}{Environment.NewLine}{exceptionMessage}",
-                                                     }),
-                                      Encoding.UTF8);
+            var exceptionMessage = exception.Demystify().ToString() ?? "Unexpected error! Try again later.";
+
+            return context.Response.WriteAsync(JsonSerializer.Serialize(new ApiErrorDto
+            {
+                StatusCode = (int)statusCode,
+                Message = $"{message}{Environment.NewLine}{exceptionMessage}"
+            }), Encoding.UTF8);
         }
 
-        Task showProductionError(
-            HttpStatusCode statusCode,
-            string message) =>
-            // NOTE!
-            // Don't show the real `exception.Message` in production for security reasons!
-            // Attackers shouldn't be able to debug our site remotely!
-            context.Response
-                   .WriteAsync(JsonSerializer.Serialize(new ApiErrorDto
-                                                        {
-                                                            StatusCode = (int)statusCode,
-                                                            Message = message,
-                                                        }),
-                               Encoding.UTF8);
+        Task showProductionError(HttpStatusCode statusCode, string message)
+            =>
+
+                // NOTE!
+                // Don't show the real `exception.Message` in production for security reasons!
+                // Attackers shouldn't be able to debug our site remotely!
+                context.Response.WriteAsync(JsonSerializer.Serialize(new ApiErrorDto
+                {
+                    StatusCode = (int)statusCode,
+                    Message = message
+                }), Encoding.UTF8);
 
         void addCorsHeaders()
         {
-            if (!context.Response.Headers
-                        .ContainsKey("Access-Control-Allow-Origin"))
+            if (!context.Response.Headers.ContainsKey(key: "Access-Control-Allow-Origin"))
             {
-                context.Response.Headers
-                       .Append("Access-Control-Allow-Origin", "*");
+                context.Response.Headers.Append(key: "Access-Control-Allow-Origin", value: "*");
             }
 
-            if (!context.Response.Headers
-                        .ContainsKey("Access-Control-Allow-Headers"))
+            if (!context.Response.Headers.ContainsKey(key: "Access-Control-Allow-Headers"))
             {
-                context.Response.Headers
-                       .Append("Access-Control-Allow-Headers",
-                               "Origin, X-Requested-With, Content-Type, Accept");
+                context.Response.Headers.Append(key: "Access-Control-Allow-Headers",
+                    value: "Origin, X-Requested-With, Content-Type, Accept");
             }
         }
     }

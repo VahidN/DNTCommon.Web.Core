@@ -48,9 +48,7 @@ public static class PasswordHasherServiceExtensions
     {
         var byteHash = SHA1.HashData(input);
 
-        return BitConverter.ToString(byteHash)
-            .Replace(oldValue: "-", newValue: "", StringComparison.OrdinalIgnoreCase)
-            .ToUpperInvariant();
+        return Convert.ToHexString(byteHash);
     }
 
     /// <summary>

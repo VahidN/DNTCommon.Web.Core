@@ -122,7 +122,7 @@ public static class DomainHelperExtensions
         var lastIndex = host.LastIndexOf(value: '.');
         var index = host.LastIndexOf(value: '.', lastIndex - 1);
 
-        return host.Substring(startIndex: 0, index);
+        return host[..index];
     }
 
     /// <summary>
@@ -292,7 +292,7 @@ public static class DomainHelperExtensions
 
         var keyValues = QueryHelpers.ParseQuery(uri.Query);
 
-        return FeedKeys.Any(key => keyValues.ContainsKey(key));
+        return FeedKeys.Any(keyValues.ContainsKey);
     }
 
     /// <summary>

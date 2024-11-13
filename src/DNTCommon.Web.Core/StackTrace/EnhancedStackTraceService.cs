@@ -1,17 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Text;
 
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-/// Resolves the stack back to the C# source format of the calls (and is an inspectable list of stack frames)
+///     Resolves the stack back to the C# source format of the calls (and is an inspectable list of stack frames)
 /// </summary>
 public class EnhancedStackTraceService : IEnhancedStackTraceService
 {
     /// <summary>
-    /// Resolves the stack back to the C# source format of the calls (and is an inspectable list of stack frames)
+    ///     Resolves the stack back to the C# source format of the calls (and is an inspectable list of stack frames)
     /// </summary>
     public IEnumerable<StackFrameInfo> GetCurrentStackFrames(Predicate<Type> skipFrame)
     {
@@ -20,11 +17,11 @@ public class EnhancedStackTraceService : IEnhancedStackTraceService
             throw new ArgumentNullException(nameof(skipFrame));
         }
 
-        return getCurrentStackFrames(skipFrame);
+        return GetStackFrames(skipFrame);
     }
 
     /// <summary>
-    /// Resolves the stack back to the C# source format of the calls (and is an inspectable list of stack frames)
+    ///     Resolves the stack back to the C# source format of the calls (and is an inspectable list of stack frames)
     /// </summary>
     public string GetCurrentStackTrace(Predicate<Type> skipFrame)
     {
@@ -34,28 +31,32 @@ public class EnhancedStackTraceService : IEnhancedStackTraceService
         }
 
         var sb = new StringBuilder();
-        foreach (var frame in getCurrentStackFrames(skipFrame))
+
+        foreach (var frame in GetStackFrames(skipFrame))
         {
             if (!string.IsNullOrEmpty(frame.File))
             {
                 sb.Append(frame.File);
                 var lineNo = frame.Line;
                 var colNo = frame.Column;
+
                 if (lineNo.HasValue && colNo.HasValue)
                 {
-                    sb.Append('(').Append(lineNo).Append(',').Append(colNo).Append("): ");
+                    sb.Append(value: '(').Append(lineNo).Append(value: ',').Append(colNo).Append(value: "): ");
                 }
             }
 
-            sb.Append("at ").AppendLine(frame.Method);
+            sb.Append(value: "at ").AppendLine(frame.Method);
         }
+
         return sb.ToString();
     }
 
-    private static IEnumerable<StackFrameInfo> getCurrentStackFrames(Predicate<Type> skipFrame)
+    private static IEnumerable<StackFrameInfo> GetStackFrames(Predicate<Type> skipFrame)
     {
         var enhancedStackTrace = EnhancedStackTrace.Current();
         var stackFrames = enhancedStackTrace.GetFrames();
+
         if (stackFrames == null)
         {
             yield break;
@@ -69,18 +70,21 @@ public class EnhancedStackTraceService : IEnhancedStackTraceService
             }
 
             var methodBase = stackFrame.GetMethod();
+
             if (methodBase == null)
             {
                 continue;
             }
 
             var resolvedMethod = EnhancedStackTrace.GetMethodDisplayString(methodBase);
+
             if (resolvedMethod == null)
             {
                 continue;
             }
 
             var declaringType = methodBase.DeclaringType;
+
             if (declaringType == null)
             {
                 continue;

@@ -1,20 +1,17 @@
-﻿using System;
-using System.Threading.Tasks;
-
-namespace DNTCommon.Web.Core;
+﻿namespace DNTCommon.Web.Core;
 
 /// <summary>
-/// Scheduled Tasks Manager
+///     Scheduled Tasks Manager
 /// </summary>
 public interface IScheduledTasksCoordinator
 {
     /// <summary>
-    /// Starts the scheduler.
+    ///     Starts the scheduler.
     /// </summary>
     void StartTasks();
 
     /// <summary>
-    /// Stops the scheduler.
+    ///     Stops the scheduler.
     /// </summary>
     Task StopTasks();
 }

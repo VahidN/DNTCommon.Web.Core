@@ -18,7 +18,7 @@ public static class Md5CryptoExtensions
         using var file = new FileStream(path, FileMode.Open, FileAccess.Read);
         var retVal = md5.ComputeHash(file);
 
-        return BitConverter.ToString(retVal).Replace("-", string.Empty, StringComparison.Ordinal); // hex string
+        return Convert.ToHexString(retVal); // hex string
     }
 
     /// <summary>
@@ -36,7 +36,7 @@ public static class Md5CryptoExtensions
 
         for (var i = 0; i < hash.Length; i++)
         {
-            sb.AppendFormat(CultureInfo.InvariantCulture, "{0:X2}", hash[i]);
+            sb.AppendFormat(CultureInfo.InvariantCulture, format: "{0:X2}", hash[i]);
         }
 
         return sb.ToString();

@@ -26,7 +26,8 @@ public static class BaseHttpClientExtensions
                 client.Timeout = TimeSpan.FromSeconds(value: 20);
 
                 client.DefaultRequestHeaders.Add(name: "User-Agent",
-                    value: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36");
+                    value:
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36");
 
                 client.DefaultRequestHeaders.Add(name: "Keep-Alive", value: "true");
 
@@ -40,10 +41,9 @@ public static class BaseHttpClientExtensions
             .AddTransientHttpErrorPolicy(policy =>
 
                 // transient errors: network failures and HTTP 5xx and HTTP 408 errors
-                policy.WaitAndRetryAsync(new[]
-                {
+                policy.WaitAndRetryAsync([
                     TimeSpan.FromSeconds(value: 3), TimeSpan.FromSeconds(value: 5), TimeSpan.FromSeconds(value: 15)
-                }));
+                ]));
 
         /*
          We should not supply the factory with a single instance of HttpClientHandler to use in all clients.

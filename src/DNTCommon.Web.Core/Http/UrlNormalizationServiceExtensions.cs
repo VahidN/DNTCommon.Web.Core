@@ -99,14 +99,14 @@ public static class UrlNormalizationServiceExtensions
     {
         var idx = url.IndexOf(value: "utm_source=", StringComparison.Ordinal);
 
-        return idx == -1 ? url : url.Substring(startIndex: 0, idx - 1);
+        return idx == -1 ? url : url[..(idx - 1)];
     }
 
     private static string RemoveFeedburnerPart2(string url)
     {
         var idx = url.IndexOf(value: "utm_medium=", StringComparison.Ordinal);
 
-        return idx == -1 ? url : url.Substring(startIndex: 0, idx - 1);
+        return idx == -1 ? url : url[..(idx - 1)];
     }
 
     private static string AddWww(string url)

@@ -40,8 +40,8 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
 
         applicationLifetime.ApplicationStopping.Register(() =>
         {
-            _logger.LogInformation("Application is stopping ... .");
-            disposeResources().Wait();
+            _logger.LogInformation(message: "Application is stopping ... .");
+            DisposeResources().Wait();
         });
     }
 
@@ -70,17 +70,17 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
 
                 if (taskStatus.IsRunning)
                 {
-                    _logger.LogInformation("Ignoring `{TaskStatus}` task. It's still running.", taskStatus);
+                    _logger.LogInformation(message: "Ignoring `{TaskStatus}` task. It's still running.", taskStatus);
 
                     continue;
                 }
 
-                tasks.Add(Task.Run(() => runTask(taskStatus, now)));
+                tasks.Add(Task.Run(() => RunTask(taskStatus, now)));
             }
 
             if (tasks.Count != 0)
             {
-                Task.WaitAll(tasks.ToArray());
+                Task.WaitAll([.. tasks]);
             }
         };
 
@@ -90,10 +90,9 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
     /// <summary>
     ///     Stops the scheduler.
     /// </summary>
-    public Task StopTasks()
-        => disposeResources();
+    public Task StopTasks() => DisposeResources();
 
-    private async Task disposeResources()
+    private async Task DisposeResources()
     {
         if (_isShuttingDown)
         {
@@ -119,18 +118,18 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
             while (_tasksStorage.Value.Tasks.Any(x => x.IsRunning) && timeOut >= 0)
             {
                 // still running ...
-                await Task.Delay(50);
+                await Task.Delay(millisecondsDelay: 50);
                 timeOut -= 50;
             }
         }
         finally
         {
             _jobsRunnerTimer.StopJobs();
-            await wakeUp();
+            await WakeUp();
         }
     }
 
-    private async Task wakeUp()
+    private async Task WakeUp()
     {
         var mySitePingClient = _serviceProvider.GetService<MySitePingClient>();
 
@@ -140,38 +139,36 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
         }
     }
 
-    private void runTask(ScheduledTaskStatus taskStatus, DateTime now)
+    private void RunTask(ScheduledTaskStatus taskStatus, DateTime now)
     {
         var name = taskStatus.TaskType.FullName;
 
         try
         {
-            using (var serviceScope = _serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope())
+            using var serviceScope = _serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
+
+            var scheduledTask = (IScheduledTask)serviceScope.ServiceProvider.GetRequiredService(taskStatus.TaskType);
+
+            taskStatus.TaskInstance = scheduledTask;
+
+            if (_isShuttingDown)
             {
-                var scheduledTask =
-                    (IScheduledTask)serviceScope.ServiceProvider.GetRequiredService(taskStatus.TaskType);
-
-                taskStatus.TaskInstance = scheduledTask;
-
-                if (_isShuttingDown)
-                {
-                    return;
-                }
-
-                taskStatus.IsRunning = true;
-                taskStatus.LastRun = now;
-
-                _logger.LogInformation("Start running `{Name}` task @ {Now}.", name, now);
-                scheduledTask.RunAsync().Wait();
-
-                _logger.LogInformation("Finished running `{Name}` task @ {Now}.", name, now);
-                taskStatus.IsLastRunSuccessful = true;
+                return;
             }
+
+            taskStatus.IsRunning = true;
+            taskStatus.LastRun = now;
+
+            _logger.LogInformation(message: "Start running `{Name}` task @ {Now}.", name, now);
+            scheduledTask.RunAsync().Wait();
+
+            _logger.LogInformation(message: "Finished running `{Name}` task @ {Now}.", name, now);
+            taskStatus.IsLastRunSuccessful = true;
         }
         catch (Exception ex)
         {
             var exception = ex.Demystify();
-            _logger.LogCritical(0, exception, "Failed running {Name}", name);
+            _logger.LogCritical(eventId: 0, exception, message: "Failed running {Name}", name);
             taskStatus.IsLastRunSuccessful = false;
             taskStatus.LastException = exception;
         }

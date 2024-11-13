@@ -32,12 +32,9 @@ public class FeedResult<TFeedItem>(FeedChannel<TFeedItem> feedChannel) : ActionR
 
         var httpContextInfo = context.HttpContext.RequestServices.GetRequiredService<IHttpRequestInfoService>();
 
-        if (httpContextInfo == null)
-        {
-            throw new InvalidOperationException(message: "httpContextInfo is null.");
-        }
-
-        return WriteSyndicationFeedToResponseAsync(context, httpContextInfo);
+        return httpContextInfo == null
+            ? throw new InvalidOperationException(message: "httpContextInfo is null.")
+            : WriteSyndicationFeedToResponseAsync(context, httpContextInfo);
     }
 
     private Task WriteSyndicationFeedToResponseAsync(ActionContext context, IHttpRequestInfoService httpContextInfo)
