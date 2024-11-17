@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
@@ -52,20 +51,7 @@ public static class HttpRequestInfoServiceExtensions
     /// <param name="services"></param>
     /// <returns></returns>
     public static IServiceCollection AddLargeFilesUploadSupport(this IServiceCollection services)
-    {
-        try
-        {
-            if (OperatingSystem.IsWindows())
-            {
-                services.Configure<IISServerOptions>(options => { options.MaxRequestBodySize = int.MaxValue; });
-            }
-        }
-        catch (Exception ex)
-        {
-            WriteLine(ex);
-        }
-
-        services.Configure<FormOptions>(options =>
+        => services.Configure<FormOptions>(options =>
         {
             options.ValueLengthLimit = int.MaxValue;
             options.MultipartBodyLengthLimit = long.MaxValue;
@@ -73,7 +59,4 @@ public static class HttpRequestInfoServiceExtensions
             options.MultipartHeadersCountLimit = int.MaxValue;
             options.MultipartHeadersLengthLimit = int.MaxValue;
         });
-
-        return services;
-    }
 }
