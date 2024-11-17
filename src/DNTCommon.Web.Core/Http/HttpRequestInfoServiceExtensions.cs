@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -51,12 +52,13 @@ public static class HttpRequestInfoServiceExtensions
     /// <param name="services"></param>
     /// <returns></returns>
     public static IServiceCollection AddLargeFilesUploadSupport(this IServiceCollection services)
-        => services.Configure<FormOptions>(options =>
-        {
-            options.ValueLengthLimit = int.MaxValue;
-            options.MultipartBodyLengthLimit = long.MaxValue;
-            options.MultipartBoundaryLengthLimit = int.MaxValue;
-            options.MultipartHeadersCountLimit = int.MaxValue;
-            options.MultipartHeadersLengthLimit = int.MaxValue;
-        });
+        => services.Configure<KestrelServerOptions>(options => { options.Limits.MaxRequestBodySize = int.MaxValue; })
+            .Configure<FormOptions>(options =>
+            {
+                options.ValueLengthLimit = int.MaxValue;
+                options.MultipartBodyLengthLimit = long.MaxValue;
+                options.MultipartBoundaryLengthLimit = int.MaxValue;
+                options.MultipartHeadersCountLimit = int.MaxValue;
+                options.MultipartHeadersLengthLimit = int.MaxValue;
+            });
 }
