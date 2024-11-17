@@ -52,13 +52,29 @@ public static class HttpRequestInfoServiceExtensions
     /// <param name="services"></param>
     /// <returns></returns>
     public static IServiceCollection AddLargeFilesUploadSupport(this IServiceCollection services)
-        => services.Configure<IISServerOptions>(options => { options.MaxRequestBodySize = int.MaxValue; })
-            .Configure<FormOptions>(options =>
-            {
-                options.ValueLengthLimit = int.MaxValue;
-                options.MultipartBodyLengthLimit = long.MaxValue;
-                options.MultipartBoundaryLengthLimit = int.MaxValue;
-                options.MultipartHeadersCountLimit = int.MaxValue;
-                options.MultipartHeadersLengthLimit = int.MaxValue;
-            });
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            return services;
+        }
+
+        try
+        {
+            return services.Configure<IISServerOptions>(options => { options.MaxRequestBodySize = int.MaxValue; })
+                .Configure<FormOptions>(options =>
+                {
+                    options.ValueLengthLimit = int.MaxValue;
+                    options.MultipartBodyLengthLimit = long.MaxValue;
+                    options.MultipartBoundaryLengthLimit = int.MaxValue;
+                    options.MultipartHeadersCountLimit = int.MaxValue;
+                    options.MultipartHeadersLengthLimit = int.MaxValue;
+                });
+        }
+        catch (Exception ex)
+        {
+            WriteLine(ex);
+        }
+
+        return services;
+    }
 }
