@@ -8,21 +8,29 @@ namespace DNTCommon.Web.Core;
 public class ExecuteApplicationProcess : IExecuteApplicationProcess
 {
     /// <summary>
-    ///     A helper method to execute the Chrome's process
+    ///     A helper method to execute a process
     /// </summary>
-    public async Task<string> ExecuteProcessAsync(string processName,
-        string arguments,
-        string converterExecutionPath,
-        TimeSpan waitForExit)
+    public async Task<string> ExecuteProcessAsync(ApplicationStartInfo startInfo)
     {
-        KillAllConverterProcesses(processName);
+        ArgumentNullException.ThrowIfNull(startInfo);
+
+        if (startInfo.KillProcessOnStart && !startInfo.ProcessName.IsEmpty())
+        {
+            KillAllAppProcesses(startInfo.ProcessName);
+        }
 
         var output = new StringBuilder();
-        var waitToClose = TimeSpan.FromSeconds(value: 10);
 
         using var process = new Process();
-        process.StartInfo.FileName = converterExecutionPath;
-        process.StartInfo.Arguments = arguments;
+
+        process.StartInfo.FileName =
+            startInfo.AppPath ?? throw new InvalidOperationException(message: "AppPath is empty.");
+
+        if (!startInfo.Arguments.IsEmpty())
+        {
+            process.StartInfo.Arguments = startInfo.Arguments;
+        }
+
         process.StartInfo.UseShellExecute = false;
         process.StartInfo.CreateNoWindow = true;
         process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
@@ -39,7 +47,7 @@ public class ExecuteApplicationProcess : IExecuteApplicationProcess
             process.BeginErrorReadLine();
 
             using CancellationTokenSource cancellationTokenSource = new();
-            cancellationTokenSource.CancelAfter(waitForExit);
+            cancellationTokenSource.CancelAfter(startInfo.WaitForExit);
             await process.WaitForExitAsync(cancellationTokenSource.Token);
         }
         finally
@@ -57,28 +65,38 @@ public class ExecuteApplicationProcess : IExecuteApplicationProcess
             return errorMessage;
         }
 
-        await Task.Delay(waitToClose);
-        KillAllConverterProcesses(processName);
+        await Task.Delay(startInfo.WaitForExit);
+        KillThisProcess(process);
 
-        throw new InvalidOperationException(Invariant($"HasExited: {isExited}, ExitCode: {exitCode}, {errorMessage}"));
+        return Invariant($"HasExited: {isExited}, ExitCode: {exitCode}, {errorMessage}");
 
         void OnProcessOnOutputDataReceived(object o, DataReceivedEventArgs e) => output.AppendLine(e.Data);
     }
 
-    private static void KillAllConverterProcesses(string processName)
+    private static void KillThisProcess(Process process)
     {
-        var chromeProcesses = Process.GetProcessesByName(processName);
-
-        foreach (var chromeProcess in chromeProcesses)
+        try
         {
-            try
-            {
-                chromeProcess.Kill(entireProcessTree: true);
-            }
-            catch
-            {
-                // It's not important!
-            }
+            process.Kill(entireProcessTree: true);
+        }
+        catch
+        {
+            // It's not important!
+        }
+    }
+
+    private static void KillAllAppProcesses(string? processName)
+    {
+        if (processName.IsEmpty())
+        {
+            return;
+        }
+
+        var processes = Process.GetProcessesByName(processName);
+
+        foreach (var process in processes)
+        {
+            KillThisProcess(process);
         }
     }
 

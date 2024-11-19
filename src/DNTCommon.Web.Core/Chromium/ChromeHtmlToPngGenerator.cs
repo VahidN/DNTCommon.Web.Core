@@ -60,15 +60,21 @@ public class ChromeHtmlToPngGenerator(IExecuteApplicationProcess executeApplicat
         arguments.Append(CultureInfo.InvariantCulture,
             $" --screenshot=\"{options.OutputPngFile}\" \"{options.SourceHtmlFileOrUri}\" ");
 
-        var converterExecutionPath = GetChromePath(options);
+        var appPath = GetChromePath(options);
 
-        if (string.IsNullOrWhiteSpace(converterExecutionPath))
+        if (string.IsNullOrWhiteSpace(appPath))
         {
             throw new InvalidOperationException(ErrorMessage);
         }
 
-        var log = await executeApplicationProcess.ExecuteProcessAsync(processName: "chrome", arguments.ToString(),
-            converterExecutionPath, options.WaitForExit);
+        var log = await executeApplicationProcess.ExecuteProcessAsync(new ApplicationStartInfo
+        {
+            ProcessName = "chrome",
+            Arguments = arguments.ToString(),
+            AppPath = appPath,
+            WaitForExit = options.WaitForExit,
+            KillProcessOnStart = true
+        });
 
         if (options is { ResizeImageOptions: not null })
         {
