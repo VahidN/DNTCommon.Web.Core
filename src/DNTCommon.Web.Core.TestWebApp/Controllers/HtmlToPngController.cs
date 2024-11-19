@@ -18,10 +18,22 @@ public class HtmlToPngController(IHtmlToPngGenerator htmlToPngGenerator, IWebHos
             OutputPngFile = outputPngFile
         });
 
+        var isBlankImage = outputPngFile.IsBlankImage();
+
         var isBlankFile = Path.Combine(webHostEnvironment.WebRootPath, path2: "files", path3: "news-19169.jpg")
             .IsBlankImage();
 
-        var isBlankImage = outputPngFile.IsBlankImage();
+        var blankPixelsPercentage1 =
+            Path.Combine(webHostEnvironment.WebRootPath, path2: "files", path3: "news-19598.jpg")
+                .GetImageBlankPixelsPercentage();
+
+        var blankPixelsPercentage2 =
+            Path.Combine(webHostEnvironment.WebRootPath, path2: "files", path3: "news-19588.jpg")
+                .GetImageBlankPixelsPercentage();
+
+        var isPartiallyBlankImage =
+            Path.Combine(webHostEnvironment.WebRootPath, path2: "files", path3: "news-19588.jpg")
+                .IsPartiallyBlankImage(whitePixelsPercentage: 80);
 
         ViewBag.ImageSrc = "/files/test.png";
 
