@@ -10,17 +10,16 @@ public static class DisposableExtensions
     /// <summary>
     ///     Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
     /// </summary>
-    public static void TryDisposeSafe(this IDisposable? disposable, ILogger? logger = null, string? message = null)
+    public static void TryDisposeSafe<T>(this T? obj, ILogger? logger = null, string? message = null)
+        where T : class
     {
-        if (disposable == null)
-        {
-            return;
-        }
-
         try
         {
-            disposable.Dispose();
-            disposable = null;
+            if (obj is IDisposable disposable)
+            {
+                disposable.Dispose();
+                obj = null;
+            }
         }
         catch (Exception ex)
         {
