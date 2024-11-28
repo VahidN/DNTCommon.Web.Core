@@ -46,8 +46,11 @@ public static class SecurityHeadersBuilder
 
                 builder.AddScriptSrc().Self();
 
-                // NOTE: it's part of the DNTCommon.Web.Core\Middlewares\CspReportController.cs
-                builder.AddReportUri().To(uri: "/api/CspReport/Log");
+                if (isDevelopment)
+                {
+                    // NOTE: it's part of the DNTCommon.Web.Core\Middlewares\CspReportController.cs
+                    builder.AddReportUri().To(uri: "/api/CspReport/Log");
+                }
 
                 if (!isDevelopment)
                 {
