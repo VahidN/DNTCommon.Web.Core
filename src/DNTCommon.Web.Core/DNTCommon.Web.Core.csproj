@@ -63,7 +63,7 @@
         <Using Include="System.Net.Http.Headers"/>
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Meziantou.Analyzer" Version="2.0.180">
+        <PackageReference Include="Meziantou.Analyzer" Version="2.0.182">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
@@ -79,7 +79,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="SonarAnalyzer.CSharp" Version="9.32.0.97167">
+        <PackageReference Include="SonarAnalyzer.CSharp" Version="10.3.0.106239">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
@@ -97,7 +97,7 @@
         <PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" Version="7.3.0.3"/>
         <PackageReference Include="Ben.Demystifier" Version="0.4.1"/>
         <PackageReference Include="UAParser" Version="3.1.47"/>
-        <PackageReference Include="AsyncKeyedLock" Version="7.1.3"/>
+        <PackageReference Include="AsyncKeyedLock" Version="7.1.4"/>
         <PackageReference Include="NetEscapades.AspNetCore.SecurityHeaders" Version="0.24.0"/>
     </ItemGroup>
     <ItemGroup>
