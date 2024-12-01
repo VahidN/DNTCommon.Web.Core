@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace DNTCommon.Web.Core;
 
@@ -7,6 +8,29 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public static class TypeExtensions
 {
+	/// <summary>
+	///     Returns whether the given value object is valid for this type.
+	/// </summary>
+	public static bool CanCovertTo([NotNullWhen(returnValue: true)] this string? value, Type type)
+        => value is not null && TypeDescriptor.GetConverter(type).IsValid(value);
+
+	/// <summary>
+	///     Returns whether the given value object is valid for this type.
+	/// </summary>
+	public static bool CanCovertTo<T>([NotNullWhen(returnValue: true)] this string? value)
+        => value.CanCovertTo(typeof(T));
+
+	/// <summary>
+	///     Returns the default value of a given type
+	/// </summary>
+	public static object? GetDefaultValue(this Type? type)
+        => type?.IsValueType == true ? RuntimeHelpers.GetUninitializedObject(type) : null;
+
+	/// <summary>
+	///     Returns the default value of a given type
+	/// </summary>
+	public static object? GetDefaultValue<T>() => GetDefaultValue(typeof(T));
+
 	/// <summary>
 	///     Determines if the type implements the given interface.
 	/// </summary>
