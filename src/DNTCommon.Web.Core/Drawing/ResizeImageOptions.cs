@@ -30,7 +30,7 @@ public class ResizeImageOptions
     /// <summary>
     ///     Filter quality settings.
     /// </summary>
-    public SKFilterQuality FilterQuality { set; get; } = SKFilterQuality.High;
+    public SKSamplingOptions FilterQuality { set; get; } = new(SKFilterMode.Linear, SKMipmapMode.Linear);
 
     /// <summary>
     ///     Quality of the resized image
