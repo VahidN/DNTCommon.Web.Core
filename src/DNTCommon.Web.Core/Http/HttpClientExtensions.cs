@@ -1,5 +1,7 @@
+using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace DNTCommon.Web.Core;
 
@@ -8,6 +10,57 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public static class HttpClientExtensions
 {
+    /// <summary>
+    ///     Is the given remote url still available?
+    /// </summary>
+    public static async Task<bool> IsAvailableRemoteUrlAsync(this HttpClient httpClient,
+        string url,
+        Action<HttpRequestMessage>? configRequest = null,
+        ILogger? logger = null)
+    {
+        ArgumentNullException.ThrowIfNull(httpClient);
+
+        try
+        {
+            using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Head, url);
+            configRequest?.Invoke(httpRequestMessage);
+            using var response = await httpClient.SendAsync(httpRequestMessage);
+            await response.EnsureSuccessStatusCodeAsync();
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger?.LogError(ex, message: "Error processing `{URL}`", url);
+
+            if (ex is HttpRequestException hre)
+            {
+                if (hre.InnerException is SocketException { SocketErrorCode: SocketError.HostNotFound })
+                {
+                    return false;
+                }
+
+                if (hre.StatusCode.HasValue)
+                {
+                    var statusCode = (int)hre.StatusCode.Value;
+
+                    switch (statusCode)
+                    {
+                        //Good requests
+                        case >= 100 and < 400:
+                            return true;
+
+                        //Server Errors
+                        case >= 500 and <= 510:
+                            return false;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
     /// <summary>
     ///     Allows manipulation of the request headers before it is sent, when you are using a singleton httpClient.
     /// </summary>
