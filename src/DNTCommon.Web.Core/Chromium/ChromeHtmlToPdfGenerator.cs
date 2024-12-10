@@ -3,32 +3,28 @@ using System.Text;
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-///     A high level utility that converts HTML to PNG.
+///     A high level utility that converts HTML to PDF.
 /// </summary>
-public class ChromeHtmlToPngGenerator(IExecuteApplicationProcess executeApplicationProcess) : IHtmlToPngGenerator
+public class ChromeHtmlToPdfGenerator(IExecuteApplicationProcess executeApplicationProcess) : IHtmlToPdfGenerator
 {
     private const string ErrorMessage = "ChromeFinder was not successful and ChromeExecutablePath is null.";
 
     /// <summary>
-    ///     High level method that converts HTML to PNG.
+    ///     High level method that converts HTML to PDF.
     /// </summary>
     /// <returns></returns>
-    public async Task<string> GeneratePngFromHtmlAsync(HtmlToPngGeneratorOptions options)
+    public async Task<string> GeneratePdfFromHtmlAsync(HtmlToPdfGeneratorOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
 
-        string[] parameters =
-        [
-            ..ChromeGeneralParameters.GeneralParameters,
-            Invariant($"--window-size=\"{options.Width},{options.Height}\"")
-        ];
+        string[] parameters = [..ChromeGeneralParameters.GeneralParameters, "--no-pdf-header-footer"];
 
         var arguments = new StringBuilder();
         arguments.AppendJoin(separator: " ", parameters);
 
-        if (string.IsNullOrEmpty(options.OutputPngFile))
+        if (string.IsNullOrEmpty(options.OutputPdfFile))
         {
-            throw new InvalidOperationException(message: "OutputPngFile is null");
+            throw new InvalidOperationException(message: "OutputPdfFile is null");
         }
 
         if (string.IsNullOrEmpty(options.SourceHtmlFileOrUri))
@@ -37,7 +33,7 @@ public class ChromeHtmlToPngGenerator(IExecuteApplicationProcess executeApplicat
         }
 
         arguments.Append(CultureInfo.InvariantCulture,
-            $" --screenshot=\"{options.OutputPngFile}\" \"{options.SourceHtmlFileOrUri}\" ");
+            $" --print-to-pdf=\"{options.OutputPdfFile}\" \"{options.SourceHtmlFileOrUri}\" ");
 
         var appPath = GetChromePath(options);
 
@@ -55,20 +51,12 @@ public class ChromeHtmlToPngGenerator(IExecuteApplicationProcess executeApplicat
             KillProcessOnStart = true
         });
 
-        if (options is { ResizeImageOptions: not null })
-        {
-            var newData = options.OutputPngFile.ResizeImage(options.ResizeImageOptions);
-
-            if (newData is not null)
-            {
-                await File.WriteAllBytesAsync(options.OutputPngFile, newData);
-            }
-        }
+        options.OutputPdfFile.AddMetadataToPdfFile(options.DocumentMetadata);
 
         return log;
     }
 
-    private static string? GetChromePath(HtmlToPngGeneratorOptions options)
+    private static string? GetChromePath(HtmlToPdfGeneratorOptions options)
         => !string.IsNullOrWhiteSpace(options.ChromeExecutablePath)
             ? options.ChromeExecutablePath
             : ChromeFinder.Find();
