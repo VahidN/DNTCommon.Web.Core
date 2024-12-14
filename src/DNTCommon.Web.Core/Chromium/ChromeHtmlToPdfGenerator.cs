@@ -5,7 +5,9 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     A high level utility that converts HTML to PDF.
 /// </summary>
-public class ChromeHtmlToPdfGenerator(IExecuteApplicationProcess executeApplicationProcess) : IHtmlToPdfGenerator
+public class ChromeHtmlToPdfGenerator(
+    IExecuteApplicationProcess executeApplicationProcess,
+    ILockerService lockerService) : IHtmlToPdfGenerator
 {
     private const string ErrorMessage = "ChromeFinder was not successful and ChromeExecutablePath is null.";
 
@@ -16,6 +18,8 @@ public class ChromeHtmlToPdfGenerator(IExecuteApplicationProcess executeApplicat
     public async Task<string> GeneratePdfFromHtmlAsync(HtmlToPdfGeneratorOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
+
+        using var locker = await lockerService.LockAsync<ExecuteApplicationProcess>();
 
         string[] parameters = [..ChromeGeneralParameters.GeneralParameters, "--no-pdf-header-footer"];
 

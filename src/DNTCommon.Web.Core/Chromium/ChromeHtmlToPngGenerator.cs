@@ -5,7 +5,9 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     A high level utility that converts HTML to PNG.
 /// </summary>
-public class ChromeHtmlToPngGenerator(IExecuteApplicationProcess executeApplicationProcess) : IHtmlToPngGenerator
+public class ChromeHtmlToPngGenerator(
+    IExecuteApplicationProcess executeApplicationProcess,
+    ILockerService lockerService) : IHtmlToPngGenerator
 {
     private const string ErrorMessage = "ChromeFinder was not successful and ChromeExecutablePath is null.";
 
@@ -16,6 +18,8 @@ public class ChromeHtmlToPngGenerator(IExecuteApplicationProcess executeApplicat
     public async Task<string> GeneratePngFromHtmlAsync(HtmlToPngGeneratorOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
+
+        using var locker = await lockerService.LockAsync<ExecuteApplicationProcess>();
 
         string[] parameters =
         [
