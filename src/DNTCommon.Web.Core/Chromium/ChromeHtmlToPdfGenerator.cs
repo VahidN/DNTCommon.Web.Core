@@ -21,6 +21,31 @@ public class ChromeHtmlToPdfGenerator(
 
         using var locker = await lockerService.LockAsync<ExecuteApplicationProcess>();
 
+        var arguments = CreateArguments(options);
+
+        var appPath = GetChromePath(options);
+
+        if (string.IsNullOrWhiteSpace(appPath))
+        {
+            throw new InvalidOperationException(ErrorMessage);
+        }
+
+        var log = await executeApplicationProcess.ExecuteProcessAsync(new ApplicationStartInfo
+        {
+            ProcessName = "chrome",
+            Arguments = arguments,
+            AppPath = appPath,
+            WaitForExit = options.WaitForExit,
+            KillProcessOnStart = true
+        });
+
+        options.OutputPdfFile.AddMetadataToPdfFile(options.DocumentMetadata);
+
+        return log;
+    }
+
+    private static string CreateArguments(HtmlToPdfGeneratorOptions options)
+    {
         string[] parameters = [..ChromeGeneralParameters.GeneralParameters, "--no-pdf-header-footer"];
 
         var arguments = new StringBuilder();
@@ -39,25 +64,7 @@ public class ChromeHtmlToPdfGenerator(
         arguments.Append(CultureInfo.InvariantCulture,
             $" --print-to-pdf=\"{options.OutputPdfFile}\" \"{options.SourceHtmlFileOrUri}\" ");
 
-        var appPath = GetChromePath(options);
-
-        if (string.IsNullOrWhiteSpace(appPath))
-        {
-            throw new InvalidOperationException(ErrorMessage);
-        }
-
-        var log = await executeApplicationProcess.ExecuteProcessAsync(new ApplicationStartInfo
-        {
-            ProcessName = "chrome",
-            Arguments = arguments.ToString(),
-            AppPath = appPath,
-            WaitForExit = options.WaitForExit,
-            KillProcessOnStart = true
-        });
-
-        options.OutputPdfFile.AddMetadataToPdfFile(options.DocumentMetadata);
-
-        return log;
+        return arguments.ToString();
     }
 
     private static string? GetChromePath(HtmlToPdfGeneratorOptions options)

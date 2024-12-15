@@ -1,4 +1,5 @@
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace DNTCommon.Web.Core;
 
@@ -7,7 +8,8 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public class ChromeHtmlToPngGenerator(
     IExecuteApplicationProcess executeApplicationProcess,
-    ILockerService lockerService) : IHtmlToPngGenerator
+    ILockerService lockerService,
+    ILogger<ChromeHtmlToPngGenerator> logger) : IHtmlToPngGenerator
 {
     private const string ErrorMessage = "ChromeFinder was not successful and ChromeExecutablePath is null.";
 
@@ -21,6 +23,36 @@ public class ChromeHtmlToPngGenerator(
 
         using var locker = await lockerService.LockAsync<ExecuteApplicationProcess>();
 
+        var arguments = CreateArguments(options);
+
+        var appPath = GetChromePath(options);
+
+        if (string.IsNullOrWhiteSpace(appPath))
+        {
+            throw new InvalidOperationException(ErrorMessage);
+        }
+
+        var log = await executeApplicationProcess.ExecuteProcessAsync(new ApplicationStartInfo
+        {
+            ProcessName = "chrome",
+            Arguments = arguments,
+            AppPath = appPath,
+            WaitForExit = options.WaitForExit,
+            KillProcessOnStart = true
+        });
+
+        if (!IsValidImageFile(options))
+        {
+            return log;
+        }
+
+        await TryResizeFileAsync(options);
+
+        return log;
+    }
+
+    private static string CreateArguments(HtmlToPngGeneratorOptions options)
+    {
         string[] parameters =
         [
             ..ChromeGeneralParameters.GeneralParameters,
@@ -43,33 +75,37 @@ public class ChromeHtmlToPngGenerator(
         arguments.Append(CultureInfo.InvariantCulture,
             $" --screenshot=\"{options.OutputPngFile}\" \"{options.SourceHtmlFileOrUri}\" ");
 
-        var appPath = GetChromePath(options);
+        return arguments.ToString();
+    }
 
-        if (string.IsNullOrWhiteSpace(appPath))
+    private bool IsValidImageFile(HtmlToPngGeneratorOptions options)
+    {
+        if (options.OutputPngFile.IsValidImageFile(logger: logger))
         {
-            throw new InvalidOperationException(ErrorMessage);
+            return true;
         }
 
-        var log = await executeApplicationProcess.ExecuteProcessAsync(new ApplicationStartInfo
-        {
-            ProcessName = "chrome",
-            Arguments = arguments.ToString(),
-            AppPath = appPath,
-            WaitForExit = options.WaitForExit,
-            KillProcessOnStart = true
-        });
+        options.OutputPngFile.TryDeleteFile(logger);
+        logger.LogError(message: "`{File} was an invalid image file.`", options.OutputPngFile);
 
-        if (options is { ResizeImageOptions: not null })
-        {
-            var newData = options.OutputPngFile.ResizeImage(options.ResizeImageOptions);
+        return false;
+    }
 
-            if (newData is not null)
-            {
-                await File.WriteAllBytesAsync(options.OutputPngFile, newData);
-            }
+    private static async Task TryResizeFileAsync(HtmlToPngGeneratorOptions options)
+    {
+        var pngFile = options.OutputPngFile;
+
+        if (!pngFile.FileExists() || options is not { ResizeImageOptions: not null })
+        {
+            return;
         }
 
-        return log;
+        var newData = pngFile.ResizeImage(options.ResizeImageOptions);
+
+        if (newData is not null)
+        {
+            await File.WriteAllBytesAsync(pngFile, newData);
+        }
     }
 
     private static string? GetChromePath(HtmlToPngGeneratorOptions options)

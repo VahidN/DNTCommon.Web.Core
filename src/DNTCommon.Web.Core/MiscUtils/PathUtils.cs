@@ -12,6 +12,13 @@ public static class PathUtils
     private static readonly TimeSpan MatchTimeout = TimeSpan.FromSeconds(value: 3);
 
     /// <summary>
+    ///     Determines whether the specified file exists.
+    /// </summary>
+    /// <param name="filePath"></param>
+    public static bool FileExists([NotNullWhen(returnValue: true)] this string? filePath)
+        => !filePath.IsEmpty() && File.Exists(filePath);
+
+    /// <summary>
     ///     Tries to delete a file without throwing an exception
     /// </summary>
     /// <param name="filePath"></param>

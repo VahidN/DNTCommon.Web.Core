@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using SkiaSharp;
+using Exception = System.Exception;
 
 namespace DNTCommon.Web.Core;
 
@@ -14,9 +16,11 @@ public static class ImageValidatorExtensions
     /// <param name="filePath">The absolute path of the file</param>
     /// <param name="maxWidth">maximum allowed width</param>
     /// <param name="maxHeight">maximum allowed height</param>
+    /// <param name="logger">An optional error's logger</param>
     public static bool IsValidImageFile([NotNullWhen(returnValue: true)] this string? filePath,
         int? maxWidth = null,
-        int? maxHeight = null)
+        int? maxHeight = null,
+        ILogger? logger = null)
     {
         if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
         {
@@ -29,8 +33,10 @@ public static class ImageValidatorExtensions
 
             return bitmap != null && bitmap.Info.HasValidImageInfo(maxWidth, maxHeight);
         }
-        catch
+        catch (Exception ex)
         {
+            logger?.LogError(ex.Demystify(), message: "`{File}` is an invalid image file.", filePath);
+
             return false;
         }
     }
@@ -41,9 +47,11 @@ public static class ImageValidatorExtensions
     /// <param name="data">The provided content</param>
     /// <param name="maxWidth">maximum allowed width</param>
     /// <param name="maxHeight">maximum allowed height</param>
+    /// <param name="logger">An optional error's logger</param>
     public static bool IsValidImageFile([NotNullWhen(returnValue: true)] this byte[]? data,
         int? maxWidth = null,
-        int? maxHeight = null)
+        int? maxHeight = null,
+        ILogger? logger = null)
     {
         if (data == null || data.Length == 0)
         {
@@ -56,8 +64,10 @@ public static class ImageValidatorExtensions
 
             return bitmap != null && bitmap.Info.HasValidImageInfo(maxWidth, maxHeight);
         }
-        catch
+        catch (Exception ex)
         {
+            logger?.LogError(ex.Demystify(), message: "This is an invalid image file.");
+
             return false;
         }
     }
@@ -68,9 +78,11 @@ public static class ImageValidatorExtensions
     /// <param name="stream">The stream of a given data</param>
     /// <param name="maxWidth">maximum allowed width</param>
     /// <param name="maxHeight">maximum allowed height</param>
+    /// <param name="logger">An optional error's logger</param>
     public static bool IsValidImageFile([NotNullWhen(returnValue: true)] this Stream? stream,
         int? maxWidth = null,
-        int? maxHeight = null)
+        int? maxHeight = null,
+        ILogger? logger = null)
     {
         if (stream is null)
         {
@@ -85,8 +97,10 @@ public static class ImageValidatorExtensions
 
             return bitmap != null && bitmap.Info.HasValidImageInfo(maxWidth, maxHeight);
         }
-        catch
+        catch (Exception ex)
         {
+            logger?.LogError(ex.Demystify(), message: "This is an invalid image file.");
+
             return false;
         }
     }
@@ -97,9 +111,11 @@ public static class ImageValidatorExtensions
     /// <param name="fromFile">Represents a file sent with the HttpRequest</param>
     /// <param name="maxWidth">maximum allowed width</param>
     /// <param name="maxHeight">maximum allowed height</param>
+    /// <param name="logger">An optional error's logger</param>
     public static bool IsValidImageFile([NotNullWhen(returnValue: true)] this IFormFile? fromFile,
         int? maxWidth = null,
-        int? maxHeight = null)
+        int? maxHeight = null,
+        ILogger? logger = null)
     {
         if (fromFile is null || fromFile.Length == 0)
         {
@@ -118,8 +134,10 @@ public static class ImageValidatorExtensions
 
             return bitmap != null && bitmap.Info.HasValidImageInfo(maxWidth, maxHeight);
         }
-        catch
+        catch (Exception ex)
         {
+            logger?.LogError(ex.Demystify(), message: "This is an invalid image file.");
+
             return false;
         }
     }
@@ -130,22 +148,18 @@ public static class ImageValidatorExtensions
     /// <param name="fromFiles">Represents the files sent with the HttpRequest</param>
     /// <param name="maxWidth">maximum allowed width</param>
     /// <param name="maxHeight">maximum allowed height</param>
+    /// <param name="logger">An optional error's logger</param>
     public static bool AreValidImageFiles([NotNullWhen(returnValue: true)] this IFormFileCollection? fromFiles,
         int? maxWidth = null,
-        int? maxHeight = null)
-    {
-        if (fromFiles is null || fromFiles.Count == 0)
-        {
-            return false;
-        }
-
-        return fromFiles.All(fromFile => fromFile.IsValidImageFile(maxWidth, maxHeight));
-    }
+        int? maxHeight = null,
+        ILogger? logger = null)
+        => fromFiles is not null && fromFiles.Count != 0 &&
+           fromFiles.All(fromFile => fromFile.IsValidImageFile(maxWidth, maxHeight, logger));
 
     /// <summary>
-    ///     Does this image has proper Width and Height
+    ///     Does this image has a proper Width and Height
     /// </summary>
-    public static bool HasValidImageInfo(this SKImageInfo info, int? maxWidth, int? maxHeight)
-        => (!maxWidth.HasValue || info.Width <= maxWidth.Value) &&
-           (!maxHeight.HasValue || info.Height <= maxHeight.Value);
+    public static bool HasValidImageInfo(this SKImageInfo info, int? maxWidth = null, int? maxHeight = null)
+        => (maxWidth is null && maxHeight is null) || (maxWidth.HasValue && info.Width <= maxWidth.Value) ||
+           (maxHeight.HasValue && info.Height <= maxHeight.Value);
 }
