@@ -350,13 +350,18 @@ public static class DomainHelperExtensions
             baseUrl = "/";
         }
 
+        baseUrl = baseUrl.Trim().Replace(oldValue: "\\", newValue: "/", StringComparison.Ordinal);
+
         if (string.IsNullOrWhiteSpace(relativeUrl))
         {
             return baseUrl;
         }
 
         baseUrl = baseUrl.TrimEnd(trimChar: '/');
-        relativeUrl = relativeUrl.TrimStart(trimChar: '/');
+
+        relativeUrl = relativeUrl.Trim()
+            .Replace(oldValue: "\\", newValue: "/", StringComparison.Ordinal)
+            .TrimStart(trimChar: '/');
 
         return escapeRelativeUrl ? $"{baseUrl}/{Uri.EscapeDataString(relativeUrl)}" : $"{baseUrl}/{relativeUrl}";
     }

@@ -6,6 +6,15 @@ namespace DNTCommon.Web.Core.Tests;
 public class CombineUrlsTests
 {
     [TestMethod]
+    public void CombineUrlShouldWorkWithPathUrls()
+    {
+        var result = "http://localhost:7221/".CombineUrl(relativeUrl: "\\exports\\posts\\localhost-posts-1.pdf",
+            escapeRelativeUrl: false);
+
+        Assert.AreEqual(expected: "http://localhost:7221/exports/posts/localhost-posts-1.pdf", result);
+    }
+
+    [TestMethod]
     public void CombineUrlShouldWorkWithRootUrls()
     {
         var result = "".CombineUrl(relativeUrl: "/path1", escapeRelativeUrl: false)
