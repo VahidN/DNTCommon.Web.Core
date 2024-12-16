@@ -1,4 +1,5 @@
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace DNTCommon.Web.Core;
 
@@ -7,7 +8,8 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public class ChromeHtmlToPdfGenerator(
     IExecuteApplicationProcess executeApplicationProcess,
-    ILockerService lockerService) : IHtmlToPdfGenerator
+    ILockerService lockerService,
+    ILogger<ChromeHtmlToPdfGenerator> logger) : IHtmlToPdfGenerator
 {
     private const string ErrorMessage = "ChromeFinder was not successful and ChromeExecutablePath is null.";
 
@@ -38,6 +40,8 @@ public class ChromeHtmlToPdfGenerator(
             WaitForExit = options.WaitForExit,
             KillProcessOnStart = true
         });
+
+        log.LogPossibleErrorsOrWarnings(logger);
 
         options.OutputPdfFile.AddMetadataToPdfFile(options.DocumentMetadata);
 
