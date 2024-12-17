@@ -45,7 +45,7 @@ public class UAParserService(BaseHttpClient baseHttpClient, ILogger<UAParserServ
 
     private async Task<Parser> LoadLatestParserAsync(string regexesUrl)
     {
-        if (!NetworkExtensions.IsConnectedToInternet())
+        if (!NetworkExtensions.IsConnectedToInternet(TimeSpan.FromSeconds(2)))
         {
             return Parser.GetDefault();
         }
