@@ -12,9 +12,10 @@ public static class ChromeGeneralParameters
     /// </summary>
     public static readonly string[] GeneralParameters =
     [
-        "--disable-crash-reporter", "--disable-translate", "--disable-background-networking",
-        "--enable-features=NetworkService,NetworkServiceInProcess", "--disable-background-timer-throttling",
-        "--disable-backgrounding-occluded-windows", "--disable-breakpad",
+        "--disable-search-engine-choice-screen", "--disable-component-extensions-with-background-pages",
+        "--allow-pre-commit-input", "--disable-infobars", "--disable-crash-reporter", "--disable-translate",
+        "--disable-background-networking", "--enable-features=NetworkService,NetworkServiceInProcess",
+        "--disable-background-timer-throttling", "--disable-backgrounding-occluded-windows", "--disable-breakpad",
         "--disable-client-side-phishing-detection", "--disable-component-extensions-with-background-pages",
         "--disable-default-apps", "--disable-dev-shm-usage", "--disable-component-update", "--disable-extensions",
         "--disable-features=Translate,BackForwardCache,AcceptCHFrame,MediaRouter,OptimizationHints,TranslateUI",
@@ -33,6 +34,6 @@ public static class ChromeGeneralParameters
         "--disable-canvas-aa", "--disable-3d-apis", "--disable-accelerated-2d-canvas",
         "--disable-accelerated-jpeg-decoding", "--disable-accelerated-mjpeg-decode",
         "--disable-app-list-dismiss-on-blur", "--disable-accelerated-video-decode",
-        "--run-all-compositor-stages-before-draw", "--virtual-time-budget=20000"
+        "--run-all-compositor-stages-before-draw", "--virtual-time-budget=30000"
     ];
 }

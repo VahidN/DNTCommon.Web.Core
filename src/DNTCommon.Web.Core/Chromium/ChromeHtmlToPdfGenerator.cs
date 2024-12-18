@@ -50,8 +50,11 @@ public class ChromeHtmlToPdfGenerator(
 
     private static string CreateArguments(HtmlToPdfGeneratorOptions options)
     {
-        string[] parameters = [..ChromeGeneralParameters.GeneralParameters, "--no-pdf-header-footer", 
-                               "--generate-pdf-document-outline"];
+        string[] parameters =
+        [
+            ..ChromeGeneralParameters.GeneralParameters, "--no-pdf-header-footer",
+            "--generate-pdf-document-outline", "--export-tagged-pdf"
+        ];
 
         var arguments = new StringBuilder();
         arguments.AppendJoin(separator: " ", parameters);
