@@ -20,6 +20,46 @@ public static class PathUtils
         => filePath.FileExists() ? new FileInfo(filePath).Length.ToFormattedFileSize() : null;
 
     /// <summary>
+    ///     Computes the hash value for the specified Stream object.
+    /// </summary>
+    /// <param name="filePath"></param>
+    /// <returns>A string representation that is encoded with uppercase hex characters</returns>
+    public static string GetContentsSHA256(this string filePath)
+    {
+        using var sha256 = SHA256.Create();
+
+        return filePath.GetContentsHash(sha256);
+    }
+
+    /// <summary>
+    ///     Computes the hash value for the specified Stream object.
+    /// </summary>
+    /// <param name="filePath"></param>
+    /// <param name="hashAlgorithm">Such as `using var sha256 = SHA256.Create();`</param>
+    /// <returns>A string representation that is encoded with uppercase hex characters</returns>
+    public static string GetContentsHash(this string filePath, HashAlgorithm hashAlgorithm)
+    {
+        ArgumentNullException.ThrowIfNull(hashAlgorithm);
+
+        using var stream = File.OpenRead(filePath);
+        var checksum = hashAlgorithm.ComputeHash(stream);
+
+        return Convert.ToHexString(checksum);
+    }
+
+    /// <summary>
+    ///     Computes the hash value for the specified Stream object.
+    /// </summary>
+    /// <param name="filePath"></param>
+    /// <returns>A string representation that is encoded with uppercase hex characters</returns>
+    public static string GetContentsSHA1(this string filePath)
+    {
+        using var sha1 = SHA1.Create();
+
+        return filePath.GetContentsHash(sha1);
+    }
+
+    /// <summary>
     ///     Determines whether the specified file exists.
     /// </summary>
     /// <param name="filePath"></param>
