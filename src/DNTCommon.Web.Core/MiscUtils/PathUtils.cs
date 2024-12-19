@@ -12,6 +12,14 @@ public static class PathUtils
     private static readonly TimeSpan MatchTimeout = TimeSpan.FromSeconds(value: 3);
 
     /// <summary>
+    ///     Returns the file's size in KB/ MB format
+    /// </summary>
+    /// <param name="filePath"></param>
+    /// <returns></returns>
+    public static string? GetFormattedFileSize(this string? filePath)
+        => filePath.FileExists() ? new FileInfo(filePath).Length.ToFormattedFileSize() : null;
+
+    /// <summary>
     ///     Determines whether the specified file exists.
     /// </summary>
     /// <param name="filePath"></param>
