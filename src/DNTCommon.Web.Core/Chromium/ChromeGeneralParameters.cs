@@ -21,19 +21,20 @@ public static class ChromeGeneralParameters
         "--disable-features=Translate,BackForwardCache,AcceptCHFrame,MediaRouter,OptimizationHints,TranslateUI",
         "--disable-hang-monitor", "--disable-ipc-flooding-protection", "--disable-popup-blocking",
         "--disable-prompt-on-repost", "--disable-renderer-backgrounding", "--disable-sync",
-        "--force-color-profile=srgb", "--metrics-recording-only", "--no-first-run", "--enable-automation",
+        "--force-color-profile=srgb", "--metrics-recording-only", "--no-first-run", 
         "--password-store=basic", "--use-mock-keychain", "--enable-blink-features=IdleDetection",
         "--auto-open-devtools-for-tabs", "--headless", "--hide-scrollbars", "--mute-audio",
         "--proxy-server='direct://'", "--proxy-bypass-list=*", "--no-sandbox", "--no-zygote",
         "--no-default-browser-check", "--disable-site-isolation-trials", "--no-experiments",
         "--ignore-gpu-blocklist", "--ignore-certificate-errors", "--ignore-certificate-errors-spki-list",
         "--disable-gpu", "--num-raster-threads=2", "--no-service-autorun", "--disable-extensions",
-        "--disable-default-apps", "--enable-features=NetworkService", "--disable-setuid-sandbox", "--disable-webgl",
+        "--disable-default-apps", "--disable-setuid-sandbox", "--disable-webgl",
         "--disable-threaded-animation", "--disable-threaded-scrolling", "--disable-in-process-stack-traces",
         "--disable-histogram-customizer", "--disable-gl-extensions", "--disable-composited-antialiasing",
         "--disable-canvas-aa", "--disable-3d-apis", "--disable-accelerated-2d-canvas",
         "--disable-accelerated-jpeg-decoding", "--disable-accelerated-mjpeg-decode",
         "--disable-app-list-dismiss-on-blur", "--disable-accelerated-video-decode",
-        "--run-all-compositor-stages-before-draw", "--virtual-time-budget=30000", "--no-crashpad"
+        "--run-all-compositor-stages-before-draw", "--virtual-time-budget=30000", "--no-crashpad", 
+        "--disable-notifications"
     ];
 }
