@@ -23,7 +23,7 @@ public static class ChromeGeneralParameters
         "--disable-prompt-on-repost", "--disable-renderer-backgrounding", "--disable-sync",
         "--force-color-profile=srgb", "--metrics-recording-only", "--no-first-run", 
         "--password-store=basic", "--use-mock-keychain", "--enable-blink-features=IdleDetection",
-        "--auto-open-devtools-for-tabs", "--headless", "--hide-scrollbars", "--mute-audio",
+        "--headless", "--hide-scrollbars", "--mute-audio",
         "--proxy-server='direct://'", "--proxy-bypass-list=*", "--no-sandbox", "--no-zygote",
         "--no-default-browser-check", "--disable-site-isolation-trials", "--no-experiments",
         "--ignore-gpu-blocklist", "--ignore-certificate-errors", "--ignore-certificate-errors-spki-list",
