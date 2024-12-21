@@ -94,14 +94,17 @@ public static class PathUtils
     ///     Find files by their extensions
     /// </summary>
     /// <param name="dirInfo"></param>
+    /// <param name="searchOption"></param>
     /// <param name="extensions"></param>
     /// <returns></returns>
-    public static IEnumerable<FileInfo> GetFilesByExtensions(this DirectoryInfo dirInfo, params string[] extensions)
+    public static IEnumerable<FileInfo> GetFilesByExtensions(this DirectoryInfo dirInfo,
+        SearchOption searchOption = SearchOption.AllDirectories,
+        params string[] extensions)
     {
         ArgumentNullException.ThrowIfNull(dirInfo);
         var normalizedExtensions = extensions.Select(ext => ext.TrimStart(trimChar: '*'));
 
-        return dirInfo.EnumerateFiles()
+        return dirInfo.EnumerateFiles(searchPattern: "*", searchOption)
             .Where(fileInfo => normalizedExtensions.Contains(fileInfo.Extension, StringComparer.OrdinalIgnoreCase));
     }
 
@@ -127,10 +130,13 @@ public static class PathUtils
     ///     Deletes the given files
     /// </summary>
     /// <param name="path"></param>
+    /// <param name="searchOption"></param>
     /// <param name="extensions"></param>
-    public static void DeleteFiles(this string path, params string[] extensions)
+    public static void DeleteFiles(this string path,
+        SearchOption searchOption = SearchOption.AllDirectories,
+        params string[] extensions)
     {
-        foreach (var file in new DirectoryInfo(path).GetFilesByExtensions(extensions))
+        foreach (var file in new DirectoryInfo(path).GetFilesByExtensions(searchOption, extensions))
         {
             file.Delete();
         }
