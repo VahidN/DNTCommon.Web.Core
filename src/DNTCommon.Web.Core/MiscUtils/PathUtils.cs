@@ -153,4 +153,212 @@ public static class PathUtils
 
         return r.Replace(fileName, replacement: ".").GetPostSlug()!;
     }
+
+    /// <summary>
+    ///     Creates a temporary file path with the given extension and returns its full path.
+    /// </summary>
+    public static string GetTempFilePath(this string? extension)
+    {
+        var path = Path.GetTempPath();
+        var ext = extension.IsEmpty() ? ".tmp" : $".{extension.TrimStart(trimChar: '.')}";
+        var fileName = $"{Guid.NewGuid():N}{ext}";
+
+        return Path.Combine(path, fileName);
+    }
+
+    /// <summary>
+    ///     Creates a temporary file with the given extension and returns its full path.
+    /// </summary>
+    public static string CreateTempFile(this string extension, byte[] contentBytes)
+    {
+        var tempFilePath = GetTempFilePath(extension);
+        File.WriteAllBytes(tempFilePath, contentBytes);
+
+        return tempFilePath;
+    }
+
+    /// <summary>
+    ///     Creates a temporary file with the given extension and returns its full path.
+    /// </summary>
+    public static string CreateTempFile(this string extension, string content)
+    {
+        var tempFilePath = GetTempFilePath(extension);
+        File.WriteAllText(tempFilePath, content);
+
+        return tempFilePath;
+    }
+
+    /// <summary>
+    ///     Checks the System.Security.Permissions.FileIOPermissionAccess.Append permission
+    /// </summary>
+    /// <param name="filePath">The file to open</param>
+    /// <param name="logger"></param>
+    /// <returns></returns>
+    public static bool IsReadableFile(this string filePath, ILogger? logger = null)
+    {
+        try
+        {
+            using var _ = File.Open(filePath, FileMode.Append, FileAccess.Read);
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger?.LogError(ex.Demystify(), message: "IsReadablePath(`{Path}`)", filePath);
+
+            return false;
+        }
+    }
+
+    /// <summary>
+    ///     Checks the System.Security.Permissions.FileIOPermissionAccess.Append permission
+    /// </summary>
+    /// <param name="filePath">The file to open</param>
+    /// <param name="logger"></param>
+    /// <returns></returns>
+    public static bool IsWritableFile(this string filePath, ILogger? logger = null)
+    {
+        try
+        {
+            using var _ = File.Open(filePath, FileMode.Append, FileAccess.Write);
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger?.LogError(ex.Demystify(), message: "IsWritablePath(`{Path}`)", filePath);
+
+            return false;
+        }
+    }
+
+    /// <summary>
+    ///     Returns the extension (including the period ".") of the specified path string.
+    /// </summary>
+    /// <param name="filePath"></param>
+    /// <returns></returns>
+    public static string GetExtension(this string filePath) => Path.GetExtension(filePath);
+
+    /// <summary>
+    ///     Returns the file name and extension of the specified path string.
+    /// </summary>
+    /// <param name="filePath"></param>
+    /// <returns></returns>
+    public static string GetFileName(this string filePath) => Path.GetFileName(filePath);
+
+    /// <summary>
+    ///     Returns the directory information for the specified path.
+    /// </summary>
+    /// <param name="dirPath"></param>
+    /// <returns>
+    ///     Directory information for path, or null if path denotes a root directory or is null. Returns Empty if path
+    ///     does not contain directory information.
+    /// </returns>
+    public static string? GetDirectoryName(this string dirPath) => Path.GetDirectoryName(dirPath);
+
+    /// <summary>
+    ///     Copies an existing dir to a new dir. Creates the destDirPath if it doesn't exist.
+    /// </summary>
+    /// <param name="sourceDirPath"></param>
+    /// <param name="destDirPath"></param>
+    /// <param name="copySubDirectories"></param>
+    /// <param name="forceOverWrite"></param>
+    /// <returns></returns>
+    public static bool CopyDirectory(this string sourceDirPath,
+        string destDirPath,
+        bool copySubDirectories = true,
+        bool forceOverWrite = true)
+    {
+        var sourceDirInfo = new DirectoryInfo(sourceDirPath);
+
+        if (!sourceDirInfo.Exists)
+        {
+            return false;
+        }
+
+        var sourceDirs = sourceDirInfo.GetDirectories();
+
+        if (!Directory.Exists(destDirPath))
+        {
+            Directory.CreateDirectory(destDirPath);
+        }
+
+        var sourceFiles = sourceDirInfo.GetFiles();
+
+        foreach (var sourceFile in sourceFiles)
+        {
+            var newDir = Path.Combine(destDirPath, sourceFile.Name);
+            sourceFile.CopyTo(newDir, forceOverWrite);
+        }
+
+        if (copySubDirectories)
+        {
+            foreach (var sourceDir in sourceDirs)
+            {
+                var newDir = Path.Combine(destDirPath, sourceDir.Name);
+
+                if (!CopyDirectory(sourceDir.FullName, newDir, copySubDirectories, forceOverWrite))
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    ///     Copies an existing file to a new file. Overwriting a file of the same name is allowed.
+    /// </summary>
+    /// <param name="sourceFilePath"></param>
+    /// <param name="destFilePath"></param>
+    /// <param name="forceOverWrite"></param>
+    /// <param name="logger"></param>
+    /// <returns></returns>
+    public static bool TryCopyFileTo(this string sourceFilePath,
+        string destFilePath,
+        bool forceOverWrite,
+        ILogger? logger = null)
+    {
+        try
+        {
+            File.Copy(sourceFilePath, destFilePath, forceOverWrite);
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger?.LogError(ex.Demystify(), message: "TryCopyFileTo(`{Path}`,`{To}`)", sourceFilePath, destFilePath);
+
+            return false;
+        }
+    }
+
+    /// <summary>
+    ///     Test if user has write access to a folder
+    /// </summary>
+    /// <param name="dirPath"></param>
+    /// <param name="logger"></param>
+    /// <returns></returns>
+    public static bool IsWritableDirectory(this string? dirPath, ILogger? logger = null)
+    {
+        try
+        {
+            if (dirPath.IsEmpty())
+            {
+                return false;
+            }
+
+            using var _ = File.Create(Path.Combine(dirPath, Path.GetRandomFileName()), bufferSize: 1,
+                FileOptions.DeleteOnClose);
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger?.LogError(ex.Demystify(), message: "IsWritableDirectory(`{Path}``)", dirPath);
+
+            return false;
+        }
+    }
 }
