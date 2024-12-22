@@ -40,7 +40,7 @@ public class CspReportController(
                 return Ok();
             }
 
-            cacheService.GetOrAdd(body.Md5Hash(), () =>
+            cacheService.GetOrAdd(body.Md5Hash(), nameof(CspReportController), () =>
             {
                 if (ShouldBeIgnored(body))
                 {

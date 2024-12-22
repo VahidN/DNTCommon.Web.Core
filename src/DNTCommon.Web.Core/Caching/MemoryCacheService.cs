@@ -8,8 +8,27 @@ namespace DNTCommon.Web.Core;
 /// <remarks>
 ///     Encapsulates IMemoryCache functionality.
 /// </remarks>
-public class MemoryCacheService(IMemoryCache memoryCache, ILockerService lockerService) : ICacheService
+public class MemoryCacheService(
+    IMemoryCache memoryCache,
+    IMemoryCacheResetTokenProvider signal,
+    ILockerService lockerService) : ICacheService
 {
+    /// <summary>
+    ///     Gets all the defined tags. Each tag allows multiple cache entries to be considered as a group.
+    /// </summary>
+    /// <returns></returns>
+    public IReadOnlyList<string> GetTags() => signal.GetTags();
+
+    /// <summary>
+    ///     Removes  all the cached entries added by this library.
+    /// </summary>
+    public void RemoveAllCachedEntries() => signal.RemoveAllChangeTokens();
+
+    /// <summary>
+    ///     Removes all the tagged cached entries added by this library.
+    /// </summary>
+    public void RemoveAllCachedEntries(string tag) => signal.RemoveChangeToken(tag);
+
     /// <summary>
     ///     Gets the key's value from the cache.
     ///     Return the value associated with this key, or default(TItem) if the key is not present.
@@ -26,20 +45,29 @@ public class MemoryCacheService(IMemoryCache memoryCache, ILockerService lockerS
     ///     Adds a key-value to the cache.
     ///     It will use the factory method to get the value and then inserts it.
     /// </summary>
-    public void Add<T>(string cacheKey, Func<T> factory, DateTimeOffset absoluteExpiration, int size = 1)
-        => Add(cacheKey, factory, new MemoryCacheEntryOptions
+    public void Add<T>(string cacheKey, string tag, Func<T> factory, DateTimeOffset absoluteExpiration, int size = 1)
+    {
+        var options = new MemoryCacheEntryOptions
         {
             AbsoluteExpiration = absoluteExpiration,
             Size = size // the size limit is the count of entries
-        });
+        };
+
+        options.ExpirationTokens.Add(signal.GetChangeToken(tag));
+
+        Add(cacheKey, tag, factory, options);
+    }
 
     /// <summary>
     ///     Adds a key-value to the cache.
     ///     It will use the factory method to get the value and then inserts it.
     /// </summary>
-    public void Add<T>(string cacheKey, Func<T> factory, MemoryCacheEntryOptions memoryCacheEntryOptions)
+    public void Add<T>(string cacheKey, string tag, Func<T> factory, MemoryCacheEntryOptions memoryCacheEntryOptions)
     {
         ArgumentNullException.ThrowIfNull(factory);
+        ArgumentNullException.ThrowIfNull(memoryCacheEntryOptions);
+
+        memoryCacheEntryOptions.ExpirationTokens.Add(signal.GetChangeToken(tag));
 
         memoryCache.Set(cacheKey, factory(), memoryCacheEntryOptions);
     }
@@ -48,71 +76,120 @@ public class MemoryCacheService(IMemoryCache memoryCache, ILockerService lockerS
     ///     Adds a key-value to the cache.
     ///     It will use the factory method to get the value and then inserts it.
     /// </summary>
-    public void Add<T>(string cacheKey, Func<T> factory, TimeSpan absoluteExpirationRelativeToNow, int size = 1)
-        => Add(cacheKey, factory, new MemoryCacheEntryOptions
+    public void Add<T>(string cacheKey,
+        string tag,
+        Func<T> factory,
+        TimeSpan absoluteExpirationRelativeToNow,
+        int size = 1)
+    {
+        var options = new MemoryCacheEntryOptions
         {
             AbsoluteExpirationRelativeToNow = absoluteExpirationRelativeToNow,
             Size = size // the size limit is the count of entries
-        });
+        };
+
+        options.ExpirationTokens.Add(signal.GetChangeToken(tag));
+
+        Add(cacheKey, tag, factory, options);
+    }
 
     /// <summary>
     ///     Adds a key-value to the cache.
     /// </summary>
-    public void Add<T>(string cacheKey, T value, DateTimeOffset absoluteExpiration, int size = 1)
-        => memoryCache.Set(cacheKey, value, new MemoryCacheEntryOptions
+    public void Add<T>(string cacheKey, string tag, T value, DateTimeOffset absoluteExpiration, int size = 1)
+    {
+        var options = new MemoryCacheEntryOptions
         {
             AbsoluteExpiration = absoluteExpiration,
             Size = size // the size limit is the count of entries
-        });
+        };
+
+        options.ExpirationTokens.Add(signal.GetChangeToken(tag));
+
+        memoryCache.Set(cacheKey, value, options);
+    }
 
     /// <summary>
     ///     Adds a key-value to the cache.
     /// </summary>
-    public void Add<T>(string cacheKey, T value, TimeSpan absoluteExpirationRelativeToNow, int size = 1)
-        => memoryCache.Set(cacheKey, value, new MemoryCacheEntryOptions
+    public void Add<T>(string cacheKey, string tag, T value, TimeSpan absoluteExpirationRelativeToNow, int size = 1)
+    {
+        var options = new MemoryCacheEntryOptions
         {
             AbsoluteExpirationRelativeToNow = absoluteExpirationRelativeToNow,
             Size = size // the size limit is the count of entries
-        });
+        };
+
+        options.ExpirationTokens.Add(signal.GetChangeToken(tag));
+
+        memoryCache.Set(cacheKey, value, options);
+    }
 
     /// <summary>
     ///     Adds a key-value to the cache.
     /// </summary>
-    public void Add<T>(string cacheKey, T value, int size = 1)
-        => memoryCache.Set(cacheKey, value, new MemoryCacheEntryOptions
+    public void Add<T>(string cacheKey, string tag, T value, int size = 1)
+    {
+        var options = new MemoryCacheEntryOptions
         {
             Size = size // the size limit is the count of entries
-        });
+        };
+
+        options.ExpirationTokens.Add(signal.GetChangeToken(tag));
+
+        memoryCache.Set(cacheKey, value, options);
+    }
 
     /// <summary>
     ///     Adds a key-value to the cache.
     /// </summary>
-    public void Add<T>(string cacheKey, T value, MemoryCacheEntryOptions memoryCacheEntryOptions)
-        => memoryCache.Set(cacheKey, value, memoryCacheEntryOptions);
+    public void Add<T>(string cacheKey, string tag, T value, MemoryCacheEntryOptions memoryCacheEntryOptions)
+    {
+        ArgumentNullException.ThrowIfNull(memoryCacheEntryOptions);
+
+        memoryCacheEntryOptions.ExpirationTokens.Add(signal.GetChangeToken(tag));
+        memoryCache.Set(cacheKey, value, memoryCacheEntryOptions);
+    }
 
     /// <summary>
     ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache.
     ///     Otherwise it will use the factory method to get the value and then inserts it.
     ///     The returned value is a found item in cache or the result of calling factory().
     /// </summary>
-    public T? GetOrAdd<T>(string cacheKey, Func<T> factory, DateTimeOffset absoluteExpiration, int size = 1)
-        => GetOrAdd(cacheKey, factory, new MemoryCacheEntryOptions
+    public T? GetOrAdd<T>(string cacheKey, string tag, Func<T> factory, DateTimeOffset absoluteExpiration, int size = 1)
+    {
+        var options = new MemoryCacheEntryOptions
         {
             AbsoluteExpiration = absoluteExpiration,
             Size = size // the size limit is the count of entries
-        });
+        };
+
+        options.ExpirationTokens.Add(signal.GetChangeToken(tag));
+
+        return GetOrAdd(cacheKey, tag, factory, options);
+    }
 
     /// <summary>
     ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache.
     ///     Otherwise it will use the factory method to get the value and then inserts it.
     ///     The returned value is a found item in cache or the result of calling factory().
     /// </summary>
-    public T? GetOrAdd<T>(string cacheKey, Func<T> factory, TimeSpan absoluteExpirationRelativeToNow, int size = 1)
-        => GetOrAdd(cacheKey, factory, new MemoryCacheEntryOptions
+    public T? GetOrAdd<T>(string cacheKey,
+        string tag,
+        Func<T> factory,
+        TimeSpan absoluteExpirationRelativeToNow,
+        int size = 1)
+    {
+        var options = new MemoryCacheEntryOptions
         {
             AbsoluteExpirationRelativeToNow = absoluteExpirationRelativeToNow,
             Size = size // the size limit is the count of entries
-        });
+        };
+
+        options.ExpirationTokens.Add(signal.GetChangeToken(tag));
+
+        return GetOrAdd(cacheKey, tag, factory, options);
+    }
 
     /// <summary>
     ///     A thread-safe way (`synchronously` blocks) of working with memory cache. First tries to get the key's value from
@@ -120,9 +197,10 @@ public class MemoryCacheService(IMemoryCache memoryCache, ILockerService lockerS
     ///     Otherwise it will use the factory method to get the value and then inserts it.
     ///     The returned value is a found item in cache or the result of calling factory().
     /// </summary>
-    public T? GetOrAdd<T>(string cacheKey, Func<T> factory, MemoryCacheEntryOptions options)
+    public T? GetOrAdd<T>(string cacheKey, string tag, Func<T> factory, MemoryCacheEntryOptions options)
     {
         ArgumentNullException.ThrowIfNull(factory);
+        ArgumentNullException.ThrowIfNull(options);
 
         // locks get and set internally
 
@@ -134,6 +212,8 @@ public class MemoryCacheService(IMemoryCache memoryCache, ILockerService lockerS
         }
 
         result = factory();
+
+        options.ExpirationTokens.Add(signal.GetChangeToken(tag));
         memoryCache.Set(cacheKey, result, options);
 
         return result;
@@ -150,9 +230,13 @@ public class MemoryCacheService(IMemoryCache memoryCache, ILockerService lockerS
     ///     Otherwise it will use the factory method to get the value and then inserts it.
     ///     The returned values is a found item in cache or the result of calling await factory().
     /// </summary>
-    public async Task<T?> GetOrAddAsync<T>(string cacheKey, Func<Task<T>> factory, MemoryCacheEntryOptions options)
+    public async Task<T?> GetOrAddAsync<T>(string cacheKey,
+        string tag,
+        Func<Task<T>> factory,
+        MemoryCacheEntryOptions options)
     {
         ArgumentNullException.ThrowIfNull(factory);
+        ArgumentNullException.ThrowIfNull(options);
 
         // locks get and set internally
 
@@ -164,6 +248,8 @@ public class MemoryCacheService(IMemoryCache memoryCache, ILockerService lockerS
         }
 
         result = await factory();
+
+        options.ExpirationTokens.Add(signal.GetChangeToken(tag));
         memoryCache.Set(cacheKey, result, options);
 
         return result;
@@ -175,14 +261,21 @@ public class MemoryCacheService(IMemoryCache memoryCache, ILockerService lockerS
     ///     The returned values is a found item in cache or the result of calling await factory().
     /// </summary>
     public Task<T?> GetOrAddAsync<T>(string cacheKey,
+        string tag,
         Func<Task<T>> factory,
         DateTimeOffset absoluteExpiration,
         int size = 1)
-        => GetOrAddAsync(cacheKey, factory, new MemoryCacheEntryOptions
+    {
+        var options = new MemoryCacheEntryOptions
         {
             AbsoluteExpiration = absoluteExpiration,
             Size = size // the size limit is the count of entries
-        });
+        };
+
+        options.ExpirationTokens.Add(signal.GetChangeToken(tag));
+
+        return GetOrAddAsync(cacheKey, tag, factory, options);
+    }
 
     /// <summary>
     ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache.
@@ -190,12 +283,19 @@ public class MemoryCacheService(IMemoryCache memoryCache, ILockerService lockerS
     ///     The returned values is a found item in cache or the result of calling await factory().
     /// </summary>
     public Task<T?> GetOrAddAsync<T>(string cacheKey,
+        string tag,
         Func<Task<T>> factory,
         TimeSpan absoluteExpirationRelativeToNow,
         int size = 1)
-        => GetOrAddAsync(cacheKey, factory, new MemoryCacheEntryOptions
+    {
+        var options = new MemoryCacheEntryOptions
         {
             AbsoluteExpirationRelativeToNow = absoluteExpirationRelativeToNow,
             Size = size // the size limit is the count of entries
-        });
+        };
+
+        options.ExpirationTokens.Add(signal.GetChangeToken(tag));
+
+        return GetOrAddAsync(cacheKey, tag, factory, options);
+    }
 }

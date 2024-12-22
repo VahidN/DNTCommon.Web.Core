@@ -331,7 +331,7 @@ public class AntiDosFirewall : IAntiDosFirewall
                 ExpiresAt = expiresAt
             };
 
-            _cacheService.Add(key, clientThrottleInfo, expiresAt);
+            _cacheService.Add(key, nameof(AntiDosFirewall), clientThrottleInfo, expiresAt);
 
             return (false, clientThrottleInfo);
         }
@@ -339,13 +339,13 @@ public class AntiDosFirewall : IAntiDosFirewall
         if (clientThrottleInfo.RequestsCount > _antiDosConfig.AllowedRequests)
         {
             clientThrottleInfo.BanReason = "IsDosAttack";
-            _cacheService.Add(key, clientThrottleInfo, expiresAt);
+            _cacheService.Add(key, nameof(AntiDosFirewall), clientThrottleInfo, expiresAt);
 
             return (true, clientThrottleInfo);
         }
 
         clientThrottleInfo.RequestsCount++;
-        _cacheService.Add(key, clientThrottleInfo, expiresAt);
+        _cacheService.Add(key, nameof(AntiDosFirewall), clientThrottleInfo, expiresAt);
 
         return (false, clientThrottleInfo);
     }
@@ -390,15 +390,17 @@ public class AntiDosFirewall : IAntiDosFirewall
             return;
         }
 
-        _cacheService.GetOrAdd($"__Anti_Dos__{$"{requestInfo.IP}_{requestInfo.UserAgent}".GetSha1Hash()}", () =>
-        {
-            _logger.LogWarning(message: "Banned IP: {RequestInfoIP}, UserAgent: {RequestInfoUserAgent}. {ThrottleInfo}",
-                requestInfo.IP, requestInfo.UserAgent, throttleInfo);
+        _cacheService.GetOrAdd($"__Anti_Dos__{$"{requestInfo.IP}_{requestInfo.UserAgent}".GetSha1Hash()}",
+            nameof(AntiDosFirewall), () =>
+            {
+                _logger.LogWarning(
+                    message: "Banned IP: {RequestInfoIP}, UserAgent: {RequestInfoUserAgent}. {ThrottleInfo}",
+                    requestInfo.IP, requestInfo.UserAgent, throttleInfo);
 
-            throttleInfo.IsLogged = true;
-            _cacheService.Add(GetCacheKey(requestInfo), throttleInfo, GetCacheExpiresAt());
+                throttleInfo.IsLogged = true;
+                _cacheService.Add(GetCacheKey(requestInfo), nameof(AntiDosFirewall), throttleInfo, GetCacheExpiresAt());
 
-            return $"{requestInfo.IP}_{requestInfo.UserAgent}";
-        }, DateTimeOffset.UtcNow.AddDays(days: 1));
+                return $"{requestInfo.IP}_{requestInfo.UserAgent}";
+            }, DateTimeOffset.UtcNow.AddDays(days: 1));
     }
 }

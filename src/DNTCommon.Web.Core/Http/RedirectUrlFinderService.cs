@@ -128,7 +128,7 @@ public class RedirectUrlFinderService : IRedirectUrlFinderService
     {
         if (redirectUrl != null)
         {
-            _cacheService.Add($"{CachePrefix}{originalUrl}", redirectUrl,
+            _cacheService.Add($"{CachePrefix}{originalUrl}", nameof(RedirectUrlFinderService), redirectUrl,
                 DateTimeOffset.UtcNow.AddMinutes(minutes: 15));
         }
 
