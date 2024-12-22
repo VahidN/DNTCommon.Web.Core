@@ -201,6 +201,13 @@ public class HtmlHelperService(
     public string? FullHtmlEncode(string? text) => text.FullHtmlEncode();
 
     /// <summary>
+    ///     imageBuilder delegate gives you an image's src, and then you can return its equivalent data bytes to be inserted as
+    ///     an embedded data:image
+    /// </summary>
+    public string ReplaceImageUrlsWithEmbeddedDataImages(string html, Func<string, byte[]?> imageBuilder)
+        => html.ReplaceImageUrlsWithEmbeddedDataImages(imageBuilder, _logger);
+
+    /// <summary>
     ///     Returns HtmlAttribute's of the selected nodes.
     /// </summary>
     public IEnumerable<HtmlAttributeCollection> SelectNodes(string html, string xpath)

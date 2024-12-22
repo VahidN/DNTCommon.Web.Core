@@ -49,4 +49,10 @@ public interface IHtmlHelperService
     ///     An enhanced version of HttpUtility.HtmlEncode method
     /// </summary>
     string? FullHtmlEncode(string? text);
+
+    /// <summary>
+    ///     imageBuilder delegate gives you an image's src, and then you can return its equivalent data bytes to be inserted as
+    ///     an embedded data:image
+    /// </summary>
+    string ReplaceImageUrlsWithEmbeddedDataImages(string html, Func<string, byte[]?> imageBuilder);
 }

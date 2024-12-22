@@ -28,6 +28,58 @@ public static class HtmlHelperServiceExtensions
     }
 
     /// <summary>
+    ///     imageBuilder delegate gives you an image's src, and then you can return its equivalent data bytes to be inserted as
+    ///     an embedded data:image
+    /// </summary>
+    public static string ReplaceImageUrlsWithEmbeddedDataImages(this string html,
+        Func<string, byte[]?> imageBuilder,
+        ILogger? logger = null)
+    {
+        ArgumentNullException.ThrowIfNull(html);
+        ArgumentNullException.ThrowIfNull(imageBuilder);
+
+        var htmlDocument = html.CreateHtmlDocument(logger);
+        var imageNodes = htmlDocument.DocumentNode.SelectNodes(xpath: "//img[@src]");
+
+        if (imageNodes == null)
+        {
+            return html;
+        }
+
+        foreach (var imageNode in imageNodes)
+        {
+            var imageSrcAttribute = imageNode.GetSrcAttribute();
+            var imageSrcValue = imageSrcAttribute?.Value?.Trim();
+
+            if (imageSrcAttribute is null || imageSrcValue is null ||
+                imageSrcValue.StartsWith(value: "file:/", StringComparison.OrdinalIgnoreCase) ||
+                imageSrcValue.IsBase64EncodedImage())
+            {
+                continue;
+            }
+
+            var imageBytes = imageBuilder(imageSrcValue);
+
+            if (imageBytes is null || imageBytes.Length == 0)
+            {
+                continue;
+            }
+
+            var ext = imageSrcValue.GetUriExtension();
+
+            if (string.IsNullOrWhiteSpace(ext))
+            {
+                ext = ".jpg";
+            }
+
+            imageSrcAttribute.Value =
+                $"data:image/{ext.TrimStart(trimChar: '.')};base64,{Convert.ToBase64String(imageBytes, Base64FormattingOptions.None)}";
+        }
+
+        return htmlDocument.DocumentNode.OuterHtml;
+    }
+
+    /// <summary>
     ///     Returns the src list of img tags.
     /// </summary>
     public static IEnumerable<string> ExtractImagesLinks(this string html, ILogger? logger = null)
