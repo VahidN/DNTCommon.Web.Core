@@ -208,6 +208,12 @@ public class HtmlHelperService(
         => html.ReplaceImageUrlsWithEmbeddedDataImages(imageBuilder, _logger);
 
     /// <summary>
+    ///     imageUrlBuilder delegate gives you an image's src, and then you can return its new url.
+    /// </summary>
+    public string ReplaceImageUrlsWithNewImageUrls(string html, Func<string, string?> imageUrlBuilder)
+        => html.ReplaceImageUrlsWithNewImageUrls(imageUrlBuilder, _logger);
+
+    /// <summary>
     ///     Returns HtmlAttribute's of the selected nodes.
     /// </summary>
     public IEnumerable<HtmlAttributeCollection> SelectNodes(string html, string xpath)

@@ -28,6 +28,49 @@ public static class HtmlHelperServiceExtensions
     }
 
     /// <summary>
+    ///     imageUrlBuilder delegate gives you an image's src, and then you can return its new url.
+    /// </summary>
+    public static string ReplaceImageUrlsWithNewImageUrls(this string html,
+        Func<string, string?> imageUrlBuilder,
+        ILogger? logger = null)
+    {
+        ArgumentNullException.ThrowIfNull(html);
+        ArgumentNullException.ThrowIfNull(imageUrlBuilder);
+
+        var htmlDocument = html.CreateHtmlDocument(logger);
+        var imageNodes = htmlDocument.DocumentNode.SelectNodes(xpath: "//img[@src]");
+
+        if (imageNodes == null)
+        {
+            return html;
+        }
+
+        foreach (var imageNode in imageNodes)
+        {
+            var imageSrcAttribute = imageNode.GetSrcAttribute();
+            var imageSrcValue = imageSrcAttribute?.Value?.Trim();
+
+            if (imageSrcAttribute is null || imageSrcValue is null ||
+                imageSrcValue.StartsWith(value: "file:/", StringComparison.OrdinalIgnoreCase) ||
+                imageSrcValue.IsBase64EncodedImage())
+            {
+                continue;
+            }
+
+            var newUrl = imageUrlBuilder(imageSrcValue);
+
+            if (newUrl is null)
+            {
+                continue;
+            }
+
+            imageSrcAttribute.Value = newUrl;
+        }
+
+        return htmlDocument.DocumentNode.OuterHtml;
+    }
+
+    /// <summary>
     ///     imageBuilder delegate gives you an image's src, and then you can return its equivalent data bytes to be inserted as
     ///     an embedded data:image
     /// </summary>

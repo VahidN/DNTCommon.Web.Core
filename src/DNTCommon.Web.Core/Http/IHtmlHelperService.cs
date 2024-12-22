@@ -55,4 +55,9 @@ public interface IHtmlHelperService
     ///     an embedded data:image
     /// </summary>
     string ReplaceImageUrlsWithEmbeddedDataImages(string html, Func<string, byte[]?> imageBuilder);
+
+    /// <summary>
+    ///     imageUrlBuilder delegate gives you an image's src, and then you can return its new url.
+    /// </summary>
+    string ReplaceImageUrlsWithNewImageUrls(string html, Func<string, string?> imageUrlBuilder);
 }
