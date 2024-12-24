@@ -9,6 +9,11 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public static class PathUtils
 {
+    /// <summary>
+    ///     '/'
+    /// </summary>
+    public const char MoveDirectorySeparator = '/';
+
     private static readonly TimeSpan MatchTimeout = TimeSpan.FromSeconds(value: 3);
 
     /// <summary>
@@ -98,7 +103,7 @@ public static class PathUtils
     /// <param name="extensions"></param>
     /// <returns></returns>
     public static IEnumerable<FileInfo> GetFilesByExtensions(this DirectoryInfo dirInfo,
-        SearchOption searchOption = SearchOption.AllDirectories,
+        SearchOption searchOption,
         params string[] extensions)
     {
         ArgumentNullException.ThrowIfNull(dirInfo);
@@ -132,14 +137,23 @@ public static class PathUtils
     /// <param name="path"></param>
     /// <param name="searchOption"></param>
     /// <param name="extensions"></param>
-    public static void DeleteFiles(this string path,
-        SearchOption searchOption = SearchOption.AllDirectories,
-        params string[] extensions)
+    public static void DeleteFiles(this string path, SearchOption searchOption, params string[] extensions)
     {
         foreach (var file in new DirectoryInfo(path).GetFilesByExtensions(searchOption, extensions))
         {
             file.Delete();
         }
+    }
+
+    /// <summary>
+    ///     Specifies that the operating system should open an existing file. When the file is opened, it should be truncated
+    ///     so that its size is zero bytes.
+    /// </summary>
+    /// <param name="filePath"></param>
+    public static void CleanFileContent(string filePath)
+    {
+        using var fs = new FileStream(filePath, FileMode.Truncate, FileAccess.ReadWrite);
+        fs.Close();
     }
 
     /// <summary>
@@ -314,6 +328,34 @@ public static class PathUtils
     }
 
     /// <summary>
+    ///     Return file(s) size in byte
+    /// </summary>
+    /// <param name="pathList"></param>
+    /// <returns></returns>
+    public static long GetFilesSize(params ICollection<string> pathList)
+        => pathList.Where(File.Exists).Sum(path => new FileInfo(path).Length);
+
+    /// <summary>
+    ///     Return directory files size in byte
+    /// </summary>
+    /// <param name="path"></param>
+    /// <param name="searchPattern"></param>
+    /// <param name="includeSubDirectories"></param>
+    /// <returns></returns>
+    public static long GetDirectorySize(this string path, string searchPattern, bool includeSubDirectories)
+    {
+        if (!Directory.Exists(path))
+        {
+            return 0;
+        }
+
+        var files = Directory.GetFiles(path, searchPattern,
+            includeSubDirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+
+        return GetFilesSize(files);
+    }
+
+    /// <summary>
     ///     Copies an existing file to a new file. Overwriting a file of the same name is allowed.
     /// </summary>
     /// <param name="sourceFilePath"></param>
@@ -367,4 +409,34 @@ public static class PathUtils
             return false;
         }
     }
+
+    /// <summary>
+    ///     Splits the path based on the current Path.DirectorySeparatorChar
+    /// </summary>
+    /// <param name="path"></param>
+    /// <returns></returns>
+    public static IReadOnlyList<string>? SplitPath(this string? path)
+    {
+        path = NormalizePath(path);
+
+        return path?.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries).ToList();
+    }
+
+    /// <summary>
+    ///     Normalizes Path.DirectorySeparatorChar in the given path
+    /// </summary>
+    /// <param name="path"></param>
+    /// <returns></returns>
+    public static string? NormalizePath(this string? path)
+        => string.IsNullOrEmpty(path)
+            ? path
+            : Path.DirectorySeparatorChar switch
+            {
+                '\\' => path.Replace(oldValue: "/", newValue: "\\", StringComparison.OrdinalIgnoreCase)
+                    .TrimEnd(trimChar: '\\'),
+                '/' => path.Replace(oldValue: "\\", newValue: "/", StringComparison.OrdinalIgnoreCase)
+                    .TrimEnd(trimChar: '/'),
+                _ => path.Replace(oldValue: "\\", newValue: "/", StringComparison.OrdinalIgnoreCase)
+                    .TrimEnd(MoveDirectorySeparator)
+            };
 }
