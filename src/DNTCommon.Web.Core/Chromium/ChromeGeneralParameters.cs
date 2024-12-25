@@ -33,6 +33,6 @@ public static class ChromeGeneralParameters
         "--disable-accelerated-2d-canvas", "--disable-accelerated-jpeg-decoding",
         "--disable-accelerated-mjpeg-decode", "--disable-app-list-dismiss-on-blur",
         "--disable-accelerated-video-decode", "--run-all-compositor-stages-before-draw",
-        "--virtual-time-budget=30000", "--no-crashpad", "--disable-notifications", "--single-process"
+        "--virtual-time-budget=130000", "--no-crashpad", "--disable-notifications"
     ];
 }
