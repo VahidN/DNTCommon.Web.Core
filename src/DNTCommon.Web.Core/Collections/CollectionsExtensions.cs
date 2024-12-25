@@ -159,4 +159,65 @@ public static class CollectionsExtensions
 
         return count;
     }
+
+#if !NET_6
+    /// <summary>
+    ///     Parses a string into a value.
+    /// </summary>
+    /// <param name="text"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static T ParseInvariant<T>(this string text)
+        where T : IParsable<T>
+        => T.Parse(text, CultureInfo.InvariantCulture);
+
+    /// <summary>
+    ///     Tries to parse a string into a value.
+    /// </summary>
+    /// <param name="text"></param>
+    /// <param name="result"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static bool TryParseInvariant<T>(this string text, out T? result)
+        where T : IParsable<T>
+        => T.TryParse(text, CultureInfo.InvariantCulture, out result);
+
+    /// <summary>
+    ///     Tries to parse and convert a collection of strings into a collection T values.
+    /// </summary>
+    /// <param name="items"></param>
+    /// <param name="ignoreParsingFailures">If it's set to true, adding defaultValue on parsing failures will be ignored. </param>
+    /// <param name="defaultValue"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static IList<T?> TryConvertToListOfT<T>(this ICollection<string>? items,
+        bool ignoreParsingFailures = false,
+        T? defaultValue = default)
+        where T : IParsable<T>
+    {
+        var results = new List<T?>();
+
+        if (items is null)
+        {
+            return results;
+        }
+
+        foreach (var item in items)
+        {
+            if (item.TryParseInvariant<T>(out var result))
+            {
+                results.Add(result);
+            }
+            else
+            {
+                if (!ignoreParsingFailures)
+                {
+                    results.Add(defaultValue);
+                }
+            }
+        }
+
+        return results;
+    }
+#endif
 }
