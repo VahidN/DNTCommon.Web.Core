@@ -60,7 +60,7 @@ public class ExecuteApplicationProcess : IExecuteApplicationProcess
 
         var (exitCode, isExited) = GetProcessExitInfo(process);
 
-        if (exitCode == 0 && isExited)
+        if (isExited)
         {
             return errorMessage;
         }
@@ -68,7 +68,7 @@ public class ExecuteApplicationProcess : IExecuteApplicationProcess
         await Task.Delay(startInfo.WaitForExit);
         KillThisProcess(process);
 
-        return Invariant($"HasExited: {isExited}, ExitCode: {exitCode}, {errorMessage}");
+        return Invariant($"{errorMessage}{Environment.NewLine}HasExited: {isExited}, ExitCode: {exitCode}");
 
         void OnProcessOnOutputDataReceived(object o, DataReceivedEventArgs e) => output.AppendLine(e.Data);
     }
