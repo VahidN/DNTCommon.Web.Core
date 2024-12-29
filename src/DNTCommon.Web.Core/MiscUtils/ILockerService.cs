@@ -12,20 +12,8 @@ public interface ILockerService : IDisposable
         where T : notnull;
 
     /// <summary>
-    ///     Tries to enter the sync lock
-    /// </summary>
-    IDisposable? Lock<T>(CancellationToken cancellationToken = default)
-        where T : notnull;
-
-    /// <summary>
     ///     Tries to enter the async lock
     /// </summary>
     ValueTask<IDisposable?> LockAsync<T>(TimeSpan timeout, CancellationToken cancellationToken = default)
-        where T : notnull;
-
-    /// <summary>
-    ///     Tries to enter the async lock
-    /// </summary>
-    ValueTask<IDisposable?> LockAsync<T>(CancellationToken cancellationToken = default)
         where T : notnull;
 }

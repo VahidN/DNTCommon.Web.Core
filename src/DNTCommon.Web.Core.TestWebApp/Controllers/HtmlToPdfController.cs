@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
@@ -30,7 +31,7 @@ public class HtmlToPdfController(IHtmlToPdfGenerator htmlToPdfGenerator, IWebHos
                 Creator = "dntips.ir",
                 Keywords = "test1, test2"
             }
-        });
+        }, TimeSpan.FromMinutes(minutes: 1));
 
         new FileExtensionContentTypeProvider().TryGetContentType(outputPdfFile, out var contentType);
 

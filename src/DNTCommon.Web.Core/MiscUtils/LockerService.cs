@@ -9,7 +9,6 @@ namespace DNTCommon.Web.Core;
 public class LockerService : ILockerService
 {
     private readonly AsyncKeyedLocker<Type> _lock = new(new AsyncKeyedLockOptions());
-    private readonly TimeSpan _lockTimeout = TimeSpan.FromSeconds(value: 5);
     private bool _isDisposed;
 
     /// <summary>
@@ -19,14 +18,6 @@ public class LockerService : ILockerService
     public ValueTask<IDisposable?> LockAsync<T>(TimeSpan timeout, CancellationToken cancellationToken = default)
         where T : notnull
         => _lock.LockOrNullAsync(typeof(T), timeout, cancellationToken);
-
-    /// <summary>
-    ///     Tries to enter the async lock
-    /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ValueTask<IDisposable?> LockAsync<T>(CancellationToken cancellationToken = default)
-        where T : notnull
-        => _lock.LockOrNullAsync(typeof(T), _lockTimeout, cancellationToken);
 
     /// <summary>
     ///     Dispose all the locks
@@ -46,15 +37,7 @@ public class LockerService : ILockerService
         => _lock.LockOrNull(typeof(T), timeout, cancellationToken);
 
     /// <summary>
-    ///     Tries to enter the sync lock
-    /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public IDisposable? Lock<T>(CancellationToken cancellationToken = default)
-        where T : notnull
-        => _lock.LockOrNull(typeof(T), _lockTimeout, cancellationToken);
-
-    /// <summary>
-    ///     Dispose all of the locks
+    ///     Dispose all the locks
     /// </summary>
     protected virtual void Dispose(bool disposing)
     {

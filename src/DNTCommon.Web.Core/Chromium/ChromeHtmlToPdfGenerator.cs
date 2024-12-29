@@ -17,13 +17,13 @@ public class ChromeHtmlToPdfGenerator(
     ///     High level method that converts HTML to PDF.
     /// </summary>
     /// <returns></returns>
-    public async Task<string> GeneratePdfFromHtmlAsync(HtmlToPdfGeneratorOptions options)
+    public async Task<string> GeneratePdfFromHtmlAsync(HtmlToPdfGeneratorOptions options, TimeSpan timeout)
     {
         ArgumentNullException.ThrowIfNull(options);
 
-        using var locker = await lockerService.LockAsync<ExecuteApplicationProcess>();
+        using var locker = await lockerService.LockAsync<ExecuteApplicationProcess>(timeout);
 
-        var arguments = CreateArguments(options);
+        var arguments = CreateArguments(options, timeout);
 
         var appPath = GetChromePath(options);
 
@@ -48,12 +48,13 @@ public class ChromeHtmlToPdfGenerator(
         return log;
     }
 
-    private static string CreateArguments(HtmlToPdfGeneratorOptions options)
+    private static string CreateArguments(HtmlToPdfGeneratorOptions options, TimeSpan timeout)
     {
         string[] parameters =
         [
             ..ChromeGeneralParameters.GeneralParameters, "--no-pdf-header-footer",
-            "--generate-pdf-document-outline", "--export-tagged-pdf"
+            "--generate-pdf-document-outline", "--export-tagged-pdf",
+            string.Create(CultureInfo.InvariantCulture, $"--virtual-time-budget={GetVirtualTimeBudget(timeout)}")
         ];
 
         var arguments = new StringBuilder();
@@ -74,6 +75,9 @@ public class ChromeHtmlToPdfGenerator(
 
         return arguments.ToString();
     }
+
+    private static int GetVirtualTimeBudget(TimeSpan timeout)
+        => timeout.TotalMilliseconds < int.MaxValue ? (int)timeout.TotalMilliseconds : int.MaxValue - 1;
 
     private static string? GetChromePath(HtmlToPdfGeneratorOptions options)
         => !string.IsNullOrWhiteSpace(options.ChromeExecutablePath)

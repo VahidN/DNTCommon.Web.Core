@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
@@ -16,7 +17,7 @@ public class HtmlToPngController(IHtmlToPngGenerator htmlToPngGenerator, IWebHos
         {
             SourceHtmlFileOrUri = "https://localhost:5001/TextToImage",
             OutputPngFile = outputPngFile
-        });
+        }, TimeSpan.FromMinutes(minutes: 1));
 
         var isBlankImage = outputPngFile.IsBlankImage();
 

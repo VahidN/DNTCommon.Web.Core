@@ -17,13 +17,13 @@ public class ChromeHtmlToPngGenerator(
     ///     High level method that converts HTML to PNG.
     /// </summary>
     /// <returns></returns>
-    public async Task<string> GeneratePngFromHtmlAsync(HtmlToPngGeneratorOptions options)
+    public async Task<string> GeneratePngFromHtmlAsync(HtmlToPngGeneratorOptions options, TimeSpan timeout)
     {
         ArgumentNullException.ThrowIfNull(options);
 
-        using var locker = await lockerService.LockAsync<ExecuteApplicationProcess>();
+        using var locker = await lockerService.LockAsync<ExecuteApplicationProcess>(timeout);
 
-        var arguments = CreateArguments(options);
+        var arguments = CreateArguments(options, timeout);
 
         var appPath = GetChromePath(options);
 
@@ -53,11 +53,12 @@ public class ChromeHtmlToPngGenerator(
         return log;
     }
 
-    private static string CreateArguments(HtmlToPngGeneratorOptions options)
+    private static string CreateArguments(HtmlToPngGeneratorOptions options, TimeSpan timeout)
     {
         string[] parameters =
         [
             ..ChromeGeneralParameters.GeneralParameters,
+            string.Create(CultureInfo.InvariantCulture, $"--virtual-time-budget={GetVirtualTimeBudget(timeout)}"),
             Invariant($"--window-size=\"{options.Width},{options.Height}\"")
         ];
 
@@ -114,4 +115,7 @@ public class ChromeHtmlToPngGenerator(
         => !string.IsNullOrWhiteSpace(options.ChromeExecutablePath)
             ? options.ChromeExecutablePath
             : ChromeFinder.Find();
+
+    private static int GetVirtualTimeBudget(TimeSpan timeout)
+        => timeout.TotalMilliseconds < int.MaxValue ? (int)timeout.TotalMilliseconds : int.MaxValue - 1;
 }

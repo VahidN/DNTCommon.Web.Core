@@ -13,6 +13,8 @@ public class MemoryCacheService(
     IMemoryCacheResetTokenProvider signal,
     ILockerService lockerService) : ICacheService
 {
+    private readonly TimeSpan _lockTimeout = TimeSpan.FromSeconds(value: 5);
+
     /// <summary>
     ///     Gets all the defined tags. Each tag allows multiple cache entries to be considered as a group.
     /// </summary>
@@ -204,7 +206,7 @@ public class MemoryCacheService(
 
         // locks get and set internally
 
-        using var locker = lockerService.Lock<MemoryCacheService>();
+        using var locker = lockerService.Lock<MemoryCacheService>(_lockTimeout);
 
         if (memoryCache.TryGetValue<T>(cacheKey, out var result))
         {
@@ -240,7 +242,7 @@ public class MemoryCacheService(
 
         // locks get and set internally
 
-        using var locker = await lockerService.LockAsync<MemoryCacheService>();
+        using var locker = await lockerService.LockAsync<MemoryCacheService>(_lockTimeout);
 
         if (memoryCache.TryGetValue<T>(cacheKey, out var result))
         {

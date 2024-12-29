@@ -32,7 +32,8 @@ public static class ChromeGeneralParameters
         "--disable-gl-extensions", "--disable-composited-antialiasing", "--disable-canvas-aa", "--disable-3d-apis",
         "--disable-accelerated-2d-canvas", "--disable-accelerated-jpeg-decoding",
         "--disable-accelerated-mjpeg-decode", "--disable-app-list-dismiss-on-blur",
-        "--disable-accelerated-video-decode", "--run-all-compositor-stages-before-draw",
-        "--virtual-time-budget=130000", "--no-crashpad", "--disable-notifications"
+        "--disable-accelerated-video-decode", "--run-all-compositor-stages-before-draw", "--no-crashpad",
+        "--disable-notifications",
+        "--user-agent=\"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0\""
     ];
 }
