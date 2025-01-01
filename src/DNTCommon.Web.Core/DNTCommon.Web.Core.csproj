@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Description>DNTCommon.Web.Core provides common scenarios' solutions for ASP.NET Core applications.</Description>
-        <VersionPrefix>8.2.4</VersionPrefix>
+        <VersionPrefix>8.2.5</VersionPrefix>
         <Authors>Vahid Nasiri</Authors>
         <TargetFrameworks>net9.0;net8.0;net7.0;net6.0;</TargetFrameworks>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -89,7 +89,7 @@
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
         <PackageReference Include="DNTPersianUtils.Core" Version="6.3.2"/>
         <PackageReference Include="MailKit" Version="4.9.0"/>
-        <PackageReference Include="HtmlAgilityPack" Version="1.11.71"/>
+        <PackageReference Include="HtmlAgilityPack" Version="1.11.72"/>
         <PackageReference Include="IPAddressRange" Version="6.1.0"/>
         <PackageReference Include="SkiaSharp" Version="3.116.1"/>
         <PackageReference Include="SkiaSharp.HarfBuzz" Version="3.116.1"/>
@@ -99,7 +99,7 @@
         <PackageReference Include="UAParser" Version="3.1.47"/>
         <PackageReference Include="AsyncKeyedLock" Version="7.1.4"/>
         <PackageReference Include="NetEscapades.AspNetCore.SecurityHeaders" Version="0.24.0"/>
-        <PackageReference Include="iTextSharp.LGPLv2.Core" Version="3.5.0"/>
+        <PackageReference Include="iTextSharp.LGPLv2.Core" Version="3.5.1"/>
     </ItemGroup>
     <ItemGroup>
         <None Include="../../README.md" Link="README.md" Pack="true" PackagePath="/" Visible="false"/>
