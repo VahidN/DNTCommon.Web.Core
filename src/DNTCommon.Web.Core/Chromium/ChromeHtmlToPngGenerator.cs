@@ -38,7 +38,7 @@ public class ChromeHtmlToPngGenerator(
             Arguments = arguments,
             AppPath = appPath,
             WaitForExit = options.WaitForExit,
-            KillProcessOnStart = true
+            KillProcessOnStart = false
         });
 
         log.LogPossibleErrorsOrWarnings(logger);
