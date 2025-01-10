@@ -1,13 +1,12 @@
 ﻿using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DNTCommon.Web.Core.TestWebApp;
 
 public class ExceptionalTask(IHttpRequestInfoService httpRequestInfoService) : IScheduledTask
 {
-    public bool IsShuttingDown { get; set; }
-
-    public Task RunAsync()
+    public Task RunAsync(CancellationToken cancellationToken)
     {
         var ip = httpRequestInfoService.GetIP() ?? "::1";
 

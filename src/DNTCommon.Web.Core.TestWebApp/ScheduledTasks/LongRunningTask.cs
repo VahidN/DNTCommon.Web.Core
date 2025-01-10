@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
@@ -7,22 +8,18 @@ namespace DNTCommon.Web.Core.TestWebApp;
 public class LongRunningTask : IScheduledTask
 {
     private readonly ILogger<LongRunningTask> _logger;
-    public bool IsShuttingDown { get; set; }
 
-    public LongRunningTask(ILogger<LongRunningTask> logger)
-    {
-        _logger = logger;
-    }
+    public LongRunningTask(ILogger<LongRunningTask> logger) => _logger = logger;
 
-    public async Task RunAsync()
+    public async Task RunAsync(CancellationToken cancellationToken)
     {
-        if (this.IsShuttingDown)
+        if (cancellationToken.IsCancellationRequested)
         {
             return;
         }
 
-        _logger.LogInformation("Running The LongRunningTask.");
+        _logger.LogInformation(message: "Running The LongRunningTask.");
 
-        await Task.Delay(TimeSpan.FromMinutes(3));
+        await Task.Delay(TimeSpan.FromMinutes(minutes: 3), cancellationToken);
     }
 }

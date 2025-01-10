@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
@@ -8,22 +9,17 @@ public class DoBackupTask : IScheduledTask
 {
     private readonly ILogger<DoBackupTask> _logger;
 
-    public DoBackupTask(ILogger<DoBackupTask> logger)
-    {
-        _logger = logger;
-    }
+    public DoBackupTask(ILogger<DoBackupTask> logger) => _logger = logger;
 
-    public bool IsShuttingDown { get; set; }
-
-    public async Task RunAsync()
+    public async Task RunAsync(CancellationToken cancellationToken)
     {
-        if (this.IsShuttingDown)
+        if (cancellationToken.IsCancellationRequested)
         {
             return;
         }
 
-        _logger.LogInformation("Running Do Backup");
+        _logger.LogInformation(message: "Running Do Backup");
 
-        await Task.Delay(TimeSpan.FromMinutes(3));
+        await Task.Delay(TimeSpan.FromMinutes(minutes: 3), cancellationToken);
     }
 }

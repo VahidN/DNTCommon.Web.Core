@@ -12,11 +12,14 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
 {
     // the 30 seconds is for the entire app to tie up what it's doing.
     private const int TimeToFinish = 30 * 1000;
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
 
     private readonly IJobsRunnerTimer _jobsRunnerTimer;
     private readonly ILogger<ScheduledTasksCoordinator> _logger;
     private readonly IServiceProvider _serviceProvider;
     private readonly IOptions<ScheduledTasksStorage> _tasksStorage;
+
+    private bool _isDisposed;
     private bool _isShuttingDown;
 
     /// <summary>
@@ -92,9 +95,18 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
     /// </summary>
     public Task StopTasks() => DisposeResources();
 
+    /// <summary>
+    ///     Free resources
+    /// </summary>
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
     private async Task DisposeResources()
     {
-        if (_isShuttingDown)
+        if (_isShuttingDown || _isDisposed)
         {
             return;
         }
@@ -103,15 +115,11 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
         {
             _isShuttingDown = true;
 
-            foreach (var task in _tasksStorage.Value.Tasks.Where(x => x.TaskInstance != null))
-            {
-                if (task.TaskInstance == null)
-                {
-                    continue;
-                }
-
-                task.TaskInstance.IsShuttingDown = true;
-            }
+#if NET_6 || NET_7
+             _cancellationTokenSource.Cancel();
+#else
+            await _cancellationTokenSource.CancelAsync();
+#endif
 
             var timeOut = TimeToFinish;
 
@@ -125,6 +133,8 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
         finally
         {
             _jobsRunnerTimer.StopJobs();
+            _cancellationTokenSource.Dispose();
+            _isDisposed = true;
             await WakeUp();
         }
     }
@@ -160,7 +170,7 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
             taskStatus.LastRun = now;
 
             _logger.LogInformation(message: "Start running `{Name}` task @ {Now}.", name, now);
-            scheduledTask.RunAsync().Wait();
+            scheduledTask.RunAsync(_cancellationTokenSource.Token).Wait();
 
             _logger.LogInformation(message: "Finished running `{Name}` task @ {Now}.", name, now);
             taskStatus.IsLastRunSuccessful = true;
@@ -176,6 +186,31 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
         {
             taskStatus.IsRunning = false;
             taskStatus.TaskInstance = null;
+        }
+    }
+
+    /// <summary>
+    ///     Free resources
+    /// </summary>
+    private void Dispose(bool disposing)
+    {
+        if (_isDisposed)
+        {
+            return;
+        }
+
+        try
+        {
+            if (!disposing)
+            {
+                return;
+            }
+
+            StopTasks().Wait();
+        }
+        finally
+        {
+            _isDisposed = true;
         }
     }
 }

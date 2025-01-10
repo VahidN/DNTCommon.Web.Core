@@ -3,7 +3,7 @@
 /// <summary>
 ///     Scheduled Tasks Manager
 /// </summary>
-public interface IScheduledTasksCoordinator
+public interface IScheduledTasksCoordinator : IDisposable
 {
     /// <summary>
     ///     Starts the scheduler.

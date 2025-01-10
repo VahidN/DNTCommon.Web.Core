@@ -9,17 +9,11 @@
 public class PingTask(MySitePingClient pingClient) : IScheduledTask
 {
     /// <summary>
-    ///     Is ASP.Net app domain tearing down?
-    ///     If set to true by the coordinator, the task should cleanup and return.
-    /// </summary>
-    public bool IsShuttingDown { get; set; }
-
-    /// <summary>
     ///     Scheduled task's logic.
     /// </summary>
-    public async Task RunAsync()
+    public async Task RunAsync(CancellationToken cancellationToken)
     {
-        if (IsShuttingDown)
+        if (cancellationToken.IsCancellationRequested)
         {
             return;
         }
