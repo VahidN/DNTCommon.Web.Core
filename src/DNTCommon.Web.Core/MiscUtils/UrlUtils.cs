@@ -13,7 +13,7 @@ public static class UrlUtils
     /// <param name="thumbnailUrl"></param>
     /// <returns></returns>
     public static string? TryGetImageFormat(this string? thumbnailUrl)
-        => TryExtractFileName(thumbnailUrl)?.Pipe(Path.GetExtension)?.Trim('.');
+        => TryExtractFileName(thumbnailUrl)?.Pipe(Path.GetExtension)?.Trim(trimChar: '.');
 
     /// <summary>
     ///     Tries to extract a file name form a url
@@ -27,8 +27,8 @@ public static class UrlUtils
             return null;
         }
 
-        return Regex.Match(url, @".+/([^?]*)", RegexOptions.Compiled, TimeSpan.FromMinutes(1))
-            .Groups[1]
+        return Regex.Match(url, pattern: @".+/([^?]*)", RegexOptions.Compiled, TimeSpan.FromMinutes(value: 1))
+            .Groups[groupnum: 1]
             .Value.NullIfEmptyOrWhiteSpace();
     }
 
@@ -46,4 +46,52 @@ public static class UrlUtils
 
         return transform(input);
     }
+
+    /// <summary>
+    ///     Allows adding params to the given URI.
+    /// </summary>
+    public static Uri AddQueryString(this Uri uri, string key, string value)
+        => new UriBuilderExtensions(uri).AddParameter(key, value).Uri;
+
+    /// <summary>
+    ///     Allows adding params to the given URI.
+    /// </summary>
+    public static Uri AddQueryString(this string uri, string key, string value)
+        => new UriBuilderExtensions(uri).AddParameter(key, value).Uri;
+
+    /// <summary>
+    ///     Allows adding or replacing params to the given URI.
+    /// </summary>
+    public static Uri AddOrUpdateQueryString(this Uri uri, string key, string value)
+        => new UriBuilderExtensions(uri).AddOrUpdateParameter(key, value).Uri;
+
+    /// <summary>
+    ///     Allows adding or replacing params to the given URI.
+    /// </summary>
+    public static Uri AddOrUpdateQueryString(this string uri, string key, string value)
+        => new UriBuilderExtensions(uri).AddOrUpdateParameter(key, value).Uri;
+
+    /// <summary>
+    ///     Allows replacing existing params to the given URI.
+    /// </summary>
+    public static Uri UpdateQueryString(this Uri uri, string key, string value)
+        => new UriBuilderExtensions(uri).UpdateParameter(key, value).Uri;
+
+    /// <summary>
+    ///     Allows replacing existing params to the given URI.
+    /// </summary>
+    public static Uri UpdateQueryString(this string uri, string key, string value)
+        => new UriBuilderExtensions(uri).UpdateParameter(key, value).Uri;
+
+    /// <summary>
+    ///     Allows removing params to the given URI.
+    /// </summary>
+    public static Uri UpdateQueryString(this Uri uri, string key)
+        => new UriBuilderExtensions(uri).RemoveParameter(key).Uri;
+
+    /// <summary>
+    ///     Allows removing params to the given URI.
+    /// </summary>
+    public static Uri UpdateQueryString(this string uri, string key)
+        => new UriBuilderExtensions(uri).RemoveParameter(key).Uri;
 }
