@@ -27,34 +27,30 @@ public static class PdfExtensions
 
         if (metadata is not null)
         {
-            var readerInfo = reader.Info;
-
             if (!metadata.Keywords.IsEmpty())
             {
-                readerInfo[key: "Keywords"] = metadata.Keywords;
+                stamper.AddKeywords(metadata.Keywords);
             }
 
             if (!metadata.Author.IsEmpty())
             {
-                readerInfo[key: "Author"] = metadata.Author;
+                stamper.AddAuthor(metadata.Author);
             }
 
             if (!metadata.Title.IsEmpty())
             {
-                readerInfo[key: "Title"] = metadata.Title;
+                stamper.AddTitle(metadata.Title);
             }
 
             if (!metadata.Subject.IsEmpty())
             {
-                readerInfo[key: "Subject"] = metadata.Subject;
+                stamper.AddSubject(metadata.Subject);
             }
 
             if (!metadata.Creator.IsEmpty())
             {
-                readerInfo[key: "Creator"] = metadata.Creator;
+                stamper.AddCreator(metadata.Creator);
             }
-
-            stamper.MoreInfo = readerInfo;
         }
 
         stamper.ViewerPreferences = PdfWriter.PageModeUseOutlines;
