@@ -16,8 +16,8 @@ public static class ChromeGeneralParameters
         "--allow-pre-commit-input", "--disable-infobars", "--disable-crash-reporter", "--disable-translate",
         "--disable-background-networking", "--enable-features=NetworkService,NetworkServiceInProcess",
         "--disable-background-timer-throttling", "--disable-backgrounding-occluded-windows", "--disable-breakpad",
-        "--disable-client-side-phishing-detection", "--disable-component-extensions-with-background-pages",
-        "--disable-default-apps", "--disable-dev-shm-usage", "--disable-component-update", "--disable-extensions",
+        "--disable-client-side-phishing-detection", "--disable-default-apps", "--disable-dev-shm-usage",
+        "--disable-component-update", "--disable-extensions",
         "--disable-features=Translate,BackForwardCache,AcceptCHFrame,MediaRouter,OptimizationHints,TranslateUI",
         "--disable-hang-monitor", "--disable-ipc-flooding-protection", "--disable-popup-blocking",
         "--disable-prompt-on-repost", "--disable-renderer-backgrounding", "--disable-sync",
@@ -33,7 +33,10 @@ public static class ChromeGeneralParameters
         "--disable-accelerated-2d-canvas", "--disable-accelerated-jpeg-decoding",
         "--disable-accelerated-mjpeg-decode", "--disable-app-list-dismiss-on-blur",
         "--disable-accelerated-video-decode", "--run-all-compositor-stages-before-draw", "--no-crashpad",
-        "--disable-notifications",
-        "--user-agent=\"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0\""
+        "--disable-notifications", "--process-priority=low", "--disable-domain-reliability", "--no-pings",
+        "--user-agent=\"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0\"",
+        "--enable-logging=stderr", "--log-level=0", "--deny-permission-prompts",
+        "--disable-external-intent-requests", "--noerrdialogs", "--disable-back-forward-cache",
+        "--aggressive-cache-discard", "--ash-no-nudges", "--disable-oopr-debug-crash-dump"
     ];
 }
