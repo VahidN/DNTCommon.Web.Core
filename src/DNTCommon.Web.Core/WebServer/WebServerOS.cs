@@ -44,4 +44,9 @@ public class WebServerOS
     ///     Returns the Internet Protocol (IP) addresses for the specified host.
     /// </summary>
     public string HostAddresses { set; get; } = default!;
+
+    /// <summary>
+    ///     The server's uptime
+    /// </summary>
+    public TimeSpan UpTime { set; get; } = default!;
 }

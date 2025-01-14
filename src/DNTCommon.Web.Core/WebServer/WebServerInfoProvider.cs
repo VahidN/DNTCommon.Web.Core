@@ -83,7 +83,8 @@ public static class WebServerInfoProvider
                 ServerTime = DateTime.UtcNow,
                 UserName = Environment.UserName,
                 HostName = hostName,
-                HostAddresses = string.Join(separator: ", ", addresses)
+                HostAddresses = string.Join(separator: ", ", addresses),
+                UpTime = TimeSpan.FromMilliseconds(Environment.TickCount64)
             },
             DriveInfo = GetDriveInfo(),
             TimeZone = GetTimezoneDetails(),
