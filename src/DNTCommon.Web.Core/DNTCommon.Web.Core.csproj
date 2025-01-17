@@ -87,7 +87,7 @@
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App"/>
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
-        <PackageReference Include="DNTPersianUtils.Core" Version="6.3.2"/>
+        <PackageReference Include="DNTPersianUtils.Core" Version="6.4.0"/>
         <PackageReference Include="MailKit" Version="4.9.0"/>
         <PackageReference Include="HtmlAgilityPack" Version="1.11.72"/>
         <PackageReference Include="IPAddressRange" Version="6.1.0"/>
