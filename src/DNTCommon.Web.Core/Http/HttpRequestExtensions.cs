@@ -18,7 +18,7 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     Http Request Extensions
 /// </summary>
-public static partial class HttpRequestExtensions
+public static class HttpRequestExtensions
 {
     /// <summary>
     ///     Determines whether the requested URL is reachable or not.
@@ -123,10 +123,16 @@ public static partial class HttpRequestExtensions
             ip = SplitCsv(httpContext.GetHeaderValue(headerName: "X-Forwarded-For")).FirstOrDefault();
         }
 
-        // RemoteIpAddress is always null in DNX RC1 Update1 (bug).
         if (string.IsNullOrWhiteSpace(ip) && httpContext.Connection?.RemoteIpAddress != null)
         {
-            ip = httpContext.Connection.RemoteIpAddress.ToString();
+            var remoteIpAddress = httpContext.Connection.RemoteIpAddress;
+
+            if (remoteIpAddress.IsIPv4MappedToIPv6)
+            {
+                remoteIpAddress = remoteIpAddress.MapToIPv4();
+            }
+
+            ip = remoteIpAddress.ToString();
         }
 
         if (string.IsNullOrWhiteSpace(ip))
