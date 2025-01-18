@@ -350,6 +350,14 @@ public static class HttpRequestExtensions
             ["Is Authenticated", httpContext.User.IsAuthenticated().ToString()]
         ]));
 
+        var endpoint = httpContext.GetEndpoint();
+
+        sb.AppendLine(HtmlExtensions.CreateHtmlTable(caption: "Current Endpoint", ["Key", "Value"],
+        [
+            ["Has Endpoint", (endpoint != null).ToString()], ["DisplayName", endpoint?.DisplayName ?? ""],
+            ["RoutePattern", (endpoint as RouteEndpoint)?.RoutePattern?.RawText ?? ""]
+        ]));
+
         if (httpRequest.Query.Count != 0)
         {
             sb.AppendLine(HtmlExtensions.CreateHtmlTable(caption: "Request Query", ["Key", "Value"],
