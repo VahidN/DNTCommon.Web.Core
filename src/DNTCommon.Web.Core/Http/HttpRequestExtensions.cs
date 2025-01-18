@@ -18,7 +18,7 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     Http Request Extensions
 /// </summary>
-public static class HttpRequestExtensions
+public static partial class HttpRequestExtensions
 {
     /// <summary>
     ///     Determines whether the requested URL is reachable or not.
