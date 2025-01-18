@@ -117,13 +117,7 @@ public static class PathUtils
     ///     Determines whether the given path refers to an existing directory on disk.
     /// </summary>
     /// <param name="path"></param>
-    public static void CheckDirExists(this string? path)
-    {
-        if (!path.IsEmpty() && !Directory.Exists(path))
-        {
-            Directory.CreateDirectory(path);
-        }
-    }
+    public static void CheckDirExists(this string? path) => path.CreateSafeDir();
 
     /// <summary>
     ///     Determines whether the given path refers to an existing directory on disk.
@@ -298,10 +292,7 @@ public static class PathUtils
 
         var sourceDirs = sourceDirInfo.GetDirectories();
 
-        if (!Directory.Exists(destDirPath))
-        {
-            Directory.CreateDirectory(destDirPath);
-        }
+        destDirPath.CreateSafeDir();
 
         var sourceFiles = sourceDirInfo.GetFiles();
 
@@ -439,4 +430,34 @@ public static class PathUtils
                 _ => path.Replace(oldValue: "\\", newValue: "/", StringComparison.OrdinalIgnoreCase)
                     .TrimEnd(MoveDirectorySeparator)
             };
+
+    /// <summary>
+    ///     Tries to create a dir safely without dir traversal bug
+    /// </summary>
+    /// <param name="dirPath">the full path of the directory.</param>
+    /// <returns>the full path of the directory.</returns>
+    public static string? CreateSafeDir(this string? dirPath)
+    {
+        if (dirPath.IsEmpty())
+        {
+            return null;
+        }
+
+        // Normalizes the path.
+        dirPath = Path.GetFullPath(dirPath);
+
+        // Ensures that the last character on the extraction path is the directory separator char.
+        // Without this, a malicious path could try to traverse outside the expected path.        
+        if (!dirPath.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
+        {
+            dirPath += Path.DirectorySeparatorChar;
+        }
+
+        if (!Directory.Exists(dirPath))
+        {
+            dirPath = Directory.CreateDirectory(dirPath).FullName;
+        }
+
+        return dirPath;
+    }
 }

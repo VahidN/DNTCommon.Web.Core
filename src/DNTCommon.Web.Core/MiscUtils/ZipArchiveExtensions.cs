@@ -154,11 +154,7 @@ public static class ZipArchiveExtensions
     /// <param name="overwriteFiles">true to overwrite files; false otherwise.</param>
     public static void DecompressZipFile(this string zipFilePath, string extractDir, bool overwriteFiles = true)
     {
-        if (!Directory.Exists(extractDir))
-        {
-            Directory.CreateDirectory(extractDir);
-        }
-
+        extractDir.CreateSafeDir();
         ZipFile.ExtractToDirectory(zipFilePath, extractDir, Encoding.UTF8, overwriteFiles);
     }
 
@@ -198,5 +194,72 @@ public static class ZipArchiveExtensions
 
         using var gZipStream = new GZipStream(source, CompressionMode.Decompress);
         gZipStream.CopyTo(destination);
+    }
+
+    /// <summary>
+    ///     Deletes the specified entries from the given archive.
+    /// </summary>
+    /// <param name="zipFilePath">The path on the file system to the archive that is to be modified.</param>
+    /// <param name="predicate">Defines a set of criteria for deleting entries.</param>
+    public static void DeleteEntriesFromZipFile(this string zipFilePath, Predicate<ZipArchiveEntry> predicate)
+    {
+        ArgumentNullException.ThrowIfNull(predicate);
+
+        using var zipArchive = ZipFile.Open(zipFilePath, ZipArchiveMode.Update);
+
+        foreach (var entry in zipArchive.Entries.Where(archiveEntry => predicate(archiveEntry)))
+        {
+            entry.Delete();
+        }
+    }
+
+    /// <summary>
+    ///     Extracts the specified entries from the given archive.
+    /// </summary>
+    /// <param name="zipFilePath">The path on the file system to the archive that is to be modified.</param>
+    /// <param name="predicate">Defines a set of criteria for deleting entries.</param>
+    /// <param name="extractPath">The path to the destination directory on the file system.</param>
+    /// <param name="overwriteFiles">true to overwrite files; false otherwise.</param>
+    public static void ExtractEntriesFromZipFile(this string zipFilePath,
+        Predicate<ZipArchiveEntry> predicate,
+        string extractPath,
+        bool overwriteFiles = true)
+    {
+        ArgumentNullException.ThrowIfNull(predicate);
+
+        extractPath = extractPath.CreateSafeDir() ??
+                      throw new InvalidOperationException($"The specified extractPath: `{extractPath}` is invalid.");
+
+        using var archive = ZipFile.OpenRead(zipFilePath);
+
+        foreach (var entry in archive.Entries.Where(archiveEntry => predicate(archiveEntry)))
+        {
+            var destinationPath = Path.GetFullPath(Path.Combine(extractPath, entry.FullName));
+
+            if (destinationPath.StartsWith(extractPath, StringComparison.Ordinal))
+            {
+                entry.ExtractToFile(destinationPath, overwriteFiles);
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Extracts the specified entries from the given archive.
+    /// </summary>
+    /// <param name="zipFilePath">The path on the file system to the archive that is to be modified.</param>
+    /// <param name="predicate">Defines a set of criteria for deleting entries.</param>
+    public static IEnumerable<byte[]> ExtractEntriesFromZipFile(this string zipFilePath,
+        Predicate<ZipArchiveEntry> predicate)
+    {
+        using var archive = ZipFile.OpenRead(zipFilePath);
+
+        foreach (var entry in archive.Entries.Where(archiveEntry => predicate(archiveEntry)))
+        {
+            using var memoryStream = new MemoryStream();
+            using var zipEntryStream = entry.Open();
+            zipEntryStream.CopyTo(memoryStream);
+
+            yield return memoryStream.ToArray();
+        }
     }
 }

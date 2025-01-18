@@ -82,10 +82,7 @@ public static class UploadFileServiceExtensions
             return (false, string.Empty);
         }
 
-        if (!Directory.Exists(uploadsRootFolder))
-        {
-            Directory.CreateDirectory(uploadsRootFolder);
-        }
+        uploadsRootFolder.CreateSafeDir();
 
         var filePath = Path.Combine(uploadsRootFolder, formFile.FileName);
 

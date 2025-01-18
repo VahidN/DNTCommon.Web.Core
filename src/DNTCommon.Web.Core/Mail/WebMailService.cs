@@ -183,10 +183,7 @@ public class WebMailService(
             return;
         }
 
-        if (!Directory.Exists(smtpConfig.PickupFolder))
-        {
-            Directory.CreateDirectory(smtpConfig.PickupFolder);
-        }
+        smtpConfig.PickupFolder.CreateSafeDir();
 
         foreach (var email in emails)
         {
