@@ -44,6 +44,18 @@ public static class HttpRequestExtensions
     }
 
     /// <summary>
+    ///     Does this route has ApiControllerAttribute?
+    /// </summary>
+    /// <param name="context"></param>
+    /// <returns></returns>
+    public static bool IsApiRequest(this HttpContext context)
+    {
+        var endpoint = context.GetEndpoint();
+
+        return endpoint is not null && endpoint.Metadata.Any(o => o is ApiControllerAttribute);
+    }
+
+    /// <summary>
     ///     Gets the current HttpContext.Request's UserAgent.
     /// </summary>
     public static string GetUserAgent(this HttpContext httpContext)
