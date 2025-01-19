@@ -7,7 +7,7 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public class ExecuteApplicationProcess : IExecuteApplicationProcess
 {
-    private readonly TimeSpan _defaultWaitForExit = TimeSpan.FromMinutes(minutes: 3);
+    private readonly TimeSpan _defaultWaitForExit = TimeSpan.FromMinutes(value: 3);
 
     /// <summary>
     ///     A helper method to execute a process
