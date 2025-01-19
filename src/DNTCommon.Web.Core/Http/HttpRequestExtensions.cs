@@ -393,7 +393,7 @@ public static partial class HttpRequestExtensions
 
         if (httpRequest is { HasFormContentType: true, Form.Count: > 0 })
         {
-            sb.AppendLine(HtmlExtensions.CreateHtmlTable(caption: "User Claims", ["Key", "Value"],
+            sb.AppendLine(HtmlExtensions.CreateHtmlTable(caption: "Form Content", ["Key", "Value"],
                 httpRequest.Form.Select(header => (List<string>) [header.Key, $"<pre>{header.Value}</pre>"]).ToList()));
         }
 
