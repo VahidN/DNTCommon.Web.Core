@@ -116,7 +116,7 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
             _isShuttingDown = true;
 
 #if NET_6 || NET_7
-             _cancellationTokenSource.Cancel();
+            _cancellationTokenSource.Cancel();
 #else
             await _cancellationTokenSource.CancelAsync();
 #endif
@@ -151,6 +151,9 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
 
     private void RunTask(ScheduledTaskStatus taskStatus, DateTime now)
     {
+        var watch = new Stopwatch();
+        watch.Start();
+
         var name = taskStatus.TaskType.FullName;
 
         try
@@ -178,12 +181,16 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
         catch (Exception ex)
         {
             var exception = ex.Demystify();
-            _logger.LogCritical(eventId: 0, exception, message: "Failed running {Name}", name);
+
+            _logger.LogCritical(eventId: 0, exception, message: "Failed running `{Name}` after `{Time}`.", name,
+                watch.Elapsed);
+
             taskStatus.IsLastRunSuccessful = false;
             taskStatus.LastException = exception;
         }
         finally
         {
+            watch.Stop();
             taskStatus.IsRunning = false;
             taskStatus.TaskInstance = null;
         }
