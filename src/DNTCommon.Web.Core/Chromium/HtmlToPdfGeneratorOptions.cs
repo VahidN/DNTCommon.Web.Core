@@ -26,7 +26,7 @@ public class HtmlToPdfGeneratorOptions
     public string? ChromeExecutablePath { get; set; } = "";
 
     /// <summary>
-    ///     Wait for exit. Its default value is 2 minutes.
+    ///     Wait for exit.
     /// </summary>
-    public TimeSpan WaitForExit { set; get; } = TimeSpan.FromMinutes(value: 3);
+    public TimeSpan? WaitForExit { set; get; }
 }

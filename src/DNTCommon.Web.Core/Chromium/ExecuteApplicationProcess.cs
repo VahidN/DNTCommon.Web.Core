@@ -7,6 +7,8 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public class ExecuteApplicationProcess : IExecuteApplicationProcess
 {
+    private readonly TimeSpan _defaultWaitForExit = TimeSpan.FromMinutes(minutes: 3);
+
     /// <summary>
     ///     A helper method to execute a process
     /// </summary>
@@ -46,9 +48,16 @@ public class ExecuteApplicationProcess : IExecuteApplicationProcess
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
 
-            using CancellationTokenSource cancellationTokenSource = new();
-            cancellationTokenSource.CancelAfter(startInfo.WaitForExit);
-            await process.WaitForExitAsync(cancellationTokenSource.Token);
+            if (startInfo.WaitForExit.HasValue)
+            {
+                using CancellationTokenSource cancellationTokenSource = new();
+                cancellationTokenSource.CancelAfter(startInfo.WaitForExit.Value);
+                await process.WaitForExitAsync(cancellationTokenSource.Token);
+            }
+            else
+            {
+                await process.WaitForExitAsync();
+            }
         }
         finally
         {
@@ -65,7 +74,7 @@ public class ExecuteApplicationProcess : IExecuteApplicationProcess
             return errorMessage;
         }
 
-        await Task.Delay(startInfo.WaitForExit);
+        await Task.Delay(startInfo.WaitForExit ?? _defaultWaitForExit);
         KillThisProcess(process);
 
         return Invariant($"{errorMessage}{Environment.NewLine}HasExited: {isExited}, ExitCode: {exitCode}");

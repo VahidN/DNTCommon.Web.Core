@@ -22,9 +22,8 @@ public class ApplicationStartInfo
 
     /// <summary>
     ///     The time span to wait before killing this app.
-    ///     Its default value is 10 seconds.
     /// </summary>
-    public TimeSpan WaitForExit { set; get; } = TimeSpan.FromSeconds(value: 10);
+    public TimeSpan? WaitForExit { set; get; }
 
     /// <summary>
     ///     Should we kill all related processes on start

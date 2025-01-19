@@ -31,9 +31,9 @@ public class HtmlToPngGeneratorOptions
     public int Height { set; get; } = 600;
 
     /// <summary>
-    ///     Wait for exit. Its default value is 2 minutes.
+    ///     Wait for exit.
     /// </summary>
-    public TimeSpan WaitForExit { set; get; } = TimeSpan.FromMinutes(value: 3);
+    public TimeSpan? WaitForExit { set; get; }
 
     /// <summary>
     ///     ResizeImage Options
