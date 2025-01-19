@@ -34,7 +34,13 @@ public static class UrlValidatorExtensions
         }
 
         email = email.ToLowerInvariant().Trim();
-        var emailParts = email.Split(separator: '@');
+        var emailParts = email.Split(separator: '@', StringSplitOptions.RemoveEmptyEntries);
+
+        if (emailParts.Length == 1)
+        {
+            return email;
+        }
+
         var name = emailParts[0].Replace(oldValue: ".", string.Empty, StringComparison.OrdinalIgnoreCase);
 
         var plusIndex = name.IndexOf(value: '+', StringComparison.OrdinalIgnoreCase);
