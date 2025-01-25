@@ -29,4 +29,8 @@ public class PdfDocumentMetadata
     ///     Adds the keywords to a Document.
     /// </summary>
     public string? Keywords { set; get; }
+
+    /// <inheritdoc />
+    public override string ToString()
+        => $"Title:`{Title}, Subject:`{Subject}`, Author:`{Author}`, Creator:`{Creator}`, Keywords:`{Keywords}``";
 }

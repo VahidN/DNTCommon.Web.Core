@@ -41,7 +41,7 @@ public class ChromeHtmlToPdfGenerator(
             KillProcessOnStart = false
         });
 
-        log.LogPossibleErrorsOrWarnings(logger);
+        $"{options}{Environment.NewLine}{log}".LogPossibleErrorsOrWarnings(logger);
 
         options.OutputPdfFile.AddMetadataToPdfFile(options.DocumentMetadata);
 

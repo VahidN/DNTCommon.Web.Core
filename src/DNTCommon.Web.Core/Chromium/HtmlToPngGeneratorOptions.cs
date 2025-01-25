@@ -39,4 +39,8 @@ public class HtmlToPngGeneratorOptions
     ///     ResizeImage Options
     /// </summary>
     public ResizeImageOptions? ResizeImageOptions { set; get; }
+
+    /// <inheritdoc />
+    public override string ToString()
+        => $"SourceHtmlFileOrUri:`{SourceHtmlFileOrUri}`, OutputPngFile:`{OutputPngFile}`, Width:`{Width}`, Height:`{Height}`, WaitForExit:`{WaitForExit}`.";
 }

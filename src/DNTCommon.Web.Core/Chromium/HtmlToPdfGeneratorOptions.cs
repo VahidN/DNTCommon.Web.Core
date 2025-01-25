@@ -29,4 +29,8 @@ public class HtmlToPdfGeneratorOptions
     ///     Wait for exit.
     /// </summary>
     public TimeSpan? WaitForExit { set; get; }
+
+    /// <inheritdoc />
+    public override string ToString()
+        => $"SourceHtmlFileOrUri:`{SourceHtmlFileOrUri}`, OutputPdfFile:`{OutputPdfFile}`, WaitForExit:`{WaitForExit}`, DocumentMetadata:`{DocumentMetadata}`.";
 }

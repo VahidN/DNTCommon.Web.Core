@@ -41,7 +41,7 @@ public class ChromeHtmlToPngGenerator(
             KillProcessOnStart = false
         });
 
-        log.LogPossibleErrorsOrWarnings(logger);
+        $"{options}{Environment.NewLine}{log}".LogPossibleErrorsOrWarnings(logger);
 
         if (!IsValidImageFile(options))
         {
