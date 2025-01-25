@@ -43,7 +43,7 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
 
         applicationLifetime.ApplicationStopping.Register(() =>
         {
-            _logger.LogInformation(message: "Application is stopping ... .");
+            _logger.LogWarning(message: "Application is stopping ... .");
             DisposeResources().Wait();
         });
     }
