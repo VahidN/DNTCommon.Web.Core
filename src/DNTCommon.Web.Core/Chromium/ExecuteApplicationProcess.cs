@@ -50,9 +50,8 @@ public class ExecuteApplicationProcess : IExecuteApplicationProcess
 
             if (startInfo.WaitForExit.HasValue)
             {
-                using CancellationTokenSource cancellationTokenSource = new();
-                cancellationTokenSource.CancelAfter(startInfo.WaitForExit.Value);
-                await process.WaitForExitAsync(cancellationTokenSource.Token);
+                using var cts = startInfo.WaitForExit.Value.ToCancellationTokenSource();
+                await process.WaitForExitAsync(cts.Token);
             }
             else
             {
