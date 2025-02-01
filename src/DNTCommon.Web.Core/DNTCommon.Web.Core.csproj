@@ -100,6 +100,7 @@
         <PackageReference Include="AsyncKeyedLock" Version="7.1.4"/>
         <PackageReference Include="NetEscapades.AspNetCore.SecurityHeaders" Version="0.24.0"/>
         <PackageReference Include="iTextSharp.LGPLv2.Core" Version="3.7.0"/>
+        <PackageReference Include="Scrutor" Version="6.0.1"/>
     </ItemGroup>
     <ItemGroup>
         <None Include="../../README.md" Link="README.md" Pack="true" PackagePath="/" Visible="false"/>

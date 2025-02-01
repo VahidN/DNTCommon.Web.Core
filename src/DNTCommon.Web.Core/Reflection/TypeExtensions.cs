@@ -69,6 +69,28 @@ public static class TypeExtensions
                 .ToList();
 
 	/// <summary>
+	///     Finds all the derived concrete types of baseType in the given assemblies
+	/// </summary>
+	public static IList<Type> GetAllDerivedConcreteTypes(this ICollection<Assembly>? assemblies,
+        params ICollection<Type>? baseTypes)
+        => assemblies is null || baseTypes is null
+            ? []
+            : (IList<Type>)assemblies.Where(a => !a.IsDynamic)
+                .SelectMany(a => a.GetExportedTypes())
+                .Where(t => t is { IsAbstract: false, IsInterface: false } &&
+                            baseTypes.Any(baseType => baseType.IsAssignableFrom(t)))
+                .ToList();
+
+	/// <summary>
+	///     Finds all the derived concrete types of baseType in the given assemblies
+	/// </summary>
+	public static IList<Type> GetAllDerivedConcreteTypes(this Assembly assembly, params ICollection<Type>? baseTypes)
+        => new List<Assembly>
+        {
+            assembly
+        }.GetAllDerivedConcreteTypes(baseTypes);
+
+	/// <summary>
 	///     Finds all the concrete types in the given assemblies
 	/// </summary>
 	public static IList<Type> GetAllConcreteTypes(this ICollection<Assembly>? assemblies)
