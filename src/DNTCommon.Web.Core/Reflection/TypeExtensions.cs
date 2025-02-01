@@ -61,17 +61,32 @@ public static class TypeExtensions
 	///     Finds all the derived concrete types of baseType in the given assemblies
 	/// </summary>
 	public static IList<Type> GetAllDerivedConcreteTypes(this ICollection<Assembly>? assemblies, Type baseType)
-    {
-        if (assemblies is null)
-        {
-            return [];
-        }
+        => assemblies is null
+            ? []
+            : (IList<Type>)assemblies.Where(a => !a.IsDynamic)
+                .SelectMany(a => a.GetExportedTypes())
+                .Where(t => t is { IsAbstract: false, IsInterface: false } && baseType.IsAssignableFrom(t))
+                .ToList();
 
-        return assemblies.Where(a => !a.IsDynamic)
-            .SelectMany(a => a.GetExportedTypes())
-            .Where(t => t is { IsAbstract: false, IsInterface: false } && baseType.IsAssignableFrom(t))
-            .ToList();
-    }
+	/// <summary>
+	///     Finds all the concrete types in the given assemblies
+	/// </summary>
+	public static IList<Type> GetAllConcreteTypes(this ICollection<Assembly>? assemblies)
+        => assemblies is null
+            ? []
+            : (IList<Type>)assemblies.Where(a => !a.IsDynamic)
+                .SelectMany(a => a.GetExportedTypes())
+                .Where(t => t is { IsAbstract: false, IsInterface: false })
+                .ToList();
+
+	/// <summary>
+	///     Finds all the exported types of the given assembly
+	/// </summary>
+	public static IList<Type> GetAllConcreteTypes(this Assembly assembly)
+        => new List<Assembly>
+        {
+            assembly
+        }.GetAllConcreteTypes();
 
 	/// <summary>
 	///     Finds all the derived types of baseType in the given assemblies
@@ -80,7 +95,7 @@ public static class TypeExtensions
         => assemblies.GetAllDerivedConcreteTypes(typeof(TBaseType));
 
 	/// <summary>
-	///     Finds all the derived types of baseType in the given assemblies
+	///     Finds all the derived types of baseType in the given assembly
 	/// </summary>
 	public static IList<Type> GetAllDerivedConcreteTypes<TBaseType>(this Assembly assembly)
         => new List<Assembly>
@@ -187,136 +202,64 @@ public static class TypeExtensions
         => type != null && (!type.IsValueType || Nullable.GetUnderlyingType(type) != null);
 
 	/// <summary>
-	///     Determines if the type has the specified attribute.
-	/// </summary>
-	public static bool HasAttribute<TAttribute>([NotNullWhen(returnValue: true)] this Type? type, bool inherited = true)
-        => type?.GetTypeInfo().GetCustomAttributes(inherited).OfType<TAttribute>().Any() == true;
-
-	/// <summary>
 	///     Determines if the type !IsAbstract and !IsInterface.
 	/// </summary>
 	public static bool IsConcreteType([NotNullWhen(returnValue: true)] this Type? type)
         => type?.GetTypeInfo() is { IsAbstract: false, IsInterface: false };
 
 	/// <summary>
-	///     Gets the specified attribute from the PropertyDescriptor.
+	///     Indicates whether the current Type represents an enumeration.
 	/// </summary>
-	public static T? GetAttribute<T>(this PropertyDescriptor? prop)
-        where T : Attribute
-    {
-        if (prop is null)
-        {
-            return null;
-        }
-
-        foreach (Attribute att in prop.Attributes)
-        {
-            if (att is T tAtt)
-            {
-                return tAtt;
-            }
-        }
-
-        return null;
-    }
+	public static bool IsEnum(this Type type) => type.GetTypeInfo().IsEnum;
 
 	/// <summary>
-	///     Gets the specified attribute from the PropertyDescriptor.
+	///     Gets the Assembly in which the type is declared.
 	/// </summary>
-	public static T? GetAttribute<T>(this PropertyInfo? prop, bool inherit)
-        where T : Attribute
-        => prop?.GetCustomAttributes(typeof(T), inherit).GetAttributeType<T>();
+	public static Assembly Assembly(this Type type) => type.GetTypeInfo().Assembly;
 
 	/// <summary>
-	///     Gets the specified attribute from the type.
+	///     The Type from which the current Type directly inherits, or null if the current Type represents the Object class or
+	///     an interface.
 	/// </summary>
-	public static T? GetAttribute<T>(this Type? type, bool inherit)
-        where T : Attribute
-        => type?.GetCustomAttributes(typeof(T), inherit).GetAttributeType<T>();
+	public static Type? BaseType(this Type type) => type.GetTypeInfo().BaseType;
 
 	/// <summary>
-	///     Gets the specified attribute for the assembly.
+	///     Determines whether the current Type derives from the specified Type.
 	/// </summary>
-	public static T? GetAttribute<T>(this Assembly? asm)
-        where T : Attribute
-        => asm?.GetCustomAttributes(typeof(T), inherit: false).GetAttributeType<T>();
+	public static bool IsSubclassOf(this Type type, Type parent) => type.GetTypeInfo().IsSubclassOf(parent);
 
 	/// <summary>
-	///     Gets the specified attribute from the PropertyDescriptor.
+	///     Gets a value indicating whether the Type is abstract and must be overridden.
 	/// </summary>
-	public static T? GetAttribute<T>(this object? obj, bool inherit)
-        where T : Attribute
-    {
-        if (obj == null)
-        {
-            return null;
-        }
-
-        var type = obj.GetType();
-
-        if (type.IsDerivedFrom<PropertyDescriptor>())
-        {
-            return GetAttribute<T>((PropertyDescriptor)obj);
-        }
-
-        if (type.IsDerivedFrom<PropertyInfo>())
-        {
-            return GetAttribute<T>((PropertyInfo)obj, inherit);
-        }
-
-        if (type.IsDerivedFrom<Assembly>())
-        {
-            return (obj as Assembly)?.GetCustomAttributes(typeof(T), inherit: false).GetAttributeType<T>();
-        }
-
-        if (type.IsDerivedFrom<Type>())
-        {
-            return GetAttribute<T>((Type)obj, inherit);
-        }
-
-        return GetAttribute<T>(type, inherit);
-    }
+	public static bool IsAbstract(this Type type) => type.GetTypeInfo().IsAbstract;
 
 	/// <summary>
-	///     Gets the specified attribute from the Enum.
+	///     Gets a value indicating whether the current type is a generic type.
 	/// </summary>
-	public static T? GetAttribute<T>(this Enum? val)
-        where T : Attribute
-        => val?.GetType()
-            .GetField(val.ToString())
-            ?.GetCustomAttributes(typeof(T), inherit: false)
-            .GetAttributeType<T>();
+	public static bool IsGenericType(this Type type) => type.GetTypeInfo().IsGenericType;
 
-    private static T? GetAttributeType<T>(this object[]? attributes)
-        where T : Attribute
-        => attributes is null || attributes.Length == 0 ? null : (T)attributes[0];
+	/// <summary>
+	///     searches for the fields defined for the current Type, using the specified binding constraints.
+	/// </summary>
+	public static FieldInfo[] GetFields(this Type type, BindingFlags flags) => type.GetTypeInfo().GetFields(flags);
 
-    /// <summary>
-    ///     Gets the value from the DescriptionAttribute for the given enumeration value.
-    /// </summary>
-    public static string? GetDescription(this Enum? e) => GetAttribute<DescriptionAttribute>(e)?.Description;
+	/// <summary>
+	///     An object representing the interface with the specified name, implemented or inherited by the current Type, if
+	///     found; otherwise, null.
+	/// </summary>
+	public static Type? GetInterface(this Type type, string name) => type.GetTypeInfo().GetInterface(name);
 
-    /// <summary>
-    ///     Gets the specified attributes from the PropertyDescriptor.
-    /// </summary>
-    public static IList<T>? GetAttributes<T>(this PropertyDescriptor? prop)
-        where T : Attribute
-    {
-        if (prop is null)
-        {
-            return null;
-        }
+	/// <summary>
+	///     An array of Type objects that represent the type arguments of a generic type. Returns an empty array if the current
+	///     type is not a generic type.
+	/// </summary>
+	public static Type[] GetGenericArguments(this Type type) => type.GetTypeInfo().GetGenericArguments();
 
-        var attributes = new List<T>();
-
-        foreach (Attribute att in prop.Attributes)
-        {
-            if (att is T tAtt)
-            {
-                attributes.Add(tAtt);
-            }
-        }
-
-        return attributes;
-    }
+	/// <summary>
+	///     An array of objects representing all properties of the current Type that match the specified binding constraints.
+	///     -or- An empty array of type PropertyInfo, if the current Type does not have properties, or if none of the
+	///     properties match the binding constraints.
+	/// </summary>
+	public static PropertyInfo[] GetProperties(this Type type, BindingFlags flags)
+        => type.GetTypeInfo().GetProperties(flags);
 }
