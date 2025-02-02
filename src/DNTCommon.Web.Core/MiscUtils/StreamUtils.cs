@@ -1,0 +1,65 @@
+namespace DNTCommon.Web.Core;
+
+/// <summary>
+///     Stream helpers
+/// </summary>
+public static class StreamUtils
+{
+    /// <summary>
+    ///     Reads the given stream in chunks
+    /// </summary>
+    public static string? ToText([NotNullIfNotNull(nameof(stream))] this Stream? stream,
+        int readChunkBufferLength = 4096)
+    {
+        if (stream is null)
+        {
+            return null;
+        }
+
+        stream.Seek(offset: 0, SeekOrigin.Begin);
+
+        using var textWriter = new StringWriter(CultureInfo.InvariantCulture);
+        using var reader = new StreamReader(stream);
+
+        var readChunk = new char[readChunkBufferLength];
+        int readChunkLength;
+
+        do
+        {
+            readChunkLength = reader.ReadBlock(readChunk, index: 0, readChunkBufferLength);
+            textWriter.Write(readChunk, index: 0, readChunkLength);
+        }
+        while (readChunkLength > 0);
+
+        return textWriter.ToString();
+    }
+
+    /// <summary>
+    ///     Reads the given stream in chunks
+    /// </summary>
+    public static byte[]? ToBytes([NotNullIfNotNull(nameof(stream))] this Stream? stream,
+        int readChunkBufferLength = 4096)
+    {
+        if (stream is null)
+        {
+            return null;
+        }
+
+        stream.Seek(offset: 0, SeekOrigin.Begin);
+
+        var capacity = stream.CanSeek ? (int)stream.Length : 0;
+        using var output = new MemoryStream(capacity);
+
+        int readLength;
+        var buffer = new byte[readChunkBufferLength];
+
+        do
+        {
+            readLength = stream.Read(buffer, offset: 0, buffer.Length);
+            output.Write(buffer, offset: 0, readLength);
+        }
+        while (readLength > 0);
+
+        return output.ToArray();
+    }
+}
