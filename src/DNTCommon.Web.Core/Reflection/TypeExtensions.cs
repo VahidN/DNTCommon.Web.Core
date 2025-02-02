@@ -284,4 +284,69 @@ public static class TypeExtensions
 	/// </summary>
 	public static PropertyInfo[] GetProperties(this Type type, BindingFlags flags)
         => type.GetTypeInfo().GetProperties(flags);
+
+	/// <summary>
+	///     Determines if a type is numeric.  Nullable numeric types are considered numeric.
+	/// </summary>
+	/// <remarks>
+	///     Boolean is not considered numeric.
+	/// </remarks>
+	public static bool IsNumericType(this Type? type)
+    {
+        if (type == null)
+        {
+            return false;
+        }
+
+        switch (Type.GetTypeCode(type))
+        {
+            case TypeCode.Byte:
+            case TypeCode.Decimal:
+            case TypeCode.Double:
+            case TypeCode.Int16:
+            case TypeCode.Int32:
+            case TypeCode.Int64:
+            case TypeCode.SByte:
+            case TypeCode.Single:
+            case TypeCode.UInt16:
+            case TypeCode.UInt32:
+            case TypeCode.UInt64:
+                return true;
+            case TypeCode.Object:
+                if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+                {
+                    return IsNumericType(Nullable.GetUnderlyingType(type));
+                }
+
+                return false;
+        }
+
+        return false;
+    }
+
+	/// <summary>
+	///     Determines whether this type is a NestedProperty?
+	/// </summary>
+	/// <param name="type"></param>
+	/// <returns></returns>
+	public static bool IsNestedProperty(this Type? type)
+    {
+        if (type is null)
+        {
+            return false;
+        }
+
+        var typeInfo = type.GetTypeInfo();
+        var assemblyFullName = typeInfo.Assembly.FullName;
+
+        if (assemblyFullName?.StartsWith(value: "mscorlib", StringComparison.OrdinalIgnoreCase) == true ||
+            assemblyFullName?.StartsWith(value: "System.Private.CoreLib", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            return false;
+        }
+
+        return (typeInfo.IsClass || typeInfo.IsInterface) && !typeInfo.IsValueType &&
+               !string.IsNullOrEmpty(type.Namespace) &&
+               !type.Namespace.StartsWith(value: "System.", StringComparison.OrdinalIgnoreCase);
+    }
 }
