@@ -1,10 +1,44 @@
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-///     DisplayAttribute extensions
+///     Expressions extensions
 /// </summary>
-public static class DisplayNameExtensions
+public static class ExpressionsExtensions
 {
+    /// <summary>
+    ///     Sets the value of a nested Expression
+    /// </summary>
+    public static void SetPropertyValue<TEntity>(this TEntity? targetInstance,
+        Expression<Func<TEntity, object?>> func,
+        object? value)
+    {
+        var (info, memberExp) = GetPropertyInfo(func);
+        var target = GetTarget(memberExp.Expression, targetInstance);
+        info?.SetValue(target, value, index: null);
+    }
+
+    private static object? GetTarget<TEntity>(Expression? expr, TEntity? targetInstance)
+    {
+        switch (expr?.NodeType)
+        {
+            case ExpressionType.Parameter:
+                return targetInstance;
+            case ExpressionType.MemberAccess:
+                var mex = (MemberExpression)expr;
+
+                if (mex.Member is not PropertyInfo pi)
+                {
+                    throw new InvalidOperationException();
+                }
+
+                var target = GetTarget(mex.Expression, targetInstance);
+
+                return pi.GetValue(target, index: null);
+            default:
+                throw new InvalidOperationException();
+        }
+    }
+
     /// <summary>
     ///     Gets the DisplayName of the provided expression
     /// </summary>
