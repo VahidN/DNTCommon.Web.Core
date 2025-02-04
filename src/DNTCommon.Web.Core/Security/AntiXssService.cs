@@ -57,13 +57,15 @@ public class AntiXssService : IAntiXssService
             return string.Empty;
         }
 
-        var parser = _htmlReaderService.ParseHtml(html);
+        var (htmlDocument, htmlNodes) = _htmlReaderService.ParseHtml(html);
 
         var whitelistTags =
             new HashSet<string>(_antiXssConfig.ValidHtmlTags.Select(x => x.Tag.ToLowerInvariant()).ToArray(),
                 StringComparer.OrdinalIgnoreCase);
 
-        foreach (var node in parser.HtmlNodes.ToList())
+        var emptyLinesCount = 0;
+
+        foreach (var node in htmlNodes.ToList())
         {
             FixCodeTag(node, htmlModificationRules);
 
@@ -86,27 +88,61 @@ public class AntiXssService : IAntiXssService
 
             CleanAttributes(node, allowDataAttributes);
 
-            ApplyHtmlModificationRules(node, htmlModificationRules);
+            ConvertPToDiv(node, htmlModificationRules);
+
+            RemoveRelAndTargetFromInternalUrls(node, htmlModificationRules);
+
+            RemoveConsecutiveEmptyLines(node, htmlModificationRules, ref emptyLinesCount);
         }
 
-        return parser.HtmlDocument.DocumentNode.OuterHtml;
+        return htmlDocument.DocumentNode.OuterHtml;
     }
 
-    private static void ApplyHtmlModificationRules(HtmlNode node, HtmlModificationRules? htmlModificationRules)
+    private void RemoveConsecutiveEmptyLines(HtmlNode node,
+        HtmlModificationRules? htmlModificationRules,
+        ref int emptyLinesCount)
     {
-        if (htmlModificationRules is null)
+        if (htmlModificationRules?.RemoveConsecutiveEmptyLines != true || node.NodeType != HtmlNodeType.Element)
         {
             return;
         }
 
-        ConvertPToDiv(node, htmlModificationRules);
-        RemoveRelAndTargetFromInternalUrls(node, htmlModificationRules);
+        string[] nodesToInspect = ["div", "p", "br", "span"];
+
+        if (!nodesToInspect.Any(nodeToInspect
+                => string.Equals(node.Name, nodeToInspect, StringComparison.OrdinalIgnoreCase)))
+        {
+            emptyLinesCount = 0;
+
+            return;
+        }
+
+        if (node.ParentNode is null)
+        {
+            return;
+        }
+
+        if (node.InnerText.IsEmpty())
+        {
+            emptyLinesCount++;
+        }
+        else
+        {
+            emptyLinesCount = 0;
+        }
+
+        if (emptyLinesCount > htmlModificationRules.MaxAllowedConsecutiveEmptyLines)
+        {
+            _logger.LogInformation(message: "Removed an empty line: `{NodeOuterHtml}`.", node.OuterHtml);
+            node.RemoveAll();
+            node.Remove();
+        }
     }
 
-    private static void RemoveRelAndTargetFromInternalUrls(HtmlNode node, HtmlModificationRules htmlModificationRules)
+    private void RemoveRelAndTargetFromInternalUrls(HtmlNode node, HtmlModificationRules? htmlModificationRules)
     {
-        if (!htmlModificationRules.RemoveRelAndTargetFromInternalUrls || node.NodeType != HtmlNodeType.Element ||
-            htmlModificationRules.HostUri == null)
+        if (htmlModificationRules?.RemoveRelAndTargetFromInternalUrls != true ||
+            node.NodeType != HtmlNodeType.Element || htmlModificationRules.HostUri == null)
         {
             return;
         }
@@ -119,6 +155,7 @@ public class AntiXssService : IAntiXssService
 
             if (href.IsEmpty())
             {
+                _logger.LogInformation(message: "Removed an empty link: `{NodeOuterHtml}`.", node.OuterHtml);
                 node.Remove();
 
                 return;
@@ -139,15 +176,19 @@ public class AntiXssService : IAntiXssService
                 if (string.Equals(attribute.Name, b: "rel", StringComparison.OrdinalIgnoreCase) ||
                     string.Equals(attribute.Name, b: "target", StringComparison.OrdinalIgnoreCase))
                 {
+                    _logger.LogInformation(
+                        message: "Removed `rel` or `target` attribute from the link: `{NodeOuterHtml}`.",
+                        node.OuterHtml);
+
                     attribute.Remove();
                 }
             }
         }
     }
 
-    private static void ConvertPToDiv(HtmlNode node, HtmlModificationRules htmlModificationRules)
+    private static void ConvertPToDiv(HtmlNode node, HtmlModificationRules? htmlModificationRules)
     {
-        if (!htmlModificationRules.ConvertPToDiv || node.NodeType != HtmlNodeType.Element)
+        if (htmlModificationRules?.ConvertPToDiv != true || node.NodeType != HtmlNodeType.Element)
         {
             return;
         }
@@ -183,7 +224,7 @@ public class AntiXssService : IAntiXssService
             {
                 node.InnerHtml = encodedHtml;
 
-                _logger.LogWarning(message: "Fixed a non-encoded `{NodeName}` tag: `{NodeOuterHtml}`.", node.Name,
+                _logger.LogInformation(message: "Fixed a non-encoded `{NodeName}` tag: `{NodeOuterHtml}`.", node.Name,
                     node.OuterHtml);
             }
 
@@ -194,11 +235,15 @@ public class AntiXssService : IAntiXssService
         }
     }
 
-    private static bool CleanWhitespacesBetweenTags(HtmlNode node)
+    private bool CleanWhitespacesBetweenTags(HtmlNode node)
     {
         if (node.NodeType == HtmlNodeType.Text &&
             (string.IsNullOrWhiteSpace(node.InnerText) || string.IsNullOrEmpty(node.InnerText.Trim())))
         {
+            _logger.LogInformation(
+                message: "Cleaned the whitespaces between tags. InnerStartIndex:`{InnerStartIndex}`.",
+                node.InnerStartIndex);
+
             node.ParentNode?.RemoveChild(node);
 
             return true;
@@ -218,7 +263,7 @@ public class AntiXssService : IAntiXssService
         {
             if (string.IsNullOrWhiteSpace(attribute.Value))
             {
-                _logger.LogWarning(message: "Removed an empty attribute: `{AttributeName}` from `{NodeOuterHtml}`.",
+                _logger.LogInformation(message: "Removed an empty attribute: `{AttributeName}` from `{NodeOuterHtml}`.",
                     attribute.Name, node.OuterHtml);
 
                 attribute.Remove();
@@ -228,8 +273,9 @@ public class AntiXssService : IAntiXssService
 
             if (!IsAllowedAttribute(attribute, allowDataAttributes))
             {
-                _logger.LogWarning(message: "Removed a not valid attribute: `{AttributeName}` from `{NodeOuterHtml}`.",
-                    attribute.Name, node.OuterHtml);
+                _logger.LogInformation(
+                    message: "Removed a not valid attribute: `{AttributeName}` from `{NodeOuterHtml}`.", attribute.Name,
+                    node.OuterHtml);
 
                 attribute.Remove();
 
@@ -242,7 +288,7 @@ public class AntiXssService : IAntiXssService
 
             if (result.HasUnsafeValue)
             {
-                _logger.LogWarning(
+                _logger.LogInformation(
                     message:
                     "Removed an unsafe[`{ResultUnsafeItem}`] attribute: `{AttributeName}` from `{NodeOuterHtml}`.",
                     result.UnsafeItem, attribute.Name, node.OuterHtml);
@@ -256,7 +302,7 @@ public class AntiXssService : IAntiXssService
 
             if (result.HasUnsafeValue)
             {
-                _logger.LogWarning(
+                _logger.LogInformation(
                     message:
                     "Removed an unsafe[`{ResultUnsafeItem}`] attribute: `{AttributeName}` from `{NodeOuterHtml}`.",
                     result.UnsafeItem, attribute.Name, node.OuterHtml);
@@ -275,7 +321,7 @@ public class AntiXssService : IAntiXssService
     {
         if (node.NodeType == HtmlNodeType.Comment)
         {
-            _logger.LogWarning(message: "Removed a comment: `{NodeOuterHtml}`.", node.OuterHtml);
+            _logger.LogInformation(message: "Removed a comment: `{NodeOuterHtml}`.", node.OuterHtml);
             node.ParentNode?.RemoveChild(node);
 
             return true;
@@ -288,7 +334,7 @@ public class AntiXssService : IAntiXssService
     {
         if (node.NodeType == HtmlNodeType.Element && !whitelistTags.Contains(node.Name))
         {
-            _logger.LogWarning(message: "Removed a not valid tag: `{NodeOuterHtml}`.", node.OuterHtml);
+            _logger.LogInformation(message: "Removed a not valid tag: `{NodeOuterHtml}`.", node.OuterHtml);
             node.ParentNode?.RemoveChild(node);
 
             return true;
