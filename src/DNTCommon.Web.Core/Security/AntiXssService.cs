@@ -30,7 +30,7 @@ public class AntiXssService : IAntiXssService
 
         _remoteImagesService = remoteImagesService;
 
-        if (_antiXssConfig == null || _antiXssConfig.ValidHtmlTags == null)
+        if (_antiXssConfig?.ValidHtmlTags == null)
         {
             throw new ArgumentNullException(nameof(antiXssConfigMonitor),
                 message: "Please add AntiXssConfig to your appsettings.json file.");
@@ -224,7 +224,7 @@ public class AntiXssService : IAntiXssService
             {
                 node.InnerHtml = encodedHtml;
 
-                _logger.LogInformation(message: "Fixed a non-encoded `{NodeName}` tag: `{NodeOuterHtml}`.", node.Name,
+                _logger.LogWarning(message: "Fixed a non-encoded `{NodeName}` tag: `{NodeOuterHtml}`.", node.Name,
                     node.OuterHtml);
             }
 
@@ -273,9 +273,8 @@ public class AntiXssService : IAntiXssService
 
             if (!IsAllowedAttribute(attribute, allowDataAttributes))
             {
-                _logger.LogInformation(
-                    message: "Removed a not valid attribute: `{AttributeName}` from `{NodeOuterHtml}`.", attribute.Name,
-                    node.OuterHtml);
+                _logger.LogWarning(message: "Removed a not valid attribute: `{AttributeName}` from `{NodeOuterHtml}`.",
+                    attribute.Name, node.OuterHtml);
 
                 attribute.Remove();
 
@@ -284,11 +283,23 @@ public class AntiXssService : IAntiXssService
 
             attribute.Value = attribute.Value.Trim();
 
+            if (attribute.Value.HasFullWidthChar() || attribute.Value.HasSmallCapitalChar())
+            {
+                _logger.LogWarning(
+                    message:
+                    "Removed an unsafe[`{ResultUnsafeItem}`] attribute with a bad width char: `{AttributeName}` from `{NodeOuterHtml}`.",
+                    attribute.Value, attribute.Name, node.OuterHtml);
+
+                attribute.Remove();
+
+                continue;
+            }
+
             var result = CheckAttributeValue(attribute.Value);
 
             if (result.HasUnsafeValue)
             {
-                _logger.LogInformation(
+                _logger.LogWarning(
                     message:
                     "Removed an unsafe[`{ResultUnsafeItem}`] attribute: `{AttributeName}` from `{NodeOuterHtml}`.",
                     result.UnsafeItem, attribute.Name, node.OuterHtml);
@@ -302,7 +313,7 @@ public class AntiXssService : IAntiXssService
 
             if (result.HasUnsafeValue)
             {
-                _logger.LogInformation(
+                _logger.LogWarning(
                     message:
                     "Removed an unsafe[`{ResultUnsafeItem}`] attribute: `{AttributeName}` from `{NodeOuterHtml}`.",
                     result.UnsafeItem, attribute.Name, node.OuterHtml);
@@ -334,7 +345,7 @@ public class AntiXssService : IAntiXssService
     {
         if (node.NodeType == HtmlNodeType.Element && !whitelistTags.Contains(node.Name))
         {
-            _logger.LogInformation(message: "Removed a not valid tag: `{NodeOuterHtml}`.", node.OuterHtml);
+            _logger.LogWarning(message: "Removed a not valid tag: `{NodeOuterHtml}`.", node.OuterHtml);
             node.ParentNode?.RemoveChild(node);
 
             return true;

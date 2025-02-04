@@ -7,6 +7,11 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public static class StringUtils
 {
+    private static readonly char[] SmallCapitalLetters =
+    [
+        'ᴀ', 'ʙ', 'ᴄ', 'ᴅ', 'ᴇ', 'ғ', 'ɢ', 'ʜ', 'ɪ', 'ᴊ', 'ᴋ', 'ʟ', 'ᴍ', 'ɴ', 'ᴏ', 'ᴘ', 'ʀ', 'ᴛ', 'ᴜ', 'ᴡ', 'ʏ', 'ᴢ'
+    ];
+
     /// <summary>
     ///     Converts a  multi-line text to a list. It's useful for textarea to db field value binding.
     /// </summary>
@@ -161,4 +166,49 @@ public static class StringUtils
     /// </summary>
     public static string ToInvariantString(this ref DefaultInterpolatedStringHandler handler)
         => string.Create(CultureInfo.InvariantCulture, ref handler);
+
+    /// <summary>
+    ///     Some characters such as `ｅｘｐｒｅｓｓｉｏｎ` are called "full-width" characters.
+    ///     They look like regular letters but are actually different Unicode code points.
+    /// </summary>
+    public static bool IsFullWidthChar(this char c)
+        => (c >= 0x1100 && c <= 0x115F) || // Hangul Jamo
+           (c >= 0x2E80 && c <= 0xA4CF && c != 0x303F) || // CJK Radicals Supplement and Kangxi Radicals
+           (c >= 0xAC00 && c <= 0xD7A3) || // Hangul Syllables
+           (c >= 0xF900 && c <= 0xFAFF) || // CJK Compatibility Ideographs
+           (c >= 0xFE10 && c <= 0xFE19) || // Vertical forms
+           (c >= 0xFE30 && c <= 0xFE6F) || // CJK Compatibility Forms
+           (c >= 0xFF00 && c <= 0xFF60) || // Fullwidth Forms
+           (c >= 0xFFE0 && c <= 0xFFE6); // Fullwidth Symbol Forms
+
+    /// <summary>
+    ///     Some characters such as `ｅｘｐｒｅｓｓｉｏｎ` are called "full-width" characters.
+    ///     They look like regular letters but are actually different Unicode code points.
+    /// </summary>
+    public static bool HasFullWidthChar(this string? input)
+        => !input.IsEmpty() && input.ToCharArray().Any(chr => chr.IsFullWidthChar());
+
+    /// <summary>
+    ///     Some characters such as `ｅｘｐｒｅｓｓｉｏｎ` are called "full-width" characters.
+    ///     They look like regular letters but are actually different Unicode code points.
+    /// </summary>
+    public static bool IsFullWidthCharString(this string? input)
+        => !input.IsEmpty() && input.ToCharArray().All(chr => chr.IsFullWidthChar());
+
+    /// <summary>
+    ///     The lowercase small capital I is similar in size to the letter "i" but is shaped like the capital letter "I".
+    /// </summary>
+    public static bool IsSmallCapitalChar(this char c) => SmallCapitalLetters.Contains(c);
+
+    /// <summary>
+    ///     The lowercase small capital I is similar in size to the letter "i" but is shaped like the capital letter "I".
+    /// </summary>
+    public static bool HasSmallCapitalChar(this string? input)
+        => !input.IsEmpty() && input.ToCharArray().Any(chr => chr.IsSmallCapitalChar());
+
+    /// <summary>
+    ///     The lowercase small capital I is similar in size to the letter "i" but is shaped like the capital letter "I".
+    /// </summary>
+    public static bool IsSmallCapitalCharString(this string? input)
+        => !input.IsEmpty() && input.ToCharArray().All(chr => chr.IsSmallCapitalChar());
 }
