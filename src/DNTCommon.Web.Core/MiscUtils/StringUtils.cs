@@ -211,4 +211,10 @@ public static class StringUtils
     /// </summary>
     public static bool IsSmallCapitalCharString(this string? input)
         => !input.IsEmpty() && input.ToCharArray().All(chr => chr.IsSmallCapitalChar());
+
+    /// <summary>
+    ///     Determine whether any items in values, appear in the input.
+    /// </summary>
+    public static bool IsIn<T>(this T input, ICollection<T> values, IEqualityComparer<T> comparisonType)
+        => values.Any(value => comparisonType.Equals(value, input));
 }
