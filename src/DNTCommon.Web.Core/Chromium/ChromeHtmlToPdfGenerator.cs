@@ -17,15 +17,15 @@ public class ChromeHtmlToPdfGenerator(
     ///     High level method that converts HTML to PDF.
     /// </summary>
     /// <returns></returns>
-    public async Task<string> GeneratePdfFromHtmlAsync(HtmlToPdfGeneratorOptions options, TimeSpan timeout)
+    public async Task<string> GeneratePdfFromHtmlAsync(HtmlToPdfGeneratorOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
 
-        using var locker = await lockerService.LockAsync<ExecuteApplicationProcess>(timeout);
+        using var locker = await lockerService.LockAsync<ExecuteApplicationProcess>(options.VirtualTimeBudget);
 
-        var arguments = CreateArguments(options, timeout);
+        var arguments = CreateArguments(options);
 
-        var appPath = GetChromePath(options);
+        var appPath = options.ChromePath;
 
         if (string.IsNullOrWhiteSpace(appPath))
         {
@@ -38,31 +38,32 @@ public class ChromeHtmlToPdfGenerator(
             Arguments = arguments,
             AppPath = appPath,
             WaitForExit = options.WaitForExit,
-            KillProcessOnStart = false
+            KillProcessOnStart = options.KillProcessOnStart
         });
 
         $"{options}{Environment.NewLine}{log}".LogPossibleErrorsOrWarnings(logger);
 
-        options.OutputPdfFile.AddMetadataToPdfFile(options.DocumentMetadata);
+        options.OutputFilePath.AddMetadataToPdfFile(options.DocumentMetadata);
 
         return log;
     }
 
-    private static string CreateArguments(HtmlToPdfGeneratorOptions options, TimeSpan timeout)
+    private static string CreateArguments(HtmlToPdfGeneratorOptions options)
     {
         string[] parameters =
         [
             ..ChromeGeneralParameters.GeneralParameters, "--no-pdf-header-footer",
             "--generate-pdf-document-outline", "--export-tagged-pdf",
-            string.Create(CultureInfo.InvariantCulture, $"--virtual-time-budget={GetVirtualTimeBudget(timeout)}")
+            string.Create(CultureInfo.InvariantCulture,
+                $"--virtual-time-budget={options.VirtualTimeBudgetTotalMilliseconds}")
         ];
 
         var arguments = new StringBuilder();
         arguments.AppendJoin(separator: " ", parameters);
 
-        if (string.IsNullOrEmpty(options.OutputPdfFile))
+        if (string.IsNullOrEmpty(options.OutputFilePath))
         {
-            throw new InvalidOperationException(message: "OutputPdfFile is null");
+            throw new InvalidOperationException(message: "OutputFilePath is null");
         }
 
         if (string.IsNullOrEmpty(options.SourceHtmlFileOrUri))
@@ -71,16 +72,8 @@ public class ChromeHtmlToPdfGenerator(
         }
 
         arguments.Append(CultureInfo.InvariantCulture,
-            $" --print-to-pdf=\"{options.OutputPdfFile}\" \"{options.SourceHtmlFileOrUri}\" ");
+            $" --print-to-pdf=\"{options.OutputFilePath}\" \"{options.SourceHtmlFileOrUri}\" ");
 
         return arguments.ToString();
     }
-
-    private static int GetVirtualTimeBudget(TimeSpan timeout)
-        => timeout.TotalMilliseconds < int.MaxValue ? (int)timeout.TotalMilliseconds : int.MaxValue - 1;
-
-    private static string? GetChromePath(HtmlToPdfGeneratorOptions options)
-        => !string.IsNullOrWhiteSpace(options.ChromeExecutablePath)
-            ? options.ChromeExecutablePath
-            : ChromeFinder.Find();
 }

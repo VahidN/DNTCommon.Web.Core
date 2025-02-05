@@ -17,13 +17,13 @@ public static class ChromeGeneralParameters
         "--disable-background-networking", "--enable-features=NetworkService,NetworkServiceInProcess",
         "--disable-background-timer-throttling", "--disable-backgrounding-occluded-windows", "--disable-breakpad",
         "--disable-client-side-phishing-detection", "--disable-default-apps", "--disable-dev-shm-usage",
-        "--disable-component-update", "--disable-extensions",
+        "--disable-component-update", "--disable-extensions", "--disable-speech-api",
         "--disable-features=Translate,BackForwardCache,AcceptCHFrame,MediaRouter,OptimizationHints,TranslateUI",
         "--disable-hang-monitor", "--disable-ipc-flooding-protection", "--disable-popup-blocking",
         "--disable-prompt-on-repost", "--disable-renderer-backgrounding", "--disable-sync",
         "--force-color-profile=srgb", "--metrics-recording-only", "--no-first-run", "--password-store=basic",
         "--use-mock-keychain", "--enable-blink-features=IdleDetection", "--headless", "--hide-scrollbars",
-        "--mute-audio", "--no-sandbox", "--no-zygote", "--no-default-browser-check",
+        "--mute-audio", "--no-sandbox", "--no-zygote", "--no-default-browser-check", "--disable-java",
         "--disable-site-isolation-trials", "--no-experiments", "--ignore-gpu-blocklist",
         "--ignore-certificate-errors", "--ignore-certificate-errors-spki-list", "--disable-gpu",
         "--num-raster-threads=2", "--no-service-autorun", "--disable-extensions", "--disable-default-apps",
@@ -37,6 +37,8 @@ public static class ChromeGeneralParameters
         "--user-agent=\"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0\"",
         "--enable-logging=stderr", "--log-level=0", "--deny-permission-prompts",
         "--disable-external-intent-requests", "--noerrdialogs", "--disable-back-forward-cache",
-        "--aggressive-cache-discard", "--ash-no-nudges", "--disable-oopr-debug-crash-dump"
+        "--aggressive-cache-discard", "--ash-no-nudges", "--disable-oopr-debug-crash-dump", "--disable-cache",
+        "--disable-application-cache", "--disable-offline-load-stale-cache", "--disk-cache-size=1",
+        "--media-cache-size=1"
     ];
 }

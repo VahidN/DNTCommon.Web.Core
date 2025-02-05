@@ -3,34 +3,14 @@
 /// <summary>
 ///     HtmlToPdfGenerator Options
 /// </summary>
-public class HtmlToPdfGeneratorOptions
+public class HtmlToPdfGeneratorOptions : BaseChromiumGeneratorOptions
 {
-    /// <summary>
-    ///     Source Uri
-    /// </summary>
-    public string? SourceHtmlFileOrUri { set; get; }
-
-    /// <summary>
-    ///     Output path
-    /// </summary>
-    public string? OutputPdfFile { set; get; }
-
     /// <summary>
     ///     Defines metadata information of the Document.
     /// </summary>
     public PdfDocumentMetadata? DocumentMetadata { set; get; }
 
-    /// <summary>
-    ///     If it's not specified, ChromeFinder.Find with try to find it!
-    /// </summary>
-    public string? ChromeExecutablePath { get; set; } = "";
-
-    /// <summary>
-    ///     Wait for exit.
-    /// </summary>
-    public TimeSpan? WaitForExit { set; get; }
-
     /// <inheritdoc />
     public override string ToString()
-        => $"SourceHtmlFileOrUri:`{SourceHtmlFileOrUri}`, OutputPdfFile:`{OutputPdfFile}`, WaitForExit:`{WaitForExit}`, DocumentMetadata:`{DocumentMetadata}`.";
+        => $"SourceHtmlFileOrUri:`{SourceHtmlFileOrUri}`, OutputPdfFile:`{OutputFilePath}`, WaitForExit:`{WaitForExit}`, DocumentMetadata:`{DocumentMetadata}`.";
 }

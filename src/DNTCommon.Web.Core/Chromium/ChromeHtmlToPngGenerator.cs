@@ -17,15 +17,15 @@ public class ChromeHtmlToPngGenerator(
     ///     High level method that converts HTML to PNG.
     /// </summary>
     /// <returns></returns>
-    public async Task<string> GeneratePngFromHtmlAsync(HtmlToPngGeneratorOptions options, TimeSpan timeout)
+    public async Task<string> GeneratePngFromHtmlAsync(HtmlToPngGeneratorOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
 
-        using var locker = await lockerService.LockAsync<ExecuteApplicationProcess>(timeout);
+        using var locker = await lockerService.LockAsync<ExecuteApplicationProcess>(options.VirtualTimeBudget);
 
-        var arguments = CreateArguments(options, timeout);
+        var arguments = CreateArguments(options);
 
-        var appPath = GetChromePath(options);
+        var appPath = options.ChromePath;
 
         if (string.IsNullOrWhiteSpace(appPath))
         {
@@ -38,7 +38,7 @@ public class ChromeHtmlToPngGenerator(
             Arguments = arguments,
             AppPath = appPath,
             WaitForExit = options.WaitForExit,
-            KillProcessOnStart = false
+            KillProcessOnStart = options.KillProcessOnStart
         });
 
         $"{options}{Environment.NewLine}{log}".LogPossibleErrorsOrWarnings(logger);
@@ -53,21 +53,22 @@ public class ChromeHtmlToPngGenerator(
         return log;
     }
 
-    private static string CreateArguments(HtmlToPngGeneratorOptions options, TimeSpan timeout)
+    private static string CreateArguments(HtmlToPngGeneratorOptions options)
     {
         string[] parameters =
         [
             ..ChromeGeneralParameters.GeneralParameters,
-            string.Create(CultureInfo.InvariantCulture, $"--virtual-time-budget={GetVirtualTimeBudget(timeout)}"),
+            string.Create(CultureInfo.InvariantCulture,
+                $"--virtual-time-budget={options.VirtualTimeBudgetTotalMilliseconds}"),
             Invariant($"--window-size=\"{options.Width},{options.Height}\"")
         ];
 
         var arguments = new StringBuilder();
         arguments.AppendJoin(separator: " ", parameters);
 
-        if (string.IsNullOrEmpty(options.OutputPngFile))
+        if (string.IsNullOrEmpty(options.OutputFilePath))
         {
-            throw new InvalidOperationException(message: "OutputPngFile is null");
+            throw new InvalidOperationException(message: "OutputFilePath is null");
         }
 
         if (string.IsNullOrEmpty(options.SourceHtmlFileOrUri))
@@ -76,27 +77,27 @@ public class ChromeHtmlToPngGenerator(
         }
 
         arguments.Append(CultureInfo.InvariantCulture,
-            $" --screenshot=\"{options.OutputPngFile}\" \"{options.SourceHtmlFileOrUri}\" ");
+            $" --screenshot=\"{options.OutputFilePath}\" \"{options.SourceHtmlFileOrUri}\" ");
 
         return arguments.ToString();
     }
 
     private bool IsValidImageFile(HtmlToPngGeneratorOptions options)
     {
-        if (options.OutputPngFile.IsValidImageFile(logger: logger))
+        if (options.OutputFilePath.IsValidImageFile(logger: logger))
         {
             return true;
         }
 
-        options.OutputPngFile.TryDeleteFile(logger);
-        logger.LogError(message: "`{File} was an invalid image file.`", options.OutputPngFile);
+        options.OutputFilePath.TryDeleteFile(logger);
+        logger.LogError(message: "`{File} was an invalid image file.`", options.OutputFilePath);
 
         return false;
     }
 
     private static async Task TryResizeFileAsync(HtmlToPngGeneratorOptions options)
     {
-        var pngFile = options.OutputPngFile;
+        var pngFile = options.OutputFilePath;
 
         if (!pngFile.FileExists() || options is not { ResizeImageOptions: not null })
         {
@@ -110,12 +111,4 @@ public class ChromeHtmlToPngGenerator(
             await File.WriteAllBytesAsync(pngFile, newData);
         }
     }
-
-    private static string? GetChromePath(HtmlToPngGeneratorOptions options)
-        => !string.IsNullOrWhiteSpace(options.ChromeExecutablePath)
-            ? options.ChromeExecutablePath
-            : ChromeFinder.Find();
-
-    private static int GetVirtualTimeBudget(TimeSpan timeout)
-        => timeout.TotalMilliseconds < int.MaxValue ? (int)timeout.TotalMilliseconds : int.MaxValue - 1;
 }
