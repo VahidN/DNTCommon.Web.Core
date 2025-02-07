@@ -95,6 +95,12 @@ public static class CollectionsExtensions
             return source == null && destination == null;
         }
 
+        if (IsTargetEmpty(destination) || HasNonEmptyTargetWithEmptySource(source, destination) ||
+            IsTargetLongerThanSource(source, destination))
+        {
+            return false;
+        }
+
         comparisonType ??= EqualityComparer<T>.Default;
 
         return source.Take(destination.Count).SequenceEqual(destination, comparisonType);
@@ -110,6 +116,12 @@ public static class CollectionsExtensions
         if (source == null || destination == null)
         {
             return source == null && destination == null;
+        }
+
+        if (IsTargetEmpty(destination) || HasNonEmptyTargetWithEmptySource(source, destination) ||
+            IsTargetLongerThanSource(source, destination))
+        {
+            return false;
         }
 
         comparisonType ??= EqualityComparer<T>.Default;
@@ -129,7 +141,8 @@ public static class CollectionsExtensions
             return source == null && destination == null;
         }
 
-        if (destination.Count == 0 || source.Count < destination.Count)
+        if (IsTargetEmpty(destination) || HasNonEmptyTargetWithEmptySource(source, destination) ||
+            IsTargetLongerThanSource(source, destination))
         {
             return false;
         }
@@ -147,6 +160,14 @@ public static class CollectionsExtensions
         return false;
     }
 
+    private static bool IsTargetEmpty<T>(ICollection<T> destination) => destination.Count == 0;
+
+    private static bool HasNonEmptyTargetWithEmptySource<T>(ICollection<T> source, ICollection<T> destination)
+        => source.Count == 0 && destination.Count > 0;
+
+    private static bool IsTargetLongerThanSource<T>(ICollection<T> source, ICollection<T> destination)
+        => destination.Count > source.Count;
+
     /// <summary>
     ///     Return true if the `source.Skip(Math.Max(val1: 0, source.Count - destination.Count))` elements are equal to
     ///     destination elements
@@ -158,6 +179,12 @@ public static class CollectionsExtensions
         if (source == null || destination == null)
         {
             return source == null && destination == null;
+        }
+
+        if (IsTargetEmpty(destination) || HasNonEmptyTargetWithEmptySource(source, destination) ||
+            IsTargetLongerThanSource(source, destination))
+        {
+            return false;
         }
 
         comparisonType ??= EqualityComparer<T>.Default;
