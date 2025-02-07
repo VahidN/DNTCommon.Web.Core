@@ -62,4 +62,44 @@ public static class StreamUtils
 
         return output.ToArray();
     }
+
+    /// <summary>
+    ///     Tries to read the n first bytes of the given stream.
+    /// </summary>
+    public static byte[]? TryTakeFirstBytes(this Stream? stream, int numberOfBytes)
+    {
+        if (stream is null)
+        {
+            return null;
+        }
+
+        var buffer = new byte[numberOfBytes];
+        stream.Seek(offset: 0, SeekOrigin.Begin);
+        var readLength = stream.Read(buffer, offset: 0, buffer.Length);
+
+        if (readLength <= 0)
+        {
+            return null;
+        }
+
+        using var output = new MemoryStream();
+        output.Write(buffer, offset: 0, readLength);
+
+        return output.ToArray();
+    }
+
+    /// <summary>
+    ///     Tries to read the n first bytes of the given file.
+    /// </summary>
+    public static byte[]? TryTakeFirstBytes(this string? filePath, int numberOfBytes)
+    {
+        if (!filePath.FileExists())
+        {
+            return null;
+        }
+
+        using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+
+        return fs.TryTakeFirstBytes(numberOfBytes);
+    }
 }
