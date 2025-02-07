@@ -11,12 +11,15 @@ public static class StreamUtils
     public static string? ToText([NotNullIfNotNull(nameof(stream))] this Stream? stream,
         int readChunkBufferLength = 4096)
     {
-        if (stream is null)
+        if (stream is null || !stream.IsReadableStream())
         {
             return null;
         }
 
-        stream.Seek(offset: 0, SeekOrigin.Begin);
+        if (stream.Position != 0)
+        {
+            stream.Seek(offset: 0, SeekOrigin.Begin);
+        }
 
         using var textWriter = new StringWriter(CultureInfo.InvariantCulture);
         using var reader = new StreamReader(stream);
@@ -35,17 +38,26 @@ public static class StreamUtils
     }
 
     /// <summary>
+    ///     gets a value indicating whether the current stream supports reading.
+    /// </summary>
+    public static bool IsReadableStream([NotNullWhen(returnValue: true)] this Stream? stream)
+        => stream is { CanRead: true, CanSeek: true };
+
+    /// <summary>
     ///     Reads the given stream in chunks
     /// </summary>
     public static byte[]? ToBytes([NotNullIfNotNull(nameof(stream))] this Stream? stream,
         int readChunkBufferLength = 4096)
     {
-        if (stream is null)
+        if (stream is null || !stream.IsReadableStream())
         {
             return null;
         }
 
-        stream.Seek(offset: 0, SeekOrigin.Begin);
+        if (stream.Position != 0)
+        {
+            stream.Seek(offset: 0, SeekOrigin.Begin);
+        }
 
         var capacity = stream.CanSeek ? (int)stream.Length : 0;
         using var output = new MemoryStream(capacity);
@@ -68,13 +80,17 @@ public static class StreamUtils
     /// </summary>
     public static byte[]? TryTakeFirstBytes(this Stream? stream, int numberOfBytes)
     {
-        if (stream is null)
+        if (stream is null || !stream.IsReadableStream())
         {
             return null;
         }
 
+        if (stream.Position != 0)
+        {
+            stream.Seek(offset: 0, SeekOrigin.Begin);
+        }
+
         var buffer = new byte[numberOfBytes];
-        stream.Seek(offset: 0, SeekOrigin.Begin);
         var readLength = stream.Read(buffer, offset: 0, buffer.Length);
 
         if (readLength <= 0)
