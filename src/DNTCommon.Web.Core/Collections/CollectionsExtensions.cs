@@ -10,6 +10,42 @@ namespace DNTCommon.Web.Core;
 public static class CollectionsExtensions
 {
     /// <summary>
+    ///     Applies an action to each item of the given collection
+    /// </summary>
+    public static void ForEach<T>(this IEnumerable<T>? collection, Action<T> action)
+    {
+        ArgumentNullException.ThrowIfNull(action);
+
+        if (collection is null)
+        {
+            return;
+        }
+
+        foreach (var item in collection)
+        {
+            action(item);
+        }
+    }
+
+    /// <summary>
+    ///     Applies an action to each item of the given collection
+    /// </summary>
+    public static async Task ForEachAsync<T>(this IEnumerable<T>? collection, Func<T, Task> action)
+    {
+        ArgumentNullException.ThrowIfNull(action);
+
+        if (collection is null)
+        {
+            return;
+        }
+
+        foreach (var item in collection)
+        {
+            await action(item);
+        }
+    }
+
+    /// <summary>
     ///     Adds the `AddRange` to an `IList`
     /// </summary>
     public static bool AddRange<T>([NotNullWhen(returnValue: true)] this ICollection<T>? source,
