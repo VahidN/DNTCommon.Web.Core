@@ -16,6 +16,17 @@ public static class NetworkExtensions
         => ex != null && (ex is SocketException || ex is WebException || ex.InnerException?.IsNetworkError() == true);
 
     /// <summary>
+    ///     Determines if there is at least one network interface capable of reaching the interwebs
+    /// </summary>
+    /// <returns>True if there is a viable connection</returns>
+    public static bool IsNetworkAvailable()
+        => NetworkInterface.GetIsNetworkAvailable() && NetworkInterface.GetAllNetworkInterfaces()
+            .Any(networkInterface => networkInterface.OperationalStatus == OperationalStatus.Up &&
+                                     networkInterface.NetworkInterfaceType != NetworkInterfaceType.Tunnel &&
+                                     networkInterface.NetworkInterfaceType != NetworkInterfaceType.Loopback &&
+                                     networkInterface.GetIPv4Statistics() is { BytesReceived: > 0, BytesSent: > 0 });
+
+    /// <summary>
     ///     Is there any internet connection?
     /// </summary>
     /// <returns></returns>
@@ -25,7 +36,7 @@ public static class NetworkExtensions
     {
         try
         {
-            return !hostNameOrAddressToPing.IsEmpty() && NetworkInterface.GetIsNetworkAvailable() &&
+            return !hostNameOrAddressToPing.IsEmpty() && IsNetworkAvailable() &&
                    hostNameOrAddressToPing.PingHost(timeout).Status == IPStatus.Success;
         }
         catch (Exception ex)
