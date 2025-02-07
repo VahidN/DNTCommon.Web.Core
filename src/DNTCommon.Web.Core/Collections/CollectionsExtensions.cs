@@ -48,9 +48,94 @@ public static class CollectionsExtensions
         => source == null || !source.Any();
 
     /// <summary>
+    ///     Return true if the `source.Take(destination.Count)` elements are equal to destination elements
+    /// </summary>
+    public static bool StartsWith<T>(this ICollection<T>? source,
+        ICollection<T>? destination,
+        IEqualityComparer<T>? comparisonType = null)
+    {
+        if (source == null || destination == null)
+        {
+            return source == null && destination == null;
+        }
+
+        comparisonType ??= EqualityComparer<T>.Default;
+
+        return source.Take(destination.Count).SequenceEqual(destination, comparisonType);
+    }
+
+    /// <summary>
+    ///     Return true if the `source` elements contain sub-list items
+    /// </summary>
+    public static bool ContainsNonSequentially<T>(this ICollection<T>? source,
+        ICollection<T>? destination,
+        IEqualityComparer<T>? comparisonType = null)
+    {
+        if (source == null || destination == null)
+        {
+            return source == null && destination == null;
+        }
+
+        comparisonType ??= EqualityComparer<T>.Default;
+
+        return !destination.Except(source, comparisonType).Any();
+    }
+
+    /// <summary>
+    ///     Return true if the `source` elements contain a sub-list sequentially
+    /// </summary>
+    public static bool ContainsSequentially<T>(this ICollection<T>? source,
+        ICollection<T>? destination,
+        IEqualityComparer<T>? comparisonType = null)
+    {
+        if (source == null || destination == null)
+        {
+            return source == null && destination == null;
+        }
+
+        if (destination.Count == 0 || source.Count < destination.Count)
+        {
+            return false;
+        }
+
+        comparisonType ??= EqualityComparer<T>.Default;
+
+        for (var i = 0; i <= source.Count - destination.Count; i++)
+        {
+            if (source.Skip(i).Take(destination.Count).SequenceEqual(destination, comparisonType))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    ///     Return true if the `source.Skip(Math.Max(val1: 0, source.Count - destination.Count))` elements are equal to
+    ///     destination elements
+    /// </summary>
+    public static bool EndsWith<T>(this ICollection<T>? source,
+        ICollection<T>? destination,
+        IEqualityComparer<T>? comparisonType = null)
+    {
+        if (source == null || destination == null)
+        {
+            return source == null && destination == null;
+        }
+
+        comparisonType ??= EqualityComparer<T>.Default;
+
+        return source.Skip(Math.Max(val1: 0, source.Count - destination.Count))
+            .SequenceEqual(destination, comparisonType);
+    }
+
+    /// <summary>
     ///     Return true if the source elements are equal to destination elements
     /// </summary>
-    public static bool IsEqualTo<T>(this IList<T>? source, IList<T>? destination)
+    public static bool IsEqualTo<T>(this ICollection<T>? source,
+        ICollection<T>? destination,
+        IEqualityComparer<T>? comparisonType = null)
     {
         if (source == null || destination == null)
         {
@@ -62,9 +147,19 @@ public static class CollectionsExtensions
             return false;
         }
 
-        var comparer = EqualityComparer<T>.Default;
+        comparisonType ??= EqualityComparer<T>.Default;
 
-        return !source.Where((t, i) => !comparer.Equals(t, destination[i])).Any();
+        return source.SequenceEqual(destination, comparisonType);
+    }
+
+    /// <summary>
+    ///     Determine whether any items in values, appear in the input.
+    /// </summary>
+    public static bool IsIn<T>(this T input, ICollection<T> values, IEqualityComparer<T>? comparisonType = null)
+    {
+        comparisonType ??= EqualityComparer<T>.Default;
+
+        return values.Any(value => comparisonType.Equals(value, input));
     }
 
     /// <summary>
