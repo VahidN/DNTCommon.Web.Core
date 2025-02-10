@@ -14,6 +14,7 @@ namespace DNTCommon.Web.Core;
 ///     A web mail service using the `MailKit` library.
 /// </remarks>
 public class WebMailService(
+    IBackgroundQueueService backgroundQueueService,
     IViewRendererService viewRendererService
 #if NET_9 || NET_8
     ,
@@ -27,6 +28,24 @@ public class WebMailService(
 #endif
     private readonly IViewRendererService _viewRendererService =
         viewRendererService ?? throw new ArgumentNullException(nameof(viewRendererService));
+
+    /// <summary>
+    ///     Queues sending an email using the `MailKit` library.
+    /// </summary>
+    public void BackgroundQueueSendEmail(SmtpConfig smtpConfig,
+        IEnumerable<MailAddress> emails,
+        string subject,
+        string message,
+        IEnumerable<MailAddress>? blindCarpbonCopies = null,
+        IEnumerable<MailAddress>? carpbonCopies = null,
+        IEnumerable<MailAddress>? replyTos = null,
+        DelayDelivery? delayDelivery = null,
+        IEnumerable<string>? attachmentFiles = null,
+        MailHeaders? headers = null,
+        bool shouldValidateServerCertificate = true)
+        => backgroundQueueService.QueueBackgroundWorkItem((_, _) => SendEmailAsync(smtpConfig, emails, subject, message,
+            blindCarpbonCopies, carpbonCopies, replyTos, delayDelivery, attachmentFiles, headers,
+            shouldValidateServerCertificate));
 
     /// <summary>
     ///     Sends an email using the `MailKit` library.
@@ -51,15 +70,15 @@ public class WebMailService(
             delayDelivery, attachmentFiles, headers, shouldValidateServerCertificate);
     }
 
-#if NET_9 || NET_8
     /// <summary>
-    ///     Sends an email using the `MailKit` library.
-    ///     This method converts a Blazor .razor template file to an string and then uses it as the email's message.
+    ///     Queues sending an email using the `MailKit` library.
+    ///     This method converts a razor template file to a string and then uses it as the email's message.
     /// </summary>
-    public async Task SendEmailAsync<T>(SmtpConfig smtpConfig,
+    public void BackgroundQueueSendEmail<T>(SmtpConfig smtpConfig,
         IEnumerable<MailAddress> emails,
         string subject,
-        IDictionary<string, object?> viewModel,
+        string viewNameOrPath,
+        T viewModel,
         IEnumerable<MailAddress>? blindCarpbonCopies = null,
         IEnumerable<MailAddress>? carpbonCopies = null,
         IEnumerable<MailAddress>? replyTos = null,
@@ -67,14 +86,9 @@ public class WebMailService(
         IEnumerable<string>? attachmentFiles = null,
         MailHeaders? headers = null,
         bool shouldValidateServerCertificate = true)
-        where T : IComponent
-    {
-        var message = await _blazorStaticRendererService.StaticRenderComponentAsync<T>(viewModel);
-
-        await SendEmailAsync(smtpConfig, emails, subject, message, blindCarpbonCopies, carpbonCopies, replyTos,
-            delayDelivery, attachmentFiles, headers, shouldValidateServerCertificate);
-    }
-#endif
+        => backgroundQueueService.QueueBackgroundWorkItem((_, _) => SendEmailAsync<T>(smtpConfig, emails, subject,
+            viewNameOrPath, viewModel, blindCarpbonCopies, carpbonCopies, replyTos, delayDelivery, attachmentFiles,
+            headers, shouldValidateServerCertificate));
 
     /// <summary>
     ///     Sends an email using the `MailKit` library.
@@ -295,4 +309,50 @@ public class WebMailService(
 
         return builder.ToMessageBody();
     }
+
+#if NET_9 || NET_8
+    /// <summary>
+    ///     Sends an email using the `MailKit` library.
+    ///     This method converts a Blazor .razor template file to an string and then uses it as the email's message.
+    /// </summary>
+    public async Task SendEmailAsync<T>(SmtpConfig smtpConfig,
+        IEnumerable<MailAddress> emails,
+        string subject,
+        IDictionary<string, object?> viewModel,
+        IEnumerable<MailAddress>? blindCarpbonCopies = null,
+        IEnumerable<MailAddress>? carpbonCopies = null,
+        IEnumerable<MailAddress>? replyTos = null,
+        DelayDelivery? delayDelivery = null,
+        IEnumerable<string>? attachmentFiles = null,
+        MailHeaders? headers = null,
+        bool shouldValidateServerCertificate = true)
+        where T : IComponent
+    {
+        var message = await _blazorStaticRendererService.StaticRenderComponentAsync<T>(viewModel);
+
+        await SendEmailAsync(smtpConfig, emails, subject, message, blindCarpbonCopies, carpbonCopies, replyTos,
+            delayDelivery, attachmentFiles, headers, shouldValidateServerCertificate);
+    }
+
+    /// <summary>
+    ///     Queues sending an email using the `MailKit` library.
+    ///     This method converts a blazor .razor template file to a string and then uses it as the email's message.
+    /// </summary>
+    public void BackgroundQueueSendEmail<T>(SmtpConfig smtpConfig,
+        IEnumerable<MailAddress> emails,
+        string subject,
+        IDictionary<string, object?> viewModel,
+        IEnumerable<MailAddress>? blindCarpbonCopies = null,
+        IEnumerable<MailAddress>? carpbonCopies = null,
+        IEnumerable<MailAddress>? replyTos = null,
+        DelayDelivery? delayDelivery = null,
+        IEnumerable<string>? attachmentFiles = null,
+        MailHeaders? headers = null,
+        bool shouldValidateServerCertificate = true)
+        where T : IComponent
+        => backgroundQueueService.QueueBackgroundWorkItem((_, _) => SendEmailAsync<T>(smtpConfig, emails, subject,
+            viewModel, blindCarpbonCopies, carpbonCopies, replyTos, delayDelivery, attachmentFiles, headers,
+            shouldValidateServerCertificate));
+
+#endif
 }
