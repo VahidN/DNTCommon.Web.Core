@@ -9,7 +9,8 @@ namespace DNTCommon.Web.Core;
 public class ChromeHtmlToPngGenerator(
     IExecuteApplicationProcess executeApplicationProcess,
     ILockerService lockerService,
-    ILogger<ChromeHtmlToPngGenerator> logger) : IHtmlToPngGenerator
+    ILogger<ChromeHtmlToPngGenerator> logger,
+    IAntiXssService antiXssService) : IHtmlToPngGenerator
 {
     private const string ErrorMessage = "ChromeFinder was not successful and ChromeExecutablePath is null.";
 
@@ -41,7 +42,7 @@ public class ChromeHtmlToPngGenerator(
             KillProcessOnStart = options.KillProcessOnStart
         });
 
-        $"{options}{Environment.NewLine}{log}".LogPossibleErrorsOrWarnings(logger);
+        antiXssService.GetSanitizedHtml($"{options}{Environment.NewLine}{log}").LogPossibleErrorsOrWarnings(logger);
 
         if (!IsValidImageFile(options))
         {
