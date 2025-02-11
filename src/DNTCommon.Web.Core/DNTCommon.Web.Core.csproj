@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Description>DNTCommon.Web.Core provides common scenarios' solutions for ASP.NET Core applications.</Description>
-        <VersionPrefix>9.4.0</VersionPrefix>
+        <VersionPrefix>9.5.0</VersionPrefix>
         <Authors>Vahid Nasiri</Authors>
         <TargetFrameworks>net9.0;net8.0;net7.0;net6.0;</TargetFrameworks>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -63,7 +63,7 @@
         <Using Include="System.Net.Http.Headers"/>
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Meziantou.Analyzer" Version="2.0.186">
+        <PackageReference Include="Meziantou.Analyzer" Version="2.0.187">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
@@ -87,7 +87,7 @@
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App"/>
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
-        <PackageReference Include="DNTPersianUtils.Core" Version="6.4.0"/>
+        <PackageReference Include="DNTPersianUtils.Core" Version="6.5.0"/>
         <PackageReference Include="MailKit" Version="4.10.0"/>
         <PackageReference Include="HtmlAgilityPack" Version="1.11.72"/>
         <PackageReference Include="IPAddressRange" Version="6.1.0"/>
