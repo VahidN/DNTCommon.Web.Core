@@ -67,6 +67,69 @@ public static class UploadFileServiceExtensions
     }
 
     /// <summary>
+    ///     Saves the posted IFormFile to a byte array.
+    /// </summary>
+    /// <param name="formFile">The posted file.</param>
+    public static byte[]? GetPostedFileData(this IFormFile? formFile)
+    {
+        if (formFile == null || formFile.Length == 0)
+        {
+            return null;
+        }
+
+        using var memoryStream = new MemoryStream();
+        formFile.CopyTo(memoryStream);
+
+        return memoryStream.ToArray();
+    }
+
+    /// <summary>
+    ///     Saves the posted IFormFile to a byte array.
+    /// </summary>
+    /// <param name="formFile">The posted file.</param>
+    public static Task<byte[]?> ToByteArrayAsync(this IFormFile? formFile) => formFile.GetPostedFileDataAsync();
+
+    /// <summary>
+    ///     Saves the posted IFormFile to a byte array.
+    /// </summary>
+    /// <param name="formFile">The posted file.</param>
+    public static byte[]? ToByteArray(this IFormFile? formFile) => formFile.GetPostedFileData();
+
+    /// <summary>
+    ///     Saves the posted IFormFiles to  byte arrays.
+    /// </summary>
+    /// <param name="fromFiles">The posted files.</param>
+    public static IEnumerable<Task<byte[]?>> ToByteArraysAsync(this IFormFileCollection? fromFiles)
+    {
+        if (fromFiles is null || fromFiles.Count == 0)
+        {
+            yield break;
+        }
+
+        foreach (var fromFile in fromFiles)
+        {
+            yield return fromFile.GetPostedFileDataAsync();
+        }
+    }
+
+    /// <summary>
+    ///     Saves the posted IFormFiles to byte arrays.
+    /// </summary>
+    /// <param name="fromFiles">The posted files.</param>
+    public static IEnumerable<byte[]?> ToByteArrays(this IFormFileCollection? fromFiles)
+    {
+        if (fromFiles is null || fromFiles.Count == 0)
+        {
+            yield break;
+        }
+
+        foreach (var fromFile in fromFiles)
+        {
+            yield return fromFile.GetPostedFileData();
+        }
+    }
+
+    /// <summary>
     ///     Saves the posted IFormFile to the specified directory asynchronously.
     /// </summary>
     /// <param name="formFile">The posted file.</param>
