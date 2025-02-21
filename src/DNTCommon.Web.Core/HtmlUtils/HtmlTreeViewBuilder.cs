@@ -5,9 +5,8 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     Html TreeView Builder
 /// </summary>
-/// <typeparam name="TItem"></typeparam>
-public class HtmlTreeViewBuilder<TItem>
-    where TItem : TreeItem<TItem>
+public class HtmlTreeViewBuilder<TItem, TKey>
+    where TItem : TreeItem<TKey>
 {
     private readonly StringBuilder _htmlBuilder = new();
     private int _numberOfItems;
@@ -46,6 +45,12 @@ public class HtmlTreeViewBuilder<TItem>
     ///     Dynamic template of an item
     /// </summary>
     public Func<TItem, string>? TreeItemBodyTemplate { set; get; }
+
+    /// <summary>
+    ///     Defines a method to support the comparison of objects for equality.
+    ///     Its default value is EqualityComparer&lt;TKey&gt;.Default
+    /// </summary>
+    public IEqualityComparer<TKey>? KeysEqualityComparer { set; get; } = EqualityComparer<TKey>.Default;
 
     /// <summary>
     /// </summary>
@@ -94,9 +99,11 @@ public class HtmlTreeViewBuilder<TItem>
     }
 
     private List<TItem>? GetKids(TItem parentItem)
-        => Items?.Where(treeItem => treeItem.ParentItemId is not null &&
-                                    EqualityComparer<TItem>.Default.Equals(treeItem.ParentItemId, parentItem.Id))
-            .ToList();
+        => KeysEqualityComparer is null
+            ? throw new InvalidOperationException($"{nameof(KeysEqualityComparer)} is null.")
+            : Items?.Where(treeItem => treeItem.ParentItemId is not null &&
+                                       KeysEqualityComparer.Equals(treeItem.ParentItemId, parentItem.Id))
+                .ToList();
 
     private void BuildNestedTag(TItem item)
     {
