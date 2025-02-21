@@ -5,15 +5,17 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     Html TreeView Builder
 /// </summary>
-/// <typeparam name="T"></typeparam>
-public class HtmlTreeViewBuilder<T>
+/// <typeparam name="TItem"></typeparam>
+public class HtmlTreeViewBuilder<TItem>
+    where TItem : TreeItem<TItem>
 {
     private readonly StringBuilder _htmlBuilder = new();
     private int _numberOfItems;
 
     /// <summary>
+    ///     List of TreeItems
     /// </summary>
-    public ICollection<TreeItem<T>>? Items { set; get; }
+    public IEnumerable<TItem>? Items { set; get; }
 
     /// <summary>
     ///     Its default value is &lt;ul&gt;
@@ -43,14 +45,14 @@ public class HtmlTreeViewBuilder<T>
     /// <summary>
     ///     Dynamic template of an item
     /// </summary>
-    public Func<TreeItem<T>, string>? TreeItemBodyTemplate { set; get; }
+    public Func<TItem, string>? TreeItemBodyTemplate { set; get; }
 
     /// <summary>
     /// </summary>
     /// <returns></returns>
     public (string HtmlDoc, int NumberOfItems) ItemsToHtml()
     {
-        if (Items is null || Items.Count == 0)
+        if (Items is null || !Items.Any())
         {
             return (string.Empty, 0);
         }
@@ -72,7 +74,7 @@ public class HtmlTreeViewBuilder<T>
         return (OuterDivTemplate(_htmlBuilder.ToString()), _numberOfItems);
     }
 
-    private void AppendKids(TreeItem<T> parentItem)
+    private void AppendKids(TItem parentItem)
     {
         var kids = GetKids(parentItem);
 
@@ -91,12 +93,12 @@ public class HtmlTreeViewBuilder<T>
         _htmlBuilder.Append(UnOrderedListEndTag);
     }
 
-    private List<TreeItem<T>>? GetKids(TreeItem<T> parentItem)
+    private List<TItem>? GetKids(TItem parentItem)
         => Items?.Where(treeItem => treeItem.ParentItemId is not null &&
-                                    EqualityComparer<T>.Default.Equals(treeItem.ParentItemId, parentItem.Id))
+                                    EqualityComparer<TItem>.Default.Equals(treeItem.ParentItemId, parentItem.Id))
             .ToList();
 
-    private void BuildNestedTag(TreeItem<T> item)
+    private void BuildNestedTag(TItem item)
     {
         if (TreeItemBodyTemplate is null)
         {
