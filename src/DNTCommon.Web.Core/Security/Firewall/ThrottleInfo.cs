@@ -29,5 +29,6 @@ public class ThrottleInfo
     ///     ToString()
     /// </summary>
     public override string ToString()
-        => Invariant($"RequestsCount: {RequestsCount}, ExpiresAt: {ExpiresAt},  Reason: {BanReason}");
+        => string.Create(CultureInfo.InvariantCulture,
+            $"RequestsCount: {RequestsCount}, ExpiresAt: {ExpiresAt},  Reason: {BanReason}");
 }

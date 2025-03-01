@@ -125,7 +125,7 @@ public static class AttributeExtensions
     public static T? GetAttribute<T>(this object? obj, bool inherit)
         where T : Attribute
     {
-        if (obj == null)
+        if (obj is null)
         {
             return null;
         }
@@ -205,7 +205,7 @@ public static class AttributeExtensions
     {
         ArgumentNullException.ThrowIfNull(mi);
 
-        return mi.GetCustomAttributes(inherited).Cast<Attribute>().ToList();
+        return [.. mi.GetCustomAttributes(inherited).Cast<Attribute>()];
     }
 
     /// <summary>
@@ -215,7 +215,7 @@ public static class AttributeExtensions
     {
         ArgumentNullException.ThrowIfNull(pi);
 
-        return pi.GetCustomAttributes(inherited).Cast<Attribute>().ToList();
+        return [.. pi.GetCustomAttributes(inherited).Cast<Attribute>()];
     }
 
     /// <summary>
@@ -225,7 +225,7 @@ public static class AttributeExtensions
     {
         ArgumentNullException.ThrowIfNull(pi);
 
-        return pi.GetCustomAttributes(inherited).Cast<Attribute>().ToList();
+        return [.. pi.GetCustomAttributes(inherited).Cast<Attribute>()];
     }
 
     /// <summary>
@@ -235,7 +235,7 @@ public static class AttributeExtensions
     {
         ArgumentNullException.ThrowIfNull(type);
 
-        return type.GetCustomAttributes(inherited).Cast<Attribute>().ToList();
+        return [.. type.GetCustomAttributes(inherited).Cast<Attribute>()];
     }
 
     /// <summary>
@@ -245,6 +245,6 @@ public static class AttributeExtensions
     {
         ArgumentNullException.ThrowIfNull(assembly);
 
-        return assembly.GetCustomAttributes(inherited).Cast<Attribute>().ToList();
+        return [.. assembly.GetCustomAttributes(inherited).Cast<Attribute>()];
     }
 }

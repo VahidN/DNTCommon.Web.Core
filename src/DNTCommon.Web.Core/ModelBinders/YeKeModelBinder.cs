@@ -16,10 +16,7 @@ public class YeKeModelBinder : IModelBinder
     /// </summary>
     public Task BindModelAsync(ModelBindingContext bindingContext)
     {
-        if (bindingContext == null)
-        {
-            throw new ArgumentNullException(nameof(bindingContext));
-        }
+        ArgumentNullException.ThrowIfNull(bindingContext);
 
         var logger = bindingContext.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>();
         var fallbackBinder = new SimpleTypeModelBinder(bindingContext.ModelType, logger);

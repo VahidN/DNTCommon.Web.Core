@@ -30,7 +30,7 @@ public class AntiXssService : IAntiXssService
 
         _remoteImagesService = remoteImagesService;
 
-        if (_antiXssConfig?.ValidHtmlTags == null)
+        if (_antiXssConfig?.ValidHtmlTags is null)
         {
             throw new ArgumentNullException(nameof(antiXssConfigMonitor),
                 message: "Please add AntiXssConfig to your appsettings.json file.");
@@ -142,7 +142,7 @@ public class AntiXssService : IAntiXssService
     private void RemoveRelAndTargetFromInternalUrls(HtmlNode node, HtmlModificationRules? htmlModificationRules)
     {
         if (htmlModificationRules?.RemoveRelAndTargetFromInternalUrls != true ||
-            node.NodeType != HtmlNodeType.Element || htmlModificationRules.HostUri == null)
+            node.NodeType != HtmlNodeType.Element || htmlModificationRules.HostUri is null)
         {
             return;
         }
@@ -326,7 +326,8 @@ public class AntiXssService : IAntiXssService
     private bool IsAllowedAttribute(HtmlAttribute attribute, bool allowDataAttributes)
         => (allowDataAttributes &&
             attribute.Name?.StartsWith(value: "data-", StringComparison.OrdinalIgnoreCase) == true) ||
-           _antiXssConfig.ValidHtmlTags.Any(tag => attribute.Name != null && tag.Attributes.Contains(attribute.Name));
+           _antiXssConfig.ValidHtmlTags.Any(
+               tag => attribute.Name is not null && tag.Attributes.Contains(attribute.Name));
 
     private bool CleanComments(HtmlNode node)
     {

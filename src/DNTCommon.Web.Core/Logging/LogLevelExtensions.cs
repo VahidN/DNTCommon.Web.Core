@@ -19,7 +19,7 @@ public static class LogLevelExtensions
             return null;
         }
 
-        return Enum.TryParse<LogLevel>(value, true, out var logLevelValue) ? logLevelValue : null;
+        return Enum.TryParse<LogLevel>(value, ignoreCase: true, out var logLevelValue) ? logLevelValue : null;
     }
 
     /// <summary>
@@ -52,12 +52,12 @@ public static class LogLevelExtensions
     /// <returns></returns>
     public static string GetActiveLogLevelClass(this LogLevel? buttonLogLevel, LogLevel? currentLogLevelValue)
     {
-        if (buttonLogLevel == null && currentLogLevelValue == null)
+        if (buttonLogLevel is null && currentLogLevelValue is null)
         {
             return "btn btn-info btn-sm";
         }
 
-        if (currentLogLevelValue == null)
+        if (currentLogLevelValue is null)
         {
             return "btn btn-secondary btn-sm";
         }

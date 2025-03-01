@@ -45,10 +45,10 @@ public class MvcActionViewModel
     /// </summary>
     public override string ToString()
     {
-        const string attribute = "Attribute";
+        const string Attribute = "Attribute";
 
-        var actionAttributes = string.Join(separator: ",",
-            ActionAttributes.Select(a => a.GetType().Name.Replace(attribute, newValue: "", StringComparison.Ordinal)));
+        var actionAttributes = string.Join(separator: ',',
+            ActionAttributes.Select(a => a.GetType().Name.Replace(Attribute, newValue: "", StringComparison.Ordinal)));
 
         return $"[{actionAttributes}]{ActionName}";
     }

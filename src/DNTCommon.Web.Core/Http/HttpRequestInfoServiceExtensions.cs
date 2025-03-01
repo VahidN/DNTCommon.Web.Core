@@ -30,7 +30,7 @@ public static class HttpRequestInfoServiceExtensions
             var actionContext = serviceProvider.GetRequiredService<IActionContextAccessor>().ActionContext;
             var urlHelperFactory = serviceProvider.GetRequiredService<IUrlHelperFactory>();
 
-            if (actionContext != null)
+            if (actionContext is not null)
             {
                 return urlHelperFactory.GetUrlHelper(actionContext);
             }

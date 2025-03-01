@@ -19,6 +19,7 @@ public static class GravatarExtensions
 
         var hash = emailAddress.ToLowerInvariant().Trim().Md5Hash().ToLowerInvariant();
 
-        return Invariant($"https://www.gravatar.com/avatar/{hash}.jpg?s={size}&d=identicon&r={rating}");
+        return string.Create(CultureInfo.InvariantCulture,
+            $"https://www.gravatar.com/avatar/{hash}.jpg?s={size}&d=identicon&r={rating}");
     }
 }

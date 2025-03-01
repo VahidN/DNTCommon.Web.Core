@@ -10,10 +10,7 @@ public static class HttpResponseMessageExtensions
     /// </summary>
     public static async Task EnsureSuccessStatusCodeAsync(this HttpResponseMessage response)
     {
-        if (response == null)
-        {
-            throw new ArgumentNullException(nameof(response));
-        }
+        ArgumentNullException.ThrowIfNull(response);
 
         if (response.IsSuccessStatusCode)
         {
@@ -31,10 +28,7 @@ public static class HttpResponseMessageExtensions
     /// </summary>
     public static void EnsureSuccessStatusCode(this HttpResponseMessage response)
     {
-        if (response == null)
-        {
-            throw new ArgumentNullException(nameof(response));
-        }
+        ArgumentNullException.ThrowIfNull(response);
 
         if (response.IsSuccessStatusCode)
         {

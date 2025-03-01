@@ -19,12 +19,12 @@ public static class PropertyExtensions
 
         var value = propertyInfo.GetValue(instance, index: null);
 
-        if (value != null && propertyInfo.PropertyType.GetTypeInfo().IsEnum)
+        if (value is not null && propertyInfo.PropertyType.GetTypeInfo().IsEnum)
         {
             return ((Enum)value).GetEnumStringValue();
         }
 
-        if (value == null)
+        if (value is null)
         {
             var nullDisplayText = propertyInfo.GetNullDisplayTextAttribute();
 
@@ -47,7 +47,7 @@ public static class PropertyExtensions
         ArgumentNullException.ThrowIfNull(info);
         var displayFormat = info.GetCustomAttributes(inherit: true).OfType<DisplayFormatAttribute>().FirstOrDefault();
 
-        return displayFormat == null ? string.Empty : displayFormat.NullDisplayText;
+        return displayFormat is null ? string.Empty : displayFormat.NullDisplayText;
     }
 
     /// <summary>
@@ -60,7 +60,7 @@ public static class PropertyExtensions
         ArgumentNullException.ThrowIfNull(info);
         var displayFormat = info.GetCustomAttributes(inherit: true).OfType<DisplayFormatAttribute>().FirstOrDefault();
 
-        return displayFormat == null ? string.Empty : displayFormat.DataFormatString;
+        return displayFormat is null ? string.Empty : displayFormat.DataFormatString;
     }
 
     /// <summary>
@@ -74,21 +74,21 @@ public static class PropertyExtensions
     {
         var displayName = info?.GetCustomAttributes(inherit: true).OfType<DisplayNameAttribute>().FirstOrDefault();
 
-        if (displayName != null)
+        if (displayName is not null)
         {
             return displayName.DisplayName;
         }
 
         var description = info?.GetCustomAttributes(inherit: true).OfType<DescriptionAttribute>().FirstOrDefault();
 
-        if (description != null)
+        if (description is not null)
         {
             return description.Description;
         }
 
         var display = info?.GetCustomAttributes(inherit: true).OfType<DisplayAttribute>().FirstOrDefault();
 
-        if (display != null)
+        if (display is not null)
         {
             return display.Name;
         }

@@ -69,7 +69,7 @@ public class ViewRendererService(
     {
         var httpContext = httpContextAccessor?.HttpContext;
 
-        if (httpContext != null)
+        if (httpContext is not null)
         {
             return new ActionContext(httpContext, httpContext.GetRouteData(), new ActionDescriptor());
         }

@@ -61,7 +61,7 @@ public class SharedResourceService(
     {
         if (result.ResourceNotFound)
         {
-            var acceptLanguage = _httpContextAccessor?.HttpContext?.Request?.Headers[key: "Accept-Language"];
+            var acceptLanguage = _httpContextAccessor?.HttpContext?.Request?.Headers.AcceptLanguage;
 
             _logger.LogError(
                 message:

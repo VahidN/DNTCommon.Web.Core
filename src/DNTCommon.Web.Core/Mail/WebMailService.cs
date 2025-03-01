@@ -86,7 +86,7 @@ public class WebMailService(
         IEnumerable<string>? attachmentFiles = null,
         MailHeaders? headers = null,
         bool shouldValidateServerCertificate = true)
-        => backgroundQueueService.QueueBackgroundWorkItem((_, _) => SendEmailAsync<T>(smtpConfig, emails, subject,
+        => backgroundQueueService.QueueBackgroundWorkItem((_, _) => SendEmailAsync(smtpConfig, emails, subject,
             viewNameOrPath, viewModel, blindCarpbonCopies, carpbonCopies, replyTos, delayDelivery, attachmentFiles,
             headers, shouldValidateServerCertificate));
 
@@ -105,37 +105,32 @@ public class WebMailService(
         MailHeaders? headers = null,
         bool shouldValidateServerCertificate = true)
     {
-        if (smtpConfig == null)
-        {
-            throw new ArgumentNullException(nameof(smtpConfig));
-        }
+        ArgumentNullException.ThrowIfNull(smtpConfig);
 
-        if (emails == null)
-        {
-            throw new ArgumentNullException(nameof(emails));
-        }
+        ArgumentNullException.ThrowIfNull(emails);
 
         if (smtpConfig.UsePickupFolder && !string.IsNullOrWhiteSpace(smtpConfig.PickupFolder))
         {
-            await UsePickupFolderAsync(smtpConfig, emails, subject, message, blindCarpbonCopies, carpbonCopies,
-                replyTos, attachmentFiles, headers);
+            await UsePickupFolderAsync(smtpConfig, emails.ToArray(), subject, message, blindCarpbonCopies?.ToArray(),
+                carpbonCopies?.ToArray(), replyTos?.ToArray(), attachmentFiles?.ToArray(), headers);
         }
         else
         {
-            await SendThisEmailAsync(smtpConfig, emails, subject, message, blindCarpbonCopies, carpbonCopies, replyTos,
-                delayDelivery, attachmentFiles, headers, shouldValidateServerCertificate);
+            await SendThisEmailAsync(smtpConfig, emails.ToArray(), subject, message, blindCarpbonCopies?.ToArray(),
+                carpbonCopies?.ToArray(), replyTos?.ToArray(), delayDelivery, attachmentFiles?.ToArray(), headers,
+                shouldValidateServerCertificate);
         }
     }
 
     private static async Task SendThisEmailAsync(SmtpConfig smtpConfig,
-        IEnumerable<MailAddress> emails,
+        ICollection<MailAddress> emails,
         string subject,
         string message,
-        IEnumerable<MailAddress>? blindCarpbonCopies,
-        IEnumerable<MailAddress>? carpbonCopies,
-        IEnumerable<MailAddress>? replyTos,
+        ICollection<MailAddress>? blindCarpbonCopies,
+        ICollection<MailAddress>? carpbonCopies,
+        ICollection<MailAddress>? replyTos,
         DelayDelivery? delayDelivery,
-        IEnumerable<string>? attachmentFiles,
+        ICollection<string>? attachmentFiles,
         MailHeaders? headers,
         bool shouldValidateServerCertificate)
     {
@@ -171,7 +166,7 @@ public class WebMailService(
 
             count++;
 
-            if (delayDelivery != null && count % delayDelivery.NumberOfMessages == 0)
+            if (delayDelivery is not null && count % delayDelivery.NumberOfMessages == 0)
             {
                 await Task.Delay(delayDelivery.Delay);
             }
@@ -181,13 +176,13 @@ public class WebMailService(
     }
 
     private static async Task UsePickupFolderAsync(SmtpConfig smtpConfig,
-        IEnumerable<MailAddress> emails,
+        ICollection<MailAddress> emails,
         string subject,
         string message,
-        IEnumerable<MailAddress>? blindCarpbonCopies,
-        IEnumerable<MailAddress>? carpbonCopies,
-        IEnumerable<MailAddress>? replyTos,
-        IEnumerable<string>? attachmentFiles,
+        ICollection<MailAddress>? blindCarpbonCopies,
+        ICollection<MailAddress>? carpbonCopies,
+        ICollection<MailAddress>? replyTos,
+        ICollection<string>? attachmentFiles,
         MailHeaders? headers)
     {
         const int maxBufferSize = 0x10000; // 64K.
@@ -201,34 +196,55 @@ public class WebMailService(
 
         foreach (var email in emails)
         {
-            await using var stream =
-                new FileStream(Path.Combine(smtpConfig.PickupFolder, $"email-{Guid.NewGuid():N}.eml"),
-                    FileMode.CreateNew, FileAccess.Write, FileShare.None, maxBufferSize, useAsync: true);
-
-            using var emailMessage = GetEmailMessage(email.ToName, email.ToAddress, subject, message, attachmentFiles,
-                smtpConfig, headers, blindCarpbonCopies, carpbonCopies, replyTos);
-
-            await emailMessage.WriteToAsync(stream);
+            await SaveFileAsync(smtpConfig, subject, message, blindCarpbonCopies, carpbonCopies, replyTos,
+                attachmentFiles, headers, maxBufferSize, email);
         }
+    }
+
+    private static async Task SaveFileAsync(SmtpConfig smtpConfig,
+        string subject,
+        string message,
+        ICollection<MailAddress>? blindCarpbonCopies,
+        ICollection<MailAddress>? carpbonCopies,
+        ICollection<MailAddress>? replyTos,
+        ICollection<string>? attachmentFiles,
+        MailHeaders? headers,
+        int maxBufferSize,
+        MailAddress email)
+    {
+        if (smtpConfig?.PickupFolder is null)
+        {
+            return;
+        }
+
+        var path = Path.Combine(smtpConfig.PickupFolder, $"email-{Guid.NewGuid():N}.eml");
+
+        await using var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None,
+            maxBufferSize, useAsync: true);
+
+        using var emailMessage = GetEmailMessage(email.ToName, email.ToAddress, subject, message, attachmentFiles,
+            smtpConfig, headers, blindCarpbonCopies, carpbonCopies, replyTos);
+
+        await emailMessage.WriteToAsync(stream);
     }
 
     private static MimeMessage GetEmailMessage(string toName,
         string toAddress,
         string subject,
         string message,
-        IEnumerable<string>? attachmentFiles,
+        ICollection<string>? attachmentFiles,
         SmtpConfig smtpConfig,
         MailHeaders? headers,
-        IEnumerable<MailAddress>? blindCarpbonCopies,
-        IEnumerable<MailAddress>? carpbonCopies,
-        IEnumerable<MailAddress>? replyTos)
+        ICollection<MailAddress>? blindCarpbonCopies,
+        ICollection<MailAddress>? carpbonCopies,
+        ICollection<MailAddress>? replyTos)
     {
         var emailMessage = new MimeMessage();
         emailMessage.From.Add(new MailboxAddress(smtpConfig.FromName, smtpConfig.FromAddress));
         emailMessage.Subject = subject.ApplyRle();
         emailMessage.To.Add(new MailboxAddress(toName ?? string.Empty, toAddress));
 
-        if (blindCarpbonCopies?.Any() == true)
+        if (blindCarpbonCopies?.Count > 0)
         {
             foreach (var bcc in blindCarpbonCopies)
             {
@@ -236,7 +252,7 @@ public class WebMailService(
             }
         }
 
-        if (carpbonCopies?.Any() == true)
+        if (carpbonCopies?.Count > 0)
         {
             foreach (var cc in carpbonCopies)
             {
@@ -244,7 +260,7 @@ public class WebMailService(
             }
         }
 
-        if (replyTos?.Any() == true)
+        if (replyTos?.Count > 0)
         {
             foreach (var rt in replyTos)
             {
@@ -260,7 +276,7 @@ public class WebMailService(
 
     private static void AddHeaders(MimeMessage emailMessage, MailHeaders? headers, string fromAddress)
     {
-        if (headers == null)
+        if (headers is null)
         {
             return;
         }
@@ -289,14 +305,14 @@ public class WebMailService(
         }
     }
 
-    private static MimeEntity GetMessageBody(string message, IEnumerable<string>? attachmentFiles)
+    private static MimeEntity GetMessageBody(string message, ICollection<string>? attachmentFiles)
     {
         var builder = new BodyBuilder
         {
             HtmlBody = message
         };
 
-        if (attachmentFiles?.Any() == true)
+        if (attachmentFiles?.Count > 0)
         {
             foreach (var attachmentFile in attachmentFiles)
             {

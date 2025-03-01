@@ -8,7 +8,7 @@ namespace DNTCommon.Web.Core;
 public static class DntCommonWebServiceCollectionExtensions
 {
     /// <summary>
-    ///     Adds all of the default providers of DNTCommon.Web.Core at once.
+    ///     Adds all the default providers of DNTCommon.Web.Core at once.
     /// </summary>
     public static IServiceCollection AddDNTCommonWeb(this IServiceCollection services,
         Action<ScheduledTasksStorage>? scheduledTasksOptions = null)
@@ -41,7 +41,7 @@ public static class DntCommonWebServiceCollectionExtensions
         services.AddErrorBoundaryLoggerService();
         services.AddChromeHtmlToPngService();
 
-        if (scheduledTasksOptions != null)
+        if (scheduledTasksOptions is not null)
         {
             services.AddDNTScheduler(scheduledTasksOptions);
         }

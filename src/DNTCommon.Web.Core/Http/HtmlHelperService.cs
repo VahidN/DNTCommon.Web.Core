@@ -45,7 +45,7 @@ public class HtmlHelperService(
         var doc = _htmlReaderService.CreateHtmlDocument(html);
         var nodes = doc.DocumentNode.SelectNodes(xpath: "//@background|//@lowsrc|//@src|//@href");
 
-        if (nodes == null)
+        if (nodes is null)
         {
             return doc.DocumentNode.OuterHtml;
         }
@@ -115,7 +115,7 @@ public class HtmlHelperService(
                     continue;
                 }
 
-                originalUrl = originalUrl.Replace(oldValue: "\\", newValue: "/", StringComparison.Ordinal)
+                originalUrl = originalUrl.Replace(oldChar: '\\', newChar: '/')
                     .TrimStart(trimChar: '.')
                     .TrimStart(trimChar: '/')
                     .Trim();
@@ -168,10 +168,7 @@ public class HtmlHelperService(
     /// </summary>
     public async Task<string> GetUrlTitleAsync(Uri uri)
     {
-        if (uri == null)
-        {
-            throw new ArgumentNullException(nameof(uri));
-        }
+        ArgumentNullException.ThrowIfNull(uri);
 
         var result = await _downloaderService.DownloadPageAsync(uri.ToString());
 

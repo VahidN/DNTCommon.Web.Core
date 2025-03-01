@@ -5,6 +5,7 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     Sets `no-cache`, `must-revalidate`, `no-store` headers for the current `Response`.
 /// </summary>
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
 public sealed class NoBrowserCacheAttribute : ActionFilterAttribute
 {
     /// <summary>
@@ -12,10 +13,7 @@ public sealed class NoBrowserCacheAttribute : ActionFilterAttribute
     /// </summary>
     public override void OnResultExecuting(ResultExecutingContext context)
     {
-        if (context == null)
-        {
-            throw new ArgumentNullException(nameof(context));
-        }
+        ArgumentNullException.ThrowIfNull(context);
 
         context.HttpContext.DisableBrowserCache();
         base.OnResultExecuting(context);

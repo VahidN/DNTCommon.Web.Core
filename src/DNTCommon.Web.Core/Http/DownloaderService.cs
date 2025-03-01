@@ -71,7 +71,7 @@ public class DownloaderService : IDownloaderService, IDisposable
     {
         var result = await DownloadDataAsync(url, autoRetries);
 
-        return result.Data == null
+        return result.Data is null
             ? (string.Empty, _downloadStatus)
             : (Encoding.UTF8.GetString(result.Data), _downloadStatus);
     }
@@ -204,7 +204,7 @@ public class DownloaderService : IDownloaderService, IDisposable
             // or else you're just doing synchronous operations on a background thread.
             useAsync: true);
 
-        if (response.Headers.AcceptRanges == null && fileStream.Length > 0)
+        if (response.Headers.AcceptRanges is null && fileStream.Length > 0)
         {
             // Resume is not supported. Starting over.
             fileStream.SetLength(value: 0);

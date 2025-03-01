@@ -27,7 +27,7 @@ public class AntiDosMiddleware
         _antiDosFirewall = antiDosFirewall;
         _antiDosConfig = antiDosConfig.CurrentValue;
 
-        if (_antiDosConfig == null)
+        if (_antiDosConfig is null)
         {
             throw new ArgumentNullException(nameof(antiDosConfig),
                 message: "Please add AntiDosConfig to your appsettings.json file.");
@@ -52,7 +52,7 @@ public class AntiDosMiddleware
             {
                 _antiDosFirewall.LogIt(validationResult.ThrottleInfo, requestInfo);
                 AddResetHeaders(context, validationResult.ThrottleInfo);
-                await BlockClient(context);
+                await BlockClientAsync(context);
 
                 return;
             }
@@ -71,7 +71,7 @@ public class AntiDosMiddleware
             IsLocal = context.IsLocal()
         };
 
-    private Task BlockClient(HttpContext context)
+    private Task BlockClientAsync(HttpContext context)
     {
         context.Response.StatusCode = (int)HttpStatusCode.TooManyRequests;
 
@@ -80,7 +80,7 @@ public class AntiDosMiddleware
 
     private void AddResetHeaders(HttpContext context, ThrottleInfo? throttleInfo)
     {
-        if (throttleInfo == null || _antiDosConfig == null)
+        if (throttleInfo is null || _antiDosConfig is null)
         {
             return;
         }
@@ -96,6 +96,6 @@ public class AntiDosMiddleware
         context.Response.Headers[key: "X-RateLimit-Reset"] =
             throttleInfo.ExpiresAt.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture);
 
-        context.Response.Headers[key: "Retry-After"] = context.Response.Headers[key: "X-RateLimit-Reset"];
+        context.Response.Headers.RetryAfter = context.Response.Headers[key: "X-RateLimit-Reset"];
     }
 }

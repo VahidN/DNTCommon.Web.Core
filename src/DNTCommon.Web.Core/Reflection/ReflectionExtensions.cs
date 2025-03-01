@@ -79,21 +79,21 @@ public static class ReflectionExtensions
 
         var description = info?.GetCustomAttributes(inherit: true).OfType<DescriptionAttribute>().FirstOrDefault();
 
-        if (description != null)
+        if (description is not null)
         {
             return description.Description;
         }
 
         var displayName = info?.GetCustomAttributes(inherit: true).OfType<DisplayNameAttribute>().FirstOrDefault();
 
-        if (displayName != null)
+        if (displayName is not null)
         {
             return displayName.DisplayName;
         }
 
         var display = info?.GetCustomAttributes(inherit: true).OfType<DisplayAttribute>().FirstOrDefault();
 
-        if (display != null)
+        if (display is not null)
         {
             return display.Name ?? "";
         }

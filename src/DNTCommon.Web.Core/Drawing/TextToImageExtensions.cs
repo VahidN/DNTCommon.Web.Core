@@ -30,10 +30,7 @@ public static class TextToImageExtensions
     /// </summary>
     public static byte[] TextToImage(this string text, TextToImageOptions options)
     {
-        if (options == null)
-        {
-            throw new ArgumentNullException(nameof(options));
-        }
+        ArgumentNullException.ThrowIfNull(options);
 
         var fontType = GetFont(options);
         using var shaper = new SKShaper(fontType);
@@ -51,8 +48,8 @@ public static class TextToImageExtensions
         var textBounds = GetTextBounds(text, font, textPaint);
         var width = GetTextWidth(text, options, fontType);
 
-        var imageWidth = (int)width + 2 * options.TextMargin;
-        var imageHeight = (int)textBounds.Height + 2 * options.TextMargin;
+        var imageWidth = (int)width + (2 * options.TextMargin);
+        var imageHeight = (int)textBounds.Height + (2 * options.TextMargin);
 
         using var sKBitmap = new SKBitmap(imageWidth, imageHeight);
         using var canvas = new SKCanvas(sKBitmap);
@@ -84,8 +81,8 @@ public static class TextToImageExtensions
             for (var x = 0; x < width; x++)
             {
                 // Adds a simple wave
-                var newX = (int)(x + distort * Math.Sin(Math.PI * y / 84.0));
-                var newY = (int)(y + distort * Math.Cos(Math.PI * x / 44.0));
+                var newX = (int)(x + (distort * Math.Sin(Math.PI * y / 84.0)));
+                var newY = (int)(y + (distort * Math.Cos(Math.PI * x / 44.0)));
 
                 if (newX < 0 || newX >= width)
                 {
@@ -196,8 +193,8 @@ public static class TextToImageExtensions
             skPaint.StrokeWidth = 1f;
 
             canvas.DrawRect(
-                new SKRect(left: 0, top: 0, width + 2 * (float)options.TextMargin - 1,
-                    height + 2 * (float)options.TextMargin - 1), skPaint);
+                new SKRect(left: 0, top: 0, width + (2 * (float)options.TextMargin) - 1,
+                    height + (2 * (float)options.TextMargin) - 1), skPaint);
         }
     }
 

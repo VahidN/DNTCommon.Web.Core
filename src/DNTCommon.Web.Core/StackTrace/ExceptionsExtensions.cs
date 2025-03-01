@@ -23,7 +23,7 @@ public static class ExceptionsExtensions
 
         var exError = new StringBuilder();
 
-        while (ex != null)
+        while (ex is not null)
         {
             exError.AppendLine(ex.Message);
             ex = ex.InnerException;

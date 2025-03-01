@@ -9,7 +9,8 @@ public sealed class RequiredHtmlContentAttribute : ValidationAttribute
     /// <summary>
     ///     Determines whether the specified value of the object has an HTML content.
     /// </summary>
-    public override bool IsValid(object? value) => value is not null && !value.ToString().RemoveHtmlTags().IsEmpty();
+    public override bool IsValid(object? value)
+        => value is not null && !Convert.ToString(value, CultureInfo.InvariantCulture).RemoveHtmlTags().IsEmpty();
 
     /// <summary>
     ///     Determines whether the specified value of the object is valid.

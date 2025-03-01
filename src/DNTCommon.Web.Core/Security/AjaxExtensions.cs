@@ -14,5 +14,5 @@ public static class AjaxExtensions
     ///     Determines whether the HttpRequest's X-Requested-With header has XMLHttpRequest value.
     /// </summary>
     public static bool IsAjaxRequest(this HttpRequest request)
-        => request?.Headers != null && request.Headers[RequestedWithHeader] == XmlHttpRequest;
+        => request?.Headers is not null && request.Headers[RequestedWithHeader] == XmlHttpRequest;
 }

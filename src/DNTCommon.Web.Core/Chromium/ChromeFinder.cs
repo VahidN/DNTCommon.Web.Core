@@ -61,9 +61,9 @@ public static class ChromeFinder
                 @"HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\App Paths\chrome.exe",
                 valueName: "Path", string.Empty);
 
-            if (key != null)
+            if (key is not null)
             {
-                var path = Path.Combine(key.ToString()!, path2: "chrome.exe");
+                var path = Path.Combine(Convert.ToString(key, CultureInfo.InvariantCulture)!, path2: "chrome.exe");
 
                 if (File.Exists(path))
                 {
@@ -108,8 +108,7 @@ public static class ChromeFinder
 
         GetApplicationDirectories(directories);
 
-        return (from exeName in exeNames
-            from directory in directories
-            select Path.Combine(directory, exeName)).FirstOrDefault(File.Exists);
+        return (from exeName in exeNames from directory in directories select Path.Combine(directory, exeName))
+            .FirstOrDefault(File.Exists);
     }
 }

@@ -14,10 +14,7 @@ public sealed class EnableReadableBodyStreamAttribute : Attribute, IAuthorizatio
     /// </summary>
     public void OnAuthorization(AuthorizationFilterContext context)
     {
-        if (context == null)
-        {
-            throw new ArgumentNullException(nameof(context));
-        }
+        ArgumentNullException.ThrowIfNull(context);
 
         context.HttpContext.Request.EnableBuffering();
     }

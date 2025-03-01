@@ -75,6 +75,6 @@ public class ProtectionProviderService : IProtectionProviderService
     {
         var decryptData = Decrypt(data);
 
-        return decryptData == null ? default : _serializationProvider.Deserialize<T>(decryptData);
+        return decryptData is null ? default : _serializationProvider.Deserialize<T>(decryptData);
     }
 }

@@ -55,7 +55,7 @@ public static class UploadFileServiceExtensions
     /// <param name="formFile">The posted file.</param>
     public static async Task<byte[]?> GetPostedFileDataAsync(this IFormFile? formFile)
     {
-        if (formFile == null || formFile.Length == 0)
+        if (formFile is null || formFile.Length == 0)
         {
             return null;
         }
@@ -72,7 +72,7 @@ public static class UploadFileServiceExtensions
     /// <param name="formFile">The posted file.</param>
     public static byte[]? GetPostedFileData(this IFormFile? formFile)
     {
-        if (formFile == null || formFile.Length == 0)
+        if (formFile is null || formFile.Length == 0)
         {
             return null;
         }
@@ -140,7 +140,7 @@ public static class UploadFileServiceExtensions
         string uploadsRootFolder,
         bool allowOverwrite)
     {
-        if (formFile == null || formFile.Length == 0)
+        if (formFile is null || formFile.Length == 0)
         {
             return (false, string.Empty);
         }

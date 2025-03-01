@@ -10,12 +10,12 @@ public class ExceptionEqualityComparer : IEqualityComparer<Exception>
     /// </summary>
     public bool Equals(Exception? x, Exception? y)
     {
-        if (y == null && x == null)
+        if (y is null && x is null)
         {
             return true;
         }
 
-        if (x == null || y == null)
+        if (x is null || y is null)
         {
             return false;
         }
@@ -29,10 +29,7 @@ public class ExceptionEqualityComparer : IEqualityComparer<Exception>
     /// </summary>
     public int GetHashCode(Exception obj)
     {
-        if (obj == null)
-        {
-            throw new ArgumentNullException(nameof(obj));
-        }
+        ArgumentNullException.ThrowIfNull(obj);
 
         return (obj.GetType().Name + obj.Message).GetHashCode(StringComparison.Ordinal);
     }

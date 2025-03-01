@@ -76,7 +76,8 @@ public class ExecuteApplicationProcess : IExecuteApplicationProcess
         await Task.Delay(startInfo.WaitForExit ?? _defaultWaitForExit);
         KillThisProcess(process);
 
-        return Invariant($"{errorMessage}{Environment.NewLine}HasExited: {isExited}, ExitCode: {exitCode}");
+        return string.Create(CultureInfo.InvariantCulture,
+            $"{errorMessage}{Environment.NewLine}HasExited: {isExited}, ExitCode: {exitCode}");
 
         void OnProcessOnOutputDataReceived(object o, DataReceivedEventArgs e) => output.AppendLine(e.Data);
     }

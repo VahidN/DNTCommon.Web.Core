@@ -73,7 +73,7 @@ public static class HtmlReaderServiceExtensions
             {
                 var body = node.Element(name: "body");
 
-                if (body != null)
+                if (body is not null)
                 {
                     foreach (var bodyNode in HandleChildren(body.ChildNodes))
                     {

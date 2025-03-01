@@ -37,7 +37,7 @@ public class StrictSameSiteCookieFixMiddleware(RequestDelegate next)
 
             if (ctx.Response.StatusCode == 302)
             {
-                location = ctx.Response.Headers[key: "location"];
+                location = ctx.Response.Headers.Location;
             }
             else if (string.Equals(ctx.Request.Method, b: "GET", StringComparison.OrdinalIgnoreCase) &&
                      ctx.Request.Query[key: "skip"].Count == 0)

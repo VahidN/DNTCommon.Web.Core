@@ -24,7 +24,7 @@ public class AntiDosFirewall : IAntiDosFirewall
 
         _antiDosConfig = antiDosConfig.CurrentValue;
 
-        if (_antiDosConfig == null)
+        if (_antiDosConfig is null)
         {
             throw new ArgumentNullException(nameof(antiDosConfig),
                 message: "Please add AntiDosConfig to your appsettings.json file.");
@@ -86,7 +86,7 @@ public class AntiDosFirewall : IAntiDosFirewall
     {
         ArgumentNullException.ThrowIfNull(requestInfo);
 
-        if (requestInfo.UrlReferrer == null)
+        if (requestInfo.UrlReferrer is null)
         {
             return false;
         }
@@ -151,7 +151,7 @@ public class AntiDosFirewall : IAntiDosFirewall
     {
         ArgumentNullException.ThrowIfNull(requestInfo);
 
-        if (_antiDosConfig.BadBotsRequestHeaders?.Any() != true || requestInfo.RequestHeaders == null)
+        if (_antiDosConfig.BadBotsRequestHeaders?.Any() != true || requestInfo.RequestHeaders is null)
         {
             return (false, null);
         }
@@ -290,7 +290,7 @@ public class AntiDosFirewall : IAntiDosFirewall
             return (false, null);
         }
 
-        if (requestInfo.IP == null)
+        if (requestInfo.IP is null)
         {
             return (false, null);
         }
@@ -370,12 +370,12 @@ public class AntiDosFirewall : IAntiDosFirewall
     /// </summary>
     public void LogIt(ThrottleInfo? throttleInfo, AntiDosFirewallRequestInfo? requestInfo)
     {
-        if (requestInfo == null)
+        if (requestInfo is null)
         {
             return;
         }
 
-        if (throttleInfo == null)
+        if (throttleInfo is null)
         {
             return;
         }

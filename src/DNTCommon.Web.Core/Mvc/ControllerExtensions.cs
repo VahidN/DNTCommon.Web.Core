@@ -12,10 +12,7 @@ public static class ControllerExtensions
     /// </summary>
     public static string ControllerName(this Type controllerType)
     {
-        if (controllerType == null)
-        {
-            throw new ArgumentNullException(nameof(controllerType));
-        }
+        ArgumentNullException.ThrowIfNull(controllerType);
 
         var baseType = typeof(Controller);
 

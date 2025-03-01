@@ -45,7 +45,7 @@ public sealed class ValidPasswordAttribute : ValidationAttribute
             return true; // returning false, makes this field required.
         }
 
-        var valStr = value.ToString();
+        var valStr = Convert.ToString(value, CultureInfo.InvariantCulture);
 
         if (string.IsNullOrWhiteSpace(valStr))
         {

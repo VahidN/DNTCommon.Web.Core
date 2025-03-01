@@ -36,7 +36,7 @@ public class BlazorHtmlField<T> : InputBase<T>
     ///     CurrentValueAsString interprets incoming values.
     /// </summary>
     protected override bool TryParseValueFromString(string? value, out T result, out string validationErrorMessage)
-        => throw new NotImplementedException();
+        => throw new NotSupportedException();
 
     /// <summary>
     ///     Signals that the value for the specified field has changed.
@@ -44,7 +44,7 @@ public class BlazorHtmlField<T> : InputBase<T>
     /// </summary>
     public void NotifyFieldChanged(EditContext? editContext)
     {
-        if (editContext == null)
+        if (editContext is null)
         {
             return;
         }

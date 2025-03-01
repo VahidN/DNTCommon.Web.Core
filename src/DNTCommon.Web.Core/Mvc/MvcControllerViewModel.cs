@@ -40,11 +40,11 @@ public class MvcControllerViewModel
     /// </summary>
     public override string ToString()
     {
-        const string attribute = "Attribute";
+        const string Attribute = "Attribute";
 
-        var controllerAttributes = string.Join(separator: ",",
+        var controllerAttributes = string.Join(separator: ',',
             ControllerAttributes.Select(
-                a => a.GetType().Name.Replace(attribute, newValue: "", StringComparison.Ordinal)));
+                a => a.GetType().Name.Replace(Attribute, newValue: "", StringComparison.Ordinal)));
 
         return $"[{controllerAttributes}]{AreaName}.{ControllerName}";
     }

@@ -8,21 +8,14 @@ namespace DNTCommon.Web.Core;
 public static class FilterAttributesExtensions
 {
     private static readonly Type StringType = typeof(string);
-    
+
     /// <summary>
-    ///     Cleans all of the string values of the current ActionArguments and model's stringProperties
+    ///     Cleans all the string values of the current ActionArguments and model's stringProperties
     /// </summary>
     public static void CleanupActionStringValues(this ActionExecutingContext context, Func<string, string> action)
     {
-        if (context == null)
-        {
-            throw new ArgumentNullException(nameof(context));
-        }
-
-        if (action == null)
-        {
-            throw new ArgumentNullException(nameof(action));
-        }
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(action);
 
         foreach (var (aKey, aValue) in context.ActionArguments)
         {
@@ -32,30 +25,28 @@ public static class FilterAttributesExtensions
             }
 
             var type = aValue.GetType();
+
             if (type == StringType)
             {
-                context.ActionArguments[aKey] = action(aValue.ToString() ?? "");
+                context.ActionArguments[aKey] = action(Convert.ToString(aValue, CultureInfo.InvariantCulture) ?? "");
             }
             else
             {
-                var stringProperties = type
-                                             .GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                                             .Where(x =>
-                                                        x.CanRead
-                                                        && x.CanWrite
-                                                        && x.PropertyType == StringType
-                                                        && x.GetGetMethod(true)?.IsPublic == true
-                                                        && x.GetSetMethod(true)?.IsPublic == true);
+                var stringProperties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                    .Where(x => x.CanRead && x.CanWrite && x.PropertyType == StringType &&
+                                x.GetGetMethod(nonPublic: true)?.IsPublic == true &&
+                                x.GetSetMethod(nonPublic: true)?.IsPublic == true);
 
                 foreach (var propertyInfo in stringProperties)
                 {
                     var value = propertyInfo.GetValue(aValue);
+
                     if (value is null)
                     {
                         continue;
                     }
 
-                    propertyInfo.SetValue(aValue, action(value.ToString() ?? ""));
+                    propertyInfo.SetValue(aValue, action(Convert.ToString(value, CultureInfo.InvariantCulture) ?? ""));
                 }
             }
         }

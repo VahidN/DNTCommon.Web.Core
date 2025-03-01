@@ -8,7 +8,7 @@ namespace DNTCommon.Web.Core.Tests;
 public class XmlUtilsTests : TestsBase
 {
     [TestMethod]
-    public void Test_ToSignedXmlDocumentString_WithRandomKeys_Works()
+    public void TestToSignedXmlDocumentStringWithRandomKeysWorks()
     {
         var license = new License
         {
@@ -29,7 +29,7 @@ public class XmlUtilsTests : TestsBase
     }
 
     [TestMethod]
-    public void Test_ToSignedXmlDocumentString_WithCertFileKeys_Works()
+    public void TestToSignedXmlDocumentStringWithCertFileKeysWorks()
     {
         var license = new License
         {

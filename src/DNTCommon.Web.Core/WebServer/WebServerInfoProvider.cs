@@ -127,11 +127,14 @@ public static class WebServerInfoProvider
     }
 
     private static List<(string Key, string Value)> GetEnvironmentVariables()
-        => (from DictionaryEntry entry in Environment.GetEnvironmentVariables()
-            let key = entry.Key.ToString()
-            let value = entry.Value?.ToString()
+        =>
+        [
+            .. from DictionaryEntry entry in Environment.GetEnvironmentVariables()
+            let key = Convert.ToString(entry.Key, CultureInfo.InvariantCulture)
+            let value = Convert.ToString(entry.Value, CultureInfo.InvariantCulture)
             where !string.IsNullOrWhiteSpace(key)
-            select (key, value ?? "")).ToList();
+            select (key, value ?? "")
+        ];
 
     private static PCDriveInfo GetDriveInfo()
     {

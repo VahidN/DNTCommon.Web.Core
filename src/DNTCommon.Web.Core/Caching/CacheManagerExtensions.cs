@@ -5,9 +5,9 @@ using Microsoft.Net.Http.Headers;
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-///     CacheManager Extentions
+///     CacheManager Extensions
 /// </summary>
-public static class CacheManagerExtentions
+public static class CacheManagerExtensions
 {
     private static readonly string[] CacheControlValues = ["no-cache", "max-age=0", "must-revalidate", "no-store"];
 
@@ -16,10 +16,7 @@ public static class CacheManagerExtentions
     /// </summary>
     public static void DisableBrowserCache(this HttpContext httpContext)
     {
-        if (httpContext == null)
-        {
-            throw new ArgumentNullException(nameof(httpContext));
-        }
+        ArgumentNullException.ThrowIfNull(httpContext);
 
         // Note: https://docs.microsoft.com/en-us/aspnet/core/performance/caching/middleware
         // The Antiforgery system for generating secure tokens to prevent Cross-Site Request Forgery (CSRF)

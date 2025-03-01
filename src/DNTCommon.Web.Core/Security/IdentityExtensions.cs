@@ -38,7 +38,7 @@ public static class IdentityExtensions
     {
         var firstValue = identity?.GetUserClaimValue(ClaimTypes.NameIdentifier);
 
-        return firstValue != null
+        return firstValue is not null
             ? (T)Convert.ChangeType(firstValue, typeof(T), CultureInfo.InvariantCulture)
             : default;
     }

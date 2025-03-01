@@ -80,7 +80,7 @@ public class DesCryptoProvider(ILogger<DesCryptoProvider> logger, ISerialization
     {
         var decryptedData = Decrypt(data, key);
 
-        return decryptedData == null ? default : serializationProvider.Deserialize<T>(decryptedData);
+        return decryptedData is null ? default : serializationProvider.Deserialize<T>(decryptedData);
     }
 
     private byte[] EncryptIt(byte[] data, string key)

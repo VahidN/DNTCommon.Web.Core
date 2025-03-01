@@ -14,10 +14,7 @@ public static class SchedulerServiceCollectionExtensions
     /// </summary>
     public static void AddDNTScheduler(this IServiceCollection services, Action<ScheduledTasksStorage> options)
     {
-        if (options == null)
-        {
-            throw new ArgumentNullException(nameof(options));
-        }
+        ArgumentNullException.ThrowIfNull(options);
 
         services.TryAddSingleton<IScheduledTasksCoordinator, ScheduledTasksCoordinator>();
 

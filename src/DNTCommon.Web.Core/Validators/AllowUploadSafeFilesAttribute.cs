@@ -64,7 +64,7 @@ public sealed class AllowUploadSafeFilesAttribute : ValidationAttribute
     /// <param name="namesToFilter">Disallowed names such as web.config</param>
     public AllowUploadSafeFilesAttribute(string[]? extensionsToFilter = null, string[]? namesToFilter = null)
     {
-        if (extensionsToFilter != null)
+        if (extensionsToFilter is not null)
         {
             foreach (var item in extensionsToFilter)
             {
@@ -72,7 +72,7 @@ public sealed class AllowUploadSafeFilesAttribute : ValidationAttribute
             }
         }
 
-        if (namesToFilter != null)
+        if (namesToFilter is not null)
         {
             foreach (var item in namesToFilter)
             {
@@ -101,7 +101,7 @@ public sealed class AllowUploadSafeFilesAttribute : ValidationAttribute
     /// </summary>
     public override bool IsValid(object? value)
     {
-        if (value == null)
+        if (value is null)
         {
             return true; // returning false, makes this field required.
         }
@@ -124,12 +124,11 @@ public sealed class AllowUploadSafeFilesAttribute : ValidationAttribute
         return false;
     }
 
-    private bool AreValidFiles(IEnumerable<IFormFile> files)
-        => files.All(IsValidFile);
+    private bool AreValidFiles(IEnumerable<IFormFile> files) => files.All(IsValidFile);
 
     private bool IsValidFile(IFormFile? file)
     {
-        if (file == null || file.Length == 0)
+        if (file is null || file.Length == 0)
         {
             return true; // returning false, makes this field required.
         }

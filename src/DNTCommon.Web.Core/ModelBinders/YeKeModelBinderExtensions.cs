@@ -12,10 +12,7 @@ public static class YeKeModelBinderExtensions
     /// </summary>
     public static MvcOptions UseYeKeModelBinder(this MvcOptions options)
     {
-        if (options == null)
-        {
-            throw new ArgumentNullException(nameof(options));
-        }
+        ArgumentNullException.ThrowIfNull(options);
 
         options.ModelBinderProviders.Insert(index: 0, new YeKeModelBinderProvider());
 

@@ -72,7 +72,8 @@ public static class XmlUtils
             }
             else
             {
-                throw new InvalidOperationException(Invariant($"written = {written}"));
+                throw new InvalidOperationException(string.Create(CultureInfo.InvariantCulture,
+                    $"written = {written}"));
             }
 
             sb.Append(chars[..written]);
@@ -161,7 +162,7 @@ public static class XmlUtils
     public static XmlDocument? ToXmlDocument<T>([NotNullIfNotNull(nameof(value))] this T? value)
         where T : class
     {
-        if (value == null)
+        if (value is null)
         {
             return null;
         }
@@ -216,7 +217,7 @@ public static class XmlUtils
     {
         ArgumentNullException.ThrowIfNull(rsaPrivateKeyXml);
 
-        if (value == null)
+        if (value is null)
         {
             return null;
         }
@@ -345,7 +346,7 @@ public static class XmlUtils
 
         var ourXml = xml.GetXml();
 
-        if (ourXml.OwnerDocument.DocumentElement == null)
+        if (ourXml.OwnerDocument.DocumentElement is null)
         {
             return ("This license file is corrupted.", OperationStat.Failed, null);
         }

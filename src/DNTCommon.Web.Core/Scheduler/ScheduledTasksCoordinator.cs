@@ -36,15 +36,12 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
         _jobsRunnerTimer = jobsRunnerTimer ?? throw new ArgumentNullException(nameof(jobsRunnerTimer));
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
-        if (applicationLifetime == null)
-        {
-            throw new ArgumentNullException(nameof(applicationLifetime));
-        }
+        ArgumentNullException.ThrowIfNull(applicationLifetime);
 
         applicationLifetime.ApplicationStopping.Register(() =>
         {
             _logger.LogWarning(message: "Application is stopping ... .");
-            DisposeResources().Wait();
+            DisposeResourcesAsync().Wait();
         });
     }
 
@@ -93,7 +90,7 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
     /// <summary>
     ///     Stops the scheduler.
     /// </summary>
-    public Task StopTasks() => DisposeResources();
+    public Task StopTasksAsync() => DisposeResourcesAsync();
 
     /// <summary>
     ///     Free resources
@@ -104,7 +101,7 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
         GC.SuppressFinalize(this);
     }
 
-    private async Task DisposeResources()
+    private async Task DisposeResourcesAsync()
     {
         if (_isShuttingDown || _isDisposed)
         {
@@ -135,17 +132,17 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
             _jobsRunnerTimer.StopJobs();
             _cancellationTokenSource.Dispose();
             _isDisposed = true;
-            await WakeUp();
+            await WakeUpAsync();
         }
     }
 
-    private async Task WakeUp()
+    private async Task WakeUpAsync()
     {
         var mySitePingClient = _serviceProvider.GetService<MySitePingClient>();
 
-        if (mySitePingClient != null)
+        if (mySitePingClient is not null)
         {
-            await mySitePingClient.WakeUp();
+            await mySitePingClient.WakeUpAsync();
         }
     }
 
@@ -213,7 +210,7 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
                 return;
             }
 
-            StopTasks().Wait();
+            StopTasksAsync().Wait();
         }
         finally
         {

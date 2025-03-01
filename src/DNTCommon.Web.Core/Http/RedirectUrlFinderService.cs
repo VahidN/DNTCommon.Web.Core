@@ -12,15 +12,6 @@ public class RedirectUrlFinderService : IRedirectUrlFinderService
     private readonly HttpClient _client;
     private readonly ILogger<RedirectUrlFinderService> _logger;
 
-    static RedirectUrlFinderService()
-    {
-        // Default is 2 minutes: https://msdn.microsoft.com/en-us/library/system.net.servicepointmanager.dnsrefreshtimeout(v=vs.110).aspx
-        ServicePointManager.DnsRefreshTimeout = (int)TimeSpan.FromMinutes(value: 1).TotalMilliseconds;
-
-        // Increases the concurrent outbound connections
-        ServicePointManager.DefaultConnectionLimit = 1024;
-    }
-
     /// <summary>
     ///     Redirect Url Finder Service
     /// </summary>
@@ -49,10 +40,7 @@ public class RedirectUrlFinderService : IRedirectUrlFinderService
     /// </summary>
     public async Task<Uri?> GetRedirectUrlAsync(Uri siteUri, int maxRedirects = 20)
     {
-        if (siteUri == null)
-        {
-            throw new ArgumentNullException(nameof(siteUri));
-        }
+        ArgumentNullException.ThrowIfNull(siteUri);
 
         var redirectUri = siteUri;
         var hops = 1;
@@ -70,7 +58,7 @@ public class RedirectUrlFinderService : IRedirectUrlFinderService
             {
                 var webResp = await _client.GetAsync(redirectUri, HttpCompletionOption.ResponseHeadersRead);
 
-                if (webResp == null)
+                if (webResp is null)
                 {
                     return CacheReturn(siteUri, siteUri);
                 }
@@ -126,7 +114,7 @@ public class RedirectUrlFinderService : IRedirectUrlFinderService
 
     private Uri? CacheReturn(Uri originalUrl, Uri? redirectUrl)
     {
-        if (redirectUrl != null)
+        if (redirectUrl is not null)
         {
             _cacheService.Add($"{CachePrefix}{originalUrl}", nameof(RedirectUrlFinderService), redirectUrl,
                 DateTimeOffset.UtcNow.AddMinutes(minutes: 15));

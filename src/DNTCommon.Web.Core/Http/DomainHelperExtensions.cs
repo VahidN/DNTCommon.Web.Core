@@ -70,7 +70,7 @@ public static class DomainHelperExtensions
     {
         try
         {
-            return uri == null ? null : Path.GetExtension(uri.PathAndQuery);
+            return uri is null ? null : Path.GetExtension(uri.PathAndQuery);
         }
         catch
         {
@@ -102,7 +102,7 @@ public static class DomainHelperExtensions
     /// </summary>
     public static string? GetSubDomain(this Uri? url)
     {
-        if (url == null)
+        if (url is null)
         {
             return null;
         }
@@ -143,7 +143,7 @@ public static class DomainHelperExtensions
         var subdomain = GetSubDomain(url);
         var host = url.Host.TrimEnd(trimChar: '.');
 
-        if (subdomain != null)
+        if (subdomain is not null)
         {
             host = host.Replace(string.Format(CultureInfo.InvariantCulture, format: "{0}.", subdomain), string.Empty,
                 StringComparison.OrdinalIgnoreCase);
@@ -169,7 +169,7 @@ public static class DomainHelperExtensions
     /// </summary>
     public static (string Domain, bool HasBestMatch) GetUrlDomain(this Uri? url)
     {
-        if (url == null)
+        if (url is null)
         {
             return (string.Empty, false);
         }
@@ -236,7 +236,7 @@ public static class DomainHelperExtensions
     /// </summary>
     public static bool IsReferrerToThisSite(this Uri? destUri, string siteRootUrl)
     {
-        if (destUri == null || string.IsNullOrWhiteSpace(siteRootUrl))
+        if (destUri is null || string.IsNullOrWhiteSpace(siteRootUrl))
         {
             return false;
         }
@@ -350,7 +350,7 @@ public static class DomainHelperExtensions
             baseUrl = "/";
         }
 
-        baseUrl = baseUrl.Trim().Replace(oldValue: "\\", newValue: "/", StringComparison.Ordinal);
+        baseUrl = baseUrl.Trim().Replace(oldChar: '\\', newChar: '/');
 
         if (string.IsNullOrWhiteSpace(relativeUrl))
         {
@@ -359,9 +359,7 @@ public static class DomainHelperExtensions
 
         baseUrl = baseUrl.TrimEnd(trimChar: '/');
 
-        relativeUrl = relativeUrl.Trim()
-            .Replace(oldValue: "\\", newValue: "/", StringComparison.Ordinal)
-            .TrimStart(trimChar: '/');
+        relativeUrl = relativeUrl.Trim().Replace(oldChar: '\\', newChar: '/').TrimStart(trimChar: '/');
 
         return escapeRelativeUrl ? $"{baseUrl}/{Uri.EscapeDataString(relativeUrl)}" : $"{baseUrl}/{relativeUrl}";
     }
@@ -399,6 +397,6 @@ public static class DomainHelperExtensions
 
         var currentUrl = baseUrl.CombineUrl(relativePaths[0], escapeRelativeUrl);
 
-        return currentUrl.CombineUrls(escapeRelativeUrl, relativePaths.Skip(count: 1).ToArray());
+        return currentUrl.CombineUrls(escapeRelativeUrl, [.. relativePaths.Skip(count: 1)]);
     }
 }

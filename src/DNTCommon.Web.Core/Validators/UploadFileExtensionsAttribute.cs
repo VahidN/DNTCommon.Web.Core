@@ -39,7 +39,7 @@ public sealed class UploadFileExtensionsAttribute : ValidationAttribute
     /// </summary>
     public override bool IsValid(object? value)
     {
-        if (value == null)
+        if (value is null)
         {
             return true; // returning false, makes this field required.
         }
@@ -66,7 +66,7 @@ public sealed class UploadFileExtensionsAttribute : ValidationAttribute
 
     private bool IsValidFile(IFormFile? file)
     {
-        if (file == null || file.Length == 0)
+        if (file is null || file.Length == 0)
         {
             return true; // returning false, makes this field required.
         }

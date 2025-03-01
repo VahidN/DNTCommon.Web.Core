@@ -33,26 +33,28 @@ public static class ExceptionHandlerExtension
         switch (exception)
         {
             case UnauthorizedAccessException:
-                await showError(HttpStatusCode.Unauthorized, message: "You don't have access to this resource!");
+                await ShowErrorAsync(HttpStatusCode.Unauthorized, message: "You don't have access to this resource!");
 
                 break;
             default:
-                await showError(HttpStatusCode.InternalServerError, message: "Unexpected error! Try again later.");
+                await ShowErrorAsync(HttpStatusCode.InternalServerError, message: "Unexpected error! Try again later.");
 
                 break;
         }
 
-        Task showError(HttpStatusCode statusCode, string message)
+        Task ShowErrorAsync(HttpStatusCode statusCode, string message)
         {
             addCorsHeaders();
 
             context.Response.StatusCode = (int)statusCode;
             context.Response.ContentType = "application/json";
 
-            return isDevelopment ? showDevelopmentError(statusCode, message) : showProductionError(statusCode, message);
+            return isDevelopment
+                ? ShowDevelopmentErrorAsync(statusCode, message)
+                : ShowProductionErrorAsync(statusCode, message);
         }
 
-        Task showDevelopmentError(HttpStatusCode statusCode, string message)
+        Task ShowDevelopmentErrorAsync(HttpStatusCode statusCode, string message)
         {
             var exceptionMessage = exception.Demystify().ToString() ?? "Unexpected error! Try again later.";
 
@@ -63,7 +65,7 @@ public static class ExceptionHandlerExtension
             }), Encoding.UTF8);
         }
 
-        Task showProductionError(HttpStatusCode statusCode, string message)
+        Task ShowProductionErrorAsync(HttpStatusCode statusCode, string message)
             =>
 
                 // NOTE!

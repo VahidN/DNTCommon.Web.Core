@@ -36,7 +36,7 @@ public class JobsRunnerTimer : IJobsRunnerTimer
     {
         using var @lock = _lock.LockOrNull(typeof(JobsRunnerTimer), _lockTimeout);
 
-        if (_threadTimer != null)
+        if (_threadTimer is not null)
         {
             return;
         }
@@ -53,7 +53,7 @@ public class JobsRunnerTimer : IJobsRunnerTimer
     {
         using var @lock = _lock.LockOrNull(typeof(JobsRunnerTimer), _lockTimeout);
 
-        if (_threadTimer == null)
+        if (_threadTimer is null)
         {
             return;
         }

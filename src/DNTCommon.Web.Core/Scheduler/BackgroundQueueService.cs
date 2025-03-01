@@ -104,12 +104,12 @@ public class BackgroundQueueService(IServiceProvider serviceProvider) : Backgrou
     /// </summary>
     public override Task StopAsync(CancellationToken cancellationToken)
     {
-        Stop();
+        StopQueue();
 
         return Task.CompletedTask;
     }
 
-    private void Stop()
+    private void StopQueue()
     {
         _asyncTasksQueue.CompleteAdding();
         _syncTasksQueue.CompleteAdding();
@@ -132,7 +132,7 @@ public class BackgroundQueueService(IServiceProvider serviceProvider) : Backgrou
                 return;
             }
 
-            Stop();
+            StopQueue();
             _asyncTasksQueue.Dispose();
             _syncTasksQueue.Dispose();
         }

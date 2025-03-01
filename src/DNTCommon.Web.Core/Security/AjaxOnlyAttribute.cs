@@ -7,6 +7,7 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     Determines whether the HttpRequest's X-Requested-With header has XMLHttpRequest value.
 /// </summary>
+[AttributeUsage(AttributeTargets.Method)]
 public sealed class AjaxOnlyAttribute : ActionMethodSelectorAttribute
 {
     /// <summary>
@@ -14,10 +15,7 @@ public sealed class AjaxOnlyAttribute : ActionMethodSelectorAttribute
     /// </summary>
     public override bool IsValidForRequest(RouteContext routeContext, ActionDescriptor action)
     {
-        if (routeContext == null)
-        {
-            throw new ArgumentNullException(nameof(routeContext));
-        }
+        ArgumentNullException.ThrowIfNull(routeContext);
 
         return routeContext.HttpContext.Request.IsAjaxRequest();
     }

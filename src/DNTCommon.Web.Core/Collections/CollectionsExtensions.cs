@@ -75,13 +75,13 @@ public static class CollectionsExtensions
     ///     Return true if the number of elements contained in the source is > 0
     /// </summary>
     public static bool IsNullOrEmpty<T>([NotNullWhen(returnValue: false)] this ICollection<T>? source)
-        => source == null || source.Count == 0;
+        => source is null || source.Count == 0;
 
     /// <summary>
     ///     Return true if the number of elements contained in the source is > 0
     /// </summary>
     public static bool IsNullOrEmpty<T>([NotNullWhen(returnValue: false)] this IEnumerable<T>? source)
-        => source == null || !source.Any();
+        => source is null || !source.Any();
 
     /// <summary>
     ///     Return true if the `source.Take(destination.Count)` elements are equal to destination elements
@@ -90,9 +90,9 @@ public static class CollectionsExtensions
         ICollection<T>? destination,
         IEqualityComparer<T>? comparisonType = null)
     {
-        if (source == null || destination == null)
+        if (source is null || destination is null)
         {
-            return source == null && destination == null;
+            return source is null && destination is null;
         }
 
         if (IsTargetEmpty(destination) || HasNonEmptyTargetWithEmptySource(source, destination) ||
@@ -113,9 +113,9 @@ public static class CollectionsExtensions
         ICollection<T>? destination,
         IEqualityComparer<T>? comparisonType = null)
     {
-        if (source == null || destination == null)
+        if (source is null || destination is null)
         {
-            return source == null && destination == null;
+            return source is null && destination is null;
         }
 
         if (IsTargetEmpty(destination) || HasNonEmptyTargetWithEmptySource(source, destination) ||
@@ -136,9 +136,9 @@ public static class CollectionsExtensions
         ICollection<T>? destination,
         IEqualityComparer<T>? comparisonType = null)
     {
-        if (source == null || destination == null)
+        if (source is null || destination is null)
         {
-            return source == null && destination == null;
+            return source is null && destination is null;
         }
 
         if (IsTargetEmpty(destination) || HasNonEmptyTargetWithEmptySource(source, destination) ||
@@ -176,9 +176,9 @@ public static class CollectionsExtensions
         ICollection<T>? destination,
         IEqualityComparer<T>? comparisonType = null)
     {
-        if (source == null || destination == null)
+        if (source is null || destination is null)
         {
-            return source == null && destination == null;
+            return source is null && destination is null;
         }
 
         if (IsTargetEmpty(destination) || HasNonEmptyTargetWithEmptySource(source, destination) ||
@@ -200,9 +200,9 @@ public static class CollectionsExtensions
         ICollection<T>? destination,
         IEqualityComparer<T>? comparisonType = null)
     {
-        if (source == null || destination == null)
+        if (source is null || destination is null)
         {
-            return source == null && destination == null;
+            return source is null && destination is null;
         }
 
         if (source.Count != destination.Count)
@@ -230,7 +230,7 @@ public static class CollectionsExtensions
     /// </summary>
     public static void AddIfNotNull<T>(this ICollection<T> list, IEnumerable<T>? items)
     {
-        if (items == null)
+        if (items is null)
         {
             return;
         }
@@ -246,7 +246,7 @@ public static class CollectionsExtensions
     /// </summary>
     public static void AddIfNotNull<T>(this ICollection<T>? list, T? item)
     {
-        if (list == null)
+        if (list is null)
         {
             return;
         }

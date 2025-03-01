@@ -61,7 +61,7 @@ public class ChromeHtmlToPngGenerator(
             ..ChromeGeneralParameters.GeneralParameters,
             string.Create(CultureInfo.InvariantCulture,
                 $"--virtual-time-budget={options.VirtualTimeBudgetTotalMilliseconds}"),
-            Invariant($"--window-size=\"{options.Width},{options.Height}\"")
+            string.Create(CultureInfo.InvariantCulture, $"--window-size=\"{options.Width},{options.Height}\"")
         ];
 
         var arguments = new StringBuilder();

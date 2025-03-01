@@ -10,7 +10,7 @@ public static class MemoryCacheEntryOptionsExtensions
     /// <summary>
     ///     It's 30 seconds
     /// </summary>
-    public static readonly TimeSpan DefaultExpiration = TimeSpan.FromSeconds(30);
+    public static readonly TimeSpan DefaultExpiration = TimeSpan.FromSeconds(value: 30);
 
     /// <summary>
     ///     Creates a new MemoryCacheEntryOptions based on the provided options
@@ -30,27 +30,27 @@ public static class MemoryCacheEntryOptionsExtensions
     {
         var hasEvictionCriteria = false;
         var options = new MemoryCacheEntryOptions();
-        options.SetSize(1);
+        options.SetSize(size: 1);
 
-        if (expiresOn != null)
+        if (expiresOn is not null)
         {
             hasEvictionCriteria = true;
             options.SetAbsoluteExpiration(expiresOn.Value);
         }
 
-        if (expiresAfter != null)
+        if (expiresAfter is not null)
         {
             hasEvictionCriteria = true;
             options.SetAbsoluteExpiration(expiresAfter.Value);
         }
 
-        if (expiresSliding != null)
+        if (expiresSliding is not null)
         {
             hasEvictionCriteria = true;
             options.SetSlidingExpiration(expiresSliding.Value);
         }
 
-        if (priority != null)
+        if (priority is not null)
         {
             options.SetPriority(priority.Value);
         }

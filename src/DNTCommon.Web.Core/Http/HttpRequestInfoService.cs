@@ -45,7 +45,7 @@ public class HttpRequestInfoService(IHttpContextAccessor httpContextAccessor, IU
     {
         var baseUri = GetBaseUri();
 
-        return baseUri == null ? null : new Uri(baseUri, urlHelper.Content(contentPath));
+        return baseUri is null ? null : new Uri(baseUri, urlHelper.Content(contentPath));
     }
 
     /// <summary>
@@ -55,7 +55,7 @@ public class HttpRequestInfoService(IHttpContextAccessor httpContextAccessor, IU
     {
         var uriString = GetBaseUrl();
 
-        return uriString == null ? null : new Uri(uriString);
+        return uriString is null ? null : new Uri(uriString);
     }
 
     /// <summary>
@@ -75,7 +75,7 @@ public class HttpRequestInfoService(IHttpContextAccessor httpContextAccessor, IU
     {
         var uriString = GetRawUrl();
 
-        return uriString == null ? null : new Uri(uriString);
+        return uriString is null ? null : new Uri(uriString);
     }
 
     /// <summary>
@@ -87,38 +87,23 @@ public class HttpRequestInfoService(IHttpContextAccessor httpContextAccessor, IU
     ///     Deserialize `request.Body` as a JSON content.
     /// </summary>
     public Task<T?> DeserializeRequestJsonBodyAsAsync<T>()
-    {
-        if (httpContextAccessor.HttpContext == null)
-        {
-            return Task.FromResult(default(T));
-        }
-
-        return httpContextAccessor.HttpContext.DeserializeRequestJsonBodyAsAsync<T>();
-    }
+        => httpContextAccessor.HttpContext is null
+            ? Task.FromResult(default(T))
+            : httpContextAccessor.HttpContext.DeserializeRequestJsonBodyAsAsync<T>();
 
     /// <summary>
     ///     Reads `request.Body` as string.
     /// </summary>
     public Task<string> ReadRequestBodyAsStringAsync()
-    {
-        if (httpContextAccessor.HttpContext == null)
-        {
-            return Task.FromResult(string.Empty);
-        }
-
-        return httpContextAccessor.HttpContext.ReadRequestBodyAsStringAsync();
-    }
+        => httpContextAccessor.HttpContext is null
+            ? Task.FromResult(string.Empty)
+            : httpContextAccessor.HttpContext.ReadRequestBodyAsStringAsync();
 
     /// <summary>
     ///     Deserialize `request.Body` as a JSON content.
     /// </summary>
     public Task<IDictionary<string, string>?> DeserializeRequestJsonBodyAsDictionaryAsync()
-    {
-        if (httpContextAccessor.HttpContext == null)
-        {
-            return Task.FromResult<IDictionary<string, string>?>(result: null);
-        }
-
-        return httpContextAccessor.HttpContext.DeserializeRequestJsonBodyAsDictionaryAsync();
-    }
+        => httpContextAccessor.HttpContext is null
+            ? Task.FromResult<IDictionary<string, string>?>(result: null)
+            : httpContextAccessor.HttpContext.DeserializeRequestJsonBodyAsDictionaryAsync();
 }

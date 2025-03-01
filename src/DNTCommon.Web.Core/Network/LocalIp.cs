@@ -51,17 +51,14 @@ public static class LocalIp
     /// </summary>
     public static bool IsLocal(this ConnectionInfo conn)
     {
-        if (conn == null)
-        {
-            throw new ArgumentNullException(nameof(conn));
-        }
+        ArgumentNullException.ThrowIfNull(conn);
 
         if (conn.RemoteIpAddress?.IsSet() == false)
         {
             return true;
         }
 
-        if (conn.RemoteIpAddress != null && conn.LocalIpAddress?.IsSet() == true)
+        if (conn.RemoteIpAddress is not null && conn.LocalIpAddress?.IsSet() == true)
         {
             return conn.RemoteIpAddress.Equals(conn.LocalIpAddress);
         }
@@ -74,10 +71,7 @@ public static class LocalIp
     /// </summary>
     public static bool IsLocal(this HttpContext ctx)
     {
-        if (ctx == null)
-        {
-            throw new ArgumentNullException(nameof(ctx));
-        }
+        ArgumentNullException.ThrowIfNull(ctx);
 
         return ctx.Connection.IsLocal();
     }
@@ -87,19 +81,16 @@ public static class LocalIp
     /// </summary>
     public static bool IsLocal(this HttpRequest req)
     {
-        if (req == null)
-        {
-            throw new ArgumentNullException(nameof(req));
-        }
+        ArgumentNullException.ThrowIfNull(req);
 
         return req.HttpContext.IsLocal();
     }
 
     /// <summary>
-    ///     address != NullIPv6
+    ///     address is not nullIPv6
     /// </summary>
     public static bool IsSet(this IPAddress address)
-        => address != null && !string.Equals(address.ToString(), NullIPv6, StringComparison.Ordinal);
+        => address is not null && !string.Equals(address.ToString(), NullIPv6, StringComparison.Ordinal);
 
     /// <summary>
     ///     Indicates whether the specified IP address is the loopback address.

@@ -16,10 +16,7 @@ public class PersianDateModelBinder : IModelBinder
     /// </summary>
     public Task BindModelAsync(ModelBindingContext bindingContext)
     {
-        if (bindingContext == null)
-        {
-            throw new ArgumentNullException(nameof(bindingContext));
-        }
+        ArgumentNullException.ThrowIfNull(bindingContext);
 
         var logger = bindingContext.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>();
         var binderLogger = logger.CreateLogger(nameof(PersianDateModelBinder));
@@ -30,7 +27,7 @@ public class PersianDateModelBinder : IModelBinder
 
         if (valueProviderResult == ValueProviderResult.None)
         {
-            binderLogger.LogError("There is not valueProvider for bindingContext.ModelName: {ModelName}",
+            binderLogger.LogError(message: "There is not valueProvider for bindingContext.ModelName: {ModelName}",
                 bindingContext.ModelName);
 
             return fallbackBinder.BindModelAsync(bindingContext);
@@ -49,7 +46,7 @@ public class PersianDateModelBinder : IModelBinder
 
             if (!isValidPersianDateTime)
             {
-                binderLogger.LogError("{ValueAsString}` is not a valid PersianDateTime.", valueAsString);
+                binderLogger.LogError(message: "{ValueAsString}` is not a valid PersianDateTime.", valueAsString);
 
                 return fallbackBinder.BindModelAsync(bindingContext);
             }
@@ -61,7 +58,7 @@ public class PersianDateModelBinder : IModelBinder
             var message = $"`{valueProviderResult.FirstValue}` is not a valid Persian date.";
             bindingContext.ModelState.TryAddModelError(bindingContext.ModelName, message);
 
-            binderLogger.LogError(ex.Demystify(), "PersianDateModelBinder error. {Message}", message);
+            binderLogger.LogError(ex.Demystify(), message: "PersianDateModelBinder error. {Message}", message);
 
             return Task.CompletedTask;
         }

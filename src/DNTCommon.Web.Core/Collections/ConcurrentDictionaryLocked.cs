@@ -15,7 +15,9 @@ public class ConcurrentDictionaryLocked<TKey, TValue> : ConcurrentDictionary<TKe
     ///     exist. Returns the new value, or the existing value if the key exists.
     /// </summary>
     public TValue LockedGetOrAdd(TKey key, Func<TKey, TValue> valueFactory)
-        => GetOrAdd(key, k => new Lazy<TValue>(() => valueFactory(k), LazyThreadSafetyMode.ExecutionAndPublication))
+        => GetOrAdd(key,
+                static (k, arg) => new Lazy<TValue>(() => arg(k), LazyThreadSafetyMode.ExecutionAndPublication),
+                valueFactory)
             .Value;
 
     /// <summary>

@@ -25,10 +25,7 @@ public class MvcActionsDiscoveryService : IMvcActionsDiscoveryService
     /// </summary>
     public MvcActionsDiscoveryService(IActionDescriptorCollectionProvider actionDescriptorCollectionProvider)
     {
-        if (actionDescriptorCollectionProvider == null)
-        {
-            throw new ArgumentNullException(nameof(actionDescriptorCollectionProvider));
-        }
+        ArgumentNullException.ThrowIfNull(actionDescriptorCollectionProvider);
 
         var apiControllers = new HashSet<MvcControllerViewModel>(new MvcControllerEqualityComparer());
 
@@ -111,7 +108,7 @@ public class MvcActionsDiscoveryService : IMvcActionsDiscoveryService
                     controller.MvcActions.AddRange(securedOnes);
                 }
 
-                return controllers.Where(model => model.MvcActions.Any()).ToList();
+                return [.. controllers.Where(model => model.MvcActions.Any())];
             }));
 
         return getter.Value;
@@ -122,22 +119,24 @@ public class MvcActionsDiscoveryService : IMvcActionsDiscoveryService
            attributes.OfType<DisplayAttribute>().FirstOrDefault()?.Name ?? string.Empty;
 
     private static List<Attribute> GetAttributes(MemberInfo actionMethodInfo)
-        => actionMethodInfo.GetCustomAttributes(inherit: true)
-            .Where(attribute =>
-            {
-                var attributeNamespace = attribute.GetType().Namespace;
+        =>
+        [
+            .. actionMethodInfo.GetCustomAttributes(inherit: true)
+                .Where(attribute =>
+                {
+                    var attributeNamespace = attribute.GetType().Namespace;
 
-                return !string.Equals(attributeNamespace, typeof(CompilerGeneratedAttribute).Namespace,
-                    StringComparison.Ordinal) && !string.Equals(attributeNamespace,
-                    typeof(DebuggerStepThroughAttribute).Namespace, StringComparison.Ordinal);
-            })
-            .Cast<Attribute>()
-            .ToList();
+                    return !string.Equals(attributeNamespace, typeof(CompilerGeneratedAttribute).Namespace,
+                        StringComparison.Ordinal) && !string.Equals(attributeNamespace,
+                        typeof(DebuggerStepThroughAttribute).Namespace, StringComparison.Ordinal);
+                })
+                .Cast<Attribute>()
+        ];
 
     private static bool IsSecuredAction(MemberInfo controllerTypeInfo, MemberInfo actionMethodInfo)
     {
         var actionHasAllowAnonymousAttribute =
-            actionMethodInfo.GetCustomAttribute<AllowAnonymousAttribute>(inherit: true) != null;
+            actionMethodInfo.GetCustomAttribute<AllowAnonymousAttribute>(inherit: true) is not null;
 
         if (actionHasAllowAnonymousAttribute)
         {
@@ -145,7 +144,7 @@ public class MvcActionsDiscoveryService : IMvcActionsDiscoveryService
         }
 
         var controllerHasAuthorizeAttribute =
-            controllerTypeInfo.GetCustomAttribute<AuthorizeAttribute>(inherit: true) != null;
+            controllerTypeInfo.GetCustomAttribute<AuthorizeAttribute>(inherit: true) is not null;
 
         if (controllerHasAuthorizeAttribute)
         {
@@ -153,7 +152,7 @@ public class MvcActionsDiscoveryService : IMvcActionsDiscoveryService
         }
 
         var actionMethodHasAuthorizeAttribute =
-            actionMethodInfo.GetCustomAttribute<AuthorizeAttribute>(inherit: true) != null;
+            actionMethodInfo.GetCustomAttribute<AuthorizeAttribute>(inherit: true) is not null;
 
         if (actionMethodHasAuthorizeAttribute)
         {

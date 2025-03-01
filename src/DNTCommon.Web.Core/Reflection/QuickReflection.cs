@@ -43,7 +43,7 @@ public class QuickReflection
                 var getterDelegate = CreateGetterPropertyDelegate(typeCache, property, index);
                 index++;
 
-                if (getterDelegate == null)
+                if (getterDelegate is null)
                 {
                     continue;
                 }
@@ -65,7 +65,7 @@ public class QuickReflection
             {
                 var getterDelegate = CreateGetterFieldDelegate(typeCache, field);
 
-                if (getterDelegate == null)
+                if (getterDelegate is null)
                 {
                     continue;
                 }

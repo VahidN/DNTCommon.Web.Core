@@ -13,7 +13,8 @@ public static class NetworkExtensions
     ///     Determines whether ex is a SocketException or WebException
     /// </summary>
     public static bool IsNetworkError(this Exception? ex)
-        => ex != null && (ex is SocketException || ex is WebException || ex.InnerException?.IsNetworkError() == true);
+        => ex is not null &&
+           (ex is SocketException || ex is WebException || ex.InnerException?.IsNetworkError() == true);
 
     /// <summary>
     ///     Determines if there is at least one network interface capable of reaching the interwebs

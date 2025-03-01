@@ -12,10 +12,7 @@ public class EnhancedStackTraceService : IEnhancedStackTraceService
     /// </summary>
     public IEnumerable<StackFrameInfo> GetCurrentStackFrames(Predicate<Type> skipFrame)
     {
-        if (skipFrame == null)
-        {
-            throw new ArgumentNullException(nameof(skipFrame));
-        }
+        ArgumentNullException.ThrowIfNull(skipFrame);
 
         return GetStackFrames(skipFrame);
     }
@@ -25,10 +22,7 @@ public class EnhancedStackTraceService : IEnhancedStackTraceService
     /// </summary>
     public string GetCurrentStackTrace(Predicate<Type> skipFrame)
     {
-        if (skipFrame == null)
-        {
-            throw new ArgumentNullException(nameof(skipFrame));
-        }
+        ArgumentNullException.ThrowIfNull(skipFrame);
 
         var sb = new StringBuilder();
 
@@ -57,7 +51,7 @@ public class EnhancedStackTraceService : IEnhancedStackTraceService
         var enhancedStackTrace = EnhancedStackTrace.Current();
         var stackFrames = enhancedStackTrace.GetFrames();
 
-        if (stackFrames == null)
+        if (stackFrames is null)
         {
             yield break;
         }
@@ -71,21 +65,21 @@ public class EnhancedStackTraceService : IEnhancedStackTraceService
 
             var methodBase = stackFrame.GetMethod();
 
-            if (methodBase == null)
+            if (methodBase is null)
             {
                 continue;
             }
 
             var resolvedMethod = EnhancedStackTrace.GetMethodDisplayString(methodBase);
 
-            if (resolvedMethod == null)
+            if (resolvedMethod is null)
             {
                 continue;
             }
 
             var declaringType = methodBase.DeclaringType;
 
-            if (declaringType == null)
+            if (declaringType is null)
             {
                 continue;
             }

@@ -12,10 +12,7 @@ public static class PersianDateModelBinderExtensions
     /// </summary>
     public static MvcOptions UsePersianDateModelBinder(this MvcOptions options)
     {
-        if (options == null)
-        {
-            throw new ArgumentNullException(nameof(options));
-        }
+        ArgumentNullException.ThrowIfNull(options);
 
         options.ModelBinderProviders.Insert(index: 0, new PersianDateModelBinderProvider());
 

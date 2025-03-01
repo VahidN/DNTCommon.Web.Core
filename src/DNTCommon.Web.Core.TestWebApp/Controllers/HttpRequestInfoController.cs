@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using DNTCommon.Web.Core.TestWebApp.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +24,8 @@ public class HttpRequestInfoController(IHttpRequestInfoService httpRequestInfoSe
     {
         var requestBody = string.Empty;
 
-        if (Request.IsAjaxRequest() && Request.ContentType.Contains(value: "application/json"))
+        if (Request.IsAjaxRequest() &&
+            Request.ContentType?.Contains(value: "application/json", StringComparison.OrdinalIgnoreCase) == true)
         {
             //var roleModel = await _httpRequestInfoService.DeserializeRequestJsonBodyAsAsync<RoleViewModel>();
             requestBody = await httpRequestInfoService.ReadRequestBodyAsStringAsync();

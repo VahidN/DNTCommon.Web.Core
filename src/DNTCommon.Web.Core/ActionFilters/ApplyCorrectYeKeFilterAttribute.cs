@@ -11,8 +11,5 @@ namespace DNTCommon.Web.Core;
 public sealed class ApplyCorrectYeKeFilterAttribute : ActionFilterAttribute
 {
     /// <inheritdoc />
-    public override void OnActionExecuting(ActionExecutingContext? context)
-    {
-        context?.CleanupActionStringValues(data => data.ApplyCorrectYeKe());
-    }
+    public override void OnActionExecuting(ActionExecutingContext? context) => context?.CleanupActionStringValues(data => data.ApplyCorrectYeKe());
 }

@@ -13,10 +13,7 @@ public class EncryptedFieldModelBinderProvider : IModelBinderProvider
     /// </summary>
     public IModelBinder? GetBinder(ModelBinderProviderContext context)
     {
-        if (context == null)
-        {
-            throw new ArgumentNullException(nameof(context));
-        }
+        ArgumentNullException.ThrowIfNull(context);
 
         if (context.Metadata.IsComplexType)
         {
@@ -32,14 +29,14 @@ public class EncryptedFieldModelBinderProvider : IModelBinderProvider
 
         var propInfo = context.Metadata.ContainerType?.GetProperty(propName);
 
-        if (propInfo == null)
+        if (propInfo is null)
         {
             return null;
         }
 
         var attribute = propInfo.GetCustomAttributes(typeof(EncryptedFieldAttribute), inherit: false).FirstOrDefault();
 
-        if (attribute == null)
+        if (attribute is null)
         {
             return null;
         }

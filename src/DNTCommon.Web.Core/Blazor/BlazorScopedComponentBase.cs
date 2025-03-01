@@ -34,10 +34,12 @@ public class BlazorScopedComponentBase : OwningComponentBase
 
     private List<PropertyInfo> InjectComponentScopedPropertiesList => CachedProperties.GetOrAdd(GetType(),
             type => new Lazy<List<PropertyInfo>>(
-                () => type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance |
-                                         BindingFlags.NonPublic | BindingFlags.Public)
-                    .Where(p => p.GetCustomAttribute<InjectComponentScopedAttribute>() is not null)
-                    .ToList(), LazyThreadSafetyMode.ExecutionAndPublication))
+                () =>
+                [
+                    .. type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.NonPublic |
+                                          BindingFlags.Public)
+                        .Where(p => p.GetCustomAttribute<InjectComponentScopedAttribute>() is not null)
+                ], LazyThreadSafetyMode.ExecutionAndPublication))
         .Value;
 
     /// <inheritdoc />

@@ -12,10 +12,7 @@ public class TextToImageResult(string text, TextToImageOptions options) : Action
     /// </summary>
     public override Task ExecuteResultAsync(ActionContext context)
     {
-        if (context == null)
-        {
-            throw new ArgumentNullException(nameof(context));
-        }
+        ArgumentNullException.ThrowIfNull(context);
 
         return WriteToResponseAsync(context);
     }

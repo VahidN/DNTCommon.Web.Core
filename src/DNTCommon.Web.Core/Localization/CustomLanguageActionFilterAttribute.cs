@@ -8,6 +8,7 @@ namespace DNTCommon.Web.Core;
 /// <remarks>
 ///     Sets the CultureInfo.CurrentCulture and CultureInfo.CurrentUICulture to the specified culture.
 /// </remarks>
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
 public sealed class CustomLanguageActionFilterAttribute(string culture) : ActionFilterAttribute
 {
     private readonly string _culture = culture ?? throw new ArgumentNullException(nameof(culture));

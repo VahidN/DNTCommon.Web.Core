@@ -104,7 +104,7 @@ public static partial class HttpRequestExtensions
         {
             // fine! they have banned this server, but the link is correct!
             // 301 = HttpStatusCode.MovedPermanently
-            // 302 = HttpStatusCode.Redirect            
+            // 302 = HttpStatusCode.Redirect
             HttpStatusCode.Found or HttpStatusCode.Moved or HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden or
                 HttpStatusCode.OK => true,
             _ => false
@@ -116,10 +116,7 @@ public static partial class HttpRequestExtensions
     /// </summary>
     public static string? GetIP(this HttpContext httpContext, bool tryUseXForwardHeader = true)
     {
-        if (httpContext == null)
-        {
-            throw new ArgumentNullException(nameof(httpContext));
-        }
+        ArgumentNullException.ThrowIfNull(httpContext);
 
         var ip = string.Empty;
 
@@ -135,7 +132,7 @@ public static partial class HttpRequestExtensions
             ip = SplitCsv(httpContext.GetHeaderValue(headerName: "X-Forwarded-For")).FirstOrDefault();
         }
 
-        if (string.IsNullOrWhiteSpace(ip) && httpContext.Connection?.RemoteIpAddress != null)
+        if (string.IsNullOrWhiteSpace(ip) && httpContext.Connection?.RemoteIpAddress is not null)
         {
             var remoteIpAddress = httpContext.Connection.RemoteIpAddress;
 
@@ -160,10 +157,7 @@ public static partial class HttpRequestExtensions
     /// </summary>
     public static string GetHeaderValue(this HttpContext httpContext, string headerName)
     {
-        if (httpContext == null)
-        {
-            throw new ArgumentNullException(nameof(httpContext));
-        }
+        ArgumentNullException.ThrowIfNull(httpContext);
 
         StringValues values = string.Empty;
 
@@ -176,14 +170,9 @@ public static partial class HttpRequestExtensions
     }
 
     private static List<string> SplitCsv(string csvList)
-    {
-        if (string.IsNullOrWhiteSpace(csvList))
-        {
-            return [];
-        }
-
-        return csvList.TrimEnd(trimChar: ',').Split(separator: ',').AsEnumerable().Select(s => s.Trim()).ToList();
-    }
+        => string.IsNullOrWhiteSpace(csvList)
+            ? []
+            : [.. csvList.TrimEnd(trimChar: ',').Split(separator: ',').AsEnumerable().Select(s => s.Trim())];
 
     /// <summary>
     ///     Gets the current HttpContext.Request content's absolute path.
@@ -252,33 +241,23 @@ public static partial class HttpRequestExtensions
     ///     Gets the current HttpContext.Request's IUrlHelper.
     /// </summary>
     public static IUrlHelper GetUrlHelper(this HttpContext httpContext)
-    {
-        if (httpContext == null)
-        {
-            throw new ArgumentNullException(nameof(httpContext));
-        }
-
-        return httpContext.RequestServices.GetRequiredService<IUrlHelper>();
-    }
+        => httpContext is null
+            ? throw new ArgumentNullException(nameof(httpContext))
+            : httpContext.RequestServices.GetRequiredService<IUrlHelper>();
 
     /// <summary>
     ///     Gets the current HttpContext.Request's LinkGenerator.
     /// </summary>
     public static LinkGenerator GetLinkGenerator(this HttpContext httpContext)
-    {
-        if (httpContext == null)
-        {
-            throw new ArgumentNullException(nameof(httpContext));
-        }
-
-        return httpContext.RequestServices.GetRequiredService<LinkGenerator>();
-    }
+        => httpContext is null
+            ? throw new ArgumentNullException(nameof(httpContext))
+            : httpContext.RequestServices.GetRequiredService<LinkGenerator>();
 
     private static void RequestSanityCheck(this HttpContext httpContext)
     {
         ArgumentNullException.ThrowIfNull(httpContext);
 
-        if (httpContext.Request == null)
+        if (httpContext.Request is null)
         {
             throw new InvalidOperationException(message: "HttpContext.Request is null.");
         }
@@ -366,7 +345,7 @@ public static partial class HttpRequestExtensions
 
         sb.AppendLine(HtmlExtensions.CreateHtmlTable(caption: "Current Endpoint", ["Key", "Value"],
         [
-            ["Has Endpoint", (endpoint != null).ToString()], ["DisplayName", endpoint?.DisplayName ?? ""],
+            ["Has Endpoint", (endpoint is not null).ToString()], ["DisplayName", endpoint?.DisplayName ?? ""],
             ["RoutePattern", (endpoint as RouteEndpoint)?.RoutePattern?.RawText ?? ""]
         ]));
 

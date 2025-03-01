@@ -39,10 +39,7 @@ public class MvcControllerEqualityComparer : IEqualityComparer<MvcControllerView
     /// </summary>
     public int GetHashCode(MvcControllerViewModel obj)
     {
-        if (obj == null)
-        {
-            throw new ArgumentNullException(nameof(obj));
-        }
+        ArgumentNullException.ThrowIfNull(obj);
 
         return HashCode.Combine(obj.AreaName, obj.ControllerName);
     }

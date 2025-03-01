@@ -25,7 +25,7 @@ public class UploadFileService(IWebHostEnvironment environment) : IUploadFileSer
         bool allowOverwrite,
         params string[] destinationDirectoryNames)
     {
-        if (formFile == null || formFile.Length == 0)
+        if (formFile is null || formFile.Length == 0)
         {
             return (false, string.Empty);
         }

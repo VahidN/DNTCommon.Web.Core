@@ -44,10 +44,7 @@ public sealed class EncryptedFieldResultFilterAttribute(
     /// </summary>
     public override void OnResultExecuting(ResultExecutingContext context)
     {
-        if (context == null)
-        {
-            throw new ArgumentNullException(nameof(context));
-        }
+        ArgumentNullException.ThrowIfNull(context);
 
         var model = context.Result switch
         {
@@ -81,7 +78,7 @@ public sealed class EncryptedFieldResultFilterAttribute(
 
     private void EncryptProperties(object? model)
     {
-        if (model == null)
+        if (model is null)
         {
             return;
         }
@@ -99,7 +96,7 @@ public sealed class EncryptedFieldResultFilterAttribute(
             var attribute = property.GetCustomAttributes(typeof(EncryptedFieldAttribute), inherit: false)
                 .FirstOrDefault();
 
-            if (attribute == null)
+            if (attribute is null)
             {
                 continue;
             }
@@ -108,7 +105,7 @@ public sealed class EncryptedFieldResultFilterAttribute(
 
             var value = property.GetValue(model);
 
-            if (value == null)
+            if (value is null)
             {
                 continue;
             }
@@ -123,9 +120,9 @@ public sealed class EncryptedFieldResultFilterAttribute(
                 continue;
             }
 
-            var inputText = value.ToString();
+            var inputText = Convert.ToString(value, CultureInfo.InvariantCulture);
 
-            if (inputText == null)
+            if (inputText is null)
             {
                 continue;
             }

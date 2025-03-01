@@ -17,7 +17,7 @@ public class NestedPropertiesDumper
     /// <returns>Nested Property Values List</returns>
     public IList<PropertyData>? DumpPropertyValues(object? data, string? parent = "", int dumpLevel = 2)
     {
-        if (data == null || parent is null)
+        if (data is null || parent is null)
         {
             return null;
         }
@@ -30,14 +30,14 @@ public class NestedPropertiesDumper
             var name = string.Format(CultureInfo.InvariantCulture, format: "{0}{1}", parent, propertyGetter.Name);
             var propertyType = propertyGetter.PropertyType;
             var underlyingType = Nullable.GetUnderlyingType(propertyType);
-            var isNullable = underlyingType != null;
+            var isNullable = underlyingType is not null;
 
             if (isNullable)
             {
                 propertyType = underlyingType;
             }
 
-            if (dataValue == null)
+            if (dataValue is null)
             {
                 var nullDisplayText = propertyGetter.MemberInfo.GetNullDisplayTextAttribute();
 

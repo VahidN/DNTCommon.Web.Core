@@ -40,7 +40,7 @@ public static class HtmlHelperServiceExtensions
         var htmlDocument = html.CreateHtmlDocument(logger);
         var imageNodes = htmlDocument.DocumentNode.SelectNodes(xpath: "//img[@src]");
 
-        if (imageNodes == null)
+        if (imageNodes is null)
         {
             return html;
         }
@@ -84,7 +84,7 @@ public static class HtmlHelperServiceExtensions
         var htmlDocument = html.CreateHtmlDocument(logger);
         var imageNodes = htmlDocument.DocumentNode.SelectNodes(xpath: "//img[@src]");
 
-        if (imageNodes == null)
+        if (imageNodes is null)
         {
             return html;
         }
@@ -130,7 +130,7 @@ public static class HtmlHelperServiceExtensions
         var doc = html.CreateHtmlDocument(logger);
         var nodes = doc.DocumentNode.SelectNodes(xpath: "//img[@src]");
 
-        if (nodes == null)
+        if (nodes is null)
         {
             yield break;
         }
@@ -153,7 +153,7 @@ public static class HtmlHelperServiceExtensions
         var doc = html.CreateHtmlDocument(logger);
         var nodes = doc.DocumentNode.SelectNodes(xpath: "//a[@href]");
 
-        if (nodes == null)
+        if (nodes is null)
         {
             yield break;
         }
@@ -229,7 +229,7 @@ public static class HtmlHelperServiceExtensions
         var doc = html.CreateHtmlDocument(logger);
         var title = doc.DocumentNode.SelectSingleNode(xpath: "//head/title");
 
-        if (title == null)
+        if (title is null)
         {
             return string.Empty;
         }
@@ -243,8 +243,8 @@ public static class HtmlHelperServiceExtensions
 
         titleText = titleText.Trim()
             .Replace(Environment.NewLine, newValue: " ", StringComparison.Ordinal)
-            .Replace(oldValue: "\t", newValue: " ", StringComparison.Ordinal)
-            .Replace(oldValue: "\n", newValue: " ", StringComparison.Ordinal);
+            .Replace(oldChar: '\t', newChar: ' ')
+            .Replace(oldChar: '\n', newChar: ' ');
 
         return WebUtility.HtmlDecode(titleText.Trim());
     }
@@ -307,7 +307,7 @@ public static class HtmlHelperServiceExtensions
         var doc = html.CreateHtmlDocument(logger);
         var nodes = doc.DocumentNode.SelectNodes(xpath);
 
-        if (nodes == null)
+        if (nodes is null)
         {
             yield break;
         }

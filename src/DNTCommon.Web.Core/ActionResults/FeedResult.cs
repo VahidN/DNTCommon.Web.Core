@@ -25,14 +25,11 @@ public class FeedResult<TFeedItem>(FeedChannel<TFeedItem> feedChannel) : ActionR
     /// </summary>
     public override Task ExecuteResultAsync(ActionContext context)
     {
-        if (context == null)
-        {
-            throw new ArgumentNullException(nameof(context));
-        }
+        ArgumentNullException.ThrowIfNull(context);
 
         var httpContextInfo = context.HttpContext.RequestServices.GetRequiredService<IHttpRequestInfoService>();
 
-        return httpContextInfo == null
+        return httpContextInfo is null
             ? throw new InvalidOperationException(message: "httpContextInfo is null.")
             : WriteSyndicationFeedToResponseAsync(context, httpContextInfo);
     }
@@ -76,12 +73,14 @@ public class FeedResult<TFeedItem>(FeedChannel<TFeedItem> feedChannel) : ActionR
         var feed = new SyndicationFeed
         {
             Id = rawUri?.ToString(),
-            Title = new TextSyndicationContent(feedChannel.FeedTitle.ApplyRle()
-                .RemoveHexadecimalSymbols()
-                .SanitizeXmlString()),
-            Description = new TextSyndicationContent(feedChannel.FeedDescription.ApplyRle()
-                .RemoveHexadecimalSymbols()
-                .SanitizeXmlString()),
+            Title =
+                new TextSyndicationContent(feedChannel.FeedTitle.ApplyRle()
+                    .RemoveHexadecimalSymbols()
+                    .SanitizeXmlString()),
+            Description =
+                new TextSyndicationContent(feedChannel.FeedDescription.ApplyRle()
+                    .RemoveHexadecimalSymbols()
+                    .SanitizeXmlString()),
             Items = GetSyndicationItems(baseUri?.ToString() ?? "/"),
             Language = feedChannel.CultureName,
             Copyright = new TextSyndicationContent(feedChannel.FeedCopyright.ApplyRle()
@@ -170,7 +169,7 @@ public class FeedResult<TFeedItem>(FeedChannel<TFeedItem> feedChannel) : ActionR
 
     private static string GetUpdatedStamp(FeedItem item)
         => item.LastUpdatedTime.ToShortPersianDateTimeString()
-            .Replace(oldValue: "/", newValue: "-", StringComparison.Ordinal)
-            .Replace(oldValue: " ", newValue: "-", StringComparison.Ordinal)
-            .Replace(oldValue: ":", newValue: "-", StringComparison.Ordinal);
+            .Replace(oldChar: '/', newChar: '-')
+            .Replace(oldChar: ' ', newChar: '-')
+            .Replace(oldChar: ':', newChar: '-');
 }

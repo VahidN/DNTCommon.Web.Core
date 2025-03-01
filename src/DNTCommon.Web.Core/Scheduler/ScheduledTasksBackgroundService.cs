@@ -21,5 +21,5 @@ public class ScheduledTasksBackgroundService(IScheduledTasksCoordinator schedule
     ///     Triggered when the application host is performing a graceful shutdown.
     /// </summary>
     public override async Task StopAsync(CancellationToken cancellationToken)
-        => await scheduledTasksCoordinator.StopTasks();
+        => await scheduledTasksCoordinator.StopTasksAsync();
 }

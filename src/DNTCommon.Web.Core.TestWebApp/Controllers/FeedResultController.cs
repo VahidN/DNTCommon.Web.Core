@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DNTCommon.Web.Core.TestWebApp.Controllers;
@@ -62,7 +63,7 @@ public class FeedResultController : Controller
         return new FeedResult<WhatsNewItemModel>(channel);
     }
 
-    public IActionResult Article(int? id) => Content(id == null ? "" : id.ToString());
+    public IActionResult Article(int? id) => Content(id is null ? "" : id.Value.ToString(CultureInfo.InvariantCulture));
 }
 
 public class WhatsNewFeedChannel : FeedChannel<WhatsNewItemModel>

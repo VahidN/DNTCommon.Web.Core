@@ -26,15 +26,9 @@ public static class IServiceProviderExtensions
     public static T RunScopedService<TS, T>(this IServiceScope serviceScope, Func<TS, T> callback)
         where TS : notnull
     {
-        if (serviceScope == null)
-        {
-            throw new ArgumentNullException(nameof(serviceScope));
-        }
+        ArgumentNullException.ThrowIfNull(serviceScope);
 
-        if (callback == null)
-        {
-            throw new ArgumentNullException(nameof(callback));
-        }
+        ArgumentNullException.ThrowIfNull(callback);
 
         var context = serviceScope.ServiceProvider.GetRequiredService<TS>();
 
@@ -48,10 +42,7 @@ public static class IServiceProviderExtensions
     public static T RunScopedService<TS, T>(this IServiceScopeFactory serviceScopeFactory, Func<TS, T> callback)
         where TS : notnull
     {
-        if (serviceScopeFactory == null)
-        {
-            throw new ArgumentNullException(nameof(serviceScopeFactory));
-        }
+        ArgumentNullException.ThrowIfNull(serviceScopeFactory);
 
         using var serviceScope = serviceScopeFactory.CreateScope();
 
@@ -77,15 +68,9 @@ public static class IServiceProviderExtensions
     public static void RunScopedService<TS>(this IServiceScope serviceScope, Action<TS> callback)
         where TS : notnull
     {
-        if (serviceScope == null)
-        {
-            throw new ArgumentNullException(nameof(serviceScope));
-        }
+        ArgumentNullException.ThrowIfNull(serviceScope);
 
-        if (callback == null)
-        {
-            throw new ArgumentNullException(nameof(callback));
-        }
+        ArgumentNullException.ThrowIfNull(callback);
 
         var context = serviceScope.ServiceProvider.GetRequiredService<TS>();
 
@@ -109,10 +94,7 @@ public static class IServiceProviderExtensions
     public static void RunScopedService<TS>(this IServiceScopeFactory serviceScopeFactory, Action<TS> callback)
         where TS : notnull
     {
-        if (serviceScopeFactory == null)
-        {
-            throw new ArgumentNullException(nameof(serviceScopeFactory));
-        }
+        ArgumentNullException.ThrowIfNull(serviceScopeFactory);
 
         using var serviceScope = serviceScopeFactory.CreateScope();
         RunScopedService(serviceScope, callback);
@@ -137,15 +119,9 @@ public static class IServiceProviderExtensions
         where TS : notnull
         where T : notnull
     {
-        if (serviceScope == null)
-        {
-            throw new ArgumentNullException(nameof(serviceScope));
-        }
+        ArgumentNullException.ThrowIfNull(serviceScope);
 
-        if (callback == null)
-        {
-            throw new ArgumentNullException(nameof(callback));
-        }
+        ArgumentNullException.ThrowIfNull(callback);
 
         var context = serviceScope.ServiceProvider.GetRequiredService<TS>();
 
@@ -170,10 +146,7 @@ public static class IServiceProviderExtensions
         where TS : notnull
         where T : notnull
     {
-        if (serviceScopeFactory == null)
-        {
-            throw new ArgumentNullException(nameof(serviceScopeFactory));
-        }
+        ArgumentNullException.ThrowIfNull(serviceScopeFactory);
 
         using var serviceScope = serviceScopeFactory.CreateScope();
         RunScopedService(serviceScope, callback);
@@ -201,10 +174,7 @@ public static class IServiceProviderExtensions
         where TS : notnull
         where T : notnull
     {
-        if (serviceScopeFactory == null)
-        {
-            throw new ArgumentNullException(nameof(serviceScopeFactory));
-        }
+        ArgumentNullException.ThrowIfNull(serviceScopeFactory);
 
         using var serviceScope = serviceScopeFactory.CreateScope();
         await RunScopedServiceAsync(serviceScope, callback);
@@ -218,15 +188,9 @@ public static class IServiceProviderExtensions
         where TS : notnull
         where T : notnull
     {
-        if (serviceScope == null)
-        {
-            throw new ArgumentNullException(nameof(serviceScope));
-        }
+        ArgumentNullException.ThrowIfNull(serviceScope);
 
-        if (callback == null)
-        {
-            throw new ArgumentNullException(nameof(callback));
-        }
+        ArgumentNullException.ThrowIfNull(callback);
 
         var context = serviceScope.ServiceProvider.GetRequiredService<TS>();
 
@@ -262,10 +226,7 @@ public static class IServiceProviderExtensions
         Func<TS, Task> callback)
         where TS : notnull
     {
-        if (serviceScopeFactory == null)
-        {
-            throw new ArgumentNullException(nameof(serviceScopeFactory));
-        }
+        ArgumentNullException.ThrowIfNull(serviceScopeFactory);
 
         using var serviceScope = serviceScopeFactory.CreateScope();
         await RunScopedServiceAsync(serviceScope, callback);
@@ -278,15 +239,9 @@ public static class IServiceProviderExtensions
     public static async Task RunScopedServiceAsync<TS>(this IServiceScope serviceScope, Func<TS, Task> callback)
         where TS : notnull
     {
-        if (serviceScope == null)
-        {
-            throw new ArgumentNullException(nameof(serviceScope));
-        }
+        ArgumentNullException.ThrowIfNull(serviceScope);
 
-        if (callback == null)
-        {
-            throw new ArgumentNullException(nameof(callback));
-        }
+        ArgumentNullException.ThrowIfNull(callback);
 
         var context = serviceScope.ServiceProvider.GetRequiredService<TS>();
 
@@ -324,10 +279,7 @@ public static class IServiceProviderExtensions
         Func<TS, Task<T>> callback)
         where TS : notnull
     {
-        if (serviceScopeFactory == null)
-        {
-            throw new ArgumentNullException(nameof(serviceScopeFactory));
-        }
+        ArgumentNullException.ThrowIfNull(serviceScopeFactory);
 
         using var serviceScope = serviceScopeFactory.CreateScope();
 
@@ -342,15 +294,9 @@ public static class IServiceProviderExtensions
         Func<TS, Task<T>> callback)
         where TS : notnull
     {
-        if (serviceScope == null)
-        {
-            throw new ArgumentNullException(nameof(serviceScope));
-        }
+        ArgumentNullException.ThrowIfNull(serviceScope);
 
-        if (callback == null)
-        {
-            throw new ArgumentNullException(nameof(callback));
-        }
+        ArgumentNullException.ThrowIfNull(callback);
 
         var context = serviceScope.ServiceProvider.GetRequiredService<TS>();
 

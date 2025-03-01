@@ -26,7 +26,7 @@ public static class StringUtils
     /// <param name="items"></param>
     /// <returns></returns>
     public static string ConvertListToMultiLineText(this ICollection<string>? items)
-        => items == null || items.Count == 0 ? string.Empty : string.Join(Environment.NewLine, items);
+        => items is null || items.Count == 0 ? string.Empty : string.Join(Environment.NewLine, items);
 
     /// <summary>
     ///     Simplified version of IsNullOrWhiteSpace
@@ -172,14 +172,14 @@ public static class StringUtils
     ///     They look like regular letters but are actually different Unicode code points.
     /// </summary>
     public static bool IsFullWidthChar(this char c)
-        => (c >= 0x1100 && c <= 0x115F) || // Hangul Jamo
-           (c >= 0x2E80 && c <= 0xA4CF && c != 0x303F) || // CJK Radicals Supplement and Kangxi Radicals
-           (c >= 0xAC00 && c <= 0xD7A3) || // Hangul Syllables
-           (c >= 0xF900 && c <= 0xFAFF) || // CJK Compatibility Ideographs
-           (c >= 0xFE10 && c <= 0xFE19) || // Vertical forms
-           (c >= 0xFE30 && c <= 0xFE6F) || // CJK Compatibility Forms
-           (c >= 0xFF00 && c <= 0xFF60) || // Fullwidth Forms
-           (c >= 0xFFE0 && c <= 0xFFE6); // Fullwidth Symbol Forms
+        => c is >= (char)0x1100 and <= (char)0x115F or // Hangul Jamo
+            >= (char)0x2E80 and <= (char)0xA4CF and not (char)0x303F or // CJK Radicals Supplement and Kangxi Radicals
+            >= (char)0xAC00 and <= (char)0xD7A3 or // Hangul Syllables
+            >= (char)0xF900 and <= (char)0xFAFF or // CJK Compatibility Ideographs
+            >= (char)0xFE10 and <= (char)0xFE19 or // Vertical forms
+            >= (char)0xFE30 and <= (char)0xFE6F or // CJK Compatibility Forms
+            >= (char)0xFF00 and <= (char)0xFF60 or // Fullwidth Forms
+            >= (char)0xFFE0 and <= (char)0xFFE6; // Fullwidth Symbol Forms
 
     /// <summary>
     ///     Some characters such as `ｅｘｐｒｅｓｓｉｏｎ` are called "full-width" characters.

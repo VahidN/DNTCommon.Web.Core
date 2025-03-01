@@ -18,7 +18,7 @@ public class ContentSecurityPolicyMiddleware(RequestDelegate next)
 
     private static string GetContentSecurityPolicyValue(ContentSecurityPolicyConfig config, string errorLogUri)
     {
-        if (config.Options == null || config.Options.Count == 0)
+        if (config.Options is null || config.Options.Count == 0)
         {
             throw new InvalidOperationException(
                 message: "Please set the `ContentSecurityPolicyConfig:Options` value in `appsettings.json` file.");
@@ -34,7 +34,7 @@ public class ContentSecurityPolicyMiddleware(RequestDelegate next)
     /// </summary>
     public Task Invoke(HttpContext context, IOptionsSnapshot<ContentSecurityPolicyConfig> config)
     {
-        if (config?.Value?.Options == null)
+        if (config?.Value?.Options is null)
         {
             throw new ArgumentNullException(nameof(config),
                 message: "Please add ContentSecurityPolicyConfig to your appsettings.json file.");

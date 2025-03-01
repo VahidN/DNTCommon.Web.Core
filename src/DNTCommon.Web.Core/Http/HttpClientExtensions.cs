@@ -280,7 +280,7 @@ public static class HttpClientExtensions
             await response.EnsureSuccessStatusCodeAsync();
         }
 
-        if (response.Content == null)
+        if (response.Content is null)
         {
             throw new InvalidOperationException($"`response.Content` of `{url}` is null!");
         }
@@ -311,7 +311,7 @@ public static class HttpClientExtensions
             response.EnsureSuccessStatusCode();
         }
 
-        if (response.Content == null)
+        if (response.Content is null)
         {
             throw new InvalidOperationException($"`response.Content` of `{url}` is null!");
         }
@@ -380,7 +380,7 @@ public static class HttpClientExtensions
             File.Delete(tempFilePath);
         }
 
-        if (response.Content == null)
+        if (response.Content is null)
         {
             throw new InvalidOperationException($"`response.Content` of `{url}` is null!");
         }
@@ -445,7 +445,7 @@ public static class HttpClientExtensions
             File.Delete(tempFilePath);
         }
 
-        if (response.Content == null)
+        if (response.Content is null)
         {
             throw new InvalidOperationException($"`response.Content` of `{url}` is null!");
         }
@@ -482,7 +482,8 @@ public static class HttpClientExtensions
 
                     if (readCount % 100 == 0)
                     {
-                        logger?.Invoke(Invariant($"\rProgress: {percentComplete}%   "));
+                        logger?.Invoke(
+                            string.Create(CultureInfo.InvariantCulture, $"\rProgress: {percentComplete}%   "));
                     }
                 }
 
@@ -524,7 +525,8 @@ public static class HttpClientExtensions
 
                     if (readCount % 100 == 0)
                     {
-                        logger?.Invoke(Invariant($"\rProgress: {percentComplete}%   "));
+                        logger?.Invoke(
+                            string.Create(CultureInfo.InvariantCulture, $"\rProgress: {percentComplete}%   "));
                     }
                 }
 

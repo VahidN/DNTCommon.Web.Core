@@ -13,5 +13,5 @@ public interface IScheduledTasksCoordinator : IDisposable
     /// <summary>
     ///     Stops the scheduler.
     /// </summary>
-    Task StopTasks();
+    Task StopTasksAsync();
 }

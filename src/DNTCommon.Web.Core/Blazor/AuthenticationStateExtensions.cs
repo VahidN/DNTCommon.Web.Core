@@ -237,9 +237,11 @@ public static class AuthenticationStateExtensions
             return [];
         }
 
-        return user.Claims.Where(c => string.Equals(c.Type, claimType, StringComparison.Ordinal))
-            .Select(c => c.Value)
-            .ToList();
+        return
+        [
+            .. user.Claims.Where(c => string.Equals(c.Type, claimType, StringComparison.Ordinal))
+                .Select(c => c.Value)
+        ];
     }
 
     /// <summary>
