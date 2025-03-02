@@ -1,8 +1,6 @@
 ﻿namespace DNTCommon.Web.Core;
 
 /// <summary>
-/// It's just a marker for the `Scrutor`
+///     It's just a marker for the `Scrutor`
 /// </summary>
-public interface ITransientService
-{
-}
+public interface ITransientService;

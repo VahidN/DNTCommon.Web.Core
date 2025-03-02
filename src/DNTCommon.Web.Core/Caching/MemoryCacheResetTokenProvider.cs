@@ -22,7 +22,7 @@ public class MemoryCacheResetTokenProvider : IMemoryCacheResetTokenProvider
     public IChangeToken GetChangeToken(string key)
         => _changeTokens.GetOrAdd(key, _ =>
             {
-                var cancellationTokenSource = new CancellationTokenSource();
+                using var cancellationTokenSource = new CancellationTokenSource();
                 var changeToken = new CancellationChangeToken(cancellationTokenSource.Token);
 
                 return new ChangeTokenInfo(changeToken, cancellationTokenSource);

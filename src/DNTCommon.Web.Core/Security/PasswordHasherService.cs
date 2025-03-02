@@ -3,7 +3,7 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     PasswordHasher Service
 /// </summary>
-public class PasswordHasherService : IPasswordHasherService
+public sealed class PasswordHasherService : IPasswordHasherService
 {
     private readonly RandomNumberGenerator _rand = RandomNumberGenerator.Create();
 
@@ -49,4 +49,6 @@ public class PasswordHasherService : IPasswordHasherService
     /// <returns></returns>
     public bool IsValidPbkdf2Hash(string hashedPassword, string providedPassword)
         => hashedPassword.IsValidPbkdf2Hash(providedPassword);
+
+    public void Dispose() => _rand.Dispose();
 }

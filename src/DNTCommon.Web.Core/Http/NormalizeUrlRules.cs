@@ -49,5 +49,6 @@ public enum NormalizeUrlRules : long
 
     /// <summary>
     /// </summary>
-    All = ~(~0 << 9)
+    All = UrlToLower | LimitProtocols | RemoveDefaultDirectoryIndexes | RemoveTheFragment | RemoveDuplicateSlashes |
+          AddWww | RemoveFeedburnerPart1 | RemoveFeedburnerPart2 | RemoveTrailingSlashAndEmptyQuery
 }

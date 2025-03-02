@@ -6,7 +6,7 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     Creates and returns an XML string containing the key of the current RSA object.
 /// </summary>
-public class RsaKeys
+public sealed class RsaKeys
 {
     private RsaKeys()
     {
@@ -15,12 +15,16 @@ public class RsaKeys
     /// <summary>
     ///     Returns the public key
     /// </summary>
+#pragma warning disable IDISP006
     public RSA? PublicKey { get; private set; }
+#pragma warning restore IDISP006
 
     /// <summary>
     ///     Returns the private key
     /// </summary>
+#pragma warning disable IDISP006
     public RSA? PrivateKey { get; private set; }
+#pragma warning restore IDISP006
 
     /// <summary>
     ///     Returns the public key
@@ -58,6 +62,7 @@ public class RsaKeys
     {
         using var certificate = GetX509Certificate2(pfxFilePath, pfxPassword);
 
+#pragma warning disable IDISP003
         return new RsaKeys
         {
             PublicKey = certificate.GetRSAPublicKey() ??
@@ -65,6 +70,7 @@ public class RsaKeys
             PrivateKey = certificate.GetRSAPrivateKey() ??
                          throw new InvalidKeyException(message: "Failed to GetRSAPrivateKey")
         };
+#pragma warning restore IDISP003
     }
 
     private static X509Certificate2 GetX509Certificate2(string pfxFilePath, string pfxPassword)

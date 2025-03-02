@@ -14,7 +14,7 @@ public class PersianDateModelBinder : IModelBinder
     /// <summary>
     ///     Attempts to bind a model.
     /// </summary>
-    public Task BindModelAsync(ModelBindingContext bindingContext)
+    public async Task BindModelAsync(ModelBindingContext bindingContext)
     {
         ArgumentNullException.ThrowIfNull(bindingContext);
 
@@ -30,7 +30,9 @@ public class PersianDateModelBinder : IModelBinder
             binderLogger.LogError(message: "There is not valueProvider for bindingContext.ModelName: {ModelName}",
                 bindingContext.ModelName);
 
-            return fallbackBinder.BindModelAsync(bindingContext);
+            await fallbackBinder.BindModelAsync(bindingContext);
+
+            return;
         }
 
         bindingContext.ModelState.SetModelValue(bindingContext.ModelName, valueProviderResult);
@@ -48,7 +50,9 @@ public class PersianDateModelBinder : IModelBinder
             {
                 binderLogger.LogError(message: "{ValueAsString}` is not a valid PersianDateTime.", valueAsString);
 
-                return fallbackBinder.BindModelAsync(bindingContext);
+                await fallbackBinder.BindModelAsync(bindingContext);
+
+                return;
             }
 
             dt = valueAsString?.ToGregorianDateTime();
@@ -60,7 +64,9 @@ public class PersianDateModelBinder : IModelBinder
 
             binderLogger.LogError(ex.Demystify(), message: "PersianDateModelBinder error. {Message}", message);
 
-            return Task.CompletedTask;
+            await Task.CompletedTask;
+
+            return;
         }
 
         if (Nullable.GetUnderlyingType(bindingContext.ModelType) == typeof(DateTime))
@@ -72,6 +78,6 @@ public class PersianDateModelBinder : IModelBinder
             bindingContext.Result = ModelBindingResult.Success(dt.Value);
         }
 
-        return Task.CompletedTask;
+        await Task.CompletedTask;
     }
 }

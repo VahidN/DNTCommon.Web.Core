@@ -127,14 +127,12 @@ public class BackgroundQueueService(IServiceProvider serviceProvider) : Backgrou
 
         try
         {
-            if (!disposing)
+            if (disposing)
             {
-                return;
+                StopQueue();
+                _asyncTasksQueue.Dispose();
+                _syncTasksQueue.Dispose();
             }
-
-            StopQueue();
-            _asyncTasksQueue.Dispose();
-            _syncTasksQueue.Dispose();
         }
         finally
         {

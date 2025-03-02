@@ -5,6 +5,4 @@
 ///     the current component and won't be shared across different ones.
 /// </summary>
 [AttributeUsage(AttributeTargets.Property)]
-public sealed class InjectComponentScopedAttribute : Attribute
-{
-}
+public sealed class InjectComponentScopedAttribute : Attribute;

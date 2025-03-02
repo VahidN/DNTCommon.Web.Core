@@ -3,7 +3,7 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     Anti Xss Service
 /// </summary>
-public interface IAntiXssService
+public interface IAntiXssService : IDisposable
 {
     /// <summary>
     ///     Takes raw HTML input and cleans against a whitelist

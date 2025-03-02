@@ -36,10 +36,7 @@ public class JobsRunnerTimer : IJobsRunnerTimer
     {
         using var @lock = _lock.LockOrNull(typeof(JobsRunnerTimer), _lockTimeout);
 
-        if (_threadTimer is not null)
-        {
-            return;
-        }
+        _threadTimer?.Dispose();
 
         _threadTimer = new ThreadTimer(TimerCallback, state: null, Timeout.Infinite, period: 1000);
         _threadTimer.Change(startAfter, interval);

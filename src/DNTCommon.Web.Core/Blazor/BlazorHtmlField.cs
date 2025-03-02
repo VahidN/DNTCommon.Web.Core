@@ -22,7 +22,7 @@ public class BlazorHtmlField<T> : InputBase<T>
     /// <summary>
     ///     Gets the value to be used for the input's "name" attribute.
     /// </summary>
-    public string HtmlFieldName { get; private set; }
+    public string HtmlFieldName { get; }
 
     /// <summary>
     ///     Gets the name of the related FieldIdentifier.

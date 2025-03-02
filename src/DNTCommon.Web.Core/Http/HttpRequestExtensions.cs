@@ -52,7 +52,7 @@ public static partial class HttpRequestExtensions
     {
         var endpoint = context.GetEndpoint();
 
-        return endpoint is not null && endpoint.Metadata.Any(o => o is ApiControllerAttribute);
+        return endpoint?.Metadata.Any(o => o is ApiControllerAttribute) == true;
     }
 
     /// <summary>
@@ -410,7 +410,7 @@ public static partial class HttpRequestExtensions
         var queryString = statusCodeReExecuteFeature?.OriginalQueryString ??
                           httpContext.Request.QueryString.ToUriComponent();
 
-        return $"{httpRequestPath}{queryString}";
+        return httpRequestPath + queryString;
     }
 #if !NET_6
     /// <summary>

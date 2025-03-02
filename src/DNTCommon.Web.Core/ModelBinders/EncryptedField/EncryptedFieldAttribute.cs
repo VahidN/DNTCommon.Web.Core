@@ -6,6 +6,4 @@
 ///     decrypted using the `EncryptedFieldModelBinderProvider`.
 /// </summary>
 [AttributeUsage(AttributeTargets.Property)]
-public sealed class EncryptedFieldAttribute : Attribute
-{
-}
+public sealed class EncryptedFieldAttribute : Attribute;

@@ -3,7 +3,7 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     PasswordHasher Service
 /// </summary>
-public interface IPasswordHasherService
+public interface IPasswordHasherService : IDisposable
 {
     /// <summary>
     ///     Creates a custom hash based on SHA256CryptoServiceProvider.

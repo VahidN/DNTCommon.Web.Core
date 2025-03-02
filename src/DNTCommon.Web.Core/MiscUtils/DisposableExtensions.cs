@@ -17,7 +17,9 @@ public static class DisposableExtensions
         {
             if (obj is IDisposable disposable)
             {
+#pragma warning disable IDISP007
                 disposable.Dispose();
+#pragma warning restore IDISP007
                 obj = null;
             }
         }

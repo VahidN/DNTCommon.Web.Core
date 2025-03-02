@@ -95,11 +95,7 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
     /// <summary>
     ///     Free resources
     /// </summary>
-    public void Dispose()
-    {
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
-    }
+    public void Dispose() => Dispose(disposing: true);
 
     private async Task DisposeResourcesAsync()
     {
@@ -205,12 +201,10 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
 
         try
         {
-            if (!disposing)
+            if (disposing)
             {
-                return;
+                StopTasksAsync().Wait();
             }
-
-            StopTasksAsync().Wait();
         }
         finally
         {

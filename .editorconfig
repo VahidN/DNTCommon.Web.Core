@@ -716,19 +716,27 @@ dotnet_diagnostic.MA0165.severity = suggestion
 dotnet_diagnostic.RCS1021.severity = suggestion
 dotnet_diagnostic.RCS1036.severity = none
 dotnet_diagnostic.RCS1037.severity = none
-dotnet_diagnostic.RCS1046.severity = error
-dotnet_diagnostic.RCS1047.severity = error
+dotnet_diagnostic.RCS1046.severity = suggestion
+dotnet_diagnostic.RCS1047.severity = suggestion
 dotnet_diagnostic.RCS1049.severity = silent
 dotnet_diagnostic.RCS1073.severity = suggestion
 dotnet_diagnostic.RCS1077.severity = none
 dotnet_diagnostic.RCS1090.severity = error
 dotnet_diagnostic.RCS1124.severity = suggestion
 dotnet_diagnostic.RCS1141.severity = none
+dotnet_diagnostic.RCS1142.severity = suggestion
 dotnet_diagnostic.RCS1161.severity = none
 dotnet_diagnostic.RCS1181.severity = none
 dotnet_diagnostic.RCS1201.severity = suggestion
+dotnet_diagnostic.RCS1228.severity = suggestion
 dotnet_diagnostic.RCS1210.severity = error
 dotnet_diagnostic.RCS1212.severity = suggestion
+dotnet_diagnostic.RCS1138.severity = suggestion
+dotnet_diagnostic.RCS1140.severity = suggestion
+dotnet_diagnostic.RCS1232.severity = suggestion
+dotnet_diagnostic.RCS1123.severity = suggestion
+dotnet_diagnostic.RCS1043.severity = suggestion
+
 
 dotnet_diagnostic.RE0001.severity = warning
 

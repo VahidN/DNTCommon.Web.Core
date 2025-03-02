@@ -3,7 +3,7 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     Anti Dos Firewall Service
 /// </summary>
-public interface IAntiDosFirewall
+public interface IAntiDosFirewall : IDisposable
 {
     /// <summary>
     ///     Such as `google` or `bing`.

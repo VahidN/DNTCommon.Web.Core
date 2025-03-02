@@ -223,7 +223,7 @@ public static class HttpClientExtensions
 
         using var request = new HttpRequestMessage(HttpMethod.Get, path);
         configRequest?.Invoke(request);
-        var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+        using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
         if (ensureSuccess)
         {
@@ -248,7 +248,7 @@ public static class HttpClientExtensions
 
         using var request = new HttpRequestMessage(HttpMethod.Get, path);
         configRequest?.Invoke(request);
-        var response = httpClient.Send(request, HttpCompletionOption.ResponseHeadersRead);
+        using var response = httpClient.Send(request, HttpCompletionOption.ResponseHeadersRead);
 
         if (ensureSuccess)
         {
@@ -273,7 +273,7 @@ public static class HttpClientExtensions
 
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
         configRequest?.Invoke(request);
-        var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+        using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
         if (ensureSuccess)
         {
@@ -304,7 +304,7 @@ public static class HttpClientExtensions
 
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
         configRequest?.Invoke(request);
-        var response = httpClient.Send(request, HttpCompletionOption.ResponseHeadersRead);
+        using var response = httpClient.Send(request, HttpCompletionOption.ResponseHeadersRead);
 
         if (ensureSuccess)
         {
@@ -338,7 +338,7 @@ public static class HttpClientExtensions
 
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
         configRequest?.Invoke(request);
-        var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+        using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
         if (ensureSuccess)
         {
@@ -403,7 +403,7 @@ public static class HttpClientExtensions
 
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
         configRequest?.Invoke(request);
-        var response = httpClient.Send(request, HttpCompletionOption.ResponseHeadersRead);
+        using var response = httpClient.Send(request, HttpCompletionOption.ResponseHeadersRead);
 
         if (ensureSuccess)
         {
@@ -548,17 +548,12 @@ public static class HttpClientExtensions
     {
         try
         {
-            var responseMessage = await httpClient.GetAsync(siteUrl, ensureSuccess: false);
+            using var responseMessage = await httpClient.GetAsync(siteUrl, ensureSuccess: false);
 
             return responseMessage.StatusCode;
         }
-        catch (Exception ex)
+        catch (Exception ex) when (!throwOnException)
         {
-            if (throwOnException)
-            {
-                throw;
-            }
-
             return (ex as HttpRequestException)?.StatusCode;
         }
     }
@@ -570,17 +565,12 @@ public static class HttpClientExtensions
     {
         try
         {
-            var responseMessage = httpClient.Get(siteUrl, ensureSuccess: false);
+            using var responseMessage = httpClient.Get(siteUrl, ensureSuccess: false);
 
             return responseMessage.StatusCode;
         }
-        catch (Exception ex)
+        catch (Exception ex) when (!throwOnException)
         {
-            if (throwOnException)
-            {
-                throw;
-            }
-
             return (ex as HttpRequestException)?.StatusCode;
         }
     }

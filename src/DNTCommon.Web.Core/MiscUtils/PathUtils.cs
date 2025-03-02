@@ -160,7 +160,7 @@ public static class PathUtils
             return string.Empty;
         }
 
-        var regexSearch = $"{new string(Path.GetInvalidFileNameChars())}{new string(Path.GetInvalidPathChars())}";
+        var regexSearch = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
 
         var r = new Regex($"[{Regex.Escape(regexSearch)}]", RegexOptions.Compiled | RegexOptions.IgnoreCase,
             MatchTimeout);
@@ -447,7 +447,7 @@ public static class PathUtils
         dirPath = Path.GetFullPath(dirPath);
 
         // Ensures that the last character on the extraction path is the directory separator char.
-        // Without this, a malicious path could try to traverse outside the expected path.        
+        // Without this, a malicious path could try to traverse outside the expected path.
         if (!dirPath.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
         {
             dirPath += Path.DirectorySeparatorChar;

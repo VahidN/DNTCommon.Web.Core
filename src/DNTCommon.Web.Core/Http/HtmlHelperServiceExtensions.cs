@@ -50,8 +50,8 @@ public static class HtmlHelperServiceExtensions
             var imageSrcAttribute = imageNode.GetSrcAttribute();
             var imageSrcValue = imageSrcAttribute?.Value?.Trim();
 
-            if (imageSrcAttribute is null || imageSrcValue is null ||
-                imageSrcValue.StartsWith(value: "file:/", StringComparison.OrdinalIgnoreCase) ||
+            if (imageSrcAttribute is null ||
+                imageSrcValue?.StartsWith(value: "file:/", StringComparison.OrdinalIgnoreCase) != false ||
                 imageSrcValue.IsBase64EncodedImage())
             {
                 continue;
@@ -94,8 +94,8 @@ public static class HtmlHelperServiceExtensions
             var imageSrcAttribute = imageNode.GetSrcAttribute();
             var imageSrcValue = imageSrcAttribute?.Value?.Trim();
 
-            if (imageSrcAttribute is null || imageSrcValue is null ||
-                imageSrcValue.StartsWith(value: "file:/", StringComparison.OrdinalIgnoreCase) ||
+            if (imageSrcAttribute is null ||
+                imageSrcValue?.StartsWith(value: "file:/", StringComparison.OrdinalIgnoreCase) != false ||
                 imageSrcValue.IsBase64EncodedImage())
             {
                 continue;

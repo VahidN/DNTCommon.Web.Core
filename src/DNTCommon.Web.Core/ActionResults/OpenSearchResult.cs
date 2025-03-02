@@ -22,8 +22,8 @@ public class OpenSearchResult : ActionResult
     public string Description { set; get; } = default!;
 
     /// <summary>
-    ///     The URL to go to to open up the search page at the site for which the plugin is designed to search.
-    ///     This provides a way for Firefox to let the user visit the web site directly.
+    ///     The URL to go to open up the search page at the site for which the plugin is designed to search.
+    ///     This provides a way for Firefox to let the user visit the website directly.
     /// </summary>
     public string SearchForm { set; get; } = default!;
 

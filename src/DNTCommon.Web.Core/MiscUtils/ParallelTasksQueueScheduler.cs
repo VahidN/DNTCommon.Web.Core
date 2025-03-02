@@ -29,7 +29,7 @@ public class ParallelTasksQueueScheduler : TaskScheduler, IDisposable
         _tasks = new BlockingCollection<Task>();
 
         _threads = Enumerable.Range(start: 0, numberOfThreads)
-            .Select(i =>
+            .Select(_ =>
             {
                 var thread = new Thread(() =>
                 {
@@ -68,7 +68,7 @@ public class ParallelTasksQueueScheduler : TaskScheduler, IDisposable
     {
         Dispose(disposeManagedResources: true);
 
-        // tell the GC that the Finalize process no longer needs to be run for this object.  
+        // tell the GC that the Finalize process no longer needs to be run for this object.
         GC.SuppressFinalize(this);
     }
 

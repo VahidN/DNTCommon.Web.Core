@@ -186,7 +186,7 @@ public class DownloaderService : IDownloaderService, IDisposable
             _client.DefaultRequestHeaders.Range = new RangeHeaderValue(_downloadStatus.BytesTransferred, to: null);
         }
 
-        var response = await ReadResponseHeadersAsync(url);
+        using var response = await ReadResponseHeadersAsync(url);
 
         if (_downloadStatus.BytesTransferred > 0 && _downloadStatus.RemoteFileSize == _downloadStatus.BytesTransferred)
         {
@@ -265,10 +265,10 @@ public class DownloaderService : IDownloaderService, IDisposable
         _downloadStatus.StartTime = DateTimeOffset.UtcNow;
         _downloadStatus.BytesTransferred = 0;
 
-        var response = await ReadResponseHeadersAsync(url);
+        using var response = await ReadResponseHeadersAsync(url);
 
         await using var inputStream = await response.Content.ReadAsStreamAsync();
-        using var outputStream = new MemoryStream();
+        await using var outputStream = new MemoryStream();
 
         await ReadInputStreamAsync(inputStream, outputStream);
         await outputStream.FlushAsync();

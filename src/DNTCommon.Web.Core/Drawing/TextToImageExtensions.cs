@@ -116,7 +116,8 @@ public static class TextToImageExtensions
 
     private static float GetTextWidth(string text, TextToImageOptions options, SKTypeface typeface)
     {
-        using var blob = typeface.OpenStream().ToHarfBuzzBlob();
+        using var streamAsset = typeface.OpenStream();
+        using var blob = streamAsset.ToHarfBuzzBlob();
         using var hbFace = new Face(blob, index: 0);
         using var hbFont = new Font(hbFace);
         using var buffer = new Buffer();
@@ -210,7 +211,7 @@ public static class TextToImageExtensions
         {
             using var embeddedFont = File.OpenRead(key);
 
-            return SKTypeface.FromStream(File.OpenRead(key));
+            return SKTypeface.FromStream(embeddedFont);
         });
     }
 

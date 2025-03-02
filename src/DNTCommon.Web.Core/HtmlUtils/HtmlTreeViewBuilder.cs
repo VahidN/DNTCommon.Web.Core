@@ -57,7 +57,7 @@ public class HtmlTreeViewBuilder<TItem, TKey>
     /// <returns></returns>
     public (string HtmlDoc, int NumberOfItems) ItemsToHtml()
     {
-        if (Items is null || !Items.Any())
+        if (Items?.Any() != true)
         {
             return (string.Empty, 0);
         }

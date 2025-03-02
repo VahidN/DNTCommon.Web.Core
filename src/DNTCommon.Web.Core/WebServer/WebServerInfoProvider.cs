@@ -140,7 +140,7 @@ public static class WebServerInfoProvider
     {
         var currentDrive = Array.Find(DriveInfo.GetDrives(),
             driveInfo => string.Equals(driveInfo.RootDirectory.FullName,
-                Directory.GetDirectoryRoot(Path.GetPathRoot(Environment.ProcessPath!)!),
+                Directory.GetDirectoryRoot(Path.GetPathRoot(Environment.ProcessPath)!),
                 StringComparison.OrdinalIgnoreCase))!;
 
         return new PCDriveInfo

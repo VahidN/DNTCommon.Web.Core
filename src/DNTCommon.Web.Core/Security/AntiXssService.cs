@@ -7,8 +7,9 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     Anti Xss Service
 /// </summary>
-public class AntiXssService : IAntiXssService
+public sealed class AntiXssService : IAntiXssService
 {
+    private readonly IDisposable? _disposableOnChange;
     private readonly IHtmlReaderService _htmlReaderService;
     private readonly ILogger<AntiXssService> _logger;
     private readonly IReplaceRemoteImagesService _remoteImagesService;
@@ -26,7 +27,7 @@ public class AntiXssService : IAntiXssService
 
         _htmlReaderService = htmlReaderService ?? throw new ArgumentNullException(nameof(htmlReaderService));
         _antiXssConfig = antiXssConfigMonitor.CurrentValue;
-        antiXssConfigMonitor.OnChange(options => { _antiXssConfig = options; });
+        _disposableOnChange = antiXssConfigMonitor.OnChange(options => { _antiXssConfig = options; });
 
         _remoteImagesService = remoteImagesService;
 
@@ -97,6 +98,8 @@ public class AntiXssService : IAntiXssService
 
         return htmlDocument.DocumentNode.OuterHtml;
     }
+
+    public void Dispose() => _disposableOnChange?.Dispose();
 
     private void RemoveConsecutiveEmptyLines(HtmlNode node,
         HtmlModificationRules? htmlModificationRules,

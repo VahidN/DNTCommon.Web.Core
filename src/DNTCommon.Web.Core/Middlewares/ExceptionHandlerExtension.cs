@@ -61,7 +61,7 @@ public static class ExceptionHandlerExtension
             return context.Response.WriteAsync(JsonSerializer.Serialize(new ApiErrorDto
             {
                 StatusCode = (int)statusCode,
-                Message = $"{message}{Environment.NewLine}{exceptionMessage}"
+                Message = message + Environment.NewLine + exceptionMessage
             }), Encoding.UTF8);
         }
 

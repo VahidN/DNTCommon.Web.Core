@@ -81,7 +81,7 @@ public static class CollectionsExtensions
     ///     Return true if the number of elements contained in the source is > 0
     /// </summary>
     public static bool IsNullOrEmpty<T>([NotNullWhen(returnValue: false)] this IEnumerable<T>? source)
-        => source is null || !source.Any();
+        => source?.Any() != true;
 
     /// <summary>
     ///     Return true if the `source.Take(destination.Count)` elements are equal to destination elements
@@ -366,12 +366,9 @@ public static class CollectionsExtensions
             {
                 results.Add(result);
             }
-            else
+            else if (!ignoreParsingFailures)
             {
-                if (!ignoreParsingFailures)
-                {
-                    results.Add(defaultValue);
-                }
+                results.Add(defaultValue);
             }
         }
 

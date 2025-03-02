@@ -21,7 +21,7 @@ public class StronglyTyped : ExpressionVisitor
         _stack = new Stack<string>();
         Visit(expression);
 
-        return _stack.Aggregate((s1, s2) => $"{s1}{separator}{s2}");
+        return _stack.Aggregate((s1, s2) => s1 + separator + s2);
     }
 
     /// <summary>

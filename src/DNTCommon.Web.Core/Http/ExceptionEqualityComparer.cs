@@ -1,10 +1,47 @@
+using System.Collections;
+
 namespace DNTCommon.Web.Core;
 
 /// <summary>
 ///     Exception EqualityComparer
 /// </summary>
-public class ExceptionEqualityComparer : IEqualityComparer<Exception>
+public class ExceptionEqualityComparer : IEqualityComparer<Exception>, IEqualityComparer
 {
+    public new bool Equals(object? x, object? y)
+    {
+        if (x == y)
+        {
+            return true;
+        }
+
+        if (x is null || y is null)
+        {
+            return false;
+        }
+
+        if (x is Exception a && y is Exception b)
+        {
+            return Equals(a, b);
+        }
+
+        throw new ArgumentException(message: "", nameof(x));
+    }
+
+    public int GetHashCode(object? obj)
+    {
+        if (obj is null)
+        {
+            return 0;
+        }
+
+        if (obj is Exception x)
+        {
+            return GetHashCode(x);
+        }
+
+        throw new ArgumentException(message: "", nameof(obj));
+    }
+
     /// <summary>
     ///     Checks if two exceptions are equal.
     /// </summary>

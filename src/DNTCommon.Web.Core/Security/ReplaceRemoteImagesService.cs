@@ -87,7 +87,7 @@ public class ReplaceRemoteImagesService(BaseHttpClient baseHttpClient, ILogger<R
             ext = ".jpg";
         }
 
-        var fileName = $"{imageUrl.GetSha1Hash()}{ext}";
+        var fileName = imageUrl.GetSha1Hash() + ext;
         var filePath = Path.Combine(options.OutputImageFolder, fileName);
 
         if (File.Exists(filePath))

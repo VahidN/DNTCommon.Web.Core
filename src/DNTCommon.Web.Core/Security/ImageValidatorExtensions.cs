@@ -31,7 +31,7 @@ public static class ImageValidatorExtensions
         {
             using var bitmap = SKBitmap.Decode(filePath);
 
-            return bitmap is not null && bitmap.Info.HasValidImageInfo(maxWidth, maxHeight);
+            return bitmap?.Info.HasValidImageInfo(maxWidth, maxHeight) == true;
         }
         catch (Exception ex)
         {
@@ -62,7 +62,7 @@ public static class ImageValidatorExtensions
         {
             using var bitmap = SKBitmap.Decode(data);
 
-            return bitmap is not null && bitmap.Info.HasValidImageInfo(maxWidth, maxHeight);
+            return bitmap?.Info.HasValidImageInfo(maxWidth, maxHeight) == true;
         }
         catch (Exception ex)
         {
@@ -95,7 +95,7 @@ public static class ImageValidatorExtensions
             using var codec = SKCodec.Create(inputStream);
             using var bitmap = SKBitmap.Decode(codec);
 
-            return bitmap is not null && bitmap.Info.HasValidImageInfo(maxWidth, maxHeight);
+            return bitmap?.Info.HasValidImageInfo(maxWidth, maxHeight) == true;
         }
         catch (Exception ex)
         {
@@ -132,7 +132,7 @@ public static class ImageValidatorExtensions
             using var codec = SKCodec.Create(inputStream);
             using var bitmap = SKBitmap.Decode(codec);
 
-            return bitmap is not null && bitmap.Info.HasValidImageInfo(maxWidth, maxHeight);
+            return bitmap?.Info.HasValidImageInfo(maxWidth, maxHeight) == true;
         }
         catch (Exception ex)
         {

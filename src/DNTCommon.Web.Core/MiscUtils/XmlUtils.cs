@@ -25,13 +25,8 @@ public static class XmlUtils
 
             return doc.ToString();
         }
-        catch (Exception)
+        catch (Exception) when (!throwOnException)
         {
-            if (throwOnException)
-            {
-                throw;
-            }
-
             return xml;
         }
     }
@@ -49,7 +44,9 @@ public static class XmlUtils
         var sb = new StringBuilder(input.Length);
         Span<char> chars = stackalloc char[2];
 
-        foreach (var rune in input.EnumerateRunes())
+        using var stringRuneEnumerator = input.EnumerateRunes();
+
+        foreach (var rune in stringRuneEnumerator)
         {
             if (!rune.TryEncodeToUtf16(chars, out var written))
             {

@@ -7,9 +7,10 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     Anti Dos Firewall
 /// </summary>
-public class AntiDosFirewall : IAntiDosFirewall
+public sealed class AntiDosFirewall : IAntiDosFirewall
 {
     private readonly ICacheService _cacheService;
+    private readonly IDisposable? _disposable;
     private readonly ILogger<AntiDosFirewall> _logger;
     private AntiDosConfig _antiDosConfig;
 
@@ -30,7 +31,7 @@ public class AntiDosFirewall : IAntiDosFirewall
                 message: "Please add AntiDosConfig to your appsettings.json file.");
         }
 
-        antiDosConfig.OnChange(options => { _antiDosConfig = options; });
+        _disposable = antiDosConfig.OnChange(options => { _antiDosConfig = options; });
 
         _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -403,4 +404,6 @@ public class AntiDosFirewall : IAntiDosFirewall
                 return $"{requestInfo.IP}_{requestInfo.UserAgent}";
             }, DateTimeOffset.UtcNow.AddDays(days: 1));
     }
+
+    public void Dispose() => _disposable?.Dispose();
 }

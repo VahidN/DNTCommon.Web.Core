@@ -11,7 +11,7 @@ public static class StreamUtils
     public static string? ToText([NotNullIfNotNull(nameof(stream))] this Stream? stream,
         int readChunkBufferLength = 4096)
     {
-        if (stream is null || !stream.IsReadableStream())
+        if (stream?.IsReadableStream() != true)
         {
             return null;
         }
@@ -49,7 +49,7 @@ public static class StreamUtils
     public static byte[]? ToBytes([NotNullIfNotNull(nameof(stream))] this Stream? stream,
         int readChunkBufferLength = 4096)
     {
-        if (stream is null || !stream.IsReadableStream())
+        if (stream?.IsReadableStream() != true)
         {
             return null;
         }
@@ -80,7 +80,7 @@ public static class StreamUtils
     /// </summary>
     public static byte[]? TryTakeFirstBytes(this Stream? stream, int numberOfBytes)
     {
-        if (stream is null || !stream.IsReadableStream())
+        if (stream?.IsReadableStream() != true)
         {
             return null;
         }

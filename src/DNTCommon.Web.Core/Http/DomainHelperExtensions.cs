@@ -72,13 +72,8 @@ public static class DomainHelperExtensions
         {
             return uri is null ? null : Path.GetExtension(uri.PathAndQuery);
         }
-        catch
+        catch when (!throwOnException)
         {
-            if (throwOnException)
-            {
-                throw;
-            }
-
             return null;
         }
     }

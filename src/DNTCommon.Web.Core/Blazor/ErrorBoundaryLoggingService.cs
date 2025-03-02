@@ -16,7 +16,7 @@ public class ErrorBoundaryLoggingService(
     public ValueTask LogErrorAsync(Exception exception)
     {
         var stackTrace = httpContextAccessor.HttpContext is null
-            ? enhancedStackTraceService.GetCurrentStackTrace(declaringType => false)
+            ? enhancedStackTraceService.GetCurrentStackTrace(_ => false)
             : "";
 
         logger.LogError(exception.Demystify(), message: "Unhandled exception rendering component {StackTrace}",

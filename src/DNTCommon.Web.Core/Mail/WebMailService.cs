@@ -318,7 +318,9 @@ public class WebMailService(
             {
                 if (!string.IsNullOrWhiteSpace(attachmentFile) && File.Exists(attachmentFile))
                 {
+#pragma warning disable IDISP004
                     builder.Attachments.Add(attachmentFile);
+#pragma warning restore IDISP004
                 }
             }
         }

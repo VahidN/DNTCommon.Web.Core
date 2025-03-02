@@ -56,7 +56,7 @@ public class RedirectUrlFinderService : IRedirectUrlFinderService
 
             do
             {
-                var webResp = await _client.GetAsync(redirectUri, HttpCompletionOption.ResponseHeadersRead);
+                using var webResp = await _client.GetAsync(redirectUri, HttpCompletionOption.ResponseHeadersRead);
 
                 if (webResp is null)
                 {

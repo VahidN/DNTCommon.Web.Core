@@ -3,7 +3,7 @@
 /// <summary>
 ///     Provides methods for generating cryptographically-strong random numbers.
 /// </summary>
-public class RandomNumberProvider : IRandomNumberProvider
+public sealed class RandomNumberProvider : IRandomNumberProvider
 {
     private readonly RandomNumberGenerator _rand = RandomNumberGenerator.Create();
 
@@ -98,4 +98,6 @@ public class RandomNumberProvider : IRandomNumberProvider
     /// </returns>
     public int GetSecureRandomInt32(int fromInclusive, int toExclusive)
         => RandomNumberGenerator.GetInt32(fromInclusive, toExclusive);
+
+    public void Dispose() => _rand.Dispose();
 }

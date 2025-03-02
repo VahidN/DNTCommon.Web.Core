@@ -27,7 +27,7 @@ public static class UrlUtils
             return null;
         }
 
-        return Regex.Match(url, pattern: @".+/([^?]*)", RegexOptions.Compiled, TimeSpan.FromMinutes(value: 1))
+        return Regex.Match(url, pattern: ".+/([^?]*)", RegexOptions.Compiled, TimeSpan.FromMinutes(value: 1))
             .Groups[groupnum: 1]
             .Value.NullIfEmptyOrWhiteSpace();
     }

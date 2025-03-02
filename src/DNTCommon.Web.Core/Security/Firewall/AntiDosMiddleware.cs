@@ -6,9 +6,10 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     AntiDos Middleware
 /// </summary>
-public class AntiDosMiddleware
+public sealed class AntiDosMiddleware : IDisposable
 {
     private readonly IAntiDosFirewall _antiDosFirewall;
+    private readonly IDisposable? _disposableOnChange;
     private readonly RequestDelegate _next;
     private AntiDosConfig _antiDosConfig;
 
@@ -33,8 +34,10 @@ public class AntiDosMiddleware
                 message: "Please add AntiDosConfig to your appsettings.json file.");
         }
 
-        antiDosConfig.OnChange(options => { _antiDosConfig = options; });
+        _disposableOnChange = antiDosConfig.OnChange(options => { _antiDosConfig = options; });
     }
+
+    public void Dispose() => _disposableOnChange?.Dispose();
 
     /// <summary>
     ///     AntiDos Middleware Pipeline

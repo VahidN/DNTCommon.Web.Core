@@ -28,6 +28,7 @@ public class CommonHttpClientFactory : ICommonHttpClientFactory
                 // you can't change the values of the stateful properties (which are not thread safe),
                 // like BaseAddress, DefaultRequestHeaders, MaxResponseContentBufferSize and Timeout.
                 // So you can only use them if they are constant across your application and need their own instance if being varied.
+#pragma warning disable IDISP014
                 var client = handler is null
                     ? new HttpClient
                     {
@@ -37,6 +38,7 @@ public class CommonHttpClientFactory : ICommonHttpClientFactory
                     {
                         BaseAddress = uri
                     };
+#pragma warning restore IDISP014
 
                 SetRequestTimeout(timeout, client);
                 SetMaxResponseBufferSize(maxResponseContentBufferSize, client);

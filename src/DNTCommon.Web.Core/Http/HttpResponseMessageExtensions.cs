@@ -18,7 +18,6 @@ public static class HttpResponseMessageExtensions
         }
 
         var content = $"StatusCode: {response.StatusCode}, {await response.Content.ReadAsStringAsync()}";
-        response.Content?.Dispose();
 
         throw new SimpleHttpResponseException(response.StatusCode, content);
     }
@@ -39,7 +38,6 @@ public static class HttpResponseMessageExtensions
         var responseContent = reader.ReadToEnd();
 
         var content = $"StatusCode: {response.StatusCode}, {responseContent}";
-        response.Content?.Dispose();
 
         throw new SimpleHttpResponseException(response.StatusCode, content);
     }

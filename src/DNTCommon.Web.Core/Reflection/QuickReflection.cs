@@ -5,7 +5,7 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     Fast property access, using Reflection.Emit.
 /// </summary>
-public class QuickReflection
+public sealed class QuickReflection
 {
     /// <summary>
     ///     It's a lazy loaded thread-safe singleton.
