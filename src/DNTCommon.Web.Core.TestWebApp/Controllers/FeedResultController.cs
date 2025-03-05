@@ -11,6 +11,29 @@ public class FeedResultController : Controller
 
     public IActionResult RssFeed()
     {
+        var channel = GetWhatsNewFeedChannel();
+
+        return new FeedResult<WhatsNewItemModel>(channel);
+    }
+
+    [Route(template: "/llms.txt")]
+    public IActionResult Llms()
+    {
+        var channel = GetWhatsNewFeedChannel();
+
+        return new LlmsTxtResult<WhatsNewItemModel>(channel);
+    }
+
+    [Route(template: "/llms-full.txt")]
+    public IActionResult LlmsFull()
+    {
+        var channel = GetWhatsNewFeedChannel();
+
+        return new LlmsFullTxtResult<WhatsNewItemModel>(channel);
+    }
+
+    private WhatsNewFeedChannel GetWhatsNewFeedChannel()
+    {
         var rssItems = new List<WhatsNewItemModel>
         {
             new()
@@ -60,7 +83,7 @@ public class FeedResultController : Controller
             CultureName = "fa-IR"
         };
 
-        return new FeedResult<WhatsNewItemModel>(channel);
+        return channel;
     }
 
     public IActionResult Article(int? id) => Content(id is null ? "" : id.Value.ToString(CultureInfo.InvariantCulture));

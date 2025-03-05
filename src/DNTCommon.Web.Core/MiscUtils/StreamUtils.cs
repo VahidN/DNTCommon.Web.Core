@@ -1,3 +1,6 @@
+using System.Runtime.InteropServices;
+using System.Text;
+
 namespace DNTCommon.Web.Core;
 
 /// <summary>
@@ -118,4 +121,32 @@ public static class StreamUtils
 
         return fs.TryTakeFirstBytes(numberOfBytes);
     }
+
+    /// <summary>
+    ///     Encodes all the characters in the specified string into a sequence of bytes.
+    /// </summary>
+    /// <param name="text">The string containing the characters to encode.</param>
+    /// <param name="inputEncoding">
+    ///     Its default value is `Encoding.UTF8`.
+    /// </param>
+    /// <returns>A byte array containing the results of encoding the specified set of characters.</returns>
+    public static byte[]? ToBytes([NotNullIfNotNull(nameof(text))] this string? text, Encoding? inputEncoding = null)
+    {
+        if (text.IsEmpty())
+        {
+            return null;
+        }
+
+        inputEncoding ??= Encoding.UTF8;
+
+        return inputEncoding.GetBytes(text);
+    }
+
+    /// <summary>
+    ///     Casts a read-only span of one primitive type to a read-only span of another primitive type.
+    /// </summary>
+    /// <param name="text"></param>
+    /// <returns></returns>
+    public static ReadOnlySpan<byte> ToByteSpan([NotNullIfNotNull(nameof(text))] this string? text)
+        => text.IsEmpty() ? null : MemoryMarshal.Cast<char, byte>(text);
 }

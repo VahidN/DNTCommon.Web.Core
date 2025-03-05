@@ -1,16 +1,26 @@
 ﻿@{
-    ViewData["Title"] = "FeedResult";
+    ViewData[index: "Title"] = "FeedResult";
 }
 
 @section SiteHeader
 {
-  <!--Autodiscovery of RSS Feeds-->
-  <link title="My Site's Feed" href="@Url.Action("RssFeed","FeedResult")" type="application/rss+xml" rel="alternate" />
+    <!--Autodiscovery of RSS Feeds-->
+    <link title="My Site's Feed" href="@Url.Action(action: "RssFeed", controller: "FeedResult")"
+          type="application/rss+xml"
+          rel="alternate"/>
 }
 
 
-<h1>@ViewData["Title"]</h1>
+<h1>@ViewData[index: "Title"]</h1>
 
 <form asp-action="RssFeed" asp-controller="FeedResult" method="GET">
-  <button class="btn btn-primary" type="submit">Render an RssFeed</button>
+    <button class="btn btn-primary" type="submit">Render an RssFeed</button>
+</form>
+
+<form asp-action="Llms" asp-controller="FeedResult" method="GET">
+    <button class="btn btn-primary mt-2" type="submit">Render /llms.txt</button>
+</form>
+
+<form asp-action="LlmsFull" asp-controller="FeedResult" method="GET">
+    <button class="btn btn-primary mt-2" type="submit">Render /llms-full.txt</button>
 </form>
