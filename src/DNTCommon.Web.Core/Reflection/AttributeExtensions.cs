@@ -12,13 +12,8 @@ public static class AttributeExtensions
     ///     Uses the DisplayAttribute if set on the enum member, so this support localization.
     /// </summary>
     public static string GetDisplayName<TEnum>(this TEnum value)
-        where TEnum : Enum
+        where TEnum : struct, Enum
     {
-        if (value is null)
-        {
-            throw new ArgumentNullException(nameof(value));
-        }
-
         var name = value.ToString();
 
         if (string.IsNullOrWhiteSpace(name))

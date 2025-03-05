@@ -14,7 +14,7 @@ public static class ReflectionExtensions
     ///     It uses the DisplayAttribute if set on the enum member, so this support localization.
     /// </summary>
     public static IReadOnlyDictionary<string, TEnum> GetEnumItems<TEnum>()
-        where TEnum : Enum
+        where TEnum : struct, Enum
     {
         var results = new Dictionary<string, TEnum>(StringComparer.Ordinal);
         var enumType = GetEnumType<TEnum>();
@@ -105,7 +105,7 @@ public static class ReflectionExtensions
     ///     Gets the actual enum type. It unwrap Nullable of T if needed
     /// </summary>
     public static Type GetEnumType<TEnum>()
-        where TEnum : Enum
+        where TEnum : struct, Enum
     {
         var nullableType = Nullable.GetUnderlyingType(typeof(TEnum));
 
