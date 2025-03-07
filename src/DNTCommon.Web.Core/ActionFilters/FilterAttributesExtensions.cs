@@ -3,14 +3,14 @@ using Microsoft.AspNetCore.Mvc.Filters;
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-///     FilterAttributes Extensions
+///     Extensions for working with filter attributes.
 /// </summary>
 public static class FilterAttributesExtensions
 {
     private static readonly Type StringType = typeof(string);
 
     /// <summary>
-    ///     Cleans all the string values of the current ActionArguments and model's stringProperties
+    ///     Cleans all string values in the current ActionArguments and model's string properties using the specified function.
     /// </summary>
     public static void CleanupActionStringValues(this ActionExecutingContext context, Func<string, string> action)
     {

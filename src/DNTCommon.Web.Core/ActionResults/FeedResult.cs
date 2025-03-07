@@ -11,12 +11,22 @@ using Microsoft.Extensions.DependencyInjection;
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-///     An ASP.NET Core RSS Feed Renderer.
+///   Represents a custom ActionResult for generating RSS feeds in ASP.NET Core.
+///   This class leverages SyndicationFeed to create and format the feed data.
 /// </summary>
+/// <typeparam name="TFeedItem">
+///   The type of the feed items, which must inherit from the FeedItem base class.
+/// </typeparam>
+/// <param name="feedChannel">
+///   An instance of FeedChannel{TFeedItem} containing the metadata and items for the feed.
+/// </param>
 /// <remarks>
-///     An ASP.NET Core RSS Feed Renderer.
+///   This ActionResult is responsible for:
+///   1. Setting the appropriate content type for the response (application/atom+xml).
+///   2. Generating the SyndicationFeed based on the provided FeedChannel.
+///   3. Writing the feed data to the response stream.
+///   It also utilizes an IHttpRequestInfoService to resolve URLs and paths correctly.
 /// </remarks>
-/// <param name="feedChannel">Channel's info</param>
 public class FeedResult<TFeedItem>(FeedChannel<TFeedItem> feedChannel) : ActionResult
     where TFeedItem : FeedItem
 {
@@ -53,10 +63,10 @@ public class FeedResult<TFeedItem>(FeedChannel<TFeedItem> feedChannel) : ActionR
         using var memoryStream = new MemoryStream();
 
         using (var xmlWriter = XmlWriter.Create(memoryStream, new XmlWriterSettings
-               {
-                   Indent = true,
-                   Encoding = Encoding.UTF8
-               }))
+        {
+            Indent = true,
+            Encoding = Encoding.UTF8
+        }))
         {
             var feedFormatter = new Atom10FeedFormatter(GetSyndicationFeed(httpContextInfo));
             feedFormatter.WriteTo(xmlWriter);

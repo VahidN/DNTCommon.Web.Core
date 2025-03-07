@@ -5,7 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-///     An ASP.NET Core OpenSearch provider.
+///     It generates an OpenSearch description document that can be used by browsers
+///     to add the website as a search engine.
 /// </summary>
 public class OpenSearchResult : ActionResult
 {

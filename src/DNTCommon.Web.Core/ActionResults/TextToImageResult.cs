@@ -3,8 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-///     An ASP.NET Core text to image renderer.
+///   Represents a result that renders text as an image using specified options.
+///   This result sets the content type to "image/png", disables browser caching,
+///   converts the provided text to an image, and writes the image data to the response body.
 /// </summary>
+/// <param name="text">The text to be rendered as an image.</param>
+/// <param name="options">The options to use when rendering the text as an image.</param>
 public class TextToImageResult(string text, TextToImageOptions options) : ActionResult
 {
     /// <summary>

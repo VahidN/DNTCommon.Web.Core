@@ -4,9 +4,16 @@ using Microsoft.AspNetCore.Mvc;
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-///     An ASP.NET Core llms.txt provider.
-///     https://llmstxt.org/
+///   Represents a result that generates an llms.txt file, adhering to the specifications at https://llmstxt.org/.
+///   This result is an ActionResult that can be returned from ASP.NET Core controller actions.
+///   It dynamically generates the llms.txt content based on the provided FeedChannel.
 /// </summary>
+/// <typeparam name="TFeedItem">The type of the feed items, which must inherit from FeedItem.</typeparam>
+/// <remarks>
+///     This class is responsible for generating a `llms.txt` response from a given <see cref="FeedChannel{TFeedItem}"/>.
+///     It iterates through the <see cref="FeedItem"/>s in the channel, formats their title, URL, and content,
+///     and writes the result to the HTTP response body.
+/// </remarks>
 public class LlmsTxtResult<TFeedItem>(FeedChannel<TFeedItem> feedChannel) : ActionResult
     where TFeedItem : FeedItem
 {

@@ -4,9 +4,17 @@ using Microsoft.AspNetCore.Mvc;
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-///     An ASP.NET Core llms-full.txt provider.
+///     An ASP.NET Core `llms-full.txt` provider.
+///     It's a simple text file format for sharing a full-text feed.
 ///     https://llmstxt.org/
 /// </summary>
+/// <typeparam name="TFeedItem">The type of the feed item, which must inherit from <see cref="FeedItem"/>.</typeparam>
+/// <param name="feedChannel">The feed channel containing the data to be formatted as llms-full.txt.</param>
+/// <remarks>
+///     This class is responsible for generating a `llms-full.txt` response from a given <see cref="FeedChannel{TFeedItem}"/>.
+///     It iterates through the <see cref="FeedItem"/>s in the channel, formats their title, URL, and content,
+///     and writes the result to the HTTP response body.
+/// </remarks>
 public class LlmsFullTxtResult<TFeedItem>(FeedChannel<TFeedItem> feedChannel) : ActionResult
     where TFeedItem : FeedItem
 {

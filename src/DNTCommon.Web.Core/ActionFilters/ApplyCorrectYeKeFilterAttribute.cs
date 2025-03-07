@@ -4,8 +4,9 @@ using Microsoft.AspNetCore.Mvc.Filters;
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-///     Fixes common writing mistakes caused by using a bad keyboard layout, such as replacing Arabic Ye with Persian one
-///     and so on ...
+///   Corrects common typographical errors caused by incorrect keyboard layouts,
+///   such as replacing the Arabic 'ي' with the Persian 'ی'. It applies proper
+///   YeKe (ی and ک) to improve the text's readability and accuracy.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
 public sealed class ApplyCorrectYeKeFilterAttribute : ActionFilterAttribute

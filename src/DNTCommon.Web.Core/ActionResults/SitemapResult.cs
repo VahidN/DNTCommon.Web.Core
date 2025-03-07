@@ -6,7 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-///     Sitemap Result
+///   Represents a sitemap result that can be returned from an ASP.NET Core controller action.
+///   It generates an XML sitemap based on the provided <see cref="SitemapItem"/> list.
 /// </summary>
 public class SitemapResult(IList<SitemapItem> allItems) : ActionResult
 {

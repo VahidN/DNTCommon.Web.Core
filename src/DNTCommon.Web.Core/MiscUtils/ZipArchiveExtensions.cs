@@ -197,7 +197,7 @@ public static class ZipArchiveExtensions
     }
 
     /// <summary>
-    ///     Deletes the specified entries from the given archive.
+    ///     Deletes the specified entries from the given archive based on the provided predicate.
     /// </summary>
     /// <param name="zipFilePath">The path on the file system to the archive that is to be modified.</param>
     /// <param name="predicate">Defines a set of criteria for deleting entries.</param>
@@ -214,7 +214,7 @@ public static class ZipArchiveExtensions
     }
 
     /// <summary>
-    ///     Extracts the specified entries from the given archive.
+    ///     Extracts the specified entries from the given archive based on the provided predicate.
     /// </summary>
     /// <param name="zipFilePath">The path on the file system to the archive that is to be modified.</param>
     /// <param name="predicate">Defines a set of criteria for deleting entries.</param>
@@ -244,7 +244,7 @@ public static class ZipArchiveExtensions
     }
 
     /// <summary>
-    ///     Extracts the specified entries from the given archive.
+    ///     Extracts the specified entries' content from the given archive as byte arrays.
     /// </summary>
     /// <param name="zipFilePath">The path on the file system to the archive that is to be modified.</param>
     /// <param name="predicate">Defines a set of criteria for deleting entries.</param>
