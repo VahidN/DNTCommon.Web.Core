@@ -464,7 +464,7 @@ public static class HttpClientExtensions
         await using (var inputStream = await response.Content.ReadAsStreamAsync())
         {
             await using var fileStream =
-                tempFilePath.CreateAsynchronousFileStream(FileMode.CreateNew, FileAccess.Write);
+                tempFilePath.CreateAsyncFileStream(FileMode.CreateNew, FileAccess.Write);
 
             var buffer = new byte[maxBufferSize];
             int read;

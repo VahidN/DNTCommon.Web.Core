@@ -197,7 +197,7 @@ public class DownloaderService : IDownloaderService, IDisposable
 
         await using var inputStream = await response.Content.ReadAsStreamAsync();
 
-        await using var fileStream = outputFilePath.CreateAsynchronousFileStream(fileMode, FileAccess.Write);
+        await using var fileStream = outputFilePath.CreateAsyncFileStream(fileMode, FileAccess.Write);
 
         if (response.Headers.AcceptRanges is null && fileStream.Length > 0)
         {

@@ -187,7 +187,7 @@ public static class StreamUtils
     ///     Initializes a new instance of the FileStream class with the specified path, creation mode, read/ write and sharing
     ///     permission, buffer size, and synchronous or asynchronous state.
     /// </summary>
-    public static FileStream CreateAsynchronousFileStream(this string path,
+    public static FileStream CreateAsyncFileStream(this string path,
         FileMode openOrCreateMode,
         FileAccess fileAccess)
         => new(path, openOrCreateMode, fileAccess, FileShare.None, MaxBufferSize,

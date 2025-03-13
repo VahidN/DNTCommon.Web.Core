@@ -153,7 +153,7 @@ public static class UploadFileServiceExtensions
 
         // you have to explicitly open the FileStream as asynchronous
         // or else you're just doing synchronous operations on a background thread.
-        await using var fileStream = filePath.CreateAsynchronousFileStream(FileMode.Create, FileAccess.Write);
+        await using var fileStream = filePath.CreateAsyncFileStream(FileMode.Create, FileAccess.Write);
         await formFile.CopyToAsync(fileStream);
 
         return (true, filePath);

@@ -476,6 +476,11 @@ public static class PathUtils
         => File.ReadAllTextAsync(path, encoding);
 
     /// <summary>
+    ///     Asynchronously opens a binary file, reads the contents of the file into a byte array, and then closes the file.
+    /// </summary>
+    public static Task<byte[]> ReadBinaryFileAsync(this string path) => File.ReadAllBytesAsync(path);
+
+    /// <summary>
     ///     Asynchronously opens a text file, reads all lines of the file with the specified encoding, and then closes the
     ///     file.
     /// </summary>
@@ -513,17 +518,27 @@ public static class PathUtils
     ///     Asynchronously appends the specified byte array to the end of the file at the given path.  If the file doesn't
     ///     exist, this method creates a new file. If the operation is canceled, the task will return in a canceled state.
     /// </summary>
-    public static Task AppendBytesToFileAsync(this string path, byte[] content)
-        => File.AppendAllBytesAsync(path, content);
+    public static async Task AppendBytesToFileAsync(this string path, byte[] content)
+    {
+#if NET_8 || NET_7 || NET_6
+        await using var sourceStream = new MemoryStream(content);
+        await using var destStream = path.CreateAsyncFileStream(FileMode.Append, FileAccess.Write);
+        await sourceStream.CopyToAsync(destStream);
+#else
+        await File.AppendAllBytesAsync(path, content);
+#endif
+    }
 
     /// <summary>
     ///     Asynchronously reads the bytes from the current stream and writes them to another stream. Both streams positions
     ///     are advanced by the number of bytes copied.
     /// </summary>
-    public static async Task CopyFileAsync(this string sourcePath, string destPath)
+    public static async Task CopyFileAsync(this string sourcePath,
+        string destPath,
+        FileMode destFileMode = FileMode.Create)
     {
-        await using var sourceStream = sourcePath.CreateAsynchronousFileStream(FileMode.Open, FileAccess.Read);
-        await using var destStream = destPath.CreateAsynchronousFileStream(FileMode.Create, FileAccess.Write);
+        await using var sourceStream = sourcePath.CreateAsyncFileStream(FileMode.Open, FileAccess.Read);
+        await using var destStream = destPath.CreateAsyncFileStream(destFileMode, FileAccess.Write);
         await sourceStream.CopyToAsync(destStream);
     }
 }

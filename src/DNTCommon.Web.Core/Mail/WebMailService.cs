@@ -216,7 +216,7 @@ public class WebMailService(
 
         var path = Path.Combine(smtpConfig.PickupFolder, $"email-{Guid.NewGuid():N}.eml");
 
-        await using var stream = path.CreateAsynchronousFileStream(FileMode.CreateNew, FileAccess.Write);
+        await using var stream = path.CreateAsyncFileStream(FileMode.CreateNew, FileAccess.Write);
 
         using var emailMessage = GetEmailMessage(email.ToName, email.ToAddress, subject, message, attachmentFiles,
             smtpConfig, headers, blindCarpbonCopies, carpbonCopies, replyTos);
