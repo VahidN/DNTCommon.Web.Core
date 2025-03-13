@@ -8,6 +8,10 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public static class StreamUtils
 {
+    private const int
+        MaxBufferSize =
+            0x10000; // 64K. The artificial constraint due to win32 api limitations. Increasing the buffer size beyond 64k will not help in any circumstance, as the underlying SMB protocol does not support buffer lengths beyond 64k.
+
     /// <summary>
     ///     Reads all characters from the current stream from the beginning to the end
     ///     and returns them as a single string.
@@ -50,7 +54,7 @@ public static class StreamUtils
     }
 
     /// <summary>
-    /// Determines whether the specified stream is readable and seekable.
+    ///     Determines whether the specified stream is readable and seekable.
     /// </summary>
     /// <param name="stream">The stream to check.</param>
     /// <returns>true if the stream is readable and seekable; otherwise, false.</returns>
@@ -95,13 +99,13 @@ public static class StreamUtils
     }
 
     /// <summary>
-    /// Tries to read the first N bytes from a stream.
+    ///     Tries to read the first N bytes from a stream.
     /// </summary>
     /// <param name="stream">The stream to read from.</param>
     /// <param name="numberOfBytes">The number of bytes to read.</param>
     /// <returns>
-    /// A byte array containing the first N bytes of the stream,
-    /// or null if the stream is null, not readable, or empty.
+    ///     A byte array containing the first N bytes of the stream,
+    ///     or null if the stream is null, not readable, or empty.
     /// </returns>
     public static byte[]? TryTakeFirstBytes(this Stream? stream, int numberOfBytes)
     {
@@ -130,13 +134,13 @@ public static class StreamUtils
     }
 
     /// <summary>
-    /// Tries to read the first N bytes from a file.
+    ///     Tries to read the first N bytes from a file.
     /// </summary>
     /// <param name="filePath">The path to the file.</param>
     /// <param name="numberOfBytes">The number of bytes to read.</param>
     /// <returns>
-    /// A byte array containing the first N bytes of the file,
-    /// or null if the file does not exist or an error occurs.
+    ///     A byte array containing the first N bytes of the file,
+    ///     or null if the file does not exist or an error occurs.
     /// </returns>
     public static byte[]? TryTakeFirstBytes(this string? filePath, int numberOfBytes)
     {
@@ -156,7 +160,8 @@ public static class StreamUtils
     /// <param name="text">The string to convert.</param>
     /// <param name="inputEncoding">The encoding to use. The default value is UTF8.</param>
     /// <returns>
-    ///     The byte array representation of the string, or <see langword="null"/> if the input string is <see langword="null"/> or empty.
+    ///     The byte array representation of the string, or <see langword="null" /> if the input string is
+    ///     <see langword="null" /> or empty.
     /// </returns>
     public static byte[]? ToBytes([NotNullIfNotNull(nameof(text))] this string? text, Encoding? inputEncoding = null)
     {
@@ -171,10 +176,23 @@ public static class StreamUtils
     }
 
     /// <summary>
-    /// Converts a string to a read-only byte span using the Unicode encoding.
+    ///     Converts a string to a read-only byte span using the Unicode encoding.
     /// </summary>
     /// <param name="text">The string to convert. If null or empty, null is returned.</param>
     /// <returns>A read-only byte span representing the string, or null if the input string is null or empty.</returns>
     public static ReadOnlySpan<byte> ToByteSpan([NotNullIfNotNull(nameof(text))] this string? text)
         => text.IsEmpty() ? null : MemoryMarshal.Cast<char, byte>(text);
+
+    /// <summary>
+    ///     Initializes a new instance of the FileStream class with the specified path, creation mode, read/ write and sharing
+    ///     permission, buffer size, and synchronous or asynchronous state.
+    /// </summary>
+    public static FileStream CreateAsynchronousFileStream(this string path,
+        FileMode openOrCreateMode,
+        FileAccess fileAccess)
+        => new(path, openOrCreateMode, fileAccess, FileShare.None, MaxBufferSize,
+
+            // you have to explicitly open the FileStream as asynchronous
+            // or else you're just doing synchronous operations on a background thread.
+            useAsync: true);
 }

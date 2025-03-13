@@ -211,4 +211,11 @@ public static class StringUtils
     /// </summary>
     public static bool IsSmallCapitalCharString(this string? input)
         => !input.IsEmpty() && input.ToCharArray().All(chr => chr.IsSmallCapitalChar());
+
+    /// <summary>
+    ///     Returns a value indicating whether a specified string occurs within this string, using the specified comparison
+    ///     rules.
+    /// </summary>
+    public static bool ContainsOneOfValues(this string? text, StringComparison comparisonType, params string[]? values)
+        => values?.Any(value => text?.Contains(value, comparisonType) == true) == true;
 }

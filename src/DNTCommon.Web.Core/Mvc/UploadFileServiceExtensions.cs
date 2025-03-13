@@ -8,10 +8,6 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public static class UploadFileServiceExtensions
 {
-    private const int
-        MaxBufferSize =
-            0x10000; // 64K. The artificial constraint due to win32 api limitations. Increasing the buffer size beyond 64k will not help in any circumstance, as the underlying SMB protocol does not support buffer lengths beyond 64k.
-
     /// <summary>
     ///     Adds IUploadFileService to IServiceCollection.
     /// </summary>
@@ -157,9 +153,7 @@ public static class UploadFileServiceExtensions
 
         // you have to explicitly open the FileStream as asynchronous
         // or else you're just doing synchronous operations on a background thread.
-        await using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None,
-            MaxBufferSize, useAsync: true);
-
+        await using var fileStream = filePath.CreateAsynchronousFileStream(FileMode.Create, FileAccess.Write);
         await formFile.CopyToAsync(fileStream);
 
         return (true, filePath);

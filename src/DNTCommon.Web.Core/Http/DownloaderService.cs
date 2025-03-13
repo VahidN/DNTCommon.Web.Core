@@ -197,12 +197,7 @@ public class DownloaderService : IDownloaderService, IDisposable
 
         await using var inputStream = await response.Content.ReadAsStreamAsync();
 
-        await using var fileStream = new FileStream(outputFilePath, fileMode, FileAccess.Write, FileShare.None,
-            MaxBufferSize,
-
-            // you have to explicitly open the FileStream as asynchronous
-            // or else you're just doing synchronous operations on a background thread.
-            useAsync: true);
+        await using var fileStream = outputFilePath.CreateAsynchronousFileStream(fileMode, FileAccess.Write);
 
         if (response.Headers.AcceptRanges is null && fileStream.Length > 0)
         {

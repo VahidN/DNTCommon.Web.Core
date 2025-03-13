@@ -185,8 +185,6 @@ public class WebMailService(
         ICollection<string>? attachmentFiles,
         MailHeaders? headers)
     {
-        const int maxBufferSize = 0x10000; // 64K.
-
         if (string.IsNullOrWhiteSpace(smtpConfig.PickupFolder))
         {
             return;
@@ -197,7 +195,7 @@ public class WebMailService(
         foreach (var email in emails)
         {
             await SaveFileAsync(smtpConfig, subject, message, blindCarpbonCopies, carpbonCopies, replyTos,
-                attachmentFiles, headers, maxBufferSize, email);
+                attachmentFiles, headers, email);
         }
     }
 
@@ -209,7 +207,6 @@ public class WebMailService(
         ICollection<MailAddress>? replyTos,
         ICollection<string>? attachmentFiles,
         MailHeaders? headers,
-        int maxBufferSize,
         MailAddress email)
     {
         if (smtpConfig?.PickupFolder is null)
@@ -219,8 +216,7 @@ public class WebMailService(
 
         var path = Path.Combine(smtpConfig.PickupFolder, $"email-{Guid.NewGuid():N}.eml");
 
-        await using var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None,
-            maxBufferSize, useAsync: true);
+        await using var stream = path.CreateAsynchronousFileStream(FileMode.CreateNew, FileAccess.Write);
 
         using var emailMessage = GetEmailMessage(email.ToName, email.ToAddress, subject, message, attachmentFiles,
             smtpConfig, headers, blindCarpbonCopies, carpbonCopies, replyTos);
