@@ -53,12 +53,15 @@ public static class BaseHttpClientExtensions
         leaving them in an invalid state once the disposal is actioned.
         To fix this, the factory should be configured to create a new handler for each client.
          */
-        httpClientBuilder.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+        httpClientBuilder.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
         {
             AllowAutoRedirect = false,
             CookieContainer = CookieContainer,
             UseCookies = true,
-            AutomaticDecompression = DecompressionMethods.All
+            AutomaticDecompression = DecompressionMethods.All,
+            PooledConnectionLifetime = TimeSpan.FromMinutes(minutes: 2),
+            PooledConnectionIdleTimeout = TimeSpan.FromSeconds(seconds: 30),
+            MaxConnectionsPerServer = 100
         });
 
         services.RemoveAll<IHttpMessageHandlerBuilderFilter>(); // Remove logging of the HttpClient
