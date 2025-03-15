@@ -59,8 +59,8 @@ public static class BaseHttpClientExtensions
             CookieContainer = CookieContainer,
             UseCookies = true,
             AutomaticDecompression = DecompressionMethods.All,
-            PooledConnectionLifetime = TimeSpan.FromMinutes(minutes: 2),
-            PooledConnectionIdleTimeout = TimeSpan.FromSeconds(seconds: 30),
+            PooledConnectionLifetime = TimeSpan.FromMinutes(value: 2),
+            PooledConnectionIdleTimeout = TimeSpan.FromSeconds(value: 30),
             MaxConnectionsPerServer = 100
         });
 
