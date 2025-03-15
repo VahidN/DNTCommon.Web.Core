@@ -49,4 +49,10 @@ public class WebServerOS
     ///     The server's uptime
     /// </summary>
     public TimeSpan UpTime { set; get; } = default!;
+
+    /// <summary>
+    ///     Sets or gets the number of active connections.
+    ///     You can monitor port usage in .NET applications by using it.
+    /// </summary>
+    public int ActiveTcpConnectionsCount { set; get; }
 }

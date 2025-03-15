@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using Microsoft.AspNetCore.Builder;
@@ -52,10 +53,7 @@ public static class WebServerInfoProvider
 
         var hostName = Dns.GetHostName();
 
-        var addresses = (await Dns.GetHostAddressesAsync(hostName))
-            .Where(o => o.AddressFamily == AddressFamily.InterNetwork)
-            .Select(o => o.ToString())
-            .ToArray();
+        var addresses = await GetIPsAsync(hostName);
 
         return new WebServerInfo
         {
@@ -84,7 +82,8 @@ public static class WebServerInfoProvider
                 UserName = Environment.UserName,
                 HostName = hostName,
                 HostAddresses = string.Join(separator: ", ", addresses),
-                UpTime = TimeSpan.FromMilliseconds(Environment.TickCount64)
+                UpTime = TimeSpan.FromMilliseconds(Environment.TickCount64),
+                ActiveTcpConnectionsCount = IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpConnections().Length
             },
             DriveInfo = GetDriveInfo(),
             TimeZone = GetTimezoneDetails(),
@@ -97,6 +96,13 @@ public static class WebServerInfoProvider
             }
         };
     }
+
+    private static async Task<string[]> GetIPsAsync(string hostName)
+        =>
+        [
+            .. (await Dns.GetHostAddressesAsync(hostName)).Where(o => o.AddressFamily == AddressFamily.InterNetwork)
+            .Select(o => o.ToString())
+        ];
 
     private static WebServerTimeZone GetTimezoneDetails()
     {
