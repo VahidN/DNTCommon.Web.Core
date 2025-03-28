@@ -1,8 +1,5 @@
-using System.Collections.Concurrent;
-using HarfBuzzSharp;
 using SkiaSharp;
 using SkiaSharp.HarfBuzz;
-using Buffer = HarfBuzzSharp.Buffer;
 
 namespace DNTCommon.Web.Core;
 
@@ -11,18 +8,79 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public static class TextToImageExtensions
 {
-    private static readonly ConcurrentDictionary<string, SKTypeface> FontsTypeface =
-        new(StringComparer.OrdinalIgnoreCase);
-
     /// <summary>
     ///     Draws a text on a bitmap and then returns it as a data:image/png;base64.
     /// </summary>
-    public static string TextToBase64DataImage(this string text, TextToImageOptions options)
+    public static string TextToBase64DataImage(this string text,
+        TextToImageOptions options,
+        string contentType = "image/png")
     {
-        var dataBytes = text.TextToImage(options);
-        var imageBase64Data = Convert.ToBase64String(dataBytes);
+        ArgumentNullException.ThrowIfNull(text);
 
-        return $"data:image/png;base64,{imageBase64Data}";
+        return text.TextToImage(options).BytesToBase64DataImage(contentType);
+    }
+
+    /// <summary>
+    ///     returns data as a data:image/png;base64.
+    /// </summary>
+    public static string BytesToBase64DataImage(this byte[] data, string contentType = "image/png")
+    {
+        ArgumentNullException.ThrowIfNull(data);
+
+        return $"data:{contentType};base64,{Convert.ToBase64String(data)}";
+    }
+
+    /// <summary>
+    ///     Draws a rectangle around the given image
+    /// </summary>
+    public static void DrawFrame(this SKCanvas canvas, SKColor color, float width, float height)
+    {
+        ArgumentNullException.ThrowIfNull(canvas);
+
+        using var skPaint = new SKPaint();
+        skPaint.Color = color;
+        skPaint.IsStroke = true;
+        skPaint.StrokeWidth = 1f;
+
+        canvas.DrawRect(new SKRect(left: 0, top: 0, width - 1, height - 1), skPaint);
+    }
+
+    /// <summary>
+    ///     Draws a text at top of the image
+    /// </summary>
+    public static void DrawTopAlignedText(this SKCanvas canvas,
+        int imageWidth,
+        string? text,
+        ChartFont font,
+        SKTextAlign textAlign,
+        int margin)
+    {
+        if (text.IsEmpty())
+        {
+            return;
+        }
+
+        ArgumentNullException.ThrowIfNull(canvas);
+        ArgumentNullException.ThrowIfNull(font);
+
+        var titleFontType = font.Name.GetFont(font.Style, font.FilePath);
+        using var titleShaper = new SKShaper(titleFontType);
+
+        using var titleFont = new SKFont();
+        titleFont.Size = font.Size;
+        titleFont.Typeface = titleFontType;
+
+        using var titlePaint = new SKPaint();
+        titlePaint.Color = font.Color;
+        titlePaint.IsAntialias = true;
+        titlePaint.Style = SKPaintStyle.Fill;
+
+        var titleTextBounds = text.GetTextBounds(titleFont, titlePaint);
+
+        var titleX = (float)imageWidth / 2;
+        var titleY = (int)titleTextBounds.Height + (2 * margin);
+
+        canvas.DrawShapedText(titleShaper, text, titleX, titleY, textAlign, titleFont, titlePaint);
     }
 
     /// <summary>
@@ -32,7 +90,7 @@ public static class TextToImageExtensions
     {
         ArgumentNullException.ThrowIfNull(options);
 
-        var fontType = GetFont(options);
+        var fontType = options.FontName.GetFont(options.FontStyle, options.CustomFontPath);
         using var shaper = new SKShaper(fontType);
 
         using var textPaint = new SKPaint();
@@ -45,8 +103,8 @@ public static class TextToImageExtensions
         font.Typeface = fontType;
         font.Subpixel = true;
 
-        var textBounds = GetTextBounds(text, font, textPaint);
-        var width = GetTextWidth(text, options, fontType);
+        var textBounds = text.GetTextBounds(font, textPaint);
+        var width = text.GetTextWidth(options.FontSize, fontType);
 
         var imageWidth = (int)width + (2 * options.TextMargin);
         var imageHeight = (int)textBounds.Height + (2 * options.TextMargin);
@@ -65,7 +123,7 @@ public static class TextToImageExtensions
 
         DrawRectangle(options, canvas, width, textBounds.Height);
 
-        return ToPng(sKBitmap);
+        return sKBitmap.ToImageBytes(SKEncodedImageFormat.Png, quality: 100);
     }
 
     private static void AddWaves(int width, int height, SKBitmap pic)
@@ -112,31 +170,6 @@ public static class TextToImageExtensions
         using var paint = new SKPaint();
         paint.Shader = shader;
         canvas.DrawPaint(paint);
-    }
-
-    private static float GetTextWidth(string text, TextToImageOptions options, SKTypeface typeface)
-    {
-        using var streamAsset = typeface.OpenStream();
-        using var blob = streamAsset.ToHarfBuzzBlob();
-        using var hbFace = new Face(blob, index: 0);
-        using var hbFont = new Font(hbFace);
-        using var buffer = new Buffer();
-        buffer.AddUtf16(text);
-        buffer.GuessSegmentProperties();
-        hbFont.Shape(buffer);
-
-        hbFont.GetScale(out var xScale, out _);
-        var scale = options.FontSize / (float)xScale;
-        var width = buffer.GlyphPositions.Sum(position => position.XAdvance) * scale;
-
-        return width;
-    }
-
-    private static SKRect GetTextBounds(string text, SKFont font, SKPaint textPaint)
-    {
-        font.MeasureText(text, out var textBounds, textPaint);
-
-        return textBounds;
     }
 
     private static void DrawText(string text,
@@ -197,30 +230,5 @@ public static class TextToImageExtensions
                 new SKRect(left: 0, top: 0, width + (2 * (float)options.TextMargin) - 1,
                     height + (2 * (float)options.TextMargin) - 1), skPaint);
         }
-    }
-
-    private static SKTypeface GetFont(TextToImageOptions options)
-    {
-        if (string.IsNullOrWhiteSpace(options.CustomFontPath))
-        {
-            return FontsTypeface.GetOrAdd(options.FontName,
-                SKTypeface.FromFamilyName(options.FontName, options.FontStyle));
-        }
-
-        return FontsTypeface.GetOrAdd(options.CustomFontPath, key =>
-        {
-            using var embeddedFont = File.OpenRead(key);
-
-            return SKTypeface.FromStream(embeddedFont);
-        });
-    }
-
-    private static byte[] ToPng(SKBitmap bitmap)
-    {
-        using var data = bitmap.Encode(SKEncodedImageFormat.Png, quality: 100);
-        using var memory = new MemoryStream();
-        data.SaveTo(memory);
-
-        return memory.ToArray();
     }
 }

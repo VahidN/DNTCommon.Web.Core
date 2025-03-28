@@ -1,4 +1,7 @@
+using HarfBuzzSharp;
 using SkiaSharp;
+using SkiaSharp.HarfBuzz;
+using Buffer = HarfBuzzSharp.Buffer;
 
 namespace DNTCommon.Web.Core;
 
@@ -177,5 +180,71 @@ public static class DrawingExtensions
         }
 
         return whitePixels / (float)totalPixels * 100;
+    }
+
+    /// <summary>
+    ///     Encodes the given bitmap using the specified format and returns its data as a byte array
+    /// </summary>
+    public static byte[] ToImageBytes(this SKBitmap bitmap, SKEncodedImageFormat format, int quality)
+    {
+        ArgumentNullException.ThrowIfNull(bitmap);
+
+        using var image = SKImage.FromBitmap(bitmap);
+        using var encodedImage = image.Encode(format, quality);
+
+        using var stream = new MemoryStream();
+        encodedImage.SaveTo(stream);
+
+        return stream.ToArray();
+    }
+
+    /// <summary>
+    ///     Calculates the given text's width based on the provided font's info.
+    /// </summary>
+    public static float GetTextWidth(this string? text, SKFont font)
+    {
+        if (text.IsEmpty()) { return 0; }
+
+        ArgumentNullException.ThrowIfNull(font);
+
+        return text.GetTextWidth(font.Size, font.Typeface);
+    }
+
+    /// <summary>
+    ///     Calculates the given text's width based on the provided font's info.
+    /// </summary>
+    public static float GetTextWidth(this string? text, float fontSize, SKTypeface typeface)
+    {
+        if (text.IsEmpty()) { return 0; }
+
+        ArgumentNullException.ThrowIfNull(typeface);
+
+        using var streamAsset = typeface.OpenStream();
+        using var blob = streamAsset.ToHarfBuzzBlob();
+        using var hbFace = new Face(blob, index: 0);
+        using var hbFont = new Font(hbFace);
+        using var buffer = new Buffer();
+        buffer.AddUtf16(text);
+        buffer.GuessSegmentProperties();
+        hbFont.Shape(buffer);
+
+        hbFont.GetScale(out var xScale, out _);
+        var scale = fontSize / xScale;
+        var width = buffer.GlyphPositions.Sum(position => position.XAdvance) * scale;
+
+        return width;
+    }
+
+    /// <summary>
+    ///     Measures the given text's bounds
+    /// </summary>
+    public static SKRect GetTextBounds(this string text, SKFont font, SKPaint? textPaint = null)
+    {
+        ArgumentNullException.ThrowIfNull(text);
+        ArgumentNullException.ThrowIfNull(font);
+
+        font.MeasureText(text, out var textBounds, textPaint);
+
+        return textBounds;
     }
 }

@@ -7,7 +7,12 @@ namespace DNTCommon.Web.Core;
 ///     than once. To prevent this Lazy is used. In the worst case multiple Lazy objects are created for multiple
 ///     threads but only one of the objects succeeds in creating a GetterInfo.
 /// </summary>
-public class ConcurrentDictionaryLocked<TKey, TValue> : ConcurrentDictionary<TKey, Lazy<TValue>>
+/// <remarks>
+///     A thread-safe ConcurrentDictionary
+/// </remarks>
+/// <param name="comparer"></param>
+public class ConcurrentDictionaryLocked<TKey, TValue>(IEqualityComparer<TKey> comparer)
+    : ConcurrentDictionary<TKey, Lazy<TValue>>(comparer)
     where TKey : notnull
 {
     /// <summary>
