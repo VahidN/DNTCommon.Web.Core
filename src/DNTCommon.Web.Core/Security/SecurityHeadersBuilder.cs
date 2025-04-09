@@ -82,8 +82,6 @@ public static class SecurityHeadersBuilder
             _policy.AddStrictTransportSecurityMaxAgeIncludeSubDomains();
         }
 
-        _policy.ApplyDocumentHeadersToAllResponses();
-
         return _policy;
     }
 
