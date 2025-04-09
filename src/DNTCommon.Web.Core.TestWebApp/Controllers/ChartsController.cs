@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.StaticFiles;
 using SkiaSharp;
 
 namespace DNTCommon.Web.Core.TestWebApp.Controllers;
@@ -13,7 +12,7 @@ public class ChartsController(IWebHostEnvironment env) : Controller
 
     public IActionResult PieChart()
     {
-        var data = new SkiaPieChart
+        var skiaPieChart = new SkiaPieChart
         {
             Items = GetItems(),
             Title = new ChartTitle
@@ -37,16 +36,14 @@ public class ChartsController(IWebHostEnvironment env) : Controller
                 Height = 700,
                 ShowFrame = true
             }
-        }.Draw();
+        };
 
-        var contentType = new FileExtensionContentTypeProvider().Mappings[key: ".png"];
-
-        return File(data, contentType);
+        return File(skiaPieChart.DrawAsStream(), skiaPieChart.Image.Format.ToMimeType());
     }
 
     public IActionResult BarChart()
     {
-        var data = new SkiaVerticalBarChart
+        var skiaVerticalBarChart = new SkiaVerticalBarChart
         {
             Items = GetItems(),
             Title = new ChartTitle
@@ -70,16 +67,14 @@ public class ChartsController(IWebHostEnvironment env) : Controller
                 Height = 700,
                 ShowFrame = true
             }
-        }.Draw();
+        };
 
-        var contentType = new FileExtensionContentTypeProvider().Mappings[key: ".png"];
-
-        return File(data, contentType);
+        return File(skiaVerticalBarChart.DrawAsStream(), skiaVerticalBarChart.Image.Format.ToMimeType());
     }
 
     public IActionResult LineChart()
     {
-        var data = new SkiaLineChart
+        var skiaLineChart = new SkiaLineChart
         {
             Items = GetItems(),
             Title = new ChartTitle
@@ -103,11 +98,9 @@ public class ChartsController(IWebHostEnvironment env) : Controller
                 Height = 700,
                 ShowFrame = true
             }
-        }.Draw();
+        };
 
-        var contentType = new FileExtensionContentTypeProvider().Mappings[key: ".png"];
-
-        return File(data, contentType);
+        return File(skiaLineChart.DrawAsStream(), skiaLineChart.Image.Format.ToMimeType());
     }
 
     private static List<ChartItem> GetItems()

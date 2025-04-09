@@ -47,5 +47,10 @@ public abstract class SkiaChart
     /// </summary>
     public abstract byte[] Draw();
 
+    /// <summary>
+    ///     Draws a chart and returns it as a .png stream by default
+    /// </summary>
+    public abstract Stream DrawAsStream();
+
     protected string GetFormattedNumber(float number) => number.ToString(NumbersFormat, CultureInfo.InvariantCulture);
 }

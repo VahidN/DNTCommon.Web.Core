@@ -199,6 +199,19 @@ public static class DrawingExtensions
     }
 
     /// <summary>
+    ///     Encodes the given bitmap using the specified format and returns its data as a stream
+    /// </summary>
+    public static Stream AsImageStream(this SKBitmap bitmap, SKEncodedImageFormat format, int quality)
+    {
+        ArgumentNullException.ThrowIfNull(bitmap);
+
+        using var image = SKImage.FromBitmap(bitmap);
+        using var encodedImage = image.Encode(format, quality);
+
+        return encodedImage.AsStream();
+    }
+
+    /// <summary>
     ///     Calculates the given text's width based on the provided font's info.
     /// </summary>
     public static float GetTextWidth(this string? text, SKFont font)
@@ -247,4 +260,27 @@ public static class DrawingExtensions
 
         return textBounds;
     }
+
+    /// <summary>
+    ///     Returns the equivalent mimetype of the provided image-format
+    /// </summary>
+    public static string ToMimeType(this SKEncodedImageFormat imageFormat)
+        => imageFormat switch
+        {
+            SKEncodedImageFormat.Bmp => "image/bmp",
+            SKEncodedImageFormat.Gif => "image/gif",
+            SKEncodedImageFormat.Ico => "image/x-icon",
+            SKEncodedImageFormat.Jpeg => "image/jpeg",
+            SKEncodedImageFormat.Png => "image/png",
+            SKEncodedImageFormat.Wbmp => "image/x-wbmp",
+            SKEncodedImageFormat.Webp => "image/webp",
+            SKEncodedImageFormat.Pkm => "image/pkm",
+            SKEncodedImageFormat.Ktx => "image/ktx",
+            SKEncodedImageFormat.Astc => "image/astc",
+            SKEncodedImageFormat.Dng => "image/dng",
+            SKEncodedImageFormat.Heif => "image/heif",
+            SKEncodedImageFormat.Avif => "image/avif",
+            SKEncodedImageFormat.Jpegxl => "image/jpeg-xl",
+            _ => throw new ArgumentOutOfRangeException(nameof(imageFormat), imageFormat, message: null)
+        };
 }

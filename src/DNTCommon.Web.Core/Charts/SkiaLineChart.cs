@@ -58,7 +58,24 @@ public class SkiaLineChart : SkiaChart
     /// </summary>
     public override byte[] Draw()
     {
-        using var bitmap = new SKBitmap(Image.Width, Image.Height);
+        using var bitmap = DrawAsSkBitmap();
+
+        return bitmap.ToImageBytes(Image.Format, Image.Quality);
+    }
+
+    /// <summary>
+    ///     Draws a chart and returns it as a .png stream by default
+    /// </summary>
+    public override Stream DrawAsStream()
+    {
+        using var bitmap = DrawAsSkBitmap();
+
+        return bitmap.AsImageStream(Image.Format, Image.Quality);
+    }
+
+    private SKBitmap DrawAsSkBitmap()
+    {
+        var bitmap = new SKBitmap(Image.Width, Image.Height);
         using var canvas = new SKCanvas(bitmap);
         canvas.Clear(Image.BackgroundColor ?? SKColors.White);
 
@@ -78,7 +95,7 @@ public class SkiaLineChart : SkiaChart
             canvas.DrawFrame(Image.FrameColor, Image.Width - 1, Image.Height - 1);
         }
 
-        return bitmap.ToImageBytes(Image.Format, Image.Quality);
+        return bitmap;
     }
 
     private void DrawLines(SKCanvas canvas, float startY)
