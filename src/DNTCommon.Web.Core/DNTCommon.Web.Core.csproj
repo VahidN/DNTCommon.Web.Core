@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>DNTCommon.Web.Core provides common scenarios' solutions for ASP.NET Core applications.</Description>
-    <VersionPrefix>10.4.0</VersionPrefix>
+    <VersionPrefix>10.5.0</VersionPrefix>
     <Authors>Vahid Nasiri</Authors>
     <TargetFrameworks>net9.0;net8.0;net7.0;net6.0;</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -63,7 +63,7 @@
     <Using Include="System.Net.Http.Headers"/>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Meziantou.Analyzer" Version="2.0.189">
+    <PackageReference Include="Meziantou.Analyzer" Version="2.0.194">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -79,7 +79,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="SonarAnalyzer.CSharp" Version="10.7.0.110445">
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="10.8.0.113526">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -98,7 +98,7 @@
     <PackageReference Include="DNTPersianUtils.Core" Version="6.6.1"/>
     <PackageReference Include="MailKit" Version="4.11.0"/>
     <PackageReference Include="HtmlAgilityPack" Version="1.12.0"/>
-    <PackageReference Include="IPAddressRange" Version="6.1.0"/>
+    <PackageReference Include="IPAddressRange" Version="6.2.0"/>
     <PackageReference Include="SkiaSharp" Version="3.116.1"/>
     <PackageReference Include="SkiaSharp.HarfBuzz" Version="3.116.1"/>
     <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.116.1"/>
@@ -106,7 +106,7 @@
     <PackageReference Include="Ben.Demystifier" Version="0.4.1"/>
     <PackageReference Include="UAParser" Version="3.1.47"/>
     <PackageReference Include="AsyncKeyedLock" Version="7.1.4"/>
-    <PackageReference Include="NetEscapades.AspNetCore.SecurityHeaders" Version="0.24.0"/>
+    <PackageReference Include="NetEscapades.AspNetCore.SecurityHeaders" Version="1.0.0"/>
     <PackageReference Include="iTextSharp.LGPLv2.Core" Version="3.7.1"/>
     <PackageReference Include="Scrutor" Version="6.0.1"/>
   </ItemGroup>
