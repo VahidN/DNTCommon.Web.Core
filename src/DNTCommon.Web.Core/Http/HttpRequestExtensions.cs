@@ -121,9 +121,12 @@ public static partial class HttpRequestExtensions
     /// <summary>
     ///     Gets the current HttpContext.Request's IP.
     /// </summary>
-    public static string? GetIP(this HttpContext httpContext, bool tryUseXForwardHeader = true)
+    public static string? GetIP(this HttpContext? httpContext, bool tryUseXForwardHeader = true)
     {
-        ArgumentNullException.ThrowIfNull(httpContext);
+        if (httpContext is null)
+        {
+            return null;
+        }
 
         var ip = string.Empty;
 
@@ -156,7 +159,7 @@ public static partial class HttpRequestExtensions
             ip = httpContext.GetHeaderValue(headerName: "REMOTE_ADDR");
         }
 
-        return ip;
+        return ip.IsValidIp() ? ip : null;
     }
 
     /// <summary>

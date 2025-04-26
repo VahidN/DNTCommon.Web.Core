@@ -13,9 +13,14 @@ public static class LocalIp
     public const string NullIPv6 = "::1";
 
     /// <summary>
+    ///     Determines whether a string is a valid IP address.
+    /// </summary>
+    public static bool IsValidIp(this string? ip) => !string.IsNullOrWhiteSpace(ip) && IPAddress.TryParse(ip, out _);
+
+    /// <summary>
     ///     Determines whether the specified `ip` address is a private IP address.
     /// </summary>
-    public static bool IsLocalIp(this string ip)
+    public static bool IsLocalIp(this string? ip)
     {
         if (string.IsNullOrWhiteSpace(ip))
         {
@@ -49,51 +54,39 @@ public static class LocalIp
     /// <summary>
     ///     Identifies local requests
     /// </summary>
-    public static bool IsLocal(this ConnectionInfo conn)
+    public static bool IsLocal(this ConnectionInfo? conn)
     {
-        ArgumentNullException.ThrowIfNull(conn);
-
-        if (conn.RemoteIpAddress?.IsSet() == false)
+        if (conn?.RemoteIpAddress?.IsSet() == false)
         {
             return true;
         }
 
-        if (conn.RemoteIpAddress is not null && conn.LocalIpAddress?.IsSet() == true)
+        if (conn?.RemoteIpAddress is not null && conn.LocalIpAddress?.IsSet() == true)
         {
             return conn.RemoteIpAddress.Equals(conn.LocalIpAddress);
         }
 
-        return conn.RemoteIpAddress?.IsLoopback() ?? false;
+        return conn?.RemoteIpAddress?.IsLoopback() ?? false;
     }
 
     /// <summary>
     ///     Identifies local requests
     /// </summary>
-    public static bool IsLocal(this HttpContext ctx)
-    {
-        ArgumentNullException.ThrowIfNull(ctx);
-
-        return ctx.Connection.IsLocal();
-    }
+    public static bool IsLocal(this HttpContext? ctx) => ctx?.Connection.IsLocal() == true;
 
     /// <summary>
     ///     Identifies local requests
     /// </summary>
-    public static bool IsLocal(this HttpRequest req)
-    {
-        ArgumentNullException.ThrowIfNull(req);
-
-        return req.HttpContext.IsLocal();
-    }
+    public static bool IsLocal(this HttpRequest? req) => req?.HttpContext.IsLocal() == true;
 
     /// <summary>
     ///     address is not nullIPv6
     /// </summary>
-    public static bool IsSet(this IPAddress address)
+    public static bool IsSet(this IPAddress? address)
         => address is not null && !string.Equals(address.ToString(), NullIPv6, StringComparison.Ordinal);
 
     /// <summary>
     ///     Indicates whether the specified IP address is the loopback address.
     /// </summary>
-    public static bool IsLoopback(this IPAddress address) => IPAddress.IsLoopback(address);
+    public static bool IsLoopback(this IPAddress? address) => address is not null && IPAddress.IsLoopback(address);
 }
