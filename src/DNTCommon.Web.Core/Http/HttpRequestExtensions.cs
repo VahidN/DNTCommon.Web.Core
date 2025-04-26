@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
@@ -89,6 +90,12 @@ public static partial class HttpRequestExtensions
     }
 
     /// <summary>
+    ///     Returns the full URL of the current request.
+    /// </summary>
+    public static string GetFullUrl(this HttpRequest? request)
+        => request is null ? string.Empty : $"{request.Scheme}://{request.Host}{request.Path}{request.QueryString}";
+
+    /// <summary>
     ///     If page exists returns true
     /// </summary>
     /// <param name="hre"></param>
@@ -151,6 +158,12 @@ public static partial class HttpRequestExtensions
 
         return ip;
     }
+
+    /// <summary>
+    ///     Gets the information regarding the TCP/IP connection carrying the request.
+    /// </summary>
+    public static IHttpConnectionFeature? GetHttpConnectionFeature(this HttpContext? context)
+        => context?.Features.Get<IHttpConnectionFeature>();
 
     /// <summary>
     ///     Gets a current HttpContext.Request's header value.
