@@ -117,7 +117,7 @@ public static class ImageValidatorExtensions
         int? maxHeight = null,
         ILogger? logger = null)
     {
-        if (fromFile is null || fromFile.Length == 0)
+        if (fromFile.IsNullOrEmpty())
         {
             return false;
         }

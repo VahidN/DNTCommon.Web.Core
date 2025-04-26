@@ -51,7 +51,7 @@ public static class UploadFileServiceExtensions
     /// <param name="formFile">The posted file.</param>
     public static async Task<byte[]?> GetPostedFileDataAsync(this IFormFile? formFile)
     {
-        if (formFile is null || formFile.Length == 0)
+        if (formFile.IsNullOrEmpty())
         {
             return null;
         }
@@ -68,7 +68,7 @@ public static class UploadFileServiceExtensions
     /// <param name="formFile">The posted file.</param>
     public static byte[]? GetPostedFileData(this IFormFile? formFile)
     {
-        if (formFile is null || formFile.Length == 0)
+        if (formFile.IsNullOrEmpty())
         {
             return null;
         }
@@ -97,7 +97,7 @@ public static class UploadFileServiceExtensions
     /// <param name="fromFiles">The posted files.</param>
     public static IEnumerable<Task<byte[]?>> ToByteArraysAsync(this IFormFileCollection? fromFiles)
     {
-        if (fromFiles is null || fromFiles.Count == 0)
+        if (fromFiles.IsNullOrEmpty())
         {
             yield break;
         }
@@ -114,7 +114,7 @@ public static class UploadFileServiceExtensions
     /// <param name="fromFiles">The posted files.</param>
     public static IEnumerable<byte[]?> ToByteArrays(this IFormFileCollection? fromFiles)
     {
-        if (fromFiles is null || fromFiles.Count == 0)
+        if (fromFiles.IsNullOrEmpty())
         {
             yield break;
         }
@@ -136,7 +136,7 @@ public static class UploadFileServiceExtensions
         string uploadsRootFolder,
         bool allowOverwrite)
     {
-        if (formFile is null || formFile.Length == 0)
+        if (formFile.IsNullOrEmpty())
         {
             return (false, string.Empty);
         }
@@ -157,5 +157,69 @@ public static class UploadFileServiceExtensions
         await formFile.CopyToAsync(fileStream);
 
         return (true, filePath);
+    }
+
+    /// <summary>
+    ///     Converts the posted IFormFiles to a stream.
+    /// </summary>
+    public static Stream? ToStream(this IFormFile? formFile)
+    {
+        if (formFile.IsNullOrEmpty())
+        {
+            return null;
+        }
+
+        var memoryStream = new MemoryStream();
+        formFile.CopyTo(memoryStream);
+        memoryStream.Seek(offset: 0, SeekOrigin.Begin);
+
+        return memoryStream;
+    }
+
+    /// <summary>
+    ///     Converts the posted IFormFiles to a stream.
+    /// </summary>
+    public static async Task<Stream?> ToStreamAsync(this IFormFile? formFile)
+    {
+        if (formFile.IsNullOrEmpty())
+        {
+            return null;
+        }
+
+        var memoryStream = new MemoryStream();
+        await formFile.CopyToAsync(memoryStream);
+        memoryStream.Seek(offset: 0, SeekOrigin.Begin);
+
+        return memoryStream;
+    }
+
+    /// <summary>
+    ///     Checks the file's length to detect if it has a data or not.
+    /// </summary>
+    public static bool IsNullOrEmpty([NotNullWhen(returnValue: false)] this IFormFile? formFile)
+        => formFile is null || formFile.Length == 0;
+
+    /// <summary>
+    ///     Checks the fromFiles's count to detect if it has a file or not.
+    ///     Then it checks the file's length of each entry to see if there is any data attached to them.
+    /// </summary>
+    public static bool IsNullOrEmpty([NotNullWhen(returnValue: false)] this IFormFileCollection? fromFiles)
+    {
+        if (fromFiles is null || fromFiles.Count == 0)
+        {
+            return true;
+        }
+
+        var isEmpty = true;
+
+        foreach (var fromFile in fromFiles)
+        {
+            if (!fromFile.IsNullOrEmpty())
+            {
+                isEmpty = false;
+            }
+        }
+
+        return isEmpty;
     }
 }

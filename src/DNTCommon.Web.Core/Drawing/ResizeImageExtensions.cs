@@ -96,7 +96,7 @@ public static class ResizeImageExtensions
     {
         ArgumentNullException.ThrowIfNull(options);
 
-        if (fromFile is null || fromFile.Length == 0)
+        if (fromFile.IsNullOrEmpty())
         {
             return null;
         }
