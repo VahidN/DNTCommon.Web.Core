@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>DNTCommon.Web.Core provides common scenarios' solutions for ASP.NET Core applications.</Description>
-    <VersionPrefix>10.6.0</VersionPrefix>
+    <VersionPrefix>10.7.0</VersionPrefix>
     <Authors>Vahid Nasiri</Authors>
     <TargetFrameworks>net9.0;net8.0;net7.0;net6.0;</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -63,7 +63,7 @@
     <Using Include="System.Net.Http.Headers"/>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Meziantou.Analyzer" Version="2.0.197">
+    <PackageReference Include="Meziantou.Analyzer" Version="2.0.199">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -107,7 +107,7 @@
     <PackageReference Include="UAParser" Version="3.1.47"/>
     <PackageReference Include="AsyncKeyedLock" Version="7.1.6"/>
     <PackageReference Include="NetEscapades.AspNetCore.SecurityHeaders" Version="1.0.0"/>
-    <PackageReference Include="iTextSharp.LGPLv2.Core" Version="3.7.1"/>
+    <PackageReference Include="iTextSharp.LGPLv2.Core" Version="3.7.2"/>
     <PackageReference Include="Scrutor" Version="6.0.1"/>
   </ItemGroup>
   <ItemGroup>
