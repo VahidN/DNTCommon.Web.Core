@@ -20,6 +20,13 @@ public class LockerService : ILockerService
         => _lock.LockOrNullAsync(typeof(T), timeout, cancellationToken);
 
     /// <summary>
+    ///     Tries to enter the async lock
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ValueTask<IDisposable?> LockAsync(Type key, TimeSpan timeout, CancellationToken cancellationToken = default)
+        => _lock.LockOrNullAsync(key, timeout, cancellationToken);
+
+    /// <summary>
     ///     Dispose all the locks
     /// </summary>
     public void Dispose()
@@ -35,6 +42,13 @@ public class LockerService : ILockerService
     public IDisposable? Lock<T>(TimeSpan timeout, CancellationToken cancellationToken = default)
         where T : notnull
         => _lock.LockOrNull(typeof(T), timeout, cancellationToken);
+
+    /// <summary>
+    ///     Tries to enter the sync lock
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public IDisposable? Lock(Type key, TimeSpan timeout, CancellationToken cancellationToken = default)
+        => _lock.LockOrNull(key, timeout, cancellationToken);
 
     /// <summary>
     ///     Dispose all the locks
