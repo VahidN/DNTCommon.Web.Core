@@ -11,6 +11,35 @@ namespace DNTCommon.Web.Core;
 public static class ImageValidatorExtensions
 {
     /// <summary>
+    ///     Just checks the extension of the given file.
+    /// </summary>
+    /// <param name="url">The path string from which to get the extension.</param>
+    /// <param name="validExtensions">
+    ///     Its default values are ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".tif", ".webp",
+    ///     ".heic", ".heif", ".avif"
+    /// </param>
+    public static bool IsValidImageFileUrl([NotNullWhen(returnValue: true)] this string? url,
+        params ICollection<string>? validExtensions)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            return false;
+        }
+
+        if (validExtensions is null || validExtensions.Count == 0)
+        {
+            validExtensions =
+            [
+                ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".tif", ".webp", ".heic", ".heif", ".avif"
+            ];
+        }
+
+        var fileExt = Path.GetExtension(url);
+
+        return validExtensions.Any(ext => string.Equals(fileExt, ext, StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
     ///     Tries to decode the given file to a bitmap
     /// </summary>
     /// <param name="filePath">The absolute path of the file</param>
