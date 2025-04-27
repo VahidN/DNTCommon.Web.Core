@@ -10,13 +10,20 @@ public static class MimeTypesExtensions
     /// <summary>
     ///     Provides a mapping between file extensions and MIME types.
     /// </summary>
-    /// <param name="extension"></param>
+    /// <param name="input">It can be a fileName, filePath or a file extension</param>
     /// <returns></returns>
     /// <exception cref="ArgumentNullException"></exception>
 #pragma warning disable CA1502, CA1505
-    public static string GetMimeType(this string? extension)
+    public static string GetMimeType(this string? input)
 #pragma warning restore CA1505, CA1502
     {
+        if (input.IsEmpty())
+        {
+            return "application/octet-stream";
+        }
+
+        var extension = input.GetExtension();
+
         if (extension.IsEmpty())
         {
             return "application/octet-stream";

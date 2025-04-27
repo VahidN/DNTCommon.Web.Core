@@ -252,7 +252,8 @@ public static class PathUtils
     /// </summary>
     /// <param name="filePath"></param>
     /// <returns></returns>
-    public static string GetExtension(this string filePath) => Path.GetExtension(filePath);
+    public static string? GetExtension([NotNullIfNotNull(nameof(filePath))] this string? filePath)
+        => Path.GetExtension(filePath);
 
     /// <summary>
     ///     Returns the file name and extension of the specified path string.
