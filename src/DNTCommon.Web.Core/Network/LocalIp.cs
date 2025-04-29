@@ -1,3 +1,4 @@
+using System.Net.Sockets;
 using Microsoft.AspNetCore.Http;
 
 namespace DNTCommon.Web.Core;
@@ -13,9 +14,56 @@ public static class LocalIp
     public const string NullIPv6 = "::1";
 
     /// <summary>
-    ///     Determines whether a string is a valid IP address.
+    ///     Determines whether the given string is a valid IP version 4 or 6 address.
     /// </summary>
-    public static bool IsValidIp(this string? ip) => !string.IsNullOrWhiteSpace(ip) && IPAddress.TryParse(ip, out _);
+    public static bool IsValidIp(this string? ip)
+    {
+        if (!IPAddress.TryParse(ip, out var ipAddress))
+        {
+            return false;
+        }
+
+        return ipAddress.AddressFamily switch
+        {
+            //Address for IP version 4 or 6
+            AddressFamily.InterNetwork or AddressFamily.InterNetworkV6 => true,
+            _ => false
+        };
+    }
+
+    /// <summary>
+    ///     Determines whether the given string is a valid IP version 4 address.
+    /// </summary>
+    public static bool IsValidIpV4(this string? ip)
+    {
+        if (!IPAddress.TryParse(ip, out var ipAddress))
+        {
+            return false;
+        }
+
+        return ipAddress.AddressFamily switch
+        {
+            AddressFamily.InterNetwork => true,
+            _ => false
+        };
+    }
+
+    /// <summary>
+    ///     Determines whether the given string is a valid IP version 6 address.
+    /// </summary>
+    public static bool IsValidIpV6(this string? ip)
+    {
+        if (!IPAddress.TryParse(ip, out var ipAddress))
+        {
+            return false;
+        }
+
+        return ipAddress.AddressFamily switch
+        {
+            AddressFamily.InterNetworkV6 => true,
+            _ => false
+        };
+    }
 
     /// <summary>
     ///     Determines whether the specified `ip` address is a private IP address.
