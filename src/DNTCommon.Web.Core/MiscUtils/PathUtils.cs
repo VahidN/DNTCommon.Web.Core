@@ -273,6 +273,18 @@ public static class PathUtils
     public static string? GetDirectoryName(this string dirPath) => Path.GetDirectoryName(dirPath);
 
     /// <summary>
+    ///     Initializes a new instance of the DirectoryInfo class on the specified path.
+    /// </summary>
+    public static DirectoryInfo? ToDirectoryInfo([NotNullIfNotNull(nameof(dirPath))] this string? dirPath)
+        => dirPath.IsEmpty() ? null : new DirectoryInfo(dirPath);
+
+    /// <summary>
+    ///     Initializes a new instance of the FileInfo class, which acts as a wrapper for a file path.
+    /// </summary>
+    public static FileInfo? ToFileInfo([NotNullIfNotNull(nameof(fileName))] this string? fileName)
+        => fileName.IsEmpty() ? null : new FileInfo(fileName);
+
+    /// <summary>
     ///     Copies an existing dir to a new dir. Creates the destDirPath if it doesn't exist.
     /// </summary>
     /// <param name="sourceDirPath"></param>
@@ -467,14 +479,14 @@ public static class PathUtils
     ///     Asynchronously creates a new file, writes the specified string to the file using the specified encoding, and then
     ///     closes the file. If the target file already exists, it is truncated and overwritten.
     /// </summary>
-    public static Task CreateTextFileAsync(this string path, string content)
-        => File.WriteAllTextAsync(path, content, Encoding.UTF8);
+    public static Task CreateTextFileAsync(this string path, string content, Encoding? encoding = null)
+        => File.WriteAllTextAsync(path, content, encoding ?? Encoding.UTF8);
 
     /// <summary>
     ///     Asynchronously opens a text file, reads all text in the file with the specified encoding, and then closes the file.
     /// </summary>
-    public static Task<string> ReadTextFileAsync(this string path, Encoding encoding)
-        => File.ReadAllTextAsync(path, encoding);
+    public static Task<string> ReadTextFileAsync(this string path, Encoding? encoding = null)
+        => File.ReadAllTextAsync(path, encoding ?? Encoding.UTF8);
 
     /// <summary>
     ///     Asynchronously opens a binary file, reads the contents of the file into a byte array, and then closes the file.
@@ -485,15 +497,15 @@ public static class PathUtils
     ///     Asynchronously opens a text file, reads all lines of the file with the specified encoding, and then closes the
     ///     file.
     /// </summary>
-    public static Task<string[]> ReadTextFileLinesAsync(this string path, Encoding encoding)
-        => File.ReadAllLinesAsync(path, encoding);
+    public static Task<string[]> ReadTextFileLinesAsync(this string path, Encoding? encoding = null)
+        => File.ReadAllLinesAsync(path, encoding ?? Encoding.UTF8);
 
     /// <summary>
     ///     Asynchronously creates a new file, write the specified lines to the file by using the specified encoding, and then
     ///     closes the file.
     /// </summary>
-    public static Task CreateTextFileAsync(this string path, IEnumerable<string> lines)
-        => File.WriteAllLinesAsync(path, lines, Encoding.UTF8);
+    public static Task CreateTextFileAsync(this string path, IEnumerable<string> lines, Encoding? encoding = null)
+        => File.WriteAllLinesAsync(path, lines, encoding ?? Encoding.UTF8);
 
     /// <summary>
     ///     Asynchronously creates a new file, writes the specified byte array to the file, and then closes the file. If the
@@ -505,15 +517,15 @@ public static class PathUtils
     ///     Asynchronously opens a file or creates the file if it does not already exist, appends the specified string to the
     ///     file using the specified encoding, and then closes the file.
     /// </summary>
-    public static Task AppendTextToFileAsync(this string path, string content)
-        => File.AppendAllTextAsync(path, content, Encoding.UTF8);
+    public static Task AppendTextToFileAsync(this string path, string content, Encoding? encoding = null)
+        => File.AppendAllTextAsync(path, content, encoding ?? Encoding.UTF8);
 
     /// <summary>
     ///     Asynchronously appends lines to a file by using a specified encoding, and then closes the file. If the specified
     ///     file does not exist, this method creates a file, writes the specified lines to the file, and then closes the file.
     /// </summary>
-    public static Task AppendTextToFileAsync(this string path, IEnumerable<string> lines)
-        => File.AppendAllLinesAsync(path, lines, Encoding.UTF8);
+    public static Task AppendTextToFileAsync(this string path, IEnumerable<string> lines, Encoding? encoding = null)
+        => File.AppendAllLinesAsync(path, lines, encoding ?? Encoding.UTF8);
 
     /// <summary>
     ///     Asynchronously appends the specified byte array to the end of the file at the given path.  If the file doesn't

@@ -155,6 +155,19 @@ public static class StreamUtils
     }
 
     /// <summary>
+    ///     Initializes a new instance of the FileStream class with the specified path, creation mode, read/write and sharing
+    ///     permission, and buffer size.
+    /// </summary>
+    public static FileStream? ToFileStream([NotNullIfNotNull(nameof(filePath))] this string? filePath,
+        FileMode openOrCreateMode,
+        FileAccess fileAccess,
+        FileShare fileShare = FileShare.None,
+        bool useAsync = false)
+        => filePath.IsEmpty()
+            ? null
+            : new FileStream(filePath, openOrCreateMode, fileAccess, fileShare, MaxBufferSize, useAsync);
+
+    /// <summary>
     ///     Converts the string to a byte array using the specified encoding.
     /// </summary>
     /// <param name="text">The string to convert.</param>
@@ -187,12 +200,62 @@ public static class StreamUtils
     ///     Initializes a new instance of the FileStream class with the specified path, creation mode, read/ write and sharing
     ///     permission, buffer size, and synchronous or asynchronous state.
     /// </summary>
-    public static FileStream CreateAsyncFileStream(this string path,
-        FileMode openOrCreateMode,
-        FileAccess fileAccess)
+    public static FileStream CreateAsyncFileStream(this string path, FileMode openOrCreateMode, FileAccess fileAccess)
         => new(path, openOrCreateMode, fileAccess, FileShare.None, MaxBufferSize,
 
             // you have to explicitly open the FileStream as asynchronous
             // or else you're just doing synchronous operations on a background thread.
             useAsync: true);
+
+    /// <summary>
+    ///     Tries to find the encoding of the given file based on its BOM.
+    /// </summary>
+    public static Encoding? GetFileEncoding([NotNullIfNotNull(nameof(filePath))] this string? filePath)
+    {
+        if (filePath.IsEmpty())
+        {
+            return null;
+        }
+
+        var bom = filePath.TryTakeFirstBytes(numberOfBytes: 4);
+
+        if (bom is null)
+        {
+            return null;
+        }
+
+#pragma warning disable SYSLIB0001
+        if (bom[0] == 0x2b && bom[1] == 0x2f && bom[2] == 0x76)
+        {
+            return Encoding.UTF7;
+        }
+#pragma warning restore SYSLIB0001
+
+        if (bom[0] == 0xef && bom[1] == 0xbb && bom[2] == 0xbf)
+        {
+            return Encoding.UTF8;
+        }
+
+        if (bom[0] == 0xff && bom[1] == 0xfe && bom[2] == 0 && bom[3] == 0)
+        {
+            return Encoding.UTF32;
+        }
+
+        if (bom[0] == 0xff && bom[1] == 0xfe)
+        {
+            return Encoding.Unicode;
+        }
+
+        if (bom[0] == 0xfe && bom[1] == 0xff)
+        {
+            return Encoding.BigEndianUnicode;
+        }
+
+        if (bom[0] == 0 && bom[1] == 0 && bom[2] == 0xfe && bom[3] == 0xff)
+        {
+            return new UTF32Encoding(bigEndian: true, byteOrderMark: true);
+        }
+
+        return Encoding.ASCII;
+    }
 }
