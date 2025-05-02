@@ -79,7 +79,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="SonarAnalyzer.CSharp" Version="10.8.0.113526">
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="10.9.0.115408">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -96,13 +96,13 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App"/>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
     <PackageReference Include="DNTPersianUtils.Core" Version="6.6.1"/>
-    <PackageReference Include="MailKit" Version="4.11.0"/>
+    <PackageReference Include="MailKit" Version="4.12.0"/>
     <PackageReference Include="HtmlAgilityPack" Version="1.12.1"/>
     <PackageReference Include="IPAddressRange" Version="6.2.0"/>
-    <PackageReference Include="SkiaSharp" Version="3.116.1"/>
-    <PackageReference Include="SkiaSharp.HarfBuzz" Version="3.116.1"/>
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.116.1"/>
-    <PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" Version="8.3.0.1"/>
+    <PackageReference Include="SkiaSharp" Version="3.119.0"/>
+    <PackageReference Include="SkiaSharp.HarfBuzz" Version="3.119.0"/>
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.0"/>
+    <PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" Version="8.3.1.1"/>
     <PackageReference Include="Ben.Demystifier" Version="0.4.1"/>
     <PackageReference Include="UAParser" Version="3.1.47"/>
     <PackageReference Include="AsyncKeyedLock" Version="7.1.6"/>
