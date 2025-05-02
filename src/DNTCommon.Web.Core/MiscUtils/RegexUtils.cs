@@ -51,7 +51,11 @@ public static class RegexUtils
     /// <summary>
     ///     Checks if a regular expression parsing error occurred.
     /// </summary>
-    public static bool IsValidRegexPattern([StringSyntax(syntax: "Regex")] this string? regexPattern,
+    public static bool IsValidRegexPattern(
+#if !NET_6
+        [StringSyntax(syntax: "Regex")] 
+#endif
+        this string? regexPattern,
         TimeSpan parserTimeout,
         RegexOptions regexOptions = RegexOptions.None)
     {
