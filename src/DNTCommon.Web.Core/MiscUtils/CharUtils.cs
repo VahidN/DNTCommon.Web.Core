@@ -10,20 +10,26 @@ public static class CharUtils
     /// </summary>
     public static string? ExtractCharsWhere([NotNullIfNotNull(nameof(text))] this string? text,
         Predicate<char> predicate)
-        => text is null ? null : string.Concat(text.ToCharArray().Where(c => predicate(c)));
+        => text is null ? null : string.Concat(text.Where(c => predicate(c)));
 
     /// <summary>
     ///     Removes a set of chars from the given text based on the provided predicate
     /// </summary>
     public static string? RemoveCharsWhere([NotNullIfNotNull(nameof(text))] this string? text,
         Predicate<char> predicate)
-        => text is null ? null : string.Concat(text.ToCharArray().Where(c => !predicate(c)));
+        => text is null ? null : string.Concat(text.Where(c => !predicate(c)));
 
     /// <summary>
     ///     Checks if all chars of the given text satisfy the provided predicate
     /// </summary>
     public static bool ContainsOnlyWhere([NotNullWhen(returnValue: true)] this string? text, Predicate<char> predicate)
-        => text?.ToCharArray().All(c => !predicate(c)) == true;
+        => text?.All(c => !predicate(c)) == true;
+
+    /// <summary>
+    ///     Checks if any char of the given text satisfies the provided predicate
+    /// </summary>
+    public static bool ContainsAnyWhere([NotNullWhen(returnValue: true)] this string? text, Predicate<char> predicate)
+        => text?.Any(c => !predicate(c)) == true;
 
     /// <summary>
     ///     Extracts Unicode letters from the given text.
@@ -47,6 +53,11 @@ public static class CharUtils
     ///     Indicates whether the specified text contains only decimal digits.
     /// </summary>
     public static bool ContainsOnlyDigits(this string? text) => text.ContainsOnlyWhere(char.IsDigit);
+
+    /// <summary>
+    ///     Indicates whether the specified text contains any decimal digits.
+    /// </summary>
+    public static bool ContainsDigits(this string? text) => text.ContainsAnyWhere(char.IsDigit);
 
     /// <summary>
     ///     Indicates whether the character at the specified position in a specified string is categorized as a decimal digit.

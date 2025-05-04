@@ -52,4 +52,36 @@ public class StringUtilsTests : TestsBase
     [DataRow(data: 'ᴢ')]
     public void TestSmallCapitalLetters(char c)
         => Assert.IsTrue(c.IsSmallCapitalChar(), $"Character {c} should be detected as a small capital.");
+
+    [TestMethod]
+    [DataRow("this is a test", 2, "is is a test")]
+    [DataRow("test", 4, "")]
+    [DataRow("test", 6, "")]
+    [DataRow("test", 1, "est")]
+    public void TestRemoveFirstNCharsWorks(string input, int len, string output)
+        => Assert.AreEqual(output, input.RemoveFirstNChars(len));
+
+    [TestMethod]
+    [DataRow("this is a test", 2, "this is a te")]
+    [DataRow("test", 4, "")]
+    [DataRow("test", 6, "")]
+    [DataRow("test", 1, "tes")]
+    public void TestRemoveLastNCharsWorks(string input, int len, string output)
+        => Assert.AreEqual(output, input.RemoveLastNChars(len));
+
+    [TestMethod]
+    [DataRow("this is a test", 2, "th")]
+    [DataRow("test", 4, "test")]
+    [DataRow("test", 6, "test")]
+    [DataRow("test", 1, "t")]
+    public void TestTakeFirstNCharsWorks(string input, int len, string output)
+        => Assert.AreEqual(output, input.TakeFirstNChars(len));
+
+    [TestMethod]
+    [DataRow("this is a test", 2, "st")]
+    [DataRow("test", 4, "test")]
+    [DataRow("test", 6, "test")]
+    [DataRow("test", 1, "t")]
+    public void TestTakeLastNCharsWorks(string input, int len, string output)
+        => Assert.AreEqual(output, input.TakeLastNChars(len));
 }

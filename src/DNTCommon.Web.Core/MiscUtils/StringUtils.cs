@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace DNTCommon.Web.Core;
 
@@ -213,9 +214,281 @@ public static class StringUtils
         => !input.IsEmpty() && input.ToCharArray().All(chr => chr.IsSmallCapitalChar());
 
     /// <summary>
-    ///     Returns a value indicating whether a specified string occurs within this string, using the specified comparison
-    ///     rules.
+    ///     Determines whether the given text contains any of the provided values, using the specified comparison rules.
     /// </summary>
     public static bool ContainsOneOfValues(this string? text, StringComparison comparisonType, params string[]? values)
         => values?.Any(value => text?.Contains(value, comparisonType) == true) == true;
+
+    /// <summary>
+    ///     Determines whether the given text contains all the provided values, using the specified comparison rules.
+    /// </summary>
+    public static bool ContainsAllValues(this string? text, StringComparison comparisonType, params string[]? values)
+        => values?.All(value => text?.Contains(value, comparisonType) == true) == true;
+
+    /// <summary>
+    ///     Determines whether all characters of the given text are unique
+    /// </summary>
+    public static bool HasUniqueChars(this string? text) => text?.Distinct().Count() == text?.Length;
+
+    /// <summary>
+    ///     Determines whether the given text has N spaces in it
+    /// </summary>
+    public static bool HasSpaces(this string? text, int count = 1) => text?.Count(c => c == ' ') == count;
+
+    /// <summary>
+    ///     Determines whether the given text has any space in it
+    /// </summary>
+    public static bool HasAnySpace(this string? text) => text?.Any(c => c == ' ') == true;
+
+    /// <summary>
+    ///     Determines whether all characters of the given text are similar
+    /// </summary>
+    public static bool HasConsecutiveChars(this string? text) => text?.Distinct().Count() == 1;
+
+    /// <summary>
+    ///     Determines whether N characters of the given text are similar
+    /// </summary>
+    public static bool HasNConsecutiveChars(this string inputText, int sequenceLength = 3)
+    {
+        var charEnumerator = StringInfo.GetTextElementEnumerator(inputText);
+        var currentElement = string.Empty;
+        var count = 1;
+
+        while (charEnumerator.MoveNext())
+        {
+            if (string.Equals(currentElement, charEnumerator.GetTextElement(), StringComparison.Ordinal))
+            {
+                if (++count >= sequenceLength)
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                count = 1;
+                currentElement = charEnumerator.GetTextElement();
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    ///     Concatenates the given elements
+    /// </summary>
+    public static string? ConcatWith(this string? text, params IEnumerable<string>? items)
+    {
+        if (items is null)
+        {
+            return text;
+        }
+
+        if (text is null)
+        {
+            return string.Concat(items);
+        }
+
+        string?[] strings = [text, ..items];
+
+        return string.Concat(strings);
+    }
+
+    /// <summary>
+    ///     Concatenates the given elements
+    /// </summary>
+    public static string? ConcatItems([NotNullIfNotNull(nameof(items))] this IEnumerable<string>? items)
+        => items is null ? null : string.Concat(items);
+
+    /// <summary>
+    ///     Concatenates the given elements
+    /// </summary>
+    public static string? ConcatItems<T>([NotNullIfNotNull(nameof(items))] this IEnumerable<T>? items,
+        Func<T, string> toStringFunc)
+    {
+        ArgumentNullException.ThrowIfNull(toStringFunc);
+
+        if (items is null)
+        {
+            return null;
+        }
+
+        var sb = new StringBuilder();
+
+        foreach (var item in items)
+        {
+            sb.Append(toStringFunc(item));
+        }
+
+        return sb.ToString();
+    }
+
+    /// <summary>
+    ///     Returns a value indicating whether a specified character occurs within this string, using the specified comparison
+    ///     rules.
+    /// </summary>
+    public static bool ContainsChar(this string? text, char value, bool ignoreCase = false)
+        => ignoreCase
+            ? text?.Contains(value, StringComparison.OrdinalIgnoreCase) == true
+            : text?.Contains(value, StringComparison.Ordinal) == true;
+
+    /// <summary>
+    ///     Determines whether two specified String objects have the same value. A parameter specifies the culture, case, and
+    ///     sort rules used in the comparison.
+    /// </summary>
+    public static bool EqualsTo(this string? a, string? b, StringComparison comparison = StringComparison.Ordinal)
+        => string.Equals(a, b, comparison);
+
+    /// <summary>
+    ///     Reports the zero-based indexes of the occurrences of the specified string in the current String object.
+    /// </summary>
+    public static IEnumerable<int> GetAllIndexesOf(this string? text, string? subString, bool ignoreCase = false)
+    {
+        if (text is null || subString is null)
+        {
+            yield break;
+        }
+
+        var index = 0;
+
+        while ((index = text.IndexOf(subString, index,
+                   ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal)) != -1)
+        {
+            yield return index++;
+        }
+    }
+
+    /// <summary>
+    ///     Tries to return the first character of the given input
+    /// </summary>
+    public static string? GetFirstChar([NotNullIfNotNull(nameof(input))] this string? input)
+    {
+        if (string.IsNullOrEmpty(input))
+        {
+            return null;
+        }
+
+        return input.Length >= 1 ? input[index: 0].ToString() : input;
+    }
+
+    /// <summary>
+    ///     Tries to return the last character of the given input
+    /// </summary>
+    public static string? GetLastChar([NotNullIfNotNull(nameof(input))] this string? input)
+    {
+        if (string.IsNullOrEmpty(input))
+        {
+            return null;
+        }
+
+        return input.Length >= 1 ? input[^1].ToString() : input;
+    }
+
+    /// <summary>
+    ///     Returns a sub-str after the given value in the provided input
+    /// </summary>
+    public static string? SubStrAfter([NotNullIfNotNull(nameof(input))] this string? input,
+        [NotNullIfNotNull(nameof(value))] string? value,
+        StringComparison comparison = StringComparison.Ordinal)
+    {
+        if (value is null || input is null)
+        {
+            return null;
+        }
+
+        var indexOf = input.IndexOf(value, comparison);
+
+        return indexOf == -1 ? null : input[(indexOf + value.Length)..];
+    }
+
+    /// <summary>
+    ///     Returns a sub-str before the given value in the provided input
+    /// </summary>
+    public static string? SubStrBefore([NotNullIfNotNull(nameof(input))] this string? input,
+        [NotNullIfNotNull(nameof(value))] string? value,
+        StringComparison comparison = StringComparison.Ordinal)
+    {
+        if (value is null || input is null)
+        {
+            return null;
+        }
+
+        var indexOf = input.IndexOf(value, comparison);
+
+        return indexOf == -1 ? null : input[..indexOf];
+    }
+
+    /// <summary>
+    ///     Concatenates the members of a constructed IEnumerable collection of type String, using the specified separator
+    ///     between each member.
+    /// </summary>
+    public static string? Join([NotNullIfNotNull(nameof(values))] this IEnumerable<string?>? values, string? separator)
+        => values is null ? null : string.Join(separator, values);
+
+    /// <summary>
+    ///     Tries to take n chars from the beginning of the given string safely
+    /// </summary>
+    public static string? TakeFirstNChars([NotNullIfNotNull(nameof(input))] this string? input, int length)
+        => input?[..Math.Min(length, input.Length)];
+
+    /// <summary>
+    ///     Tries to take n chars from the end of the given string safely
+    /// </summary>
+    public static string? TakeLastNChars([NotNullIfNotNull(nameof(input))] this string? input, int length)
+        => input?[^Math.Min(length, input.Length)..];
+
+    /// <summary>
+    ///     Tries to remove n chars from the beginning of the given string safely
+    /// </summary>
+    public static string? RemoveFirstNChars([NotNullIfNotNull(nameof(input))] this string? input, int length)
+        => input?[Math.Min(length, input.Length)..];
+
+    /// <summary>
+    ///     Tries to remove n chars from the end of the given string safely
+    /// </summary>
+    public static string? RemoveLastNChars([NotNullIfNotNull(nameof(input))] this string? input, int length)
+        => input?[..^Math.Min(length, input.Length)];
+
+    /// <summary>
+    ///     Reads lines of characters from the current string and returns the data as a string.
+    /// </summary>
+    public static IEnumerable<string> GetLines(this string? text)
+    {
+        if (text is null)
+        {
+            yield break;
+        }
+
+        using var stringReader = new StringReader(text);
+
+        while (stringReader.ReadLine() is { } line)
+        {
+            yield return line;
+        }
+    }
+
+    /// <summary>
+    ///     Returns a new string in which all occurrences of specified values are replaced with "".
+    /// </summary>
+    public static string? RemoveAllValues([NotNullIfNotNull(nameof(text))] this string? text,
+        StringComparison comparison,
+        params ICollection<string>? values)
+    {
+        if (text is null)
+        {
+            return null;
+        }
+
+        if (values is null || values.Count == 0)
+        {
+            return text;
+        }
+
+        return values.Aggregate(text, (current, value) => current.Replace(value, string.Empty, comparison));
+    }
+
+    /// <summary>
+    ///     Inverts the order of the elements in a sequence.
+    /// </summary>
+    public static string? ReverseChars([NotNullIfNotNull(nameof(input))] this string? input)
+        => input is null ? null : string.Concat(input.Reverse());
 }
