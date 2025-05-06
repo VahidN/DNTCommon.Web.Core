@@ -1,4 +1,7 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace DNTCommon.Web.Core;
 
@@ -7,6 +10,24 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public static class DntCommonWebServiceCollectionExtensions
 {
+    /// <summary>
+    ///     Sets ForwardedHeaders to ForwardedHeaders.All
+    /// </summary>
+    /// <param name="services"></param>
+    public static void AddForwardedHeadersOptions(this IServiceCollection services)
+        => services.Configure<ForwardedHeadersOptions>(options => { options.ForwardedHeaders = ForwardedHeaders.All; });
+
+    /// <summary>
+    ///     Performs check verifying that scoped services never gets resolved from root provider.
+    ///     Performs check verifying that all services can be created during BuildServiceProvider call
+    /// </summary>
+    public static void AlwaysValidateScopes(this IHostBuilder host)
+        => host.UseDefaultServiceProvider(options =>
+        {
+            options.ValidateScopes = true;
+            options.ValidateOnBuild = true;
+        });
+
     /// <summary>
     ///     Adds all the default providers of DNTCommon.Web.Core at once.
     /// </summary>
