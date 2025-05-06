@@ -10,6 +10,18 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public static class DntCommonWebServiceCollectionExtensions
 {
+#if NET_9 || NET_8
+    /// <summary>
+    ///     Sets ServicesStartConcurrently and ServicesStopConcurrently to true
+    /// </summary>
+    public static void RunHostedServicesConcurrently(this IServiceCollection services)
+        => services.Configure<HostOptions>(options =>
+        {
+            options.ServicesStartConcurrently = true;
+            options.ServicesStopConcurrently = true;
+        });
+#endif
+
     /// <summary>
     ///     Sets ForwardedHeaders to ForwardedHeaders.All
     /// </summary>
