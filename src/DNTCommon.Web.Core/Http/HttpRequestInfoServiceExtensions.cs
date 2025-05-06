@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using System.Security.Principal;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +18,14 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public static class HttpRequestInfoServiceExtensions
 {
+    /// <summary>
+    ///     Adds a IPrincipal provider using IHttpContextAccessor
+    /// </summary>
+    public static void AddIPrincipal(this IServiceCollection services)
+        => services.AddScoped<IPrincipal>(provider
+            => provider.GetRequiredService<IHttpContextAccessor>().HttpContext?.User ??
+               ClaimsPrincipal.Current ?? new ClaimsPrincipal());
+
     /// <summary>
     ///     Adds IHttpContextAccessor, IActionContextAccessor, IUrlHelper and IHttpRequestInfoService to IServiceCollection.
     /// </summary>
