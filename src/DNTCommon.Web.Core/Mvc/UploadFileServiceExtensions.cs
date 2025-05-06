@@ -42,7 +42,7 @@ public static class UploadFileServiceExtensions
         var extension = Path.GetExtension(fileName);
 
         return Path.Combine(uploadsRootFolder,
-            $"{fileNameWithoutExtension}.{DateTime.Now.ToString(format: "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture)}.{Guid.NewGuid():N}{extension}");
+            $"{fileNameWithoutExtension}.{DateTime.UtcNow.ToString(format: "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture)}.{Guid.NewGuid():N}{extension}");
     }
 
     /// <summary>

@@ -6,8 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-///   Represents a sitemap result that can be returned from an ASP.NET Core controller action.
-///   It generates an XML sitemap based on the provided <see cref="SitemapItem"/> list.
+///     Represents a sitemap result that can be returned from an ASP.NET Core controller action.
+///     It generates an XML sitemap based on the provided <see cref="SitemapItem" /> list.
 /// </summary>
 public class SitemapResult(IList<SitemapItem> allItems) : ActionResult
 {
@@ -57,7 +57,7 @@ public class SitemapResult(IList<SitemapItem> allItems) : ActionResult
         xmlWriter.WriteElementString(localName: "loc", baseUrl);
 
         xmlWriter.WriteElementString(localName: "lastmod",
-            DateTime.Now.ToString(format: "yyyy-MM-dd", CultureInfo.InvariantCulture));
+            DateTime.UtcNow.ToString(format: "yyyy-MM-dd", CultureInfo.InvariantCulture));
 
         xmlWriter.WriteElementString(localName: "changefreq", value: "daily");
         xmlWriter.WriteElementString(localName: "priority", value: "1.0");

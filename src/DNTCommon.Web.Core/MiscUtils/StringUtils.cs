@@ -158,9 +158,9 @@ public static class StringUtils
     ///     Converts line endings in the string to <see cref="Environment.NewLine" />.
     /// </summary>
     public static string? NormalizeLineEndings([NotNullIfNotNull(nameof(text))] this string? text)
-        => text?.Replace(oldValue: "\r\n", newValue: "\n", StringComparison.InvariantCulture)
-            .Replace(oldValue: "\r", newValue: "\n", StringComparison.InvariantCulture)
-            .Replace(oldValue: "\n", Environment.NewLine, StringComparison.InvariantCulture);
+        => text?.Replace(oldValue: "\r\n", newValue: "\n", StringComparison.Ordinal)
+            .Replace(oldChar: '\r', newChar: '\n')
+            .Replace(oldValue: "\n", Environment.NewLine, StringComparison.Ordinal);
 
     /// <summary>
     ///     Formats a string to an invariant culture
