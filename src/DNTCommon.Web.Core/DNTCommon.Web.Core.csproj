@@ -63,6 +63,10 @@
     <Using Include="System.Net.Http.Headers"/>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Meziantou.Analyzer" Version="2.0.199">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -111,6 +115,7 @@
     <PackageReference Include="Scrutor" Version="6.0.1"/>
   </ItemGroup>
   <ItemGroup>
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" Link="Properties/BannedSymbols.txt"/>
     <None Include="../../README.md" Link="README.md" Pack="true" PackagePath="/" Visible="false"/>
   </ItemGroup>
   <PropertyGroup Condition="('$(TargetFramework)' == 'net6.0')">
