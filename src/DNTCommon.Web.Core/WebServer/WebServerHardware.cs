@@ -11,14 +11,22 @@ public class WebServerHardware
     public string ProcessorCount { set; get; } = default!;
 
     /// <summary>
-    ///     Gets the amount of physical memory mapped to the process context.
+    ///     Gets the formatted amount of physical memory mapped to the process context.
     /// </summary>
     public string MemoryUsage { set; get; } = default!;
+ /// <summary>
+    ///     A 64-bit signed integer containing the number of bytes of physical memory mapped to the process context.
+    /// </summary>
+    public long MemoryUsageInBytes { set; get; }
 
     /// <summary>
-    ///     Gets the total available memory for the garbage collector to use when the last garbage collection occurred.
+    ///     Gets the formatted total available memory for the garbage collector to use when the last garbage collection
+    ///     occurred.
     /// </summary>
     public string TotalPhysicalMemory { set; get; } = default!;
+ /// <summary>
+    /// </summary>
+    public long TotalPhysicalMemoryInBytes { set; get; }
 
     /// <summary>
     ///     Get the Cpu Usage

@@ -21,17 +21,30 @@ public class PCDriveInfo
     public string FileSystem { set; get; } = default!;
 
     /// <summary>
-    ///     Indicates the amount of available free space on a drive
+    ///     Indicates the formatted amount of available free space on a drive
     /// </summary>
     public string AvailableSpaceToCurrentUser { set; get; } = default!;
 
     /// <summary>
-    ///     Gets the total amount of free space available on a drive
+    ///     Indicates the amount of available free space on a drive, in bytes.
     /// </summary>
-    public string TotalAvailableSpace { set; get; } = default!;
+    public long AvailableFreeSpaceToCurrentUserInBytes { set; get; }
 
     /// <summary>
-    ///     Gets the total size of storage space on a drive
+    ///     Gets the formatted total amount of free space available on a drive
+    /// </summary>
+    public string TotalAvailableSpace { set; get; } = default!;
+ /// <summary>
+    ///     Gets the total amount of free space available on a drive, in bytes.
+    /// </summary>
+    public long TotalAvailableSpaceInBytes { set; get; }
+
+    /// <summary>
+    ///     Gets the formatted total size of storage space on a drive
     /// </summary>
     public string TotalSizeOfDive { set; get; } = default!;
+ /// <summary>
+    ///     Gets the total size of storage space on a drive, in bytes.
+    /// </summary>
+    public long TotalSizeOfDiveInBytes { set; get; }
 }

@@ -48,12 +48,10 @@ public static class WebServerInfoProvider
     public static async Task<WebServerInfo> GetServerInfoAsync()
     {
         var process = Process.GetCurrentProcess();
-
         var version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>();
-
         var hostName = Dns.GetHostName();
-
         var addresses = await GetIPsAsync(hostName);
+        var totalAvailableMemoryBytes = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes;
 
         return new WebServerInfo
         {
@@ -91,7 +89,9 @@ public static class WebServerInfoProvider
             {
                 ProcessorCount = Environment.ProcessorCount.ToString(CultureInfo.InvariantCulture),
                 MemoryUsage = Environment.WorkingSet.ToFormattedFileSize(),
-                TotalPhysicalMemory = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes.ToFormattedFileSize(),
+                MemoryUsageInBytes = Environment.WorkingSet,
+                TotalPhysicalMemory = totalAvailableMemoryBytes.ToFormattedFileSize(),
+                TotalPhysicalMemoryInBytes = totalAvailableMemoryBytes,
                 CpuUsage = await GetCpuUsageTotalAsync(process)
             }
         };
@@ -155,8 +155,18 @@ public static class WebServerInfoProvider
             VolumeLabel = currentDrive.VolumeLabel,
             FileSystem = currentDrive.DriveFormat,
             AvailableSpaceToCurrentUser = currentDrive.AvailableFreeSpace.ToFormattedFileSize(),
+            AvailableFreeSpaceToCurrentUserInBytes = currentDrive.AvailableFreeSpace,
             TotalAvailableSpace = currentDrive.TotalFreeSpace.ToFormattedFileSize(),
-            TotalSizeOfDive = currentDrive.TotalSize.ToFormattedFileSize()
+            TotalAvailableSpaceInBytes = currentDrive.TotalFreeSpace,
+            TotalSizeOfDive = currentDrive.TotalSize.ToFormattedFileSize(),
+            TotalSizeOfDiveInBytes = currentDrive.TotalSize
         };
     }
+
+    /// <summary>
+    ///     Do we have enough free-space available on the application's drive to work with it?
+    /// </summary>
+    /// <param name="requiredAvailableFreeSpaceInBytes">How much free-space should be left to raise an alarm?</param>
+    public static bool IsThereEnoughFreeSpaceOnAppDrive(long requiredAvailableFreeSpaceInBytes)
+        => GetDriveInfo().AvailableFreeSpaceToCurrentUserInBytes >= requiredAvailableFreeSpaceInBytes;
 }
