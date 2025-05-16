@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>DNTCommon.Web.Core provides common scenarios' solutions for ASP.NET Core applications.</Description>
-    <VersionPrefix>11.1.0</VersionPrefix>
+    <VersionPrefix>11.2.0</VersionPrefix>
     <Authors>Vahid Nasiri</Authors>
     <TargetFrameworks>net9.0;net8.0;net7.0;net6.0;</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -63,7 +63,7 @@
     <Using Include="System.Net.Http.Headers"/>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.4">
+    <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="4.14.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -71,7 +71,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.13.61">
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.14.15">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -110,7 +110,7 @@
     <PackageReference Include="Ben.Demystifier" Version="0.4.1"/>
     <PackageReference Include="UAParser" Version="3.1.47"/>
     <PackageReference Include="AsyncKeyedLock" Version="7.1.6"/>
-    <PackageReference Include="NetEscapades.AspNetCore.SecurityHeaders" Version="1.0.0"/>
+    <PackageReference Include="NetEscapades.AspNetCore.SecurityHeaders" Version="1.1.0"/>
     <PackageReference Include="iTextSharp.LGPLv2.Core" Version="3.7.2"/>
     <PackageReference Include="Scrutor" Version="6.0.1"/>
   </ItemGroup>
