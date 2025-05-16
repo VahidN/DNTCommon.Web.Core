@@ -178,6 +178,64 @@ public static class ZipArchiveExtensions
     }
 
     /// <summary>
+    ///     Provides a method to compress the given data by using the GZip data format specification.
+    /// </summary>
+    public static byte[] CompressDataAsGZip(this byte[] source,
+        CompressionLevel compressionLevel = CompressionLevel.Optimal)
+    {
+        using var srcStream = new MemoryStream(source);
+        using var destStream = new MemoryStream();
+        using var compressor = new GZipStream(destStream, compressionLevel);
+        srcStream.CopyTo(compressor);
+        compressor.Flush();
+
+        return destStream.ToArray();
+    }
+
+    /// <summary>
+    ///     Provides a method to decompress the given data by using the GZip data format specification.
+    /// </summary>
+    public static byte[] DecompressGZipData(this byte[] source)
+    {
+        using var srcStream = new MemoryStream(source);
+        using var destStream = new MemoryStream();
+        using var decompressor = new GZipStream(srcStream, CompressionMode.Decompress);
+        decompressor.CopyTo(destStream);
+        decompressor.Flush();
+
+        return destStream.ToArray();
+    }
+
+    /// <summary>
+    ///     Provides a method to compress the given data by using the Brotli data format specification.
+    /// </summary>
+    public static byte[] CompressDataAsBrotli(this byte[] source,
+        CompressionLevel compressionLevel = CompressionLevel.Optimal)
+    {
+        using var srcStream = new MemoryStream(source);
+        using var destStream = new MemoryStream();
+        using var compressor = new BrotliStream(destStream, compressionLevel);
+        srcStream.CopyTo(compressor);
+        compressor.Flush();
+
+        return destStream.ToArray();
+    }
+
+    /// <summary>
+    ///     Provides a method to decompress the given data by using the Brotli data format specification.
+    /// </summary>
+    public static byte[] DecompressBrotliData(this byte[] source)
+    {
+        using var srcStream = new MemoryStream(source);
+        using var destStream = new MemoryStream();
+        using var decompressor = new BrotliStream(srcStream, CompressionMode.Decompress);
+        decompressor.CopyTo(destStream);
+        decompressor.Flush();
+
+        return destStream.ToArray();
+    }
+
+    /// <summary>
     ///     Extracts the specified gzip archive to a file on the file system.
     /// </summary>
     /// <param name="gZipFilePath">The path on the file system to the archive that is to be extracted.</param>
