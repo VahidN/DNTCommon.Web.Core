@@ -195,6 +195,28 @@ public static class StreamUtils
     }
 
     /// <summary>
+    ///     Converts the string to a MemoryStream using the specified encoding.
+    /// </summary>
+    /// <param name="text">The string to convert.</param>
+    /// <param name="inputEncoding">The encoding to use. The default value is UTF8.</param>
+    /// <returns>
+    ///     The MemoryStream representation of the string, or <see langword="null" /> if the input string is
+    ///     <see langword="null" /> or empty.
+    /// </returns>
+    public static MemoryStream? ToMemoryStream([NotNullIfNotNull(nameof(text))] this string? text,
+        Encoding? inputEncoding = null)
+    {
+        if (text.IsEmpty())
+        {
+            return null;
+        }
+
+        inputEncoding ??= Encoding.UTF8;
+
+        return new MemoryStream(inputEncoding.GetBytes(text));
+    }
+
+    /// <summary>
     ///     Converts a string to a read-only byte span using the Unicode encoding.
     /// </summary>
     /// <param name="text">The string to convert. If null or empty, null is returned.</param>
@@ -263,5 +285,73 @@ public static class StreamUtils
         }
 
         return Encoding.ASCII;
+    }
+
+    /// <summary>
+    ///     Convert Stream to Byte
+    /// </summary>
+    public static byte? TakeByte(this Stream? stream, long offset)
+    {
+        if (stream?.IsReadableStream() != true)
+        {
+            return null;
+        }
+
+        if (stream.Position != offset)
+        {
+            stream.Seek(offset, SeekOrigin.Begin);
+        }
+
+        return (byte)stream.ReadByte();
+    }
+
+    /// <summary>
+    ///     Convert Stream to unsigned integer
+    /// </summary>
+    public static uint? TakeUInt(this Stream? stream, int offset)
+    {
+        if (stream?.IsReadableStream() != true)
+        {
+            return null;
+        }
+
+        if (stream.Position != offset)
+        {
+            stream.Seek(offset, SeekOrigin.Begin);
+        }
+
+        var bytes = stream.TryTakeFirstBytes(numberOfBytes: 4, offset);
+
+        if (bytes is null)
+        {
+            return null;
+        }
+
+        return BitConverter.ToUInt32(bytes, startIndex: 0);
+    }
+
+    /// <summary>
+    ///     Convert Stream to unsigned short
+    /// </summary>
+    public static ushort? TakeUShort(this Stream? stream, int offset)
+    {
+        if (stream?.IsReadableStream() != true)
+        {
+            return null;
+        }
+
+        if (stream.Position != offset)
+        {
+            stream.Seek(offset, SeekOrigin.Begin);
+        }
+
+        var bytes = stream.TryTakeFirstBytes(numberOfBytes: 2, offset);
+
+        if (bytes is null)
+        {
+            return null;
+        }
+
+        return BitConverter.ToUInt16(bytes, startIndex: 0);
     }
 }
