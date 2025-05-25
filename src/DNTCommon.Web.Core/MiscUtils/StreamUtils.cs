@@ -17,6 +17,7 @@ public static class StreamUtils
     ///     and returns them as a single string.
     /// </summary>
     /// <param name="stream">The input stream. It cannot be null.</param>
+    /// <param name="offset">A byte offset relative to the origin parameter.</param>
     /// <param name="readChunkBufferLength">
     ///     The size of the buffer. The default size is 4096.
     /// </param>
@@ -25,6 +26,7 @@ public static class StreamUtils
     ///     Or null if the stream is a null reference or not readable.
     /// </returns>
     public static string? ToText([NotNullIfNotNull(nameof(stream))] this Stream? stream,
+        int offset = 0,
         int readChunkBufferLength = 4096)
     {
         if (stream?.IsReadableStream() != true)
@@ -32,9 +34,9 @@ public static class StreamUtils
             return null;
         }
 
-        if (stream.Position != 0)
+        if (stream.Position != offset)
         {
-            stream.Seek(offset: 0, SeekOrigin.Begin);
+            stream.Seek(offset, SeekOrigin.Begin);
         }
 
         using var textWriter = new StringWriter(CultureInfo.InvariantCulture);
@@ -65,11 +67,13 @@ public static class StreamUtils
     ///     Reads the stream into a byte array.
     /// </summary>
     /// <param name="stream">The stream to read from.</param>
+    /// <param name="offset">A byte offset relative to the origin parameter.</param>
     /// <param name="readChunkBufferLength">Size of the read buffer.</param>
     /// <returns>
     ///     A byte array containing the data from the stream, or null if the stream is null or not readable.
     /// </returns>
     public static byte[]? ToBytes([NotNullIfNotNull(nameof(stream))] this Stream? stream,
+        int offset = 0,
         int readChunkBufferLength = 4096)
     {
         if (stream?.IsReadableStream() != true)
@@ -77,9 +81,9 @@ public static class StreamUtils
             return null;
         }
 
-        if (stream.Position != 0)
+        if (stream.Position != offset)
         {
-            stream.Seek(offset: 0, SeekOrigin.Begin);
+            stream.Seek(offset, SeekOrigin.Begin);
         }
 
         var capacity = stream.CanSeek ? (int)stream.Length : 0;
@@ -103,20 +107,21 @@ public static class StreamUtils
     /// </summary>
     /// <param name="stream">The stream to read from.</param>
     /// <param name="numberOfBytes">The number of bytes to read.</param>
+    /// <param name="offset">A byte offset relative to the origin parameter.</param>
     /// <returns>
     ///     A byte array containing the first N bytes of the stream,
     ///     or null if the stream is null, not readable, or empty.
     /// </returns>
-    public static byte[]? TryTakeFirstBytes(this Stream? stream, int numberOfBytes)
+    public static byte[]? TryTakeFirstBytes(this Stream? stream, int numberOfBytes, int offset = 0)
     {
         if (stream?.IsReadableStream() != true)
         {
             return null;
         }
 
-        if (stream.Position != 0)
+        if (stream.Position != offset)
         {
-            stream.Seek(offset: 0, SeekOrigin.Begin);
+            stream.Seek(offset, SeekOrigin.Begin);
         }
 
         var buffer = new byte[numberOfBytes];
@@ -138,11 +143,12 @@ public static class StreamUtils
     /// </summary>
     /// <param name="filePath">The path to the file.</param>
     /// <param name="numberOfBytes">The number of bytes to read.</param>
+    /// <param name="offset">A byte offset relative to the origin parameter.</param>
     /// <returns>
     ///     A byte array containing the first N bytes of the file,
     ///     or null if the file does not exist or an error occurs.
     /// </returns>
-    public static byte[]? TryTakeFirstBytes(this string? filePath, int numberOfBytes)
+    public static byte[]? TryTakeFirstBytes(this string? filePath, int numberOfBytes, int offset = 0)
     {
         if (!filePath.FileExists())
         {
@@ -151,7 +157,7 @@ public static class StreamUtils
 
         using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
 
-        return fs.TryTakeFirstBytes(numberOfBytes);
+        return fs.TryTakeFirstBytes(numberOfBytes, offset);
     }
 
     /// <summary>
