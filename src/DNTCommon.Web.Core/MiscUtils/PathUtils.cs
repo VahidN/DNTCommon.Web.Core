@@ -554,4 +554,21 @@ public static class PathUtils
         await using var destStream = destPath.CreateAsyncFileStream(destFileMode, FileAccess.Write);
         await sourceStream.CopyToAsync(destStream);
     }
+
+    /// <summary>
+    ///     Get text files from a directory (optionally recursively).
+    /// </summary>
+    public static IEnumerable<string> FindTextFiles(this string dir, bool recursive = false)
+    {
+        var files = Directory.EnumerateFiles(dir, searchPattern: "*.*",
+            recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+
+        foreach (var path in files)
+        {
+            if (path.IsLikelyTextFile())
+            {
+                yield return path;
+            }
+        }
+    }
 }
