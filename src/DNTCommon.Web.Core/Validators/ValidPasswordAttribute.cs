@@ -16,6 +16,11 @@ public sealed class ValidPasswordAttribute : ValidationAttribute
     private static readonly Regex Symbol = new(pattern: "(\\W)+", RegexOptions.Compiled, Timeout);
 
     /// <summary>
+    ///     Should user provide a non-null value for this field?
+    /// </summary>
+    public bool IsRequired { set; get; }
+
+    /// <summary>
     ///     Its default value is true
     /// </summary>
     public bool ShouldHaveLowercaseLetters { set; get; } = true;
@@ -42,14 +47,14 @@ public sealed class ValidPasswordAttribute : ValidationAttribute
     {
         if (value is null)
         {
-            return true; // returning false, makes this field required.
+            return !IsRequired;
         }
 
         var valStr = Convert.ToString(value, CultureInfo.InvariantCulture);
 
         if (string.IsNullOrWhiteSpace(valStr))
         {
-            return true; // returning false, makes this field required.
+            return !IsRequired;
         }
 
         return HasValidPassword(valStr);

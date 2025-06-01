@@ -7,20 +7,25 @@ namespace DNTCommon.Web.Core;
 public sealed class ShouldContainOnlyVisibleCharactersAttribute : ValidationAttribute
 {
     /// <summary>
+    ///     Should user provide a non-null value for this field?
+    /// </summary>
+    public bool IsRequired { set; get; }
+
+    /// <summary>
     ///     Determines whether the specified value of the object is valid.
     /// </summary>
     public override bool IsValid(object? value)
     {
         if (value is null)
         {
-            return true; // returning false, makes this field required.
+            return !IsRequired;
         }
 
         var valStr = Convert.ToString(value, CultureInfo.InvariantCulture);
 
         if (string.IsNullOrWhiteSpace(valStr))
         {
-            return true; // returning false, makes this field required.
+            return !IsRequired;
         }
 
         return !valStr.HasHiddenCharacters();

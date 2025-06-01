@@ -24,10 +24,20 @@ public sealed class AllowUploadOnlyImageFilesAttribute : ValidationAttribute
     /// </summary>
     /// <param name="maxWidth">maximum allowed width</param>
     /// <param name="maxHeight">maximum allowed height</param>
-    public AllowUploadOnlyImageFilesAttribute(int maxWidth, int maxHeight)
+    /// <param name="allowUploadEmptyFiles">Determines whether empty files can be uploaded</param>
+    /// <param name="maxFileSizeInBytes">Max allowed file size. It will be ignored if it's null.</param>
+    /// <param name="minFileSizeInBytes">Min allowed file size. It will be ignored if it's null.</param>
+    public AllowUploadOnlyImageFilesAttribute(int maxWidth,
+        int maxHeight,
+        bool allowUploadEmptyFiles = false,
+        long? maxFileSizeInBytes = null,
+        long? minFileSizeInBytes = null)
     {
         MaxWidth = maxWidth;
         MaxHeight = maxHeight;
+        AllowUploadEmptyFiles = allowUploadEmptyFiles;
+        MaxFileSizeInBytes = maxFileSizeInBytes;
+        MinFileSizeInBytes = minFileSizeInBytes;
     }
 
     /// <summary>
@@ -43,40 +53,53 @@ public sealed class AllowUploadOnlyImageFilesAttribute : ValidationAttribute
     public int? MaxHeight { get; }
 
     /// <summary>
+    ///     Determines whether empty files can be uploaded
+    /// </summary>
+    public bool AllowUploadEmptyFiles { get; }
+
+    /// <summary>
+    ///     Should user provide a non-null value for this field?
+    /// </summary>
+    public bool IsRequired { set; get; }
+
+    /// <summary>
+    ///     Max allowed file size. It will be ignored if it's null.
+    /// </summary>
+    public long? MaxFileSizeInBytes { get; }
+
+    /// <summary>
+    ///     Min allowed file size. It will be ignored if it's null.
+    /// </summary>
+    public long? MinFileSizeInBytes { get; }
+
+    /// <summary>
     ///     Determines whether the specified value of the object is valid.
     /// </summary>
     public override bool IsValid(object? value)
     {
         if (value is null)
         {
-            return true; // returning false, makes this field required.
+            return !IsRequired;
         }
 
-        if (value is IFormFile file)
-        {
-            return IsValidImageFile(file);
-        }
-
-        if (value is IList<IFormFile> files)
-        {
-            return AreValidImageFiles(files);
-        }
-
-        if (value is IFormFileCollection fileCollection)
-        {
-            return AreValidImageFiles(fileCollection);
-        }
-
-        return false;
+        return value.IsValidIFormFile(IsValidImageFile);
     }
-
-    private bool AreValidImageFiles(IEnumerable<IFormFile> files) => files.All(IsValidImageFile);
 
     private bool IsValidImageFile(IFormFile? file)
     {
         if (file is null || file.Length == 0)
         {
-            return true; // returning false, makes this field required.
+            return AllowUploadEmptyFiles;
+        }
+
+        if (MaxFileSizeInBytes.HasValue && file.Length > MaxFileSizeInBytes.Value)
+        {
+            return false;
+        }
+
+        if (MinFileSizeInBytes.HasValue && file.Length < MinFileSizeInBytes.Value)
+        {
+            return false;
         }
 
         return file.IsValidImageFile(MaxWidth, MaxHeight);

@@ -17,16 +17,41 @@ public sealed class UploadFileExtensionsAttribute : ValidationAttribute
     ///     Allowing only selected file extensions are safe to be uploaded.
     /// </summary>
     /// <param name="fileExtensions">Allowed files extensions to be uploaded</param>
-    public UploadFileExtensionsAttribute(string fileExtensions)
+    /// <param name="allowUploadEmptyFiles">Determines whether empty files can be uploaded</param>
+    /// <param name="maxFileSizeInBytes">Max allowed file size. It will be ignored if it's null.</param>
+    /// <param name="minFileSizeInBytes">Min allowed file size. It will be ignored if it's null.</param>
+    public UploadFileExtensionsAttribute(string fileExtensions,
+        bool allowUploadEmptyFiles = false,
+        long? maxFileSizeInBytes = null,
+        long? minFileSizeInBytes = null)
     {
         if (string.IsNullOrWhiteSpace(fileExtensions))
         {
             throw new ArgumentNullException(nameof(fileExtensions));
         }
 
+        AllowUploadEmptyFiles = allowUploadEmptyFiles;
+        MaxFileSizeInBytes = maxFileSizeInBytes;
+        MinFileSizeInBytes = minFileSizeInBytes;
+
         FileExtensions = fileExtensions;
         _allowedExtensions = [.. fileExtensions.Split(Separator, StringSplitOptions.RemoveEmptyEntries)];
     }
+
+    /// <summary>
+    ///     Determines whether empty files can be uploaded
+    /// </summary>
+    public bool AllowUploadEmptyFiles { get; }
+
+    /// <summary>
+    ///     Max allowed file size. It will be ignored if it's null.
+    /// </summary>
+    public long? MaxFileSizeInBytes { get; }
+
+    /// <summary>
+    ///     Min allowed file size. It will be ignored if it's null.
+    /// </summary>
+    public long? MinFileSizeInBytes { get; }
 
     /// <summary>
     ///     Allowed files extensions to be uploaded
@@ -35,40 +60,38 @@ public sealed class UploadFileExtensionsAttribute : ValidationAttribute
     public string FileExtensions { get; }
 
     /// <summary>
+    ///     Should user provide a non-null value for this field?
+    /// </summary>
+    public bool IsRequired { set; get; }
+
+    /// <summary>
     ///     Determines whether the specified value of the object is valid.
     /// </summary>
     public override bool IsValid(object? value)
     {
         if (value is null)
         {
-            return true; // returning false, makes this field required.
+            return !IsRequired;
         }
 
-        if (value is IFormFile file)
-        {
-            return IsValidFile(file);
-        }
-
-        if (value is IList<IFormFile> files)
-        {
-            return AreValidFiles(files);
-        }
-
-        if (value is IFormFileCollection fileCollection)
-        {
-            return AreValidFiles(fileCollection);
-        }
-
-        return false;
+        return value.IsValidIFormFile(IsValidFile);
     }
-
-    private bool AreValidFiles(IEnumerable<IFormFile> files) => files.All(IsValidFile);
 
     private bool IsValidFile(IFormFile? file)
     {
         if (file is null || file.Length == 0)
         {
-            return true; // returning false, makes this field required.
+            return AllowUploadEmptyFiles;
+        }
+
+        if (MaxFileSizeInBytes.HasValue && file.Length > MaxFileSizeInBytes.Value)
+        {
+            return false;
+        }
+
+        if (MinFileSizeInBytes.HasValue && file.Length < MinFileSizeInBytes.Value)
+        {
+            return false;
         }
 
         var fileExtension = Path.GetExtension(file.FileName);

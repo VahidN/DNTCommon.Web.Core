@@ -1,4 +1,5 @@
 using System.Text;
+using Microsoft.AspNetCore.Http;
 
 namespace DNTCommon.Web.Core;
 
@@ -14,6 +15,18 @@ public static class ValidatorsExtensions
     public static bool IsValidGuid(this string? value)
         => !value.IsEmpty() && Guid.TryParse(value, CultureInfo.InvariantCulture, out _);
 #endif
+
+    public static bool IsValidIFormFile(this object? value, Predicate<IFormFile> isValidFile)
+        => value switch
+        {
+            IFormFile file => AreValidFiles(isValidFile, file),
+            IList<IFormFile> files => AreValidFiles(isValidFile, files),
+            IFormFileCollection fileCollection => AreValidFiles(isValidFile, fileCollection),
+            _ => false
+        };
+
+    private static bool AreValidFiles(Predicate<IFormFile> isValidFile, params IEnumerable<IFormFile> files)
+        => files.All(file => isValidFile(file));
 
     /// <summary>
     ///     Determines whether the given file is a text file
