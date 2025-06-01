@@ -13,23 +13,35 @@ public sealed class RequiredHtmlContentAttribute : ValidationAttribute
     public bool IsRequired { set; get; } = true;
 
     /// <summary>
+    ///     A custom error message for IsRequired
+    /// </summary>
+    public string? IsRequiredErrorMessage { set; get; }
+
+    /// <summary>
     ///     Determines whether the specified value of the object has an HTML content.
     /// </summary>
     public override bool IsValid(object? value)
     {
+        var (success, _) = IsValidContent(value);
+
+        return success;
+    }
+
+    private (bool Success, string? ErrorMessage) IsValidContent(object? value)
+    {
         if (value is null)
         {
-            return !IsRequired;
+            return (!IsRequired, IsRequiredErrorMessage ?? ErrorMessage);
         }
 
         var valStr = Convert.ToString(value, CultureInfo.InvariantCulture);
 
         if (string.IsNullOrWhiteSpace(valStr))
         {
-            return !IsRequired;
+            return (!IsRequired, IsRequiredErrorMessage ?? ErrorMessage);
         }
 
-        return !valStr.RemoveHtmlTags().IsEmpty();
+        return (!valStr.RemoveHtmlTags().IsEmpty(), ErrorMessage);
     }
 
     /// <summary>
@@ -37,7 +49,9 @@ public sealed class RequiredHtmlContentAttribute : ValidationAttribute
     /// </summary>
     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
     {
-        if (IsValid(value))
+        var (success, errorMessage) = IsValidContent(value);
+
+        if (success)
         {
             return null;
         }
@@ -45,7 +59,7 @@ public sealed class RequiredHtmlContentAttribute : ValidationAttribute
         ArgumentNullException.ThrowIfNull(validationContext);
 
         return string.IsNullOrWhiteSpace(validationContext.MemberName)
-            ? new ValidationResult(ErrorMessage)
-            : new ValidationResult(ErrorMessage, [validationContext.MemberName]);
+            ? new ValidationResult(errorMessage)
+            : new ValidationResult(errorMessage, [validationContext.MemberName]);
     }
 }

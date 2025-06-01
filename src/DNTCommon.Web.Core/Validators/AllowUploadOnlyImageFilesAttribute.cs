@@ -8,7 +8,7 @@ namespace DNTCommon.Web.Core;
 ///     More info: http://www.dntips.ir/post/2555
 /// </summary>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-public sealed class AllowUploadOnlyImageFilesAttribute : ValidationAttribute
+public sealed class AllowUploadOnlyImageFilesAttribute : UploadFileValidationBaseAttribute
 {
     /// <summary>
     ///     Allowing only image files are safe to be uploaded.
@@ -53,55 +53,35 @@ public sealed class AllowUploadOnlyImageFilesAttribute : ValidationAttribute
     public int? MaxHeight { get; }
 
     /// <summary>
-    ///     Determines whether empty files can be uploaded
+    ///     A custom error message for MaxWidthMaxHeight
     /// </summary>
-    public bool AllowUploadEmptyFiles { get; }
+    public string? MaxWidthMaxHeightErrorMessage { set; get; }
 
     /// <summary>
-    ///     Should user provide a non-null value for this field?
+    ///     Validates the input file
     /// </summary>
-    public bool IsRequired { set; get; }
-
-    /// <summary>
-    ///     Max allowed file size. It will be ignored if it's null.
-    /// </summary>
-    public long? MaxFileSizeInBytes { get; }
-
-    /// <summary>
-    ///     Min allowed file size. It will be ignored if it's null.
-    /// </summary>
-    public long? MinFileSizeInBytes { get; }
-
-    /// <summary>
-    ///     Determines whether the specified value of the object is valid.
-    /// </summary>
-    public override bool IsValid(object? value)
+    public override (bool Success, string? ErrorMessage) IsValidFile(IFormFile? file)
     {
-        if (value is null)
+        if (file is null)
         {
-            return !IsRequired;
+            return (!IsRequired, IsRequiredErrorMessage ?? ErrorMessage);
         }
 
-        return value.IsValidIFormFile(IsValidImageFile);
-    }
-
-    private bool IsValidImageFile(IFormFile? file)
-    {
-        if (file is null || file.Length == 0)
+        if (file.Length == 0)
         {
-            return AllowUploadEmptyFiles;
+            return (AllowUploadEmptyFiles, AllowUploadEmptyFilesErrorMessage ?? ErrorMessage);
         }
 
         if (MaxFileSizeInBytes.HasValue && file.Length > MaxFileSizeInBytes.Value)
         {
-            return false;
+            return (false, MaxFileSizeInBytesErrorMessage ?? ErrorMessage);
         }
 
         if (MinFileSizeInBytes.HasValue && file.Length < MinFileSizeInBytes.Value)
         {
-            return false;
+            return (false, MinFileSizeInBytesErrorMessage ?? ErrorMessage);
         }
 
-        return file.IsValidImageFile(MaxWidth, MaxHeight);
+        return (file.IsValidImageFile(MaxWidth, MaxHeight), MaxWidthMaxHeightErrorMessage ?? ErrorMessage);
     }
 }

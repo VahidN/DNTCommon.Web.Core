@@ -21,9 +21,19 @@ public sealed class ValidPasswordAttribute : ValidationAttribute
     public bool IsRequired { set; get; }
 
     /// <summary>
+    ///     A custom error message for IsRequired
+    /// </summary>
+    public string? IsRequiredErrorMessage { set; get; }
+
+    /// <summary>
     ///     Its default value is true
     /// </summary>
     public bool ShouldHaveLowercaseLetters { set; get; } = true;
+
+    /// <summary>
+    ///     A custom error message for ShouldHaveLowercaseLetters
+    /// </summary>
+    public string? ShouldHaveLowercaseLettersErrorMessage { set; get; }
 
     /// <summary>
     ///     Its default value is true
@@ -31,9 +41,19 @@ public sealed class ValidPasswordAttribute : ValidationAttribute
     public bool ShouldHaveUppercaseLetters { set; get; } = true;
 
     /// <summary>
+    ///     A custom error message for ShouldHaveUppercaseLetters
+    /// </summary>
+    public string? ShouldHaveUppercaseLettersErrorMessage { set; get; }
+
+    /// <summary>
     ///     Its default value is true
     /// </summary>
     public bool ShouldHaveDigits { set; get; } = true;
+
+    /// <summary>
+    ///     A custom error message for ShouldHaveDigits
+    /// </summary>
+    public string? ShouldHaveDigitsErrorMessage { set; get; }
 
     /// <summary>
     ///     Its default value is true
@@ -41,20 +61,32 @@ public sealed class ValidPasswordAttribute : ValidationAttribute
     public bool ShouldHaveSymbols { set; get; } = true;
 
     /// <summary>
+    ///     A custom error message for ShouldHaveSymbols
+    /// </summary>
+    public string? ShouldHaveSymbolsErrorMessage { set; get; }
+
+    /// <summary>
     ///     Determines whether the specified value of the object is valid.
     /// </summary>
     public override bool IsValid(object? value)
     {
+        var (success, _) = IsValidPassword(value);
+
+        return success;
+    }
+
+    private (bool Success, string? ErrorMessage) IsValidPassword(object? value)
+    {
         if (value is null)
         {
-            return !IsRequired;
+            return (!IsRequired, IsRequiredErrorMessage ?? ErrorMessage);
         }
 
         var valStr = Convert.ToString(value, CultureInfo.InvariantCulture);
 
         if (string.IsNullOrWhiteSpace(valStr))
         {
-            return !IsRequired;
+            return (!IsRequired, IsRequiredErrorMessage ?? ErrorMessage);
         }
 
         return HasValidPassword(valStr);
@@ -65,7 +97,9 @@ public sealed class ValidPasswordAttribute : ValidationAttribute
     /// </summary>
     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
     {
-        if (IsValid(value))
+        var (success, errorMessage) = IsValidPassword(value);
+
+        if (success)
         {
             return null;
         }
@@ -73,27 +107,32 @@ public sealed class ValidPasswordAttribute : ValidationAttribute
         ArgumentNullException.ThrowIfNull(validationContext);
 
         return string.IsNullOrWhiteSpace(validationContext.MemberName)
-            ? new ValidationResult(ErrorMessage)
-            : new ValidationResult(ErrorMessage, [validationContext.MemberName]);
+            ? new ValidationResult(errorMessage)
+            : new ValidationResult(errorMessage, [validationContext.MemberName]);
     }
 
-    private bool HasValidPassword(string password)
+    private (bool Success, string? ErrorMessage) HasValidPassword(string password)
     {
         if (ShouldHaveLowercaseLetters && !Lowercase.IsMatch(password))
         {
-            return false;
+            return (false, ShouldHaveLowercaseLettersErrorMessage ?? ErrorMessage);
         }
 
         if (ShouldHaveUppercaseLetters && !Uppercase.IsMatch(password))
         {
-            return false;
+            return (false, ShouldHaveUppercaseLettersErrorMessage ?? ErrorMessage);
         }
 
         if (ShouldHaveDigits && !Digit.IsMatch(password))
         {
-            return false;
+            return (false, ShouldHaveDigitsErrorMessage ?? ErrorMessage);
         }
 
-        return ShouldHaveSymbols && Symbol.IsMatch(password);
+        if (ShouldHaveSymbols && !Symbol.IsMatch(password))
+        {
+            return (false, ShouldHaveSymbolsErrorMessage ?? ErrorMessage);
+        }
+
+        return (true, null);
     }
 }

@@ -16,17 +16,37 @@ public static class ValidatorsExtensions
         => !value.IsEmpty() && Guid.TryParse(value, CultureInfo.InvariantCulture, out _);
 #endif
 
-    public static bool IsValidIFormFile(this object? value, Predicate<IFormFile> isValidFile)
-        => value switch
+    public static (bool Success, string? ErrorMessage) IsValidIFormFile(this object? value,
+        Func<IFormFile, (bool Success, string? ErrorMessage)> isValidFile,
+        string? defaultError)
+    {
+        ArgumentNullException.ThrowIfNull(isValidFile);
+
+        return value switch
         {
             IFormFile file => AreValidFiles(isValidFile, file),
             IList<IFormFile> files => AreValidFiles(isValidFile, files),
             IFormFileCollection fileCollection => AreValidFiles(isValidFile, fileCollection),
-            _ => false
+            _ => (false, defaultError)
         };
+    }
 
-    private static bool AreValidFiles(Predicate<IFormFile> isValidFile, params IEnumerable<IFormFile> files)
-        => files.All(file => isValidFile(file));
+    private static (bool Success, string? ErrorMessage) AreValidFiles(
+        Func<IFormFile, (bool Success, string? ErrorMessage)> isValidFile,
+        params IEnumerable<IFormFile> files)
+    {
+        foreach (var file in files)
+        {
+            var result = isValidFile(file);
+
+            if (!result.Success)
+            {
+                return result;
+            }
+        }
+
+        return (true, null);
+    }
 
     /// <summary>
     ///     Determines whether the given file is a text file

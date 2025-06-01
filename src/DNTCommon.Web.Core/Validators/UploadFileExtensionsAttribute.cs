@@ -7,7 +7,7 @@ namespace DNTCommon.Web.Core;
 ///     More info: http://www.dntips.ir/post/2555
 /// </summary>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-public sealed class UploadFileExtensionsAttribute : ValidationAttribute
+public sealed class UploadFileExtensionsAttribute : UploadFileValidationBaseAttribute
 {
     private static readonly char[] Separator = [','];
 
@@ -39,64 +39,43 @@ public sealed class UploadFileExtensionsAttribute : ValidationAttribute
     }
 
     /// <summary>
-    ///     Determines whether empty files can be uploaded
-    /// </summary>
-    public bool AllowUploadEmptyFiles { get; }
-
-    /// <summary>
-    ///     Max allowed file size. It will be ignored if it's null.
-    /// </summary>
-    public long? MaxFileSizeInBytes { get; }
-
-    /// <summary>
-    ///     Min allowed file size. It will be ignored if it's null.
-    /// </summary>
-    public long? MinFileSizeInBytes { get; }
-
-    /// <summary>
     ///     Allowed files extensions to be uploaded
     /// </summary>
     /// <value></value>
     public string FileExtensions { get; }
 
     /// <summary>
-    ///     Should user provide a non-null value for this field?
+    ///     A custom error message for FileExtensions
     /// </summary>
-    public bool IsRequired { set; get; }
+    public string? FileExtensionsErrorMessage { set; get; }
 
-    /// <summary>
-    ///     Determines whether the specified value of the object is valid.
-    /// </summary>
-    public override bool IsValid(object? value)
+    public override (bool Success, string? ErrorMessage) IsValidFile(IFormFile? file)
     {
-        if (value is null)
+        if (file is null)
         {
-            return !IsRequired;
+            return (!IsRequired, IsRequiredErrorMessage ?? ErrorMessage);
         }
 
-        return value.IsValidIFormFile(IsValidFile);
-    }
-
-    private bool IsValidFile(IFormFile? file)
-    {
-        if (file is null || file.Length == 0)
+        if (file.Length == 0)
         {
-            return AllowUploadEmptyFiles;
+            return (AllowUploadEmptyFiles, AllowUploadEmptyFilesErrorMessage ?? ErrorMessage);
         }
 
         if (MaxFileSizeInBytes.HasValue && file.Length > MaxFileSizeInBytes.Value)
         {
-            return false;
+            return (false, MaxFileSizeInBytesErrorMessage ?? ErrorMessage);
         }
 
         if (MinFileSizeInBytes.HasValue && file.Length < MinFileSizeInBytes.Value)
         {
-            return false;
+            return (false, MinFileSizeInBytesErrorMessage ?? ErrorMessage);
         }
 
         var fileExtension = Path.GetExtension(file.FileName);
 
-        return !string.IsNullOrWhiteSpace(fileExtension) &&
-               _allowedExtensions.Any(ext => fileExtension.Equals(ext, StringComparison.OrdinalIgnoreCase));
+        return (
+            !string.IsNullOrWhiteSpace(fileExtension) &&
+            _allowedExtensions.Any(ext => fileExtension.Equals(ext, StringComparison.OrdinalIgnoreCase)),
+            FileExtensionsErrorMessage ?? ErrorMessage);
     }
 }

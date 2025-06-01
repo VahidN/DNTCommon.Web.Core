@@ -12,23 +12,35 @@ public sealed class ShouldContainOnlyVisibleCharactersAttribute : ValidationAttr
     public bool IsRequired { set; get; }
 
     /// <summary>
+    ///     A custom error message for IsRequired
+    /// </summary>
+    public string? IsRequiredErrorMessage { set; get; }
+
+    /// <summary>
     ///     Determines whether the specified value of the object is valid.
     /// </summary>
     public override bool IsValid(object? value)
     {
+        var (success, _) = IsValidContent(value);
+
+        return success;
+    }
+
+    private (bool Success, string? ErrorMessage) IsValidContent(object? value)
+    {
         if (value is null)
         {
-            return !IsRequired;
+            return (!IsRequired, IsRequiredErrorMessage ?? ErrorMessage);
         }
 
         var valStr = Convert.ToString(value, CultureInfo.InvariantCulture);
 
         if (string.IsNullOrWhiteSpace(valStr))
         {
-            return !IsRequired;
+            return (!IsRequired, IsRequiredErrorMessage ?? ErrorMessage);
         }
 
-        return !valStr.HasHiddenCharacters();
+        return (!valStr.HasHiddenCharacters(), ErrorMessage);
     }
 
     /// <summary>
@@ -36,7 +48,9 @@ public sealed class ShouldContainOnlyVisibleCharactersAttribute : ValidationAttr
     /// </summary>
     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
     {
-        if (IsValid(value))
+        var (success, errorMessage) = IsValidContent(value);
+
+        if (success)
         {
             return null;
         }
@@ -44,7 +58,7 @@ public sealed class ShouldContainOnlyVisibleCharactersAttribute : ValidationAttr
         ArgumentNullException.ThrowIfNull(validationContext);
 
         return string.IsNullOrWhiteSpace(validationContext.MemberName)
-            ? new ValidationResult(ErrorMessage)
-            : new ValidationResult(ErrorMessage, [validationContext.MemberName]);
+            ? new ValidationResult(errorMessage)
+            : new ValidationResult(errorMessage, [validationContext.MemberName]);
     }
 }

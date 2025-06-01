@@ -6,7 +6,7 @@ namespace DNTCommon.Web.Core;
 ///     Disallows uploading dangerous files such as .aspx, web.config and .asp files.
 /// </summary>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-public sealed class AllowUploadSafeFilesAttribute : ValidationAttribute
+public sealed class AllowUploadSafeFilesAttribute : UploadFileValidationBaseAttribute
 {
     private readonly HashSet<string> _extensionsToFilter = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -96,21 +96,6 @@ public sealed class AllowUploadSafeFilesAttribute : ValidationAttribute
     }
 
     /// <summary>
-    ///     Max allowed file size. It will be ignored if it's null.
-    /// </summary>
-    public long? MaxFileSizeInBytes { get; }
-
-    /// <summary>
-    ///     Min allowed file size. It will be ignored if it's null.
-    /// </summary>
-    public long? MinFileSizeInBytes { get; }
-
-    /// <summary>
-    ///     Determines whether empty files can be uploaded
-    /// </summary>
-    public bool AllowUploadEmptyFiles { get; }
-
-    /// <summary>
     ///     Disallowed file extensions such as .asp
     /// </summary>
     /// <value></value>
@@ -123,45 +108,45 @@ public sealed class AllowUploadSafeFilesAttribute : ValidationAttribute
     public string[]? NamesToFilter { get; }
 
     /// <summary>
-    ///     Should user provide a non-null value for this field?
+    ///     A custom error message for FileName
     /// </summary>
-    public bool IsRequired { set; get; }
+    public string? FileNameIsEmptyErrorMessage { set; get; }
 
     /// <summary>
-    ///     Determines whether the specified value of the object is valid.
+    ///     A custom error message for FileExtensions
     /// </summary>
-    public override bool IsValid(object? value)
+    public string? FileExtensionsErrorMessage { set; get; }
+
+    /// <summary>
+    ///     Validates the input file
+    /// </summary>
+    public override (bool Success, string? ErrorMessage) IsValidFile(IFormFile? file)
     {
-        if (value is null)
+        if (file is null)
         {
-            return !IsRequired;
+            return (!IsRequired, IsRequiredErrorMessage ?? ErrorMessage);
         }
 
-        return value.IsValidIFormFile(IsValidFile);
-    }
-
-    private bool IsValidFile(IFormFile? file)
-    {
-        if (file is null || file.Length == 0)
+        if (file.Length == 0)
         {
-            return AllowUploadEmptyFiles;
+            return (AllowUploadEmptyFiles, AllowUploadEmptyFilesErrorMessage ?? ErrorMessage);
         }
 
         if (MaxFileSizeInBytes.HasValue && file.Length > MaxFileSizeInBytes.Value)
         {
-            return false;
+            return (false, MaxFileSizeInBytesErrorMessage ?? ErrorMessage);
         }
 
         if (MinFileSizeInBytes.HasValue && file.Length < MinFileSizeInBytes.Value)
         {
-            return false;
+            return (false, MinFileSizeInBytesErrorMessage ?? ErrorMessage);
         }
 
         var fileName = file.FileName;
 
         if (string.IsNullOrWhiteSpace(fileName))
         {
-            return false;
+            return (false, FileNameIsEmptyErrorMessage ?? ErrorMessage);
         }
 
         fileName = fileName.ToLowerInvariant();
@@ -170,11 +155,13 @@ public sealed class AllowUploadSafeFilesAttribute : ValidationAttribute
 
         if (string.IsNullOrWhiteSpace(name))
         {
-            return false;
+            return (false, FileNameIsEmptyErrorMessage ?? ErrorMessage);
         }
 
         //for "file.asp;.jpg" files --> run as an ASP file
-        return !_extensionsToFilter.Contains(ext) && !_namesToFilter.Contains(name) && !_namesToFilter.Contains(ext) &&
-               _extensionsToFilter.All(item => !name.Contains(item, StringComparison.OrdinalIgnoreCase));
+        return (
+            !_extensionsToFilter.Contains(ext) && !_namesToFilter.Contains(name) && !_namesToFilter.Contains(ext) &&
+            _extensionsToFilter.All(item => !name.Contains(item, StringComparison.OrdinalIgnoreCase)),
+            FileExtensionsErrorMessage ?? ErrorMessage);
     }
 }
