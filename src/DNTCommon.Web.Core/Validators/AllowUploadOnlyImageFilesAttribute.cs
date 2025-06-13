@@ -11,46 +11,16 @@ namespace DNTCommon.Web.Core;
 public sealed class AllowUploadOnlyImageFilesAttribute : UploadFileValidationBaseAttribute
 {
     /// <summary>
-    ///     Allowing only image files are safe to be uploaded.
-    ///     This validation attribute, checks the content of the uploaded file.
-    /// </summary>
-    public AllowUploadOnlyImageFilesAttribute()
-    {
-    }
-
-    /// <summary>
-    ///     Allowing only image files are safe to be uploaded.
-    ///     This validation attribute, checks the content of the uploaded file.
-    /// </summary>
-    /// <param name="maxWidth">maximum allowed width</param>
-    /// <param name="maxHeight">maximum allowed height</param>
-    /// <param name="allowUploadEmptyFiles">Determines whether empty files can be uploaded</param>
-    /// <param name="maxFileSizeInBytes">Max allowed file size. It will be ignored if it's null.</param>
-    /// <param name="minFileSizeInBytes">Min allowed file size. It will be ignored if it's null.</param>
-    public AllowUploadOnlyImageFilesAttribute(int maxWidth,
-        int maxHeight,
-        bool allowUploadEmptyFiles = false,
-        long? maxFileSizeInBytes = null,
-        long? minFileSizeInBytes = null)
-    {
-        MaxWidth = maxWidth;
-        MaxHeight = maxHeight;
-        AllowUploadEmptyFiles = allowUploadEmptyFiles;
-        MaxFileSizeInBytes = maxFileSizeInBytes;
-        MinFileSizeInBytes = minFileSizeInBytes;
-    }
-
-    /// <summary>
-    ///     maximum allowed width
+    ///     maximum allowed width.
     /// </summary>
     /// <value></value>
-    public int? MaxWidth { get; }
+    public int? MaxWidth { get; set; }
 
     /// <summary>
     ///     maximum allowed height
     /// </summary>
     /// <value></value>
-    public int? MaxHeight { get; }
+    public int? MaxHeight { get; set; }
 
     /// <summary>
     ///     A custom error message for MaxWidthMaxHeight

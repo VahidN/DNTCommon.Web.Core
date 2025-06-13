@@ -58,54 +58,16 @@ public sealed class AllowUploadSafeFilesAttribute : UploadFileValidationBaseAttr
     };
 
     /// <summary>
-    ///     Disallows uploading dangerous files such as .aspx, web.config and .asp files.
-    /// </summary>
-    /// <param name="allowUploadEmptyFiles">Determines whether empty files can be uploaded</param>
-    /// <param name="extensionsToFilter">Disallowed file extensions such as .asp</param>
-    /// <param name="namesToFilter">Disallowed names such as web.config</param>
-    /// <param name="maxFileSizeInBytes">Max allowed file size. It will be ignored if it's null.</param>
-    /// <param name="minFileSizeInBytes">Min allowed file size. It will be ignored if it's null.</param>
-    public AllowUploadSafeFilesAttribute(bool allowUploadEmptyFiles = false,
-        string[]? extensionsToFilter = null,
-        string[]? namesToFilter = null,
-        long? maxFileSizeInBytes = null,
-        long? minFileSizeInBytes = null)
-    {
-        AllowUploadEmptyFiles = allowUploadEmptyFiles;
-        MaxFileSizeInBytes = maxFileSizeInBytes;
-        MinFileSizeInBytes = minFileSizeInBytes;
-
-        if (extensionsToFilter is not null)
-        {
-            foreach (var item in extensionsToFilter)
-            {
-                _extensionsToFilter.Add(item);
-            }
-        }
-
-        if (namesToFilter is not null)
-        {
-            foreach (var item in namesToFilter)
-            {
-                _namesToFilter.Add(item);
-            }
-        }
-
-        ExtensionsToFilter = extensionsToFilter;
-        NamesToFilter = namesToFilter;
-    }
-
-    /// <summary>
     ///     Disallowed file extensions such as .asp
     /// </summary>
     /// <value></value>
-    public string[]? ExtensionsToFilter { get; }
+    public string[]? ExtensionsToFilter { get; set; }
 
     /// <summary>
     ///     Disallowed names such as web.config
     /// </summary>
     /// <value></value>
-    public string[]? NamesToFilter { get; }
+    public string[]? NamesToFilter { get; set; }
 
     /// <summary>
     ///     A custom error message for FileName
@@ -156,6 +118,22 @@ public sealed class AllowUploadSafeFilesAttribute : UploadFileValidationBaseAttr
         if (string.IsNullOrWhiteSpace(name))
         {
             return (false, FileNameIsEmptyErrorMessage ?? ErrorMessage);
+        }
+
+        if (ExtensionsToFilter is not null)
+        {
+            foreach (var item in ExtensionsToFilter)
+            {
+                _extensionsToFilter.Add(item);
+            }
+        }
+
+        if (NamesToFilter is not null)
+        {
+            foreach (var item in NamesToFilter)
+            {
+                _namesToFilter.Add(item);
+            }
         }
 
         //for "file.asp;.jpg" files --> run as an ASP file

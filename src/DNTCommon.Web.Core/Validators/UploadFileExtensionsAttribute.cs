@@ -11,38 +11,11 @@ public sealed class UploadFileExtensionsAttribute : UploadFileValidationBaseAttr
 {
     private static readonly char[] Separator = [','];
 
-    private readonly IList<string> _allowedExtensions;
-
-    /// <summary>
-    ///     Allowing only selected file extensions are safe to be uploaded.
-    /// </summary>
-    /// <param name="fileExtensions">Allowed files extensions to be uploaded</param>
-    /// <param name="allowUploadEmptyFiles">Determines whether empty files can be uploaded</param>
-    /// <param name="maxFileSizeInBytes">Max allowed file size. It will be ignored if it's null.</param>
-    /// <param name="minFileSizeInBytes">Min allowed file size. It will be ignored if it's null.</param>
-    public UploadFileExtensionsAttribute(string fileExtensions,
-        bool allowUploadEmptyFiles = false,
-        long? maxFileSizeInBytes = null,
-        long? minFileSizeInBytes = null)
-    {
-        if (string.IsNullOrWhiteSpace(fileExtensions))
-        {
-            throw new ArgumentNullException(nameof(fileExtensions));
-        }
-
-        AllowUploadEmptyFiles = allowUploadEmptyFiles;
-        MaxFileSizeInBytes = maxFileSizeInBytes;
-        MinFileSizeInBytes = minFileSizeInBytes;
-
-        FileExtensions = fileExtensions;
-        _allowedExtensions = [.. fileExtensions.Split(Separator, StringSplitOptions.RemoveEmptyEntries)];
-    }
-
     /// <summary>
     ///     Allowed files extensions to be uploaded
     /// </summary>
     /// <value></value>
-    public string FileExtensions { get; }
+    public string? FileExtensions { get; set; }
 
     /// <summary>
     ///     A custom error message for FileExtensions
@@ -73,9 +46,16 @@ public sealed class UploadFileExtensionsAttribute : UploadFileValidationBaseAttr
 
         var fileExtension = Path.GetExtension(file.FileName);
 
+        if (FileExtensions is null)
+        {
+            throw new InvalidOperationException($"{nameof(FileExtensions)} is null");
+        }
+
+        string[] _allowedExtensions = [.. FileExtensions.Split(Separator, StringSplitOptions.RemoveEmptyEntries)];
+
         return (
-            !string.IsNullOrWhiteSpace(fileExtension) &&
-            _allowedExtensions.Any(ext => fileExtension.Equals(ext, StringComparison.OrdinalIgnoreCase)),
+            !string.IsNullOrWhiteSpace(fileExtension) && _allowedExtensions.Any(ext
+                => fileExtension.Equals(ext, StringComparison.OrdinalIgnoreCase)),
             FileExtensionsErrorMessage ?? ErrorMessage);
     }
 }
