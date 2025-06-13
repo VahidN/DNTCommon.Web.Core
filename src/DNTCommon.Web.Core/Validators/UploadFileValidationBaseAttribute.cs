@@ -28,9 +28,9 @@ public abstract class UploadFileValidationBaseAttribute : ValidationAttribute
     public string? AllowUploadEmptyFilesErrorMessage { set; get; }
 
     /// <summary>
-    ///     Max allowed file size. It will be ignored if it's null.
+    ///     Max allowed file size. It will be ignored if it's 0.
     /// </summary>
-    public long? MaxFileSizeInBytes { get; set; }
+    public long MaxFileSizeInBytes { get; set; }
 
     /// <summary>
     ///     A custom error message for MaxFileSizeInBytes
@@ -38,9 +38,9 @@ public abstract class UploadFileValidationBaseAttribute : ValidationAttribute
     public string? MaxFileSizeInBytesErrorMessage { set; get; }
 
     /// <summary>
-    ///     Min allowed file size. It will be ignored if it's null.
+    ///     Min allowed file size. It will be ignored if it's 0.
     /// </summary>
-    public long? MinFileSizeInBytes { get; set; }
+    public long MinFileSizeInBytes { get; set; }
 
     /// <summary>
     ///     A custom error message for MinFileSizeInBytes

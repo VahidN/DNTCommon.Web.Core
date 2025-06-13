@@ -14,13 +14,13 @@ public sealed class AllowUploadOnlyImageFilesAttribute : UploadFileValidationBas
     ///     maximum allowed width.
     /// </summary>
     /// <value></value>
-    public int? MaxWidth { get; set; }
+    public int MaxWidth { get; set; }
 
     /// <summary>
     ///     maximum allowed height
     /// </summary>
     /// <value></value>
-    public int? MaxHeight { get; set; }
+    public int MaxHeight { get; set; }
 
     /// <summary>
     ///     A custom error message for MaxWidthMaxHeight
@@ -42,12 +42,12 @@ public sealed class AllowUploadOnlyImageFilesAttribute : UploadFileValidationBas
             return (AllowUploadEmptyFiles, AllowUploadEmptyFilesErrorMessage ?? ErrorMessage);
         }
 
-        if (MaxFileSizeInBytes.HasValue && file.Length > MaxFileSizeInBytes.Value)
+        if (MaxFileSizeInBytes > 0 && file.Length > MaxFileSizeInBytes)
         {
             return (false, MaxFileSizeInBytesErrorMessage ?? ErrorMessage);
         }
 
-        if (MinFileSizeInBytes.HasValue && file.Length < MinFileSizeInBytes.Value)
+        if (MinFileSizeInBytes > 0 && file.Length < MinFileSizeInBytes)
         {
             return (false, MinFileSizeInBytesErrorMessage ?? ErrorMessage);
         }

@@ -34,12 +34,12 @@ public sealed class UploadFileExtensionsAttribute : UploadFileValidationBaseAttr
             return (AllowUploadEmptyFiles, AllowUploadEmptyFilesErrorMessage ?? ErrorMessage);
         }
 
-        if (MaxFileSizeInBytes.HasValue && file.Length > MaxFileSizeInBytes.Value)
+        if (MaxFileSizeInBytes > 0 && file.Length > MaxFileSizeInBytes)
         {
             return (false, MaxFileSizeInBytesErrorMessage ?? ErrorMessage);
         }
 
-        if (MinFileSizeInBytes.HasValue && file.Length < MinFileSizeInBytes.Value)
+        if (MinFileSizeInBytes > 0 && file.Length < MinFileSizeInBytes)
         {
             return (false, MinFileSizeInBytesErrorMessage ?? ErrorMessage);
         }
