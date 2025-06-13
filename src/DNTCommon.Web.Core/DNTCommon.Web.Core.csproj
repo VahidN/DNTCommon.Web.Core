@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>DNTCommon.Web.Core provides common scenarios' solutions for ASP.NET Core applications.</Description>
-    <VersionPrefix>11.5.0</VersionPrefix>
+    <VersionPrefix>11.5.1</VersionPrefix>
     <Authors>Vahid Nasiri</Authors>
     <TargetFrameworks>net9.0;net8.0;net7.0;net6.0;</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -83,7 +83,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="SonarAnalyzer.CSharp" Version="10.10.0.116381">
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="10.11.0.117924">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -112,7 +112,7 @@
     <PackageReference Include="AsyncKeyedLock" Version="7.1.6"/>
     <PackageReference Include="NetEscapades.AspNetCore.SecurityHeaders" Version="1.1.0"/>
     <PackageReference Include="iTextSharp.LGPLv2.Core" Version="3.7.4"/>
-    <PackageReference Include="Scrutor" Version="6.0.1"/>
+    <PackageReference Include="Scrutor" Version="6.1.0"/>
   </ItemGroup>
   <ItemGroup>
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" Link="Properties/BannedSymbols.txt"/>
