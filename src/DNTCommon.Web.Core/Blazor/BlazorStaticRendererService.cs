@@ -56,7 +56,9 @@ public class BlazorStaticRendererService(HtmlRenderer htmlRenderer) : IBlazorSta
 
         if (!typeof(IComponent).IsAssignableFrom(componentType))
         {
-            throw new ArgumentException(message: "Invalid component type.", nameof(componentType));
+            throw new ArgumentException(
+                $"Invalid component type, `{componentType}`. It's not assignable from `IComponent`.",
+                nameof(componentType));
         }
 
         return htmlRenderer.Dispatcher.InvokeAsync(async () =>
