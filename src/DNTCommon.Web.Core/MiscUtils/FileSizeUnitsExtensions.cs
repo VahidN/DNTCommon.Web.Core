@@ -158,83 +158,140 @@ public static class FileSizeUnitsExtensions
             _ => T.Zero
         };
 
-    private static T BytesToKilobytes<T>(this T size)
+    /// <summary>
+    ///     Converts the given number to the specified unit
+    /// </summary>
+    public static T BytesToKilobytes<T>(this T size)
         where T : INumber<T>
         => size.DivideBy1024();
 
-    private static T BytesToMegabytes<T>(this T size)
+    /// <summary>
+    ///     Converts the given number to the specified unit
+    /// </summary>
+    public static T BytesToMegabytes<T>(this T size)
         where T : INumber<T>
         => size.DivideBy1024(times: 2);
 
-    private static T BytesToGigabytes<T>(this T size)
+    /// <summary>
+    ///     Converts the given number to the specified unit
+    /// </summary>
+    public static T BytesToGigabytes<T>(this T size)
         where T : INumber<T>
         => size.DivideBy1024(times: 3);
 
-    private static T BytesToTerabytes<T>(this T size)
+    /// <summary>
+    ///     Converts the given number to the specified unit
+    /// </summary>
+    public static T BytesToTerabytes<T>(this T size)
         where T : INumber<T>
         => size.DivideBy1024(times: 4);
 
-    private static T KilobytesToBytes<T>(this T size)
+    /// <summary>
+    ///     Converts the given number to the specified unit
+    /// </summary>
+    public static T KilobytesToBytes<T>(this T size)
         where T : INumber<T>
         => size.MultiplyBy1024();
 
-    private static T KilobytesToMegabytes<T>(this T size)
+    /// <summary>
+    ///     Converts the given number to the specified unit
+    /// </summary>
+    public static T KilobytesToMegabytes<T>(this T size)
         where T : INumber<T>
         => size.DivideBy1024();
 
-    private static T KilobytesToGigabytes<T>(this T size)
+    /// <summary>
+    ///     Converts the given number to the specified unit
+    /// </summary>
+    public static T KilobytesToGigabytes<T>(this T size)
         where T : INumber<T>
         => size.DivideBy1024(times: 2);
 
-    private static T KilobytesToTerabytes<T>(this T size)
+    /// <summary>
+    ///     Converts the given number to the specified unit
+    /// </summary>
+    public static T KilobytesToTerabytes<T>(this T size)
         where T : INumber<T>
         => size.DivideBy1024(times: 3);
 
-    private static T MegabytesToBytes<T>(this T size)
+    /// <summary>
+    ///     Converts the given number to the specified unit
+    /// </summary>
+    public static T MegabytesToBytes<T>(this T size)
         where T : INumber<T>
         => size.MultiplyBy1024(times: 2);
 
-    private static T MegabytesToKilobytes<T>(this T size)
+    /// <summary>
+    ///     Converts the given number to the specified unit
+    /// </summary>
+    public static T MegabytesToKilobytes<T>(this T size)
         where T : INumber<T>
         => size.MultiplyBy1024(times: 1);
 
-    private static T MegabytesToGigabytes<T>(this T size)
+    /// <summary>
+    ///     Converts the given number to the specified unit
+    /// </summary>
+    public static T MegabytesToGigabytes<T>(this T size)
         where T : INumber<T>
         => size.DivideBy1024();
 
-    private static T MegabytesToTerabytes<T>(this T size)
+    /// <summary>
+    ///     Converts the given number to the specified unit
+    /// </summary>
+    public static T MegabytesToTerabytes<T>(this T size)
         where T : INumber<T>
         => size.DivideBy1024(times: 2);
 
-    private static T GigabytesToBytes<T>(this T size)
+    /// <summary>
+    ///     Converts the given number to the specified unit
+    /// </summary>
+    public static T GigabytesToBytes<T>(this T size)
         where T : INumber<T>
         => size.MultiplyBy1024(times: 3);
 
-    private static T GigabytesToKilobytes<T>(this T size)
+    /// <summary>
+    ///     Converts the given number to the specified unit
+    /// </summary>
+    public static T GigabytesToKilobytes<T>(this T size)
         where T : INumber<T>
         => size.MultiplyBy1024(times: 2);
 
-    private static T GigabytesToMegabytes<T>(this T size)
+    /// <summary>
+    ///     Converts the given number to the specified unit
+    /// </summary>
+    public static T GigabytesToMegabytes<T>(this T size)
         where T : INumber<T>
         => size.MultiplyBy1024();
 
-    private static T GigabytesToTerabytes<T>(this T size)
+    public static T GigabytesToTerabytes<T>(this T size)
         where T : INumber<T>
         => size.DivideBy1024();
 
-    private static T TerabytesToBytes<T>(this T size)
+    /// <summary>
+    ///     Converts the given number to the specified unit
+    /// </summary>
+    public static T TerabytesToBytes<T>(this T size)
         where T : INumber<T>
         => size.MultiplyBy1024(times: 4);
 
-    private static T TerabytesToKilobytes<T>(this T size)
+    /// <summary>
+    ///     Converts the given number to the specified unit
+    /// </summary>
+    public static T TerabytesToKilobytes<T>(this T size)
         where T : INumber<T>
         => size.MultiplyBy1024(times: 3);
 
-    private static T TerabytesToMegabytes<T>(this T size)
+    /// <summary>
+    ///     Converts the given number to the specified unit
+    /// </summary>
+    public static T TerabytesToMegabytes<T>(this T size)
         where T : INumber<T>
         => size.MultiplyBy1024(times: 2);
 
-    private static T TerabytesToGigabytes<T>(this T size)
+    /// <summary>
+    ///     Converts the given number to the specified unit
+    /// </summary>
+    public static T TerabytesToGigabytes<T>(this T size)
         where T : INumber<T>
         => size.MultiplyBy1024();
 
