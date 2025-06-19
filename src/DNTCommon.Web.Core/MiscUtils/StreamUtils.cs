@@ -21,13 +21,15 @@ public static class StreamUtils
     /// <param name="readChunkBufferLength">
     ///     The size of the buffer. The default size is 4096.
     /// </param>
+    /// <param name="encoding">The character encoding to use. Its default value is Encoding.UTF8</param>
     /// <returns>
     ///     The rest of the stream as a string, from the beginning to the end.
     ///     Or null if the stream is a null reference or not readable.
     /// </returns>
     public static string? ToText([NotNullIfNotNull(nameof(stream))] this Stream? stream,
         int offset = 0,
-        int readChunkBufferLength = 4096)
+        int readChunkBufferLength = 4096,
+        Encoding? encoding = null)
     {
         if (stream?.IsReadableStream() != true)
         {
@@ -40,7 +42,7 @@ public static class StreamUtils
         }
 
         using var textWriter = new StringWriter(CultureInfo.InvariantCulture);
-        using var reader = new StreamReader(stream);
+        using var reader = new StreamReader(stream, encoding ?? Encoding.UTF8);
 
         var readChunk = new char[readChunkBufferLength];
         int readChunkLength;

@@ -1,3 +1,4 @@
+using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -31,7 +32,7 @@ public class CspReportController(
             return Ok();
         }
 
-        using (var bodyReader = new StreamReader(HttpContext.Request.Body))
+        using (var bodyReader = new StreamReader(HttpContext.Request.Body, Encoding.UTF8))
         {
             var body = await bodyReader.ReadToEndAsync();
 

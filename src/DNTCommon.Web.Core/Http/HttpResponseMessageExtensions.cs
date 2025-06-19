@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace DNTCommon.Web.Core;
 
 /// <summary>
@@ -25,7 +27,7 @@ public static class HttpResponseMessageExtensions
     /// <summary>
     ///     Includes the response's body in the final error message.
     /// </summary>
-    public static void EnsureSuccessStatusCode(this HttpResponseMessage response)
+    public static void EnsureSuccessStatusCode(this HttpResponseMessage response, Encoding? encoding = null)
     {
         ArgumentNullException.ThrowIfNull(response);
 
@@ -34,7 +36,7 @@ public static class HttpResponseMessageExtensions
             return;
         }
 
-        using var reader = new StreamReader(response.Content.ReadAsStream());
+        using var reader = new StreamReader(response.Content.ReadAsStream(), encoding ?? Encoding.UTF8);
         var responseContent = reader.ReadToEnd();
 
         var content = $"StatusCode: {response.StatusCode}, {responseContent}";

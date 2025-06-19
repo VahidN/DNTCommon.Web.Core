@@ -217,7 +217,8 @@ public static class HttpClientExtensions
     public static async Task<string> DownloadPageAsync(this HttpClient httpClient,
         string path,
         bool ensureSuccess = true,
-        Action<HttpRequestMessage>? configRequest = null)
+        Action<HttpRequestMessage>? configRequest = null,
+        Encoding? encoding = null)
     {
         ArgumentNullException.ThrowIfNull(httpClient);
 
@@ -231,7 +232,7 @@ public static class HttpClientExtensions
         }
 
         await using var responseStream = await response.Content.ReadAsStreamAsync();
-        using var streamReader = new StreamReader(responseStream);
+        using var streamReader = new StreamReader(responseStream, encoding ?? Encoding.UTF8);
 
         return await streamReader.ReadToEndAsync();
     }
@@ -242,7 +243,8 @@ public static class HttpClientExtensions
     public static string DownloadPage(this HttpClient httpClient,
         string path,
         bool ensureSuccess = true,
-        Action<HttpRequestMessage>? configRequest = null)
+        Action<HttpRequestMessage>? configRequest = null,
+        Encoding? encoding = null)
     {
         ArgumentNullException.ThrowIfNull(httpClient);
 
@@ -256,7 +258,7 @@ public static class HttpClientExtensions
         }
 
         using var responseStream = response.Content.ReadAsStream();
-        using var streamReader = new StreamReader(responseStream);
+        using var streamReader = new StreamReader(responseStream, encoding ?? Encoding.UTF8);
 
         return streamReader.ReadToEnd();
     }
@@ -463,8 +465,7 @@ public static class HttpClientExtensions
 
         await using (var inputStream = await response.Content.ReadAsStreamAsync())
         {
-            await using var fileStream =
-                tempFilePath.CreateAsyncFileStream(FileMode.CreateNew, FileAccess.Write);
+            await using var fileStream = tempFilePath.CreateAsyncFileStream(FileMode.CreateNew, FileAccess.Write);
 
             var buffer = new byte[maxBufferSize];
             int read;

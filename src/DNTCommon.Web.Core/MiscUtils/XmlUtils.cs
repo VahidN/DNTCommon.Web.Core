@@ -130,7 +130,8 @@ public static class XmlUtils
     /// <summary>
     ///     Converts an XmlDocument to a string
     /// </summary>
-    public static string? ToXmlString([NotNullIfNotNull(nameof(document))] this XmlDocument? document)
+    public static string? ToXmlString([NotNullIfNotNull(nameof(document))] this XmlDocument? document,
+        Encoding? encoding = null)
     {
         if (document is null)
         {
@@ -148,7 +149,7 @@ public static class XmlUtils
         using var xmlWriter = XmlWriter.Create(ms, settings);
         document.Save(xmlWriter);
         ms.Position = 0;
-        using var streamReader = new StreamReader(ms);
+        using var streamReader = new StreamReader(ms, encoding ?? Encoding.UTF8);
 
         return streamReader.ReadToEnd();
     }
