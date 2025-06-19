@@ -17,7 +17,17 @@ public interface IBlazorStaticRendererService
     /// <summary>
     ///     Provides a mechanism for rendering components non-interactively as HTML markup.
     /// </summary>
-    Task<string> StaticRenderComponentAsync<T>(IDictionary<string, object?> dictionary)
+    Task<string> StaticRenderComponentAsync(Type componentType);
+
+    /// <summary>
+    ///     Provides a mechanism for rendering components non-interactively as HTML markup.
+    /// </summary>
+    Task<string> StaticRenderComponentAsync<T>(IDictionary<string, object?>? dictionary)
         where T : IComponent;
+
+    /// <summary>
+    ///     Provides a mechanism for rendering components non-interactively as HTML markup.
+    /// </summary>
+    Task<string> StaticRenderComponentAsync(Type componentType, IDictionary<string, object?>? dictionary);
 }
 #endif
