@@ -491,4 +491,71 @@ public static class StringUtils
     /// </summary>
     public static string? ReverseChars([NotNullIfNotNull(nameof(input))] this string? input)
         => input is null ? null : string.Concat(input.Reverse());
+
+    /// <summary>
+    ///     Counts words in the given text based on the available white-spaces.
+    /// </summary>
+    public static int CountWordsInText(this string? text) => text is null ? 0 : CountWordsInText(text.AsSpan());
+
+    /// <summary>
+    ///     Counts words in the given text based on the available white-spaces.
+    /// </summary>
+    public static int CountWordsInText(this ReadOnlySpan<char> text)
+    {
+        if (text.Length == 0)
+        {
+            return 0;
+        }
+
+        var wordCount = 0;
+        var index = 0;
+
+        while (index < text.Length && char.IsWhiteSpace(text[index]))
+        {
+            index++;
+        }
+
+        while (index < text.Length)
+        {
+            while (index < text.Length && !char.IsWhiteSpace(text[index]))
+            {
+                index++;
+            }
+
+            wordCount++;
+
+            while (index < text.Length && char.IsWhiteSpace(text[index]))
+            {
+                index++;
+            }
+        }
+
+        return wordCount;
+    }
+
+    /// <summary>
+    ///     Returns a new string in which the occurrence of a specified string in the current instance is replaced with another
+    ///     specified string
+    /// </summary>
+    public static string? ReplaceAt([NotNullIfNotNull(nameof(input))] this string? input,
+        int index,
+        int length,
+        string? replacement)
+    {
+        if (length == 0 || input is null || replacement is null)
+        {
+            return input;
+        }
+
+        return string.Create(input.Length - length + replacement.Length, (input, index, length, replacement),
+            (span, state) =>
+            {
+                state.input.AsSpan()[..state.index].CopyTo(span);
+
+                state.replacement.AsSpan().CopyTo(span[state.index..]);
+
+                state.input.AsSpan()[(state.index + state.length)..]
+                    .CopyTo(span[(state.index + state.replacement.Length)..]);
+            });
+    }
 }
