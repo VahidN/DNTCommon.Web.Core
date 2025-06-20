@@ -318,6 +318,51 @@ public static class CollectionsExtensions
         return count;
     }
 
+    /// <summary>
+    ///     Asserts that all elements in the sequence are unique.
+    /// </summary>
+    public static bool HasUniqueItems<T>(this IEnumerable<T>? actual, IEqualityComparer<T>? comparer = null)
+    {
+        if (actual is null)
+        {
+            return false;
+        }
+
+        var set = new HashSet<T>(comparer);
+
+        return actual.All(set.Add);
+    }
+
+    /// <summary>
+    ///     Creates a diff of the given sources
+    /// </summary>
+    public static (T[] Missing, T[] Unexpected) Diff<T>(this IEnumerable<T>? actual, IEnumerable<T>? expected)
+        where T : notnull
+    {
+        actual ??= [];
+        expected ??= [];
+
+        var histogram = new Dictionary<T, int>();
+
+        histogram.CountItems(actual, increment: 1);
+        histogram.CountItems(expected, increment: -1);
+
+        return (histogram.Filter(c => c < 0), histogram.Filter(c => c > 0));
+    }
+
+    private static void CountItems<T>(this Dictionary<T, int> dict, IEnumerable<T> source, int increment)
+        where T : notnull
+    {
+        foreach (var item in source)
+        {
+            dict[item] = dict.GetValueOrDefault(item) + increment;
+        }
+    }
+
+    private static T[] Filter<T>(this Dictionary<T, int> dict, Func<int, bool> predicate)
+        where T : notnull
+        => [.. dict.Where(kvp => predicate(kvp.Value)).Select(kvp => kvp.Key)];
+
 #if !NET_6
     /// <summary>
     ///     Parses a string into a value.
