@@ -136,8 +136,8 @@ public static class WebServerInfoProvider
         =>
         [
             .. from DictionaryEntry entry in Environment.GetEnvironmentVariables()
-            let key = Convert.ToString(entry.Key, CultureInfo.InvariantCulture)
-            let value = Convert.ToString(entry.Value, CultureInfo.InvariantCulture)
+            let key = entry.Key.ToInvariantString()
+            let value = entry.Value.ToInvariantString()
             where !string.IsNullOrWhiteSpace(key)
             select (key, value ?? "")
         ];

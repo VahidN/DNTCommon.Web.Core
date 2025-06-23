@@ -82,7 +82,7 @@ public sealed class ValidPasswordAttribute : ValidationAttribute
             return (!IsRequired, IsRequiredErrorMessage ?? ErrorMessage);
         }
 
-        var valStr = Convert.ToString(value, CultureInfo.InvariantCulture);
+        var valStr = value.ToInvariantString();
 
         if (string.IsNullOrWhiteSpace(valStr))
         {

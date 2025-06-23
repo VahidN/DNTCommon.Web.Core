@@ -39,7 +39,7 @@ public class EncryptedRouteConstraint(
 
         try
         {
-            var valueString = Convert.ToString(routeValue, CultureInfo.InvariantCulture);
+            var valueString = routeValue.ToInvariantString();
             values[routeKey] = protectionProvider.Decrypt(valueString);
 
             return true;

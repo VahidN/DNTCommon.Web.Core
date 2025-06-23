@@ -558,4 +558,11 @@ public static class StringUtils
                     .CopyTo(span[(state.index + state.replacement.Length)..]);
             });
     }
+
+    /// <summary>
+    ///     Converts the given object to an InvariantCulture string.
+    /// </summary>
+    public static string? ToInvariantString([NotNullIfNotNull(nameof(value))] this object? value,
+        string defaultValue = "")
+        => Convert.ToString(value ?? defaultValue, CultureInfo.InvariantCulture);
 }

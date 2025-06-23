@@ -34,7 +34,7 @@ public sealed class RequiredHtmlContentAttribute : ValidationAttribute
             return (!IsRequired, IsRequiredErrorMessage ?? ErrorMessage);
         }
 
-        var valStr = Convert.ToString(value, CultureInfo.InvariantCulture);
+        var valStr = value.ToInvariantString();
 
         if (string.IsNullOrWhiteSpace(valStr))
         {

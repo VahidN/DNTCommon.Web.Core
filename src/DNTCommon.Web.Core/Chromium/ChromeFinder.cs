@@ -63,7 +63,7 @@ public static class ChromeFinder
 
             if (key is not null)
             {
-                var path = Path.Combine(Convert.ToString(key, CultureInfo.InvariantCulture)!, path2: "chrome.exe");
+                var path = Path.Combine(key.ToInvariantString()!, path2: "chrome.exe");
 
                 if (File.Exists(path))
                 {

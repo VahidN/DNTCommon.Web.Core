@@ -120,13 +120,7 @@ public sealed class EncryptedFieldResultFilterAttribute(
                 continue;
             }
 
-            var inputText = Convert.ToString(value, CultureInfo.InvariantCulture);
-
-            if (inputText is null)
-            {
-                continue;
-            }
-
+            var inputText = value.ToInvariantString();
             var encryptedData = _protectionProviderService.Encrypt(inputText);
             property.SetValue(model, encryptedData);
         }
