@@ -46,6 +46,12 @@ public static class CollectionsExtensions
     }
 
     /// <summary>
+    ///     Filters not null items of the given collection
+    /// </summary>
+    public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T>? collection)
+        => collection?.Where(item => item is not null) ?? [];
+
+    /// <summary>
     ///     Adds the `AddRange` to an `IList`
     /// </summary>
     public static bool AddRange<T>([NotNullWhen(returnValue: true)] this ICollection<T>? source,
@@ -82,6 +88,16 @@ public static class CollectionsExtensions
     /// </summary>
     public static bool IsNullOrEmpty<T>([NotNullWhen(returnValue: false)] this IEnumerable<T>? source)
         => source?.Any() != true;
+
+    /// <summary>
+    ///     Determines whether any element of a sequence satisfies a condition.
+    /// </summary>
+    public static bool HasAny<T>(this IEnumerable<T>? collection, Func<T, bool> predicate)
+    {
+        ArgumentNullException.ThrowIfNull(predicate);
+
+        return collection?.Any(predicate) == true;
+    }
 
     /// <summary>
     ///     Return true if the `source.Take(destination.Count)` elements are equal to destination elements
