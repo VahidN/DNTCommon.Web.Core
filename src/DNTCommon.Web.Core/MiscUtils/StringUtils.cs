@@ -14,6 +14,17 @@ public static class StringUtils
     ];
 
     /// <summary>
+    ///     Converts the specified string to title case (except for words that are entirely in uppercase, which are considered
+    ///     to be acronyms).
+    /// </summary>
+    public static string? ToTitleCase([NotNullIfNotNull(nameof(input))] string? input, CultureInfo? cultureInfo = null)
+    {
+        cultureInfo ??= CultureInfo.InvariantCulture;
+
+        return input.IsEmpty() ? null : cultureInfo.TextInfo.ToTitleCase(input);
+    }
+
+    /// <summary>
     ///     Converts a  multi-line text to a list. It's useful for textarea to db field value binding.
     /// </summary>
     /// <param name="data"></param>
