@@ -8,6 +8,37 @@ namespace DNTCommon.Web.Core;
 public static class NumbersExtensions
 {
     /// <summary>
+    ///     Generates random integers between a specified inclusive lower bound and a specified exclusive upper bound using a
+    ///     cryptographically strong random number generator.
+    /// </summary>
+    /// <param name="count"></param>
+    /// <param name="fromInclusive">The inclusive lower bound of the random range.</param>
+    /// <param name="toExclusive">The exclusive upper bound of the random range.</param>
+    /// <returns></returns>
+    public static IEnumerable<int> RandomInts(this int count, int fromInclusive, int toExclusive)
+    {
+        for (var i = 0; i < count; i++)
+        {
+            yield return RandomNumberGenerator.GetInt32(fromInclusive, toExclusive);
+        }
+    }
+
+    /// <summary>
+    ///     Generates a random integer between 0 (inclusive) and a specified exclusive upper bound using a cryptographically
+    ///     strong random number generator.
+    /// </summary>
+    /// <param name="count"></param>
+    /// <param name="toExclusive">The exclusive upper bound of the random range.</param>
+    /// <returns></returns>
+    public static IEnumerable<int> RandomInts(this int count, int toExclusive)
+    {
+        for (var i = 0; i < count; i++)
+        {
+            yield return RandomNumberGenerator.GetInt32(toExclusive);
+        }
+    }
+
+    /// <summary>
     ///     Tries to convert a string value to an int32
     /// </summary>
     /// <param name="data"></param>
