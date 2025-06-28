@@ -1,4 +1,5 @@
 using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace DNTCommon.Web.Core;
 
@@ -7,6 +8,13 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public static class NumbersExtensions
 {
+    /// <summary>
+    ///     Creates an array of bytes with a cryptographically strong random sequence of values.
+    /// </summary>
+    /// <param name="count">The number of bytes of random values to create.</param>
+    /// <returns>An array populated with cryptographically strong random values.</returns>
+    public static byte[] RandomBytes(this int count) => RandomNumberGenerator.GetBytes(count);
+
     /// <summary>
     ///     Generates random integers between a specified inclusive lower bound and a specified exclusive upper bound using a
     ///     cryptographically strong random number generator.
@@ -56,7 +64,72 @@ public static class NumbersExtensions
             : defaultValue;
     }
 
+#if !NET_6 && !NET_7
+    /// <summary>
+    ///     Performs an in-place shuffle of a span using cryptographically random number generation.
+    /// </summary>
+    /// <param name="values">The span to shuffle.</param>
+    /// <typeparam name="T">The type of span.</typeparam>
+    public static void Shuffle<T>(this Span<T> values) => RandomNumberGenerator.Shuffle(values);
+
+    /// <summary>
+    ///     Shuffles the elements of an array in-place using a cryptographically-secure random number generator.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the array.</typeparam>
+    /// <param name="values">The array to shuffle.</param>
+    public static void Shuffle<T>(this T[]? values)
+    {
+        if (values is null)
+        {
+            return;
+        }
+
+        RandomNumberGenerator.Shuffle(new Span<T>(values));
+    }
+
+    /// <summary>
+    ///     Shuffles the elements of a List of T in-place using a cryptographically-secure random number generator.
+    ///     This is an efficient implementation using memory pinning.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the list.</typeparam>
+    /// <param name="values">The list to shuffle.</param>
+    public static void Shuffle<T>(this List<T>? values)
+    {
+        if (values is null)
+        {
+            return;
+        }
+
+        var span = CollectionsMarshal.AsSpan(values);
+        RandomNumberGenerator.Shuffle(span);
+    }
+#endif
+
 #if !NET_6
+
+    /// <summary>
+    ///     Shuffles the elements of a collection implementing IList of T in-place using a cryptographically-secure random
+    ///     number generator.
+    ///     This implementation uses the Fisher-Yates shuffle algorithm.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the list.</typeparam>
+    /// <param name="values">The list to shuffle.</param>
+    public static void Shuffle<T>(this IList<T>? values)
+    {
+        if (values is null)
+        {
+            return;
+        }
+
+        var count = values.Count;
+
+        while (count > 1)
+        {
+            count--;
+            var k = RandomNumberGenerator.GetInt32(count + 1);
+            (values[k], values[count]) = (values[count], values[k]); // Using tuple deconstruction for swapping
+        }
+    }
 
     /// <summary>
     ///     Determines if a value represents an integral number.

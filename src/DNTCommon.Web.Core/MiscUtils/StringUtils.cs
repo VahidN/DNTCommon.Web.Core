@@ -576,4 +576,31 @@ public static class StringUtils
     public static string? ToInvariantString([NotNullIfNotNull(nameof(value))] this object? value,
         string defaultValue = "")
         => Convert.ToString(value ?? defaultValue, CultureInfo.InvariantCulture);
+
+#if !NET_6 && !NET_7
+    /// <summary>
+    ///     Creates a string populated with characters chosen at random from choices.
+    /// </summary>
+    /// <param name="stringLength">The length of string to return.</param>
+    /// <param name="allowedChars">
+    ///     The characters to use to populate the string.
+    ///     Its default value is <![CDATA[ "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_-+=" ]]>
+    /// </param>
+    /// <returns>A string populated with random choices.</returns>
+    public static string RandomString(this int stringLength,
+        string allowedChars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_-+=")
+        => RandomNumberGenerator.GetString(allowedChars, stringLength);
+
+    /// <summary>
+    ///     Creates a string filled with cryptographically random hexadecimal characters.
+    /// </summary>
+    /// <param name="stringLength">The length of string to create.</param>
+    /// <param name="lowercase">
+    ///     true if the hexadecimal characters should be lowercase; false if they should be uppercase. The
+    ///     default is false.
+    /// </param>
+    /// <returns>A string populated with random hexadecimal characters.</returns>
+    public static string RandomHexString(this int stringLength, bool lowercase = false)
+        => RandomNumberGenerator.GetHexString(stringLength, lowercase);
+#endif
 }
