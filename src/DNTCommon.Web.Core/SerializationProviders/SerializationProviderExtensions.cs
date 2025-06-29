@@ -101,4 +101,24 @@ public static class SerializationProviderExtensions
     /// </summary>
     public static T? DeserializeFromUtf8Bytes<T>(this byte[] data, JsonSerializerOptions options)
         => JsonSerializer.Deserialize<T>(new ReadOnlySpan<byte>(data), options);
+
+    /// <summary>
+    ///     Asynchronously reads the UTF-8 encoded text representing a single JSON value into an instance of a type specified
+    ///     by a generic type parameter. The stream will be read to completion.
+    /// </summary>
+    public static async ValueTask<T?> DeserializeJsonFileAsync<T>(this string fileNamePath,
+        JsonSerializerOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (!File.Exists(fileNamePath))
+        {
+            throw new FileNotFoundException(fileNamePath);
+        }
+
+        options ??= DefaultJsonSerializerOptions.Instance;
+
+        await using var stream = fileNamePath.ToFileStream(FileMode.Open, FileAccess.Read, useAsync: true);
+
+        return stream is null ? default : await JsonSerializer.DeserializeAsync<T>(stream, options, cancellationToken);
+    }
 }
