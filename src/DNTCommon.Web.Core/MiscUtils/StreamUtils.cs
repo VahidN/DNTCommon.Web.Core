@@ -356,4 +356,21 @@ public static class StreamUtils
 
         return BitConverter.ToUInt16(bytes, startIndex: 0);
     }
+
+    /// <summary>
+    ///     Creates a new Span of T object over the entirety of a specified array.
+    /// </summary>
+    public static Span<T> ToSpan<T>(this T[]? values) => values is null ? [] : values.AsSpan();
+
+    /// <summary>
+    ///     Creates a new Span of T object over the entirety of a specified array.
+    /// </summary>
+    public static Span<T> ToSpan<T>(this T[]? values, int start, int length)
+        => values is null ? [] : values.AsSpan(start, length);
+
+    /// <summary>
+    ///     Gets a Span of T view over the data in a list. Items should not be added or removed from the List of T while the
+    ///     Span of T is in use.
+    /// </summary>
+    public static Span<T> ToSpan<T>(this List<T>? values) => values is null ? [] : CollectionsMarshal.AsSpan(values);
 }

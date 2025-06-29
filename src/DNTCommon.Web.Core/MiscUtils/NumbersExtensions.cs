@@ -1,5 +1,4 @@
 using System.Numerics;
-using System.Runtime.InteropServices;
 
 namespace DNTCommon.Web.Core;
 
@@ -84,7 +83,7 @@ public static class NumbersExtensions
             return;
         }
 
-        RandomNumberGenerator.Shuffle(new Span<T>(values));
+        RandomNumberGenerator.Shuffle(values.ToSpan());
     }
 
     /// <summary>
@@ -100,8 +99,7 @@ public static class NumbersExtensions
             return;
         }
 
-        var span = CollectionsMarshal.AsSpan(values);
-        RandomNumberGenerator.Shuffle(span);
+        RandomNumberGenerator.Shuffle(values.ToSpan());
     }
 #endif
 
