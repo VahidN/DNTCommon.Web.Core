@@ -15,6 +15,95 @@ public static class NumbersExtensions
     public static byte[] RandomBytes(this int count) => RandomNumberGenerator.GetBytes(count);
 
     /// <summary>
+    ///     Fills a span with cryptographically strong random bytes.
+    /// </summary>
+    /// <param name="randomBytes">The span to fill with cryptographically strong random bytes.</param>
+    public static void FillWithRandomBytes(this byte[] randomBytes) => RandomNumberGenerator.Fill(randomBytes);
+
+    /// <summary>
+    ///     Returns a random item from the given array.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the array.</typeparam>
+    /// <param name="values">The array to get a random item from.</param>
+    /// <returns>A random item from the array, or default(T) if the array is null or empty.</returns>
+    public static T? GetRandomItem<T>([NotNullIfNotNull(nameof(values))] this T[]? values)
+        => values is null || values.Length == 0 ? default : values[RandomNumberGenerator.GetInt32(values.Length)];
+
+    /// <summary>
+    ///     Returns a random item from the given list.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the list.</typeparam>
+    /// <param name="values">The list to get a random item from.</param>
+    /// <returns>A random item from the list, or default(T) if the list is null or empty.</returns>
+    public static T? GetRandomItem<T>([NotNullIfNotNull(nameof(values))] this List<T>? values)
+        => values is null || values.Count == 0 ? default : values[RandomNumberGenerator.GetInt32(values.Count)];
+
+    /// <summary>
+    ///     Returns a random item from the given read-only list.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the list.</typeparam>
+    /// <param name="values">The read-only list to get a random item from.</param>
+    /// <returns>A random item from the list, or default(T) if the list is null or empty.</returns>
+    public static T? GetRandomItem<T>([NotNullIfNotNull(nameof(values))] this IReadOnlyList<T>? values)
+        => values is null || values.Count == 0 ? default : values[RandomNumberGenerator.GetInt32(values.Count)];
+
+    /// <summary>
+    ///     Returns a random item from the given read-only span.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the span.</typeparam>
+    /// <param name="values">The read-only span to get a random item from.</param>
+    /// <returns>A random item from the span, or default(T) if the span is empty.</returns>
+    public static T? GetRandomItem<T>(this ReadOnlySpan<T> values)
+        => values.IsEmpty ? default : values[RandomNumberGenerator.GetInt32(values.Length)];
+
+    /// <summary>
+    ///     Returns a random item from the given span.
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the span.</typeparam>
+    /// <param name="values">The span to get a random item from.</param>
+    /// <returns>A random item from the span, or default(T) if the span is empty.</returns>
+    public static T? GetRandomItem<T>(this Span<T> values)
+        => values.IsEmpty ? default : values[RandomNumberGenerator.GetInt32(values.Length)];
+
+    /// <summary>
+    ///     Returns a random item from the given sequence.
+    ///     This method will iterate through the sequence. For collections that have a known count,
+    ///     consider using a more specific overload (e.g., for List of T or T[]).
+    /// </summary>
+    /// <typeparam name="T">The type of the elements in the sequence.</typeparam>
+    /// <param name="values">The sequence to get a random item from.</param>
+    /// <returns>A random item from the sequence, or default(T) if the sequence is null or empty.</returns>
+    public static T? GetRandomItem<T>([NotNullIfNotNull(nameof(values))] this IEnumerable<T>? values)
+    {
+        if (values is null)
+        {
+            return default;
+        }
+
+        // Optimization for collections that have an efficient Count and indexer
+        if (values is IReadOnlyList<T> list)
+        {
+            return list.GetRandomItem();
+        }
+
+        T? result = default;
+        var count = 0;
+
+        foreach (var item in values)
+        {
+            count++;
+
+            // Reservoir sampling with a sample size of 1
+            if (RandomNumberGenerator.GetInt32(count) == 0)
+            {
+                result = item;
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
     ///     Generates random integers between a specified inclusive lower bound and a specified exclusive upper bound using a
     ///     cryptographically strong random number generator.
     /// </summary>
@@ -104,7 +193,6 @@ public static class NumbersExtensions
 #endif
 
 #if !NET_6
-
     /// <summary>
     ///     Shuffles the elements of a collection implementing IList of T in-place using a cryptographically-secure random
     ///     number generator.

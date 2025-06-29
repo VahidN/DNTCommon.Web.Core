@@ -5,13 +5,11 @@
 /// </summary>
 public sealed class RandomNumberProvider : IRandomNumberProvider
 {
-    private readonly RandomNumberGenerator _rand = RandomNumberGenerator.Create();
-
     /// <summary>
     ///     Fills an array of bytes with a cryptographically strong random sequence of values.
     /// </summary>
     /// <param name="randomBytes"></param>
-    public void NextBytes(byte[] randomBytes) => _rand.GetBytes(randomBytes);
+    public void NextBytes(byte[] randomBytes) => RandomNumberGenerator.Fill(randomBytes);
 
     /// <summary>
     ///     Generates a random non-negative number.
@@ -19,7 +17,7 @@ public sealed class RandomNumberProvider : IRandomNumberProvider
     public int NextNumber()
     {
         var randb = new byte[4];
-        _rand.GetBytes(randb);
+        RandomNumberGenerator.Fill(randb);
         var value = BitConverter.ToInt32(randb, startIndex: 0);
 
         if (value < 0)
@@ -37,7 +35,7 @@ public sealed class RandomNumberProvider : IRandomNumberProvider
     public int NextNumber(int max)
     {
         var randb = new byte[4];
-        _rand.GetBytes(randb);
+        RandomNumberGenerator.Fill(randb);
         var value = BitConverter.ToInt32(randb, startIndex: 0);
         value %= max + 1; // % calculates remainder
 
@@ -98,6 +96,4 @@ public sealed class RandomNumberProvider : IRandomNumberProvider
     /// </returns>
     public int GetSecureRandomInt32(int fromInclusive, int toExclusive)
         => RandomNumberGenerator.GetInt32(fromInclusive, toExclusive);
-
-    public void Dispose() => _rand.Dispose();
 }
