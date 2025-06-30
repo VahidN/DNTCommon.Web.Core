@@ -1,5 +1,7 @@
 using System.Net.NetworkInformation;
+using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Logging;
 
 namespace DNTCommon.Web.Core;
@@ -76,5 +78,48 @@ public static class NetworkExtensions
         ArgumentNullException.ThrowIfNull(host);
 
         return Dns.GetHostEntry(host).AddressList.First(address => address.AddressFamily == AddressFamily.InterNetwork);
+    }
+
+    /// <summary>
+    ///     Asynchronously retrieves the expiration date of the SSL/TLS certificate for a given hostname and port.
+    /// </summary>
+    /// <param name="hostname">The host to connect to.</param>
+    /// <param name="port">The port to connect to. The default is 443.</param>
+    /// <param name="logger"></param>
+    /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+    /// <returns>The certificate's expiration date in UTC, or null if it cannot be retrieved.</returns>
+    public static async Task<DateTime?> GetCertificateExpiryAsync(this string hostname,
+        int port = 443,
+        ILogger? logger = null,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var client = new TcpClient();
+            await client.ConnectAsync(hostname, port, cancellationToken);
+
+            // IMPORTANT: We are deliberately ignoring all certificate validation errors.
+            // This is acceptable ONLY because our goal is to inspect the certificate,
+            // not to establish a secure communication channel for sensitive data.
+            // For any other purpose, this would be a major security vulnerability.
+            var sslOptions = new SslClientAuthenticationOptions
+            {
+                TargetHost = hostname,
+                RemoteCertificateValidationCallback = (_, _, _, _) => true
+            };
+
+            await using var networkStream = client.GetStream();
+            await using var sslStream = new SslStream(networkStream, leaveInnerStreamOpen: false);
+            await sslStream.AuthenticateAsClientAsync(sslOptions, cancellationToken);
+            using var cert = sslStream.RemoteCertificate as X509Certificate2;
+
+            return cert?.NotAfter.ToUniversalTime();
+        }
+        catch (Exception ex)
+        {
+            logger?.LogError(ex.Demystify(), message: "Failed to GetCertificateExpiryAsync(`{Path}`).", hostname);
+
+            return null;
+        }
     }
 }
