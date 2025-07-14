@@ -115,7 +115,7 @@ public class OperationResult
 ///     If an error is expected, don't use exceptions for flow control!
 ///     Only use exceptions for errors which we can't recover from (database connection errors...)
 /// </summary>
-public class OperationResult<TData> : OperationResult
+public sealed class OperationResult<TData> : OperationResult
 {
     /// <summary>
     ///     Creates a failed operation.
