@@ -147,7 +147,7 @@ public static class NumbersExtensions
             return defaultValue;
         }
 
-        return int.TryParse(data, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var result)
+        return int.TryParse(data, NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out var result)
             ? result
             : defaultValue;
     }
@@ -234,7 +234,7 @@ public static class NumbersExtensions
     /// <summary>
     ///     Tries to convert a string value to a number
     /// </summary>
-    public static T? ToNumber<T>(this string? data, NumberStyles style = NumberStyles.AllowDecimalPoint)
+    public static T? ToNumber<T>(this string? data, NumberStyles style = NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands)
         where T : INumber<T>
     {
         var defaultValue = default(T);
