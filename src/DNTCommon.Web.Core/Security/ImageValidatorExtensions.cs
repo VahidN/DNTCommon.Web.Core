@@ -40,7 +40,8 @@ public static class ImageValidatorExtensions
     }
 
     /// <summary>
-    ///     Tries to decode the given file to a bitmap
+    ///     Tries to decode the given file to a bitmap.
+    ///     It will not check the imageInfo, if maxWidth or maxHeight are null or 0.
     /// </summary>
     /// <param name="filePath">The absolute path of the file</param>
     /// <param name="maxWidth">maximum allowed width</param>
@@ -71,7 +72,8 @@ public static class ImageValidatorExtensions
     }
 
     /// <summary>
-    ///     Tries to decode the given bytes to a bitmap
+    ///     Tries to decode the given bytes to a bitmap.
+    ///     It will not check the imageInfo, if maxWidth or maxHeight are null or 0.
     /// </summary>
     /// <param name="data">The provided content</param>
     /// <param name="maxWidth">maximum allowed width</param>
@@ -102,7 +104,8 @@ public static class ImageValidatorExtensions
     }
 
     /// <summary>
-    ///     Tries to decode the given stream to a bitmap
+    ///     Tries to decode the given stream to a bitmap.
+    ///     It will not check the imageInfo, if maxWidth or maxHeight are null or 0.
     /// </summary>
     /// <param name="stream">The stream of a given data</param>
     /// <param name="maxWidth">maximum allowed width</param>
@@ -135,7 +138,8 @@ public static class ImageValidatorExtensions
     }
 
     /// <summary>
-    ///     Tries to decode the given posted file to a bitmap
+    ///     Tries to decode the given posted file to a bitmap.
+    ///     It will not check the imageInfo, if maxWidth or maxHeight are null or 0.
     /// </summary>
     /// <param name="fromFile">Represents a file sent with the HttpRequest</param>
     /// <param name="maxWidth">maximum allowed width</param>
@@ -186,9 +190,36 @@ public static class ImageValidatorExtensions
            fromFiles.All(fromFile => fromFile.IsValidImageFile(maxWidth, maxHeight, logger));
 
     /// <summary>
-    ///     Does this image has a proper Width and Height
+    ///     Does this image has a proper Width and Height.
+    ///     It will not check the info, if maxWidth or maxHeight are null or 0.
     /// </summary>
     public static bool HasValidImageInfo(this SKImageInfo info, int? maxWidth = null, int? maxHeight = null)
-        => (maxWidth is null && maxHeight is null) || (maxWidth.HasValue && info.Width <= maxWidth.Value) ||
-           (maxHeight.HasValue && info.Height <= maxHeight.Value);
+    {
+        if (info.BytesSize == 0)
+        {
+            return false;
+        }
+
+        if (maxWidth is null && maxHeight is null)
+        {
+            return true;
+        }
+
+        if (maxWidth is > 0 && maxHeight is > 0)
+        {
+            return info.Width <= maxWidth.Value && info.Height <= maxHeight.Value;
+        }
+
+        if (maxHeight is > 0 && maxWidth is <= 0)
+        {
+            return info.Height <= maxHeight.Value;
+        }
+
+        if (maxWidth is > 0 && maxHeight is <= 0)
+        {
+            return info.Width <= maxWidth.Value;
+        }
+
+        return true;
+    }
 }

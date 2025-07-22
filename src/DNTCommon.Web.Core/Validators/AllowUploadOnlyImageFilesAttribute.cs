@@ -12,12 +12,14 @@ public sealed class AllowUploadOnlyImageFilesAttribute : UploadFileValidationBas
 {
     /// <summary>
     ///     maximum allowed width.
+    ///     It will be ignored if it's 0.
     /// </summary>
     /// <value></value>
     public int MaxWidth { get; set; }
 
     /// <summary>
-    ///     maximum allowed height
+    ///     maximum allowed height.
+    ///     It will be ignored if it's 0.
     /// </summary>
     /// <value></value>
     public int MaxHeight { get; set; }
