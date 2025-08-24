@@ -26,9 +26,9 @@ public sealed class UploadFileExtensionsAttribute : UploadFileValidationBaseAttr
     {
         var (success, errorMessage) = HasValidFileSize(file);
 
-        if (success.HasValue)
+        if (!success)
         {
-            return (success.Value, ErrorMessage: errorMessage);
+            return (success, ErrorMessage: errorMessage);
         }
 
         var fileExtension = Path.GetExtension(file?.FileName);

@@ -18,16 +18,6 @@ public abstract class UploadFileValidationBaseAttribute : ValidationAttribute
     public string? IsRequiredErrorMessage { set; get; }
 
     /// <summary>
-    ///     Determines whether empty files can be uploaded
-    /// </summary>
-    public bool AllowUploadEmptyFiles { get; set; }
-
-    /// <summary>
-    ///     A custom error message for AllowUploadEmptyFiles
-    /// </summary>
-    public string? AllowUploadEmptyFilesErrorMessage { set; get; }
-
-    /// <summary>
     ///     Max allowed file size. It will be ignored if it's 0.
     /// </summary>
     public long MaxFileSizeInBytes { get; set; }
@@ -81,16 +71,11 @@ public abstract class UploadFileValidationBaseAttribute : ValidationAttribute
             : new ValidationResult(errorMessage, [validationContext.MemberName]);
     }
 
-    protected (bool? Success, string? ErrorMessage) HasValidFileSize(IFormFile? file)
+    protected (bool Success, string? ErrorMessage) HasValidFileSize(IFormFile? file)
     {
-        if (!IsRequired || file is null)
+        if (file is null || file.Length == 0)
         {
             return (!IsRequired, IsRequiredErrorMessage ?? ErrorMessage);
-        }
-
-        if (file.Length == 0)
-        {
-            return (AllowUploadEmptyFiles, AllowUploadEmptyFilesErrorMessage ?? ErrorMessage);
         }
 
         if (MaxFileSizeInBytes > 0 && file.Length > MaxFileSizeInBytes)
@@ -103,6 +88,6 @@ public abstract class UploadFileValidationBaseAttribute : ValidationAttribute
             return (false, MinFileSizeInBytesErrorMessage ?? ErrorMessage);
         }
 
-        return (null, null);
+        return (true, null);
     }
 }

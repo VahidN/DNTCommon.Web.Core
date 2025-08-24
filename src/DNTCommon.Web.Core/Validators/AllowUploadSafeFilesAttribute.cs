@@ -86,9 +86,9 @@ public sealed class AllowUploadSafeFilesAttribute : UploadFileValidationBaseAttr
     {
         var (success, errorMessage) = HasValidFileSize(file);
 
-        if (success.HasValue)
+        if (!success)
         {
-            return (success.Value, ErrorMessage: errorMessage);
+            return (success, ErrorMessage: errorMessage);
         }
 
         var fileName = file?.FileName;

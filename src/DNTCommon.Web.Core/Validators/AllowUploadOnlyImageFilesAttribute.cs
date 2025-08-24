@@ -36,8 +36,8 @@ public sealed class AllowUploadOnlyImageFilesAttribute : UploadFileValidationBas
     {
         var (success, errorMessage) = HasValidFileSize(file);
 
-        return success.HasValue
-            ? (success.Value, errorMessage)
+        return !success
+            ? (success, errorMessage)
             : (file.IsValidImageFile(MaxWidth, MaxHeight), MaxWidthMaxHeightErrorMessage ?? ErrorMessage);
     }
 }
