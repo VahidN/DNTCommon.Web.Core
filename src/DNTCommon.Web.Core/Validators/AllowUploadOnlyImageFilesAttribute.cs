@@ -34,26 +34,10 @@ public sealed class AllowUploadOnlyImageFilesAttribute : UploadFileValidationBas
     /// </summary>
     public override (bool Success, string? ErrorMessage) IsValidFile(IFormFile? file)
     {
-        if (file is null)
-        {
-            return (!IsRequired, IsRequiredErrorMessage ?? ErrorMessage);
-        }
+        var (success, errorMessage) = HasValidFileSize(file);
 
-        if (file.Length == 0)
-        {
-            return (AllowUploadEmptyFiles, AllowUploadEmptyFilesErrorMessage ?? ErrorMessage);
-        }
-
-        if (MaxFileSizeInBytes > 0 && file.Length > MaxFileSizeInBytes)
-        {
-            return (false, MaxFileSizeInBytesErrorMessage ?? ErrorMessage);
-        }
-
-        if (MinFileSizeInBytes > 0 && file.Length < MinFileSizeInBytes)
-        {
-            return (false, MinFileSizeInBytesErrorMessage ?? ErrorMessage);
-        }
-
-        return (file.IsValidImageFile(MaxWidth, MaxHeight), MaxWidthMaxHeightErrorMessage ?? ErrorMessage);
+        return success.HasValue
+            ? (success.Value, errorMessage)
+            : (file.IsValidImageFile(MaxWidth, MaxHeight), MaxWidthMaxHeightErrorMessage ?? ErrorMessage);
     }
 }

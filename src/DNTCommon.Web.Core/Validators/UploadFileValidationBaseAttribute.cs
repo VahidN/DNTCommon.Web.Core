@@ -80,4 +80,29 @@ public abstract class UploadFileValidationBaseAttribute : ValidationAttribute
             ? new ValidationResult(errorMessage)
             : new ValidationResult(errorMessage, [validationContext.MemberName]);
     }
+
+    protected (bool? Success, string? ErrorMessage) HasValidFileSize(IFormFile? file)
+    {
+        if (!IsRequired || file is null)
+        {
+            return (!IsRequired, IsRequiredErrorMessage ?? ErrorMessage);
+        }
+
+        if (file.Length == 0)
+        {
+            return (AllowUploadEmptyFiles, AllowUploadEmptyFilesErrorMessage ?? ErrorMessage);
+        }
+
+        if (MaxFileSizeInBytes > 0 && file.Length > MaxFileSizeInBytes)
+        {
+            return (false, MaxFileSizeInBytesErrorMessage ?? ErrorMessage);
+        }
+
+        if (MinFileSizeInBytes > 0 && file.Length < MinFileSizeInBytes)
+        {
+            return (false, MinFileSizeInBytesErrorMessage ?? ErrorMessage);
+        }
+
+        return (null, null);
+    }
 }

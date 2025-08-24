@@ -84,27 +84,14 @@ public sealed class AllowUploadSafeFilesAttribute : UploadFileValidationBaseAttr
     /// </summary>
     public override (bool Success, string? ErrorMessage) IsValidFile(IFormFile? file)
     {
-        if (file is null)
+        var (success, errorMessage) = HasValidFileSize(file);
+
+        if (success.HasValue)
         {
-            return (!IsRequired, IsRequiredErrorMessage ?? ErrorMessage);
+            return (success.Value, ErrorMessage: errorMessage);
         }
 
-        if (file.Length == 0)
-        {
-            return (AllowUploadEmptyFiles, AllowUploadEmptyFilesErrorMessage ?? ErrorMessage);
-        }
-
-        if (MaxFileSizeInBytes > 0 && file.Length > MaxFileSizeInBytes)
-        {
-            return (false, MaxFileSizeInBytesErrorMessage ?? ErrorMessage);
-        }
-
-        if (MinFileSizeInBytes > 0 && file.Length < MinFileSizeInBytes)
-        {
-            return (false, MinFileSizeInBytesErrorMessage ?? ErrorMessage);
-        }
-
-        var fileName = file.FileName;
+        var fileName = file?.FileName;
 
         if (string.IsNullOrWhiteSpace(fileName))
         {
