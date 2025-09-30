@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>DNTCommon.Web.Core provides common scenarios' solutions for ASP.NET Core applications.</Description>
-    <VersionPrefix>11.8.4</VersionPrefix>
+    <VersionPrefix>11.8.5</VersionPrefix>
     <Authors>Vahid Nasiri</Authors>
     <TargetFrameworks>net9.0;net8.0;net7.0;net6.0;</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -67,7 +67,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Meziantou.Analyzer" Version="2.0.212">
+    <PackageReference Include="Meziantou.Analyzer" Version="2.0.221">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -100,18 +100,18 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App"/>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
     <PackageReference Include="DNTPersianUtils.Core" Version="6.7.0"/>
-    <PackageReference Include="MailKit" Version="4.13.0"/>
-    <PackageReference Include="HtmlAgilityPack" Version="1.12.2"/>
+    <PackageReference Include="MailKit" Version="4.14.0"/>
+    <PackageReference Include="HtmlAgilityPack" Version="1.12.3"/>
     <PackageReference Include="IPAddressRange" Version="6.2.0"/>
-    <PackageReference Include="SkiaSharp" Version="3.119.0"/>
-    <PackageReference Include="SkiaSharp.HarfBuzz" Version="3.119.0"/>
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.0"/>
-    <PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" Version="8.3.1.1"/>
+    <PackageReference Include="SkiaSharp" Version="3.119.1"/>
+    <PackageReference Include="SkiaSharp.HarfBuzz" Version="3.119.1"/>
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.1"/>
+    <PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" Version="8.3.1.2"/>
     <PackageReference Include="Ben.Demystifier" Version="0.4.1"/>
     <PackageReference Include="UAParser" Version="3.1.47"/>
     <PackageReference Include="AsyncKeyedLock" Version="7.1.6"/>
-    <PackageReference Include="NetEscapades.AspNetCore.SecurityHeaders" Version="1.1.0"/>
-    <PackageReference Include="iTextSharp.LGPLv2.Core" Version="3.7.4"/>
+    <PackageReference Include="NetEscapades.AspNetCore.SecurityHeaders" Version="1.2.0"/>
+    <PackageReference Include="iTextSharp.LGPLv2.Core" Version="3.7.7"/>
     <PackageReference Include="Scrutor" Version="6.1.0"/>
   </ItemGroup>
   <ItemGroup>
