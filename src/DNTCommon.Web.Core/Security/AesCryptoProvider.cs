@@ -22,9 +22,17 @@ public static class AesCryptoProvider
         using var aes = Aes.Create();
 
         var saltBytes = Encoding.UTF8.GetBytes(salt);
-        using var key = new Rfc2898DeriveBytes(password, saltBytes, Iterations, HashAlgorithmName.SHA512);
-        aes.Key = key.GetBytes(cb: 32);
-        aes.IV = key.GetBytes(cb: 16);
+
+        var derivedBytes =
+            Rfc2898DeriveBytes.Pbkdf2(password, saltBytes, Iterations, HashAlgorithmName.SHA512, outputLength: 48);
+
+        var keyBytes = new byte[32];
+        var ivBytes = new byte[16];
+        Array.Copy(derivedBytes, sourceIndex: 0, keyBytes, destinationIndex: 0, length: 32);
+        Array.Copy(derivedBytes, sourceIndex: 32, ivBytes, destinationIndex: 0, length: 16);
+
+        aes.Key = keyBytes;
+        aes.IV = ivBytes;
 
         var encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
 
@@ -51,9 +59,17 @@ public static class AesCryptoProvider
         using var aes = Aes.Create();
 
         var saltBytes = Encoding.UTF8.GetBytes(salt);
-        using var key = new Rfc2898DeriveBytes(password, saltBytes, Iterations, HashAlgorithmName.SHA512);
-        aes.Key = key.GetBytes(cb: 32);
-        aes.IV = key.GetBytes(cb: 16);
+
+        var derivedBytes =
+            Rfc2898DeriveBytes.Pbkdf2(password, saltBytes, Iterations, HashAlgorithmName.SHA512, outputLength: 48);
+
+        var keyBytes = new byte[32];
+        var ivBytes = new byte[16];
+        Array.Copy(derivedBytes, sourceIndex: 0, keyBytes, destinationIndex: 0, length: 32);
+        Array.Copy(derivedBytes, sourceIndex: 32, ivBytes, destinationIndex: 0, length: 16);
+
+        aes.Key = keyBytes;
+        aes.IV = ivBytes;
 
         var buffer = WebEncoders.Base64UrlDecode(cipherText);
 

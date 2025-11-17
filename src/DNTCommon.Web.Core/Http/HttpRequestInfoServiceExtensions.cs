@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -32,23 +31,19 @@ public static class HttpRequestInfoServiceExtensions
     public static IServiceCollection AddHttpRequestInfoService(this IServiceCollection services)
     {
         services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-        services.TryAddSingleton<IActionContextAccessor, ActionContextAccessor>();
 
         // Allows injecting IUrlHelper as a dependency
-        services.AddScoped(serviceProvider =>
+        services.AddScoped<IUrlHelper>(serviceProvider =>
         {
-            var actionContext = serviceProvider.GetRequiredService<IActionContextAccessor>().ActionContext;
-            var urlHelperFactory = serviceProvider.GetRequiredService<IUrlHelperFactory>();
+            var httpContext = serviceProvider.GetRequiredService<IHttpContextAccessor>().HttpContext ??
+                              new DefaultHttpContext
+                              {
+                                  RequestServices = serviceProvider
+                              };
 
-            if (actionContext is not null)
-            {
-                return urlHelperFactory.GetUrlHelper(actionContext);
-            }
-
-            return urlHelperFactory.GetUrlHelper(new ActionContext(new DefaultHttpContext
-            {
-                RequestServices = serviceProvider
-            }, new RouteData(), new ActionDescriptor()));
+            return serviceProvider.GetRequiredService<IUrlHelperFactory>()
+                .GetUrlHelper(new ActionContext(httpContext, httpContext.GetRouteData() ?? new RouteData(),
+                    httpContext.GetEndpoint()?.Metadata.GetMetadata<ActionDescriptor>() ?? new ActionDescriptor()));
         });
 
         services.AddScoped<IHttpRequestInfoService, HttpRequestInfoService>();

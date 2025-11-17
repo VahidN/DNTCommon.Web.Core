@@ -1,7 +1,7 @@
 using DNTPersianUtils.Core;
 using MailKit.Net.Smtp;
 using MimeKit;
-#if NET9_0 || NET8_0
+#if NET10_0 || NET9_0 || NET8_0
 using Microsoft.AspNetCore.Components;
 #endif
 

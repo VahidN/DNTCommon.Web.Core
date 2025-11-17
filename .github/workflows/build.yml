@@ -12,7 +12,7 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 9.0.x
+        dotnet-version: 10.0.x
     - name: Build DNTCommon.Web.Core lib
       run: dotnet build ./src/DNTCommon.Web.Core/DNTCommon.Web.Core.csproj --configuration Release
 
