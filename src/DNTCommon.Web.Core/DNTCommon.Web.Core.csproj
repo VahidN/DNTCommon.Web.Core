@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>DNTCommon.Web.Core provides common scenarios' solutions for ASP.NET Core applications.</Description>
-    <VersionPrefix>11.8.6</VersionPrefix>
+    <VersionPrefix>11.8.7</VersionPrefix>
     <Authors>Vahid Nasiri</Authors>
     <TargetFrameworks>net10.0;net9.0;net8.0;net7.0;net6.0;</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -67,7 +67,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Meziantou.Analyzer" Version="2.0.253">
+    <PackageReference Include="Meziantou.Analyzer" Version="2.0.254">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -102,7 +102,7 @@
     <PackageReference Include="DNTPersianUtils.Core" Version="6.7.1"/>
     <PackageReference Include="MailKit" Version="4.14.1"/>
     <PackageReference Include="HtmlAgilityPack" Version="1.12.4"/>
-    <PackageReference Include="IPAddressRange" Version="6.2.0"/>
+    <PackageReference Include="IPAddressRange" Version="6.3.0"/>
     <PackageReference Include="SkiaSharp" Version="3.119.1"/>
     <PackageReference Include="SkiaSharp.HarfBuzz" Version="3.119.1"/>
     <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.1"/>

@@ -71,7 +71,7 @@ public interface IWebMailService
         MailHeaders? headers = null,
         bool shouldValidateServerCertificate = true);
 
-#if NET_9 || NET_8
+#if NET_10 || NET_9 || NET_8
     /// <summary>
     ///     Sends an email using the `MailKit` library immediately.
     ///     This method converts a blazor .razor template file to a string and then uses it as the email's message.

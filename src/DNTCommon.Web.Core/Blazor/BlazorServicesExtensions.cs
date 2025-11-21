@@ -8,7 +8,7 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public static class BlazorServicesExtensions
 {
-#if NET_9 || NET_8
+#if NET_10 || NET_9 || NET_8
     /// <summary>
     ///     Adds services to IServiceCollection.
     /// </summary>

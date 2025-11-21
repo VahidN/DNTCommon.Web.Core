@@ -10,7 +10,7 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public static class DntCommonWebServiceCollectionExtensions
 {
-#if NET_9 || NET_8
+#if NET_10 || NET_9 || NET_8
     /// <summary>
     ///     Sets ServicesStartConcurrently and ServicesStopConcurrently to true
     /// </summary>
@@ -79,7 +79,7 @@ public static class DntCommonWebServiceCollectionExtensions
             services.AddDNTScheduler(scheduledTasksOptions);
         }
 
-#if NET_9 || NET_8
+#if NET_10 || NET_9 || NET_8
         services.AddBlazorStaticRendererService();
 #endif
         services.AddBlazorRenderingContextService();

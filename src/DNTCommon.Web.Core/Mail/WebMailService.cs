@@ -1,7 +1,7 @@
 using DNTPersianUtils.Core;
 using MailKit.Net.Smtp;
 using MimeKit;
-#if NET10_0 || NET9_0 || NET8_0
+#if NET_10 || NET_9 || NET_8
 using Microsoft.AspNetCore.Components;
 #endif
 
@@ -16,13 +16,13 @@ namespace DNTCommon.Web.Core;
 public class WebMailService(
     IBackgroundQueueService backgroundQueueService,
     IViewRendererService viewRendererService
-#if NET_9 || NET_8
+#if NET_10 || NET_9 || NET_8
     ,
     IBlazorStaticRendererService blazorStaticRendererService
 #endif
 ) : IWebMailService
 {
-#if NET_9 || NET_8
+#if NET_10 || NET_9 || NET_8
     private readonly IBlazorStaticRendererService _blazorStaticRendererService = blazorStaticRendererService ??
         throw new ArgumentNullException(nameof(blazorStaticRendererService));
 #endif
@@ -324,7 +324,7 @@ public class WebMailService(
         return builder.ToMessageBody();
     }
 
-#if NET_9 || NET_8
+#if NET_10 || NET_9 || NET_8
     /// <summary>
     ///     Sends an email using the `MailKit` library.
     ///     This method converts a Blazor .razor template file to an string and then uses it as the email's message.

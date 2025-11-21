@@ -19,7 +19,7 @@ namespace DNTCommon.Web.Core;
 /// </param>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
 public sealed class ValidateAntiForgeryTokenFailedAttribute(
-#if NET_9 || NET_8 || NET_7
+#if NET_10 || NET_9 || NET_8 || NET_7
     [StringSyntax(syntax: "Uri")]
 #endif
     string redirectUrl) : Attribute, IAlwaysRunResultFilter
