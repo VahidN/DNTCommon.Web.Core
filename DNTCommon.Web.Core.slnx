@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DNTCommon.Web.Core.Tests/DNTCommon.Web.Core.Tests.csproj" />
+    <Project Path="src/DNTCommon.Web.Core.TestWebAPI/DNTCommon.Web.Core.TestWebAPI.csproj" />
+    <Project Path="src/DNTCommon.Web.Core.TestWebApp/DNTCommon.Web.Core.TestWebApp.csproj" />
+    <Project Path="src/DNTCommon.Web.Core/DNTCommon.Web.Core.csproj" />
+  </Folder>
+</Solution>
