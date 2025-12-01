@@ -45,11 +45,13 @@ public interface ICacheService
     /// <param name="factory"></param>
     /// <param name="absoluteExpiration"></param>
     /// <param name="size"></param>
+    /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     Task<T?> GetOrAddAsync<T>(string cacheKey,
         string tag,
         Func<Task<T>> factory,
         DateTimeOffset absoluteExpiration,
-        int size = 1);
+        int size = 1,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache,
@@ -62,11 +64,13 @@ public interface ICacheService
     /// <param name="factory"></param>
     /// <param name="absoluteExpirationRelativeToNow"></param>
     /// <param name="size"></param>
+    /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     Task<T?> GetOrAddAsync<T>(string cacheKey,
         string tag,
         Func<Task<T>> factory,
         TimeSpan absoluteExpirationRelativeToNow,
-        int size = 1);
+        int size = 1,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     A thread-safe way (`asynchronously` blocks) of working with memory cache. First tries to get the key's value from
@@ -78,7 +82,12 @@ public interface ICacheService
     /// <param name="tag">Allows multiple cache entries to be considered as a group</param>
     /// <param name="factory"></param>
     /// <param name="options"></param>
-    Task<T?> GetOrAddAsync<T>(string cacheKey, string tag, Func<Task<T>> factory, MemoryCacheEntryOptions options);
+    /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
+    Task<T?> GetOrAddAsync<T>(string cacheKey,
+        string tag,
+        Func<Task<T>> factory,
+        MemoryCacheEntryOptions options,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     A thread-safe way (`asynchronously` blocks) of working with memory cache. First tries to get the key's value from
@@ -90,10 +99,12 @@ public interface ICacheService
     /// <param name="tags">Allows multiple cache entries to be considered as a group</param>
     /// <param name="factory"></param>
     /// <param name="options"></param>
+    /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     Task<T?> GetOrAddAsync<T>(string cacheKey,
         ICollection<string> tags,
         Func<Task<T>> factory,
-        MemoryCacheEntryOptions options);
+        MemoryCacheEntryOptions options,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache,

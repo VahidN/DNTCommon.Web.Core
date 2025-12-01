@@ -283,9 +283,20 @@ public static partial class HttpRequestExtensions
     ///     Deserialize `request.Body` as a JSON content.
     ///     This method needs [EnableReadableBodyStream] attribute to be added to a given action method.
     /// </summary>
-    public static async Task<T?> DeserializeRequestJsonBodyAsAsync<T>(this HttpContext httpContext)
+#pragma warning disable CC001
+    public static async Task<T?> DeserializeRequestJsonBodyAsAsync<T>(this HttpContext httpContext
+#pragma warning restore CC001
+#if !NET_6
+        ,
+        CancellationToken cancellationToken = default
+#endif
+    )
     {
-        var body = await httpContext.ReadRequestBodyAsStringAsync();
+        var body = await httpContext.ReadRequestBodyAsStringAsync(
+#if !NET_6
+            cancellationToken
+#endif
+        );
 
         return JsonSerializer.Deserialize<T>(body);
     }
@@ -294,7 +305,14 @@ public static partial class HttpRequestExtensions
     ///     Reads `request.Body` as string.
     ///     This method needs [EnableReadableBodyStream] attribute to be added to a given action method.
     /// </summary>
-    public static async Task<string> ReadRequestBodyAsStringAsync(this HttpContext httpContext)
+#pragma warning disable CC001
+    public static async Task<string> ReadRequestBodyAsStringAsync(this HttpContext httpContext
+#pragma warning restore CC001
+#if !NET_6
+        ,
+        CancellationToken cancellationToken = default
+#endif
+    )
     {
         RequestSanityCheck(httpContext);
         var request = httpContext.Request;
@@ -312,7 +330,11 @@ public static partial class HttpRequestExtensions
 
         using var bodyReader = new StreamReader(request.Body, Encoding.UTF8);
 
+#if !NET_6
+        var body = await bodyReader.ReadToEndAsync(cancellationToken);
+#else
         var body = await bodyReader.ReadToEndAsync();
+#endif
 
         // this is required, otherwise model binding will return null
         request.Body.Seek(offset: 0, SeekOrigin.Begin);
@@ -324,10 +346,21 @@ public static partial class HttpRequestExtensions
     ///     Deserialize `request.Body` as a JSON content.
     ///     This method needs [EnableReadableBodyStream] attribute to be added to a given action method.
     /// </summary>
+#pragma warning disable CC001
     public static async Task<IDictionary<string, string>?> DeserializeRequestJsonBodyAsDictionaryAsync(
-        this HttpContext httpContext)
+#pragma warning restore CC001
+        this HttpContext httpContext
+#if !NET_6
+        ,
+        CancellationToken cancellationToken = default
+#endif
+    )
     {
-        var body = await httpContext.ReadRequestBodyAsStringAsync();
+        var body = await httpContext.ReadRequestBodyAsStringAsync(
+#if !NET_6
+            cancellationToken
+#endif
+        );
 
         return JsonSerializer.Deserialize<Dictionary<string, string>>(body);
     }
@@ -368,28 +401,27 @@ public static partial class HttpRequestExtensions
         if (httpRequest.Query.Count != 0)
         {
             sb.AppendLine(HtmlExtensions.CreateHtmlTable(caption: "Request Query", ["Key", "Value"],
-                httpRequest.Query.Select(header => (List<string>) [header.Key, $"<pre>{header.Value}</pre>"])
-                    .ToList()));
+                httpRequest.Query.Select(header => (List<string>)[header.Key, $"<pre>{header.Value}</pre>"]).ToList()));
         }
 
         if (httpRequest.Headers.Any())
         {
             sb.AppendLine(HtmlExtensions.CreateHtmlTable(caption: "Request Headers", ["Key", "Value"],
-                httpRequest.Headers.Select(header => (List<string>) [header.Key, $"<pre>{header.Value}</pre>"])
+                httpRequest.Headers.Select(header => (List<string>)[header.Key, $"<pre>{header.Value}</pre>"])
                     .ToList()));
         }
 
         if (httpContext.User.Claims.Any())
         {
             sb.AppendLine(HtmlExtensions.CreateHtmlTable(caption: "User Claims", ["Key", "Value"],
-                httpContext.User.Claims.Select(header => (List<string>) [header.Type, $"<pre>{header.Value}</pre>"])
+                httpContext.User.Claims.Select(header => (List<string>)[header.Type, $"<pre>{header.Value}</pre>"])
                     .ToList()));
         }
 
         if (httpRequest is { HasFormContentType: true, Form.Count: > 0 })
         {
             sb.AppendLine(HtmlExtensions.CreateHtmlTable(caption: "Form Content", ["Key", "Value"],
-                httpRequest.Form.Select(header => (List<string>) [header.Key, $"<pre>{header.Value}</pre>"]).ToList()));
+                httpRequest.Form.Select(header => (List<string>)[header.Key, $"<pre>{header.Value}</pre>"]).ToList()));
         }
 
         var exceptionHandlerFeature = httpContext.Features.Get<IExceptionHandlerFeature>();
@@ -409,7 +441,7 @@ public static partial class HttpRequestExtensions
     }
 
     /// <summary>
-    ///     Returns the current page's addres. It uses IStatusCodeReExecuteFeature for better results.
+    ///     Returns the current page's address. It uses IStatusCodeReExecuteFeature for better results.
     /// </summary>
     /// <param name="httpContext"></param>
     /// <returns></returns>

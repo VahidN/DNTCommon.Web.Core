@@ -28,12 +28,12 @@ public interface IHtmlHelperService
     /// <summary>
     ///     Download the given uri and then extracts its title.
     /// </summary>
-    Task<string> GetUrlTitleAsync(Uri uri);
+    Task<string> GetUrlTitleAsync(Uri uri, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Download the given uri and then extracts its title.
     /// </summary>
-    Task<string> GetUrlTitleAsync(string url);
+    Task<string> GetUrlTitleAsync(string url, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Extracts the given HTML page's title.
@@ -41,7 +41,7 @@ public interface IHtmlHelperService
     string GetHtmlPageTitle(string html);
 
     /// <summary>
-    ///     Removes all of the HTML tags.
+    ///     Removes all the HTML tags.
     /// </summary>
     string RemoveHtmlTags(string html);
 

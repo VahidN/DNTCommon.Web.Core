@@ -18,11 +18,13 @@ public class LockAsyncAttribute<TKey> : Attribute, IAsyncActionFilter
     /// </summary>
     public TimeSpan LockTimeout { set; get; } = TimeSpan.FromSeconds(value: 30);
 
+#pragma warning disable CC001,MA0137
     /// <summary>
     ///     Applies a lock to an asynchronous action method, ensuring that only
     ///     one instance of the method executes at a time.
     /// </summary>
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+#pragma warning restore CC001, MA0137
     {
         ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(next);

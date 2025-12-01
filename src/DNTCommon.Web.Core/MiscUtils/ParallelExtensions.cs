@@ -1,5 +1,6 @@
 namespace DNTCommon.Web.Core;
 
+#pragma warning disable CC001,CC002
 /// <summary>
 ///     Parallel Extensions
 /// </summary>
@@ -176,3 +177,4 @@ public static class ParallelExtensions
         }, async (action, _) => { await action(); });
     }
 }
+#pragma warning restore CC001,CC002

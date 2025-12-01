@@ -12,7 +12,8 @@ public class ExecuteApplicationProcess : IExecuteApplicationProcess
     /// <summary>
     ///     A helper method to execute a process
     /// </summary>
-    public async Task<string> ExecuteProcessAsync(ApplicationStartInfo startInfo)
+    public async Task<string> ExecuteProcessAsync(ApplicationStartInfo startInfo,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(startInfo);
 
@@ -55,7 +56,7 @@ public class ExecuteApplicationProcess : IExecuteApplicationProcess
             }
             else
             {
-                await process.WaitForExitAsync();
+                await process.WaitForExitAsync(cancellationToken);
             }
         }
         finally
@@ -73,7 +74,7 @@ public class ExecuteApplicationProcess : IExecuteApplicationProcess
             return errorMessage;
         }
 
-        await Task.Delay(startInfo.WaitForExit ?? _defaultWaitForExit);
+        await Task.Delay(startInfo.WaitForExit ?? _defaultWaitForExit, cancellationToken);
         KillThisProcess(process);
 
         return string.Create(CultureInfo.InvariantCulture,

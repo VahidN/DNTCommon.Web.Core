@@ -30,7 +30,9 @@ public static class CollectionsExtensions
     /// <summary>
     ///     Applies an action to each item of the given collection
     /// </summary>
-    public static async Task ForEachAsync<T>(this IEnumerable<T>? collection, Func<T, Task> action)
+    public static async Task ForEachAsync<T>(this IEnumerable<T>? collection,
+        Func<T, CancellationToken, Task> action,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(action);
 
@@ -41,7 +43,7 @@ public static class CollectionsExtensions
 
         foreach (var item in collection)
         {
-            await action(item);
+            await action(item, cancellationToken);
         }
     }
 

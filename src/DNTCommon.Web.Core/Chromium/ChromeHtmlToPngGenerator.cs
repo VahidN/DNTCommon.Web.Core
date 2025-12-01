@@ -18,11 +18,13 @@ public class ChromeHtmlToPngGenerator(
     ///     High level method that converts HTML to PNG.
     /// </summary>
     /// <returns></returns>
-    public async Task<string> GeneratePngFromHtmlAsync(HtmlToPngGeneratorOptions options)
+    public async Task<string> GeneratePngFromHtmlAsync(HtmlToPngGeneratorOptions options,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(options);
 
-        using var locker = await lockerService.LockAsync<ExecuteApplicationProcess>(options.VirtualTimeBudget);
+        using var locker =
+            await lockerService.LockAsync<ExecuteApplicationProcess>(options.VirtualTimeBudget, cancellationToken);
 
         var arguments = CreateArguments(options);
 
@@ -40,7 +42,7 @@ public class ChromeHtmlToPngGenerator(
             AppPath = appPath,
             WaitForExit = options.WaitForExit,
             KillProcessOnStart = options.KillProcessOnStart
-        });
+        }, cancellationToken);
 
         antiXssService.GetSanitizedHtml($"{options}{Environment.NewLine}{log}").LogPossibleErrorsOrWarnings(logger);
 

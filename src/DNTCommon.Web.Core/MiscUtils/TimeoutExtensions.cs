@@ -48,14 +48,17 @@ public static class TimeoutExtensions
     /// </summary>
     /// <param name="func"></param>
     /// <param name="maxDelay"></param>
+    /// <param name="cancellationToken"></param>
     /// <typeparam name="T"></typeparam>
-    public static async Task RunWithTimeoutAsync<T>(this Func<Task<T>> func, TimeSpan maxDelay)
+    public static async Task RunWithTimeoutAsync<T>(this Func<Task<T>> func,
+        TimeSpan maxDelay,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(func);
 
-        var executionTask = Task.Run(func);
+        var executionTask = Task.Run(func, cancellationToken);
 
-        var delayTask = Task.Delay(maxDelay);
+        var delayTask = Task.Delay(maxDelay, cancellationToken);
         var finishedTask = await Task.WhenAny(executionTask, delayTask);
 
         if (finishedTask == delayTask)

@@ -45,12 +45,12 @@ public static class WebServerInfoProvider
     ///     Returns the current server's basic hardware and software info
     /// </summary>
     /// <returns></returns>
-    public static async Task<WebServerInfo> GetServerInfoAsync()
+    public static async Task<WebServerInfo> GetServerInfoAsync(CancellationToken cancellationToken = default)
     {
         var process = Process.GetCurrentProcess();
         var version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>();
         var hostName = Dns.GetHostName();
-        var addresses = await GetIPsAsync(hostName);
+        var addresses = await GetIPsAsync(hostName, cancellationToken);
         var totalAvailableMemoryBytes = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes;
 
         return new WebServerInfo
@@ -97,10 +97,11 @@ public static class WebServerInfoProvider
         };
     }
 
-    private static async Task<string[]> GetIPsAsync(string hostName)
+    private static async Task<string[]> GetIPsAsync(string hostName, CancellationToken cancellationToken)
         =>
         [
-            .. (await Dns.GetHostAddressesAsync(hostName)).Where(o => o.AddressFamily == AddressFamily.InterNetwork)
+            .. (await Dns.GetHostAddressesAsync(hostName, cancellationToken))
+            .Where(o => o.AddressFamily == AddressFamily.InterNetwork)
             .Select(o => o.ToString())
         ];
 

@@ -18,10 +18,14 @@ public class UrlNormalizationService(IRedirectUrlFinderService locationFinder) :
         string url2,
         bool findRedirectUrl,
         string defaultProtocol = "http",
-        NormalizeUrlRules normalizeUrlRules = NormalizeUrlRules.All)
+        NormalizeUrlRules normalizeUrlRules = NormalizeUrlRules.All,
+        CancellationToken cancellationToken = default)
     {
-        url1 = await NormalizeUrlAsync(new Uri(url1), findRedirectUrl, defaultProtocol, normalizeUrlRules);
-        url2 = await NormalizeUrlAsync(new Uri(url2), findRedirectUrl, defaultProtocol, normalizeUrlRules);
+        url1 = await NormalizeUrlAsync(new Uri(url1), findRedirectUrl, defaultProtocol, normalizeUrlRules,
+            cancellationToken);
+
+        url2 = await NormalizeUrlAsync(new Uri(url2), findRedirectUrl, defaultProtocol, normalizeUrlRules,
+            cancellationToken);
 
         return url1.Equals(url2, StringComparison.OrdinalIgnoreCase);
     }
@@ -33,10 +37,14 @@ public class UrlNormalizationService(IRedirectUrlFinderService locationFinder) :
         Uri uri2,
         bool findRedirectUrl,
         string defaultProtocol = "http",
-        NormalizeUrlRules normalizeUrlRules = NormalizeUrlRules.All)
+        NormalizeUrlRules normalizeUrlRules = NormalizeUrlRules.All,
+        CancellationToken cancellationToken = default)
     {
-        var url1 = await NormalizeUrlAsync(uri1, findRedirectUrl, defaultProtocol, normalizeUrlRules);
-        var url2 = await NormalizeUrlAsync(uri2, findRedirectUrl, defaultProtocol, normalizeUrlRules);
+        var url1 = await NormalizeUrlAsync(uri1, findRedirectUrl, defaultProtocol, normalizeUrlRules,
+            cancellationToken);
+
+        var url2 = await NormalizeUrlAsync(uri2, findRedirectUrl, defaultProtocol, normalizeUrlRules,
+            cancellationToken);
 
         return url1.Equals(url2, StringComparison.OrdinalIgnoreCase);
     }
@@ -50,11 +58,12 @@ public class UrlNormalizationService(IRedirectUrlFinderService locationFinder) :
     public async Task<string> NormalizeUrlAsync(Uri uri,
         bool findRedirectUrl,
         string defaultProtocol = "http",
-        NormalizeUrlRules normalizeUrlRules = NormalizeUrlRules.All)
+        NormalizeUrlRules normalizeUrlRules = NormalizeUrlRules.All,
+        CancellationToken cancellationToken = default)
     {
         if (findRedirectUrl)
         {
-            uri = await _locationFinder.GetRedirectUrlAsync(uri) ?? uri;
+            uri = await _locationFinder.GetRedirectUrlAsync(uri, cancellationToken: cancellationToken) ?? uri;
         }
 
         return uri.NormalizeUrl(defaultProtocol, normalizeUrlRules);
@@ -69,8 +78,9 @@ public class UrlNormalizationService(IRedirectUrlFinderService locationFinder) :
     public Task<string> NormalizeUrlAsync(string url,
         bool findRedirectUrl,
         string defaultProtocol = "http",
-        NormalizeUrlRules normalizeUrlRules = NormalizeUrlRules.All)
-        => NormalizeUrlAsync(new Uri(url), findRedirectUrl, defaultProtocol, normalizeUrlRules);
+        NormalizeUrlRules normalizeUrlRules = NormalizeUrlRules.All,
+        CancellationToken cancellationToken = default)
+        => NormalizeUrlAsync(new Uri(url), findRedirectUrl, defaultProtocol, normalizeUrlRules, cancellationToken);
 
     /// <summary>
     ///     Uses NormalizeUrl method to find the normalized URLs and then compares them.

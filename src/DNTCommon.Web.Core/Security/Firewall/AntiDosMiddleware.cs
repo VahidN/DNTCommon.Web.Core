@@ -39,10 +39,12 @@ public sealed class AntiDosMiddleware : IDisposable
 
     public void Dispose() => _disposableOnChange?.Dispose();
 
+#pragma warning disable CC001,MA0137
     /// <summary>
     ///     AntiDos Middleware Pipeline
     /// </summary>
     public async Task Invoke(HttpContext context)
+#pragma warning restore CC001, MA0137
     {
         ArgumentNullException.ThrowIfNull(context);
 

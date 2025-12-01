@@ -336,8 +336,9 @@ public class MemoryCacheService(
     public Task<T?> GetOrAddAsync<T>(string cacheKey,
         string tag,
         Func<Task<T>> factory,
-        MemoryCacheEntryOptions options)
-        => GetOrAddAsync(cacheKey, [tag], factory, options);
+        MemoryCacheEntryOptions options,
+        CancellationToken cancellationToken = default)
+        => GetOrAddAsync(cacheKey, [tag], factory, options, cancellationToken);
 
     /// <summary>
     ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache.
@@ -347,7 +348,8 @@ public class MemoryCacheService(
     public async Task<T?> GetOrAddAsync<T>(string cacheKey,
         ICollection<string> tags,
         Func<Task<T>> factory,
-        MemoryCacheEntryOptions options)
+        MemoryCacheEntryOptions options,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(tags);
         ArgumentNullException.ThrowIfNull(factory);
@@ -355,7 +357,7 @@ public class MemoryCacheService(
 
         // locks get and set internally
 
-        using var locker = await lockerService.LockAsync<MemoryCacheService>(_lockTimeout);
+        using var locker = await lockerService.LockAsync<MemoryCacheService>(_lockTimeout, cancellationToken);
 
         if (memoryCache.TryGetValue<T>(cacheKey, out var result))
         {
@@ -383,12 +385,13 @@ public class MemoryCacheService(
         string tag,
         Func<Task<T>> factory,
         DateTimeOffset absoluteExpiration,
-        int size = 1)
+        int size = 1,
+        CancellationToken cancellationToken = default)
         => GetOrAddAsync(cacheKey, [tag], factory, new MemoryCacheEntryOptions
         {
             AbsoluteExpiration = absoluteExpiration,
             Size = size // the size limit is the count of entries
-        });
+        }, cancellationToken);
 
     /// <summary>
     ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache.
@@ -399,12 +402,13 @@ public class MemoryCacheService(
         string tag,
         Func<Task<T>> factory,
         TimeSpan absoluteExpirationRelativeToNow,
-        int size = 1)
+        int size = 1,
+        CancellationToken cancellationToken = default)
         => GetOrAddAsync(cacheKey, [tag], factory, new MemoryCacheEntryOptions
         {
             AbsoluteExpirationRelativeToNow = absoluteExpirationRelativeToNow,
             Size = size // the size limit is the count of entries
-        });
+        }, cancellationToken);
 
     /// <summary>
     ///     A thread-safe way of working with memory cache. First tries to get the key's value from the cache.

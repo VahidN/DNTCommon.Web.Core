@@ -25,7 +25,13 @@ public class CspReportController(
     [HttpPost(template: "[action]")]
     [HttpGet(template: "[action]")]
     [EnableReadableBodyStream]
-    public async Task<IActionResult> Log()
+#pragma warning disable CC005B, CC001
+    public async Task<IActionResult> Log(
+#pragma warning restore CC001, CC005B
+#if !NET_6
+        CancellationToken cancellationToken = default
+#endif
+    )
     {
         if (HttpContext.IsGetRequest())
         {
@@ -34,7 +40,11 @@ public class CspReportController(
 
         using (var bodyReader = new StreamReader(HttpContext.Request.Body, Encoding.UTF8))
         {
+#if !NET_6
+            var body = await bodyReader.ReadToEndAsync(cancellationToken);
+#else
             var body = await bodyReader.ReadToEndAsync();
+#endif
 
             if (string.IsNullOrWhiteSpace(body))
             {

@@ -166,19 +166,14 @@ public class HtmlHelperService(
     /// <summary>
     ///     Download the given uri and then extracts its title.
     /// </summary>
-    public async Task<string> GetUrlTitleAsync(Uri uri)
+    public async Task<string> GetUrlTitleAsync(Uri uri, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(uri);
 
-        var result = await _downloaderService.DownloadPageAsync(uri.ToString());
+        var result = await _downloaderService.DownloadPageAsync(uri.ToString(), cancellationToken: cancellationToken);
 
         return GetHtmlPageTitle(result.Data);
     }
-
-    /// <summary>
-    ///     Download the given uri and then extracts its title.
-    /// </summary>
-    public Task<string> GetUrlTitleAsync(string url) => GetUrlTitleAsync(new Uri(url));
 
     /// <summary>
     ///     Extracts the given HTML page's title.
@@ -209,6 +204,12 @@ public class HtmlHelperService(
     /// </summary>
     public string ReplaceImageUrlsWithNewImageUrls(string html, Func<string, string?> imageUrlBuilder)
         => html.ReplaceImageUrlsWithNewImageUrls(imageUrlBuilder, _logger);
+
+    /// <summary>
+    ///     Download the given uri and then extracts its title.
+    /// </summary>
+    public Task<string> GetUrlTitleAsync(string url, CancellationToken cancellationToken = default)
+        => GetUrlTitleAsync(new Uri(url), cancellationToken);
 
     /// <summary>
     ///     Returns HtmlAttribute's of the selected nodes.

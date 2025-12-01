@@ -35,7 +35,8 @@ public interface IWebMailService
         DelayDelivery? delayDelivery = null,
         IEnumerable<string>? attachmentFiles = null,
         MailHeaders? headers = null,
-        bool shouldValidateServerCertificate = true);
+        bool shouldValidateServerCertificate = true,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Queues sending an email using the `MailKit` library and IBackgroundQueueService.
@@ -69,7 +70,8 @@ public interface IWebMailService
         DelayDelivery? delayDelivery = null,
         IEnumerable<string>? attachmentFiles = null,
         MailHeaders? headers = null,
-        bool shouldValidateServerCertificate = true);
+        bool shouldValidateServerCertificate = true,
+        CancellationToken cancellationToken = default);
 
 #if NET_10 || NET_9 || NET_8
     /// <summary>
@@ -86,7 +88,8 @@ public interface IWebMailService
         DelayDelivery? delayDelivery = null,
         IEnumerable<string>? attachmentFiles = null,
         MailHeaders? headers = null,
-        bool shouldValidateServerCertificate = true)
+        bool shouldValidateServerCertificate = true,
+        CancellationToken cancellationToken = default)
         where T : IComponent;
 
     /// <summary>

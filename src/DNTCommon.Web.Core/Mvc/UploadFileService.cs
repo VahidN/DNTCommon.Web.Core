@@ -19,11 +19,13 @@ public class UploadFileService(IWebHostEnvironment environment) : IUploadFileSer
     /// </summary>
     /// <param name="formFile">The posted file.</param>
     /// <param name="allowOverwrite">Creates a unique file name if the file already exists.</param>
+    /// <param name="cancellationToken"></param>
     /// <param name="destinationDirectoryNames">Directory names in the wwwroot directory.</param>
     /// <returns></returns>
     public async Task<(bool IsSaved, string SavedFilePath)> SavePostedFileAsync(IFormFile? formFile,
         bool allowOverwrite,
-        params string[] destinationDirectoryNames)
+        ICollection<string>? destinationDirectoryNames = null,
+        CancellationToken cancellationToken = default)
     {
         if (formFile is null || formFile.Length == 0)
         {
@@ -40,7 +42,7 @@ public class UploadFileService(IWebHostEnvironment environment) : IUploadFileSer
             }
         }
 
-        return await SavePostedFileAsync(formFile, uploadsRootFolder, allowOverwrite);
+        return await SavePostedFileAsync(formFile, uploadsRootFolder, allowOverwrite, cancellationToken);
     }
 
     /// <summary>
@@ -49,17 +51,21 @@ public class UploadFileService(IWebHostEnvironment environment) : IUploadFileSer
     /// <param name="formFile">The posted file.</param>
     /// <param name="uploadsRootFolder">The absolute path of the upload folder.</param>
     /// <param name="allowOverwrite">Creates a unique file name if the file already exists.</param>
+    /// <param name="cancellationToken"></param>
     /// <returns></returns>
     public Task<(bool IsSaved, string SavedFilePath)> SavePostedFileAsync(IFormFile? formFile,
         string uploadsRootFolder,
-        bool allowOverwrite)
-        => formFile.SavePostedFileAsync(uploadsRootFolder, allowOverwrite);
+        bool allowOverwrite,
+        CancellationToken cancellationToken = default)
+        => formFile.SavePostedFileAsync(uploadsRootFolder, allowOverwrite, cancellationToken);
 
     /// <summary>
     ///     Saves the posted IFormFile to a byte array.
     /// </summary>
     /// <param name="formFile">The posted file.</param>
-    public Task<byte[]?> GetPostedFileDataAsync(IFormFile? formFile) => formFile.GetPostedFileDataAsync();
+    /// <param name="cancellationToken"></param>
+    public Task<byte[]?> GetPostedFileDataAsync(IFormFile? formFile, CancellationToken cancellationToken = default)
+        => formFile.GetPostedFileDataAsync(cancellationToken);
 
     /// <summary>
     ///     Creates a unique file name if the file already exists.

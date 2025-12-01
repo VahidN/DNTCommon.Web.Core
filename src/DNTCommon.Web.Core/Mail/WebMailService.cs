@@ -62,12 +62,13 @@ public class WebMailService(
         DelayDelivery? delayDelivery = null,
         IEnumerable<string>? attachmentFiles = null,
         MailHeaders? headers = null,
-        bool shouldValidateServerCertificate = true)
+        bool shouldValidateServerCertificate = true,
+        CancellationToken cancellationToken = default)
     {
         var message = await _viewRendererService.RenderViewToStringAsync(viewNameOrPath, viewModel);
 
         await SendEmailAsync(smtpConfig, emails, subject, message, blindCarpbonCopies, carpbonCopies, replyTos,
-            delayDelivery, attachmentFiles, headers, shouldValidateServerCertificate);
+            delayDelivery, attachmentFiles, headers, shouldValidateServerCertificate, cancellationToken);
     }
 
     /// <summary>
@@ -103,7 +104,8 @@ public class WebMailService(
         DelayDelivery? delayDelivery = null,
         IEnumerable<string>? attachmentFiles = null,
         MailHeaders? headers = null,
-        bool shouldValidateServerCertificate = true)
+        bool shouldValidateServerCertificate = true,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(smtpConfig);
 
@@ -112,13 +114,13 @@ public class WebMailService(
         if (smtpConfig.UsePickupFolder && !string.IsNullOrWhiteSpace(smtpConfig.PickupFolder))
         {
             await UsePickupFolderAsync(smtpConfig, emails.ToArray(), subject, message, blindCarpbonCopies?.ToArray(),
-                carpbonCopies?.ToArray(), replyTos?.ToArray(), attachmentFiles?.ToArray(), headers);
+                carpbonCopies?.ToArray(), replyTos?.ToArray(), attachmentFiles?.ToArray(), headers, cancellationToken);
         }
         else
         {
             await SendThisEmailAsync(smtpConfig, emails.ToArray(), subject, message, blindCarpbonCopies?.ToArray(),
                 carpbonCopies?.ToArray(), replyTos?.ToArray(), delayDelivery, attachmentFiles?.ToArray(), headers,
-                shouldValidateServerCertificate);
+                shouldValidateServerCertificate, cancellationToken);
         }
     }
 
@@ -132,7 +134,8 @@ public class WebMailService(
         DelayDelivery? delayDelivery,
         ICollection<string>? attachmentFiles,
         MailHeaders? headers,
-        bool shouldValidateServerCertificate)
+        bool shouldValidateServerCertificate,
+        CancellationToken cancellationToken)
     {
         using var client = new SmtpClient();
 
@@ -147,11 +150,11 @@ public class WebMailService(
             client.LocalDomain = smtpConfig.LocalDomain;
         }
 
-        await client.ConnectAsync(smtpConfig.Server, smtpConfig.Port);
+        await client.ConnectAsync(smtpConfig.Server, smtpConfig.Port, cancellationToken: cancellationToken);
 
         if (!string.IsNullOrWhiteSpace(smtpConfig.Username) && !string.IsNullOrWhiteSpace(smtpConfig.Password))
         {
-            await client.AuthenticateAsync(smtpConfig.Username, smtpConfig.Password);
+            await client.AuthenticateAsync(smtpConfig.Username, smtpConfig.Password, cancellationToken);
         }
 
         var count = 0;
@@ -161,18 +164,18 @@ public class WebMailService(
             using (var emailMessage = GetEmailMessage(email.ToName, email.ToAddress, subject, message, attachmentFiles,
                        smtpConfig, headers, blindCarpbonCopies, carpbonCopies, replyTos))
             {
-                await client.SendAsync(emailMessage);
+                await client.SendAsync(emailMessage, cancellationToken);
             }
 
             count++;
 
             if (delayDelivery is not null && count % delayDelivery.NumberOfMessages == 0)
             {
-                await Task.Delay(delayDelivery.Delay);
+                await Task.Delay(delayDelivery.Delay, cancellationToken);
             }
         }
 
-        await client.DisconnectAsync(quit: true);
+        await client.DisconnectAsync(quit: true, cancellationToken);
     }
 
     private static async Task UsePickupFolderAsync(SmtpConfig smtpConfig,
@@ -183,7 +186,8 @@ public class WebMailService(
         ICollection<MailAddress>? carpbonCopies,
         ICollection<MailAddress>? replyTos,
         ICollection<string>? attachmentFiles,
-        MailHeaders? headers)
+        MailHeaders? headers,
+        CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(smtpConfig.PickupFolder))
         {
@@ -195,7 +199,7 @@ public class WebMailService(
         foreach (var email in emails)
         {
             await SaveFileAsync(smtpConfig, subject, message, blindCarpbonCopies, carpbonCopies, replyTos,
-                attachmentFiles, headers, email);
+                attachmentFiles, headers, email, cancellationToken);
         }
     }
 
@@ -207,7 +211,8 @@ public class WebMailService(
         ICollection<MailAddress>? replyTos,
         ICollection<string>? attachmentFiles,
         MailHeaders? headers,
-        MailAddress email)
+        MailAddress email,
+        CancellationToken cancellationToken)
     {
         if (smtpConfig?.PickupFolder is null)
         {
@@ -221,7 +226,7 @@ public class WebMailService(
         using var emailMessage = GetEmailMessage(email.ToName, email.ToAddress, subject, message, attachmentFiles,
             smtpConfig, headers, blindCarpbonCopies, carpbonCopies, replyTos);
 
-        await emailMessage.WriteToAsync(stream);
+        await emailMessage.WriteToAsync(stream, cancellationToken);
     }
 
     private static MimeMessage GetEmailMessage(string toName,
@@ -339,13 +344,14 @@ public class WebMailService(
         DelayDelivery? delayDelivery = null,
         IEnumerable<string>? attachmentFiles = null,
         MailHeaders? headers = null,
-        bool shouldValidateServerCertificate = true)
+        bool shouldValidateServerCertificate = true,
+        CancellationToken cancellationToken = default)
         where T : IComponent
     {
         var message = await _blazorStaticRendererService.StaticRenderComponentAsync<T>(viewModel);
 
         await SendEmailAsync(smtpConfig, emails, subject, message, blindCarpbonCopies, carpbonCopies, replyTos,
-            delayDelivery, attachmentFiles, headers, shouldValidateServerCertificate);
+            delayDelivery, attachmentFiles, headers, shouldValidateServerCertificate, cancellationToken);
     }
 
     /// <summary>

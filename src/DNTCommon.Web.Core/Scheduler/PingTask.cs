@@ -18,6 +18,6 @@ public class PingTask(MySitePingClient pingClient) : IScheduledTask
             return;
         }
 
-        await pingClient.WakeUpAsync();
+        await pingClient.WakeUpAsync(cancellationToken);
     }
 }

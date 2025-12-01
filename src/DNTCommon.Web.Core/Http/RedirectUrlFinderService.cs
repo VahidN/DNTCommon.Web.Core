@@ -28,9 +28,11 @@ public class RedirectUrlFinderService : IRedirectUrlFinderService
     /// <summary>
     ///     Finds the actual hidden URL after multiple redirects.
     /// </summary>
-    public async Task<string?> GetRedirectUrlAsync(string siteUrl, int maxRedirects = 20)
+    public async Task<string?> GetRedirectUrlAsync(string siteUrl,
+        int maxRedirects = 20,
+        CancellationToken cancellationToken = default)
     {
-        var uri = await GetRedirectUrlAsync(new Uri(siteUrl), maxRedirects);
+        var uri = await GetRedirectUrlAsync(new Uri(siteUrl), maxRedirects, cancellationToken);
 
         return uri?.OriginalString;
     }
@@ -38,7 +40,9 @@ public class RedirectUrlFinderService : IRedirectUrlFinderService
     /// <summary>
     ///     Finds the actual hidden URL after multiple redirects.
     /// </summary>
-    public async Task<Uri?> GetRedirectUrlAsync(Uri siteUri, int maxRedirects = 20)
+    public async Task<Uri?> GetRedirectUrlAsync(Uri siteUri,
+        int maxRedirects = 20,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(siteUri);
 
@@ -56,7 +60,8 @@ public class RedirectUrlFinderService : IRedirectUrlFinderService
 
             do
             {
-                using var webResp = await _client.GetAsync(redirectUri, HttpCompletionOption.ResponseHeadersRead);
+                using var webResp = await _client.GetAsync(redirectUri, HttpCompletionOption.ResponseHeadersRead,
+                    cancellationToken);
 
                 if (webResp is null)
                 {
@@ -84,7 +89,7 @@ public class RedirectUrlFinderService : IRedirectUrlFinderService
                     case HttpStatusCode.OK:
                         return CacheReturn(siteUri, redirectUri);
                     default:
-                        await webResp.EnsureSuccessStatusCodeAsync();
+                        await webResp.EnsureSuccessStatusCodeAsync(cancellationToken);
 
                         break;
                 }

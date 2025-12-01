@@ -18,11 +18,13 @@ public class ChromeHtmlToPdfGenerator(
     ///     High level method that converts HTML to PDF.
     /// </summary>
     /// <returns></returns>
-    public async Task<string> GeneratePdfFromHtmlAsync(HtmlToPdfGeneratorOptions options)
+    public async Task<string> GeneratePdfFromHtmlAsync(HtmlToPdfGeneratorOptions options,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(options);
 
-        using var locker = await lockerService.LockAsync<ExecuteApplicationProcess>(options.VirtualTimeBudget);
+        using var locker =
+            await lockerService.LockAsync<ExecuteApplicationProcess>(options.VirtualTimeBudget, cancellationToken);
 
         var arguments = CreateArguments(options);
 
@@ -40,7 +42,7 @@ public class ChromeHtmlToPdfGenerator(
             AppPath = appPath,
             WaitForExit = options.WaitForExit,
             KillProcessOnStart = options.KillProcessOnStart
-        });
+        }, cancellationToken);
 
         antiXssService.GetSanitizedHtml($"{options}{Environment.NewLine}{log}").LogPossibleErrorsOrWarnings(logger);
 

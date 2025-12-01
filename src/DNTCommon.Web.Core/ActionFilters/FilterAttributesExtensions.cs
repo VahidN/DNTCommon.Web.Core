@@ -71,9 +71,10 @@ public static class FilterAttributesExtensions
                 default:
                     foreach (var stringProperty in argumentValue.GetType()
                                  .GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                                 .Where(p => p is { CanRead: true, CanWrite: true } && p.PropertyType == StringType &&
-                                             p.GetGetMethod(nonPublic: true)?.IsPublic == true &&
-                                             p.GetSetMethod(nonPublic: true)?.IsPublic == true))
+                                 .Where(static p
+                                     => p is { CanRead: true, CanWrite: true } && p.PropertyType == StringType &&
+                                        p.GetGetMethod(nonPublic: true)?.IsPublic == true &&
+                                        p.GetSetMethod(nonPublic: true)?.IsPublic == true))
                     {
                         var value = stringProperty.GetValue(argumentValue);
 

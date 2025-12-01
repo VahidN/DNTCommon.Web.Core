@@ -17,13 +17,13 @@ public class MySitePingClient(HttpClient httpClient, ILogger<MySitePingClient> l
     /// <summary>
     ///     Pings the site's root url.
     /// </summary>
-    public async Task WakeUpAsync()
+    public async Task WakeUpAsync(CancellationToken cancellationToken = default)
     {
         try
         {
             if (_httpClient.BaseAddress is not null)
             {
-                await _httpClient.GetStringAsync(_httpClient.BaseAddress);
+                await _httpClient.GetStringAsync(_httpClient.BaseAddress, cancellationToken);
             }
         }
         catch (Exception ex)

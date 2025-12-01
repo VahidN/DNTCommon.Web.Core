@@ -5,6 +5,7 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public class StreamContentWithProgressCallback(Stream inputStream, Action<double> progressCallback) : HttpContent
 {
+#pragma warning disable CC001,MA0137
     /// <summary>
     ///     Serializes the content of the stream to a target stream asynchronously
     ///     while tracking and reporting the upload progress.
@@ -13,6 +14,7 @@ public class StreamContentWithProgressCallback(Stream inputStream, Action<double
     /// <param name="context">An optional transport context that provides additional information about the stream operation.</param>
     /// <returns>A task representing the asynchronous operation of writing the content to the target stream.</returns>
     protected override async Task SerializeToStreamAsync(Stream stream, TransportContext? context)
+#pragma warning restore CC001, MA0137
     {
         if (stream is null)
         {

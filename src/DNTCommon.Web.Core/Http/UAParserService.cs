@@ -15,44 +15,53 @@ public class UAParserService(BaseHttpClient baseHttpClient, ILogger<UAParserServ
     ///     Gets the latest regexes.yaml file from GitHub and then uses Parser.FromYaml to parse it.
     /// </summary>
     /// <param name="regexesUrl">The latest regexes.yaml file's URL</param>
+    /// <param name="cancellationToken"></param>
     public async Task<Parser> GetLatestUAParserAsync(string regexesUrl =
-        "https://raw.githubusercontent.com/ua-parser/uap-core/master/regexes.yaml")
-        => _parser ??= await LoadLatestParserAsync(regexesUrl);
+            "https://raw.githubusercontent.com/ua-parser/uap-core/master/regexes.yaml",
+        CancellationToken cancellationToken = default)
+        => _parser ??= await LoadLatestParserAsync(regexesUrl, cancellationToken);
 
     /// <summary>
     ///     Returns the current client's info from the parsed user-agent
     /// </summary>
-    public async Task<ClientInfo?> GetClientInfoAsync(HttpContext? httpContext)
-        => httpContext is null ? null : await GetClientInfoAsync(httpContext.GetUserAgent() ?? "unknown");
+    public async Task<ClientInfo?>
+        GetClientInfoAsync(HttpContext? httpContext, CancellationToken cancellationToken = default)
+        => httpContext is null
+            ? null
+            : await GetClientInfoAsync(httpContext.GetUserAgent() ?? "unknown", cancellationToken);
 
     /// <summary>
     ///     Returns the current client's info from the parsed user-agent
     /// </summary>
-    public async Task<ClientInfo?> GetClientInfoAsync(string userAgent)
-        => string.IsNullOrWhiteSpace(userAgent) ? null : (await GetLatestUAParserAsync()).Parse(userAgent);
+    public async Task<ClientInfo?> GetClientInfoAsync(string userAgent, CancellationToken cancellationToken = default)
+        => string.IsNullOrWhiteSpace(userAgent)
+            ? null
+            : (await GetLatestUAParserAsync(cancellationToken: cancellationToken)).Parse(userAgent);
 
     /// <summary>
     ///     Returns true if the device is likely to be a spider or a bot device
     /// </summary>
-    public async Task<bool> IsSpiderClientAsync(string userAgent)
-        => string.IsNullOrWhiteSpace(userAgent) || (await GetLatestUAParserAsync()).Parse(userAgent).Device.IsSpider;
+    public async Task<bool> IsSpiderClientAsync(string userAgent, CancellationToken cancellationToken = default)
+        => string.IsNullOrWhiteSpace(userAgent) || (await GetLatestUAParserAsync(cancellationToken: cancellationToken))
+            .Parse(userAgent)
+            .Device.IsSpider;
 
     /// <summary>
     ///     Returns true if the device is likely to be a spider or a bot device
     /// </summary>
-    public async Task<bool> IsSpiderClientAsync(HttpContext? httpContext)
-        => httpContext is null || await IsSpiderClientAsync(httpContext.GetUserAgent() ?? "unknown");
+    public async Task<bool> IsSpiderClientAsync(HttpContext? httpContext, CancellationToken cancellationToken = default)
+        => httpContext is null || await IsSpiderClientAsync(httpContext.GetUserAgent() ?? "unknown", cancellationToken);
 
-    private async Task<Parser> LoadLatestParserAsync(string regexesUrl)
+    private async Task<Parser> LoadLatestParserAsync(string regexesUrl, CancellationToken cancellationToken = default)
     {
-        if (!NetworkExtensions.IsConnectedToInternet(TimeSpan.FromSeconds(2)))
+        if (!NetworkExtensions.IsConnectedToInternet(TimeSpan.FromSeconds(value: 2)))
         {
             return Parser.GetDefault();
         }
 
         try
         {
-            var content = await baseHttpClient.HttpClient.GetStringAsync(regexesUrl);
+            var content = await baseHttpClient.HttpClient.GetStringAsync(regexesUrl, cancellationToken);
 
             if (!string.IsNullOrWhiteSpace(content))
             {

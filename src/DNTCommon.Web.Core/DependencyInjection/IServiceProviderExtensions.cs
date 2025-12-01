@@ -27,7 +27,6 @@ public static class IServiceProviderExtensions
         where TS : notnull
     {
         ArgumentNullException.ThrowIfNull(serviceScope);
-
         ArgumentNullException.ThrowIfNull(callback);
 
         var context = serviceScope.ServiceProvider.GetRequiredService<TS>();
@@ -69,7 +68,6 @@ public static class IServiceProviderExtensions
         where TS : notnull
     {
         ArgumentNullException.ThrowIfNull(serviceScope);
-
         ArgumentNullException.ThrowIfNull(callback);
 
         var context = serviceScope.ServiceProvider.GetRequiredService<TS>();
@@ -120,7 +118,6 @@ public static class IServiceProviderExtensions
         where T : notnull
     {
         ArgumentNullException.ThrowIfNull(serviceScope);
-
         ArgumentNullException.ThrowIfNull(callback);
 
         var context = serviceScope.ServiceProvider.GetRequiredService<TS>();
@@ -157,12 +154,13 @@ public static class IServiceProviderExtensions
     ///     and then runs an associated callback.
     /// </summary>
     public static async Task RunScopedServiceAsync<TS, T>(this IServiceProvider serviceProvider,
-        Func<TS, T, Task> callback)
+        Func<TS, T, CancellationToken, Task> callback,
+        CancellationToken cancellationToken = default)
         where TS : notnull
         where T : notnull
     {
-        using var serviceScope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
-        await RunScopedServiceAsync(serviceScope, callback);
+        await using var serviceScope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateAsyncScope();
+        await RunScopedServiceAsync(serviceScope, callback, cancellationToken);
     }
 
     /// <summary>
@@ -170,33 +168,35 @@ public static class IServiceProviderExtensions
     ///     and then runs an associated callback.
     /// </summary>
     public static async Task RunScopedServiceAsync<TS, T>(this IServiceScopeFactory serviceScopeFactory,
-        Func<TS, T, Task> callback)
+        Func<TS, T, CancellationToken, Task> callback,
+        CancellationToken cancellationToken = default)
         where TS : notnull
         where T : notnull
     {
         ArgumentNullException.ThrowIfNull(serviceScopeFactory);
 
-        using var serviceScope = serviceScopeFactory.CreateScope();
-        await RunScopedServiceAsync(serviceScope, callback);
+        await using var serviceScope = serviceScopeFactory.CreateAsyncScope();
+        await RunScopedServiceAsync(serviceScope, callback, cancellationToken);
     }
 
     /// <summary>
     ///     Creates an IServiceScope which contains an IServiceProvider used to resolve dependencies from a newly created scope
     ///     and then runs an associated callback.
     /// </summary>
-    public static async Task RunScopedServiceAsync<TS, T>(this IServiceScope serviceScope, Func<TS, T, Task> callback)
+    public static async Task RunScopedServiceAsync<TS, T>(this IServiceScope serviceScope,
+        Func<TS, T, CancellationToken, Task> callback,
+        CancellationToken cancellationToken = default)
         where TS : notnull
         where T : notnull
     {
         ArgumentNullException.ThrowIfNull(serviceScope);
-
         ArgumentNullException.ThrowIfNull(callback);
 
         var context = serviceScope.ServiceProvider.GetRequiredService<TS>();
 
         try
         {
-            await callback(context, serviceScope.ServiceProvider.GetRequiredService<T>());
+            await callback(context, serviceScope.ServiceProvider.GetRequiredService<T>(), cancellationToken);
         }
         finally
         {
@@ -211,11 +211,13 @@ public static class IServiceProviderExtensions
     ///     Creates an IServiceScope which contains an IServiceProvider used to resolve dependencies from a newly created scope
     ///     and then runs an associated callback.
     /// </summary>
-    public static async Task RunScopedServiceAsync<TS>(this IServiceProvider serviceProvider, Func<TS, Task> callback)
+    public static async Task RunScopedServiceAsync<TS>(this IServiceProvider serviceProvider,
+        Func<TS, CancellationToken, Task> callback,
+        CancellationToken cancellationToken = default)
         where TS : notnull
     {
-        using var serviceScope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
-        await RunScopedServiceAsync(serviceScope, callback);
+        await using var serviceScope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateAsyncScope();
+        await RunScopedServiceAsync(serviceScope, callback, cancellationToken);
     }
 
     /// <summary>
@@ -223,31 +225,33 @@ public static class IServiceProviderExtensions
     ///     and then runs an associated callback.
     /// </summary>
     public static async Task RunScopedServiceAsync<TS>(this IServiceScopeFactory serviceScopeFactory,
-        Func<TS, Task> callback)
+        Func<TS, CancellationToken, Task> callback,
+        CancellationToken cancellationToken = default)
         where TS : notnull
     {
         ArgumentNullException.ThrowIfNull(serviceScopeFactory);
 
-        using var serviceScope = serviceScopeFactory.CreateScope();
-        await RunScopedServiceAsync(serviceScope, callback);
+        await using var serviceScope = serviceScopeFactory.CreateAsyncScope();
+        await RunScopedServiceAsync(serviceScope, callback, cancellationToken);
     }
 
     /// <summary>
     ///     Creates an IServiceScope which contains an IServiceProvider used to resolve dependencies from a newly created scope
     ///     and then runs an associated callback.
     /// </summary>
-    public static async Task RunScopedServiceAsync<TS>(this IServiceScope serviceScope, Func<TS, Task> callback)
+    public static async Task RunScopedServiceAsync<TS>(this IServiceScope serviceScope,
+        Func<TS, CancellationToken, Task> callback,
+        CancellationToken cancellationToken = default)
         where TS : notnull
     {
         ArgumentNullException.ThrowIfNull(serviceScope);
-
         ArgumentNullException.ThrowIfNull(callback);
 
         var context = serviceScope.ServiceProvider.GetRequiredService<TS>();
 
         try
         {
-            await callback(context);
+            await callback(context, cancellationToken);
         }
         finally
         {
@@ -263,12 +267,13 @@ public static class IServiceProviderExtensions
     ///     and then runs an associated callback.
     /// </summary>
     public static async Task<T> RunScopedServiceAsync<TS, T>(this IServiceProvider serviceProvider,
-        Func<TS, Task<T>> callback)
+        Func<TS, CancellationToken, Task<T>> callback,
+        CancellationToken cancellationToken = default)
         where TS : notnull
     {
-        using var serviceScope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
+        await using var serviceScope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateAsyncScope();
 
-        return await RunScopedServiceAsync(serviceScope, callback);
+        return await RunScopedServiceAsync(serviceScope, callback, cancellationToken);
     }
 
     /// <summary>
@@ -276,14 +281,15 @@ public static class IServiceProviderExtensions
     ///     and then runs an associated callback.
     /// </summary>
     public static async Task<T> RunScopedServiceAsync<TS, T>(this IServiceScopeFactory serviceScopeFactory,
-        Func<TS, Task<T>> callback)
+        Func<TS, CancellationToken, Task<T>> callback,
+        CancellationToken cancellationToken = default)
         where TS : notnull
     {
         ArgumentNullException.ThrowIfNull(serviceScopeFactory);
 
-        using var serviceScope = serviceScopeFactory.CreateScope();
+        await using var serviceScope = serviceScopeFactory.CreateAsyncScope();
 
-        return await RunScopedServiceAsync(serviceScope, callback);
+        return await RunScopedServiceAsync(serviceScope, callback, cancellationToken);
     }
 
     /// <summary>
@@ -291,15 +297,15 @@ public static class IServiceProviderExtensions
     ///     and then runs an associated callback.
     /// </summary>
     public static async Task<T> RunScopedServiceAsync<TS, T>(this IServiceScope serviceScope,
-        Func<TS, Task<T>> callback)
+        Func<TS, CancellationToken, Task<T>> callback,
+        CancellationToken cancellationToken = default)
         where TS : notnull
     {
         ArgumentNullException.ThrowIfNull(serviceScope);
-
         ArgumentNullException.ThrowIfNull(callback);
 
         var context = serviceScope.ServiceProvider.GetRequiredService<TS>();
 
-        return await callback(context);
+        return await callback(context, cancellationToken);
     }
 }

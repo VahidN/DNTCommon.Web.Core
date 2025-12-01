@@ -11,27 +11,29 @@ public interface IUAParserService
     /// <summary>
     ///     Returns true if the device is likely to be a spider or a bot device
     /// </summary>
-    Task<bool> IsSpiderClientAsync(HttpContext? httpContext);
+    Task<bool> IsSpiderClientAsync(HttpContext? httpContext, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Returns true if the device is likely to be a spider or a bot device
     /// </summary>
-    Task<bool> IsSpiderClientAsync(string userAgent);
+    Task<bool> IsSpiderClientAsync(string userAgent, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Returns the current client's info from the parsed user-agent
     /// </summary>
-    Task<ClientInfo?> GetClientInfoAsync(HttpContext? httpContext);
+    Task<ClientInfo?> GetClientInfoAsync(HttpContext? httpContext, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Returns the current client's info from the parsed user-agent
     /// </summary>
-    Task<ClientInfo?> GetClientInfoAsync(string userAgent);
+    Task<ClientInfo?> GetClientInfoAsync(string userAgent, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Gets the latest regexes.yaml file from GitHub and then uses Parser.FromYaml to parse it.
     /// </summary>
     /// <param name="regexesUrl">The latest regexes.yaml file's URL</param>
+    /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     Task<Parser> GetLatestUAParserAsync(string regexesUrl =
-        "https://raw.githubusercontent.com/ua-parser/uap-core/master/regexes.yaml");
+            "https://raw.githubusercontent.com/ua-parser/uap-core/master/regexes.yaml",
+        CancellationToken cancellationToken = default);
 }

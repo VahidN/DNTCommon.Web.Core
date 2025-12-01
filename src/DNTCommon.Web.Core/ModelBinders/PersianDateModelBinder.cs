@@ -11,10 +11,12 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public class PersianDateModelBinder : IModelBinder
 {
+#pragma warning disable CC001,MA0137
     /// <summary>
     ///     Attempts to bind a model.
     /// </summary>
     public async Task BindModelAsync(ModelBindingContext bindingContext)
+#pragma warning restore CC001, MA0137
     {
         ArgumentNullException.ThrowIfNull(bindingContext);
 

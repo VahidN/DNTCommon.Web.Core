@@ -10,14 +10,13 @@ namespace DNTCommon.Web.Core;
 /// <param name="next"></param>
 public class StrictSameSiteCookieFixMiddleware(RequestDelegate next)
 {
-#pragma warning disable MA0137
-
     // MA0137 : Method returning an awaitable type must use the 'Async' suffix -> well, this is how it should be defined!
     /// <summary>
     ///     Invokes the StrictSameSiteCookieFixMiddleware
     /// </summary>
+#pragma warning disable CC001,MA0137
     public async Task Invoke(HttpContext ctx)
-#pragma warning restore MA0137
+#pragma warning restore CC001, MA0137
     {
         ArgumentNullException.ThrowIfNull(ctx);
 

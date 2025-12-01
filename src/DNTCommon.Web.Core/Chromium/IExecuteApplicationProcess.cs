@@ -8,5 +8,5 @@ public interface IExecuteApplicationProcess
     /// <summary>
     ///     A helper method to execute a process
     /// </summary>
-    Task<string> ExecuteProcessAsync(ApplicationStartInfo startInfo);
+    Task<string> ExecuteProcessAsync(ApplicationStartInfo startInfo, CancellationToken cancellationToken = default);
 }

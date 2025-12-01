@@ -14,7 +14,7 @@ namespace DNTCommon.Web.Core;
 ///     https://github.com/aspnet/Entropy/blob/dev/samples/Mvc.RenderViewToString/RazorViewToStringRenderer.cs
 /// </summary>
 /// <remarks>
-///     Renders a .cshtml file as an string.
+///     Renders a .cshtml file as a string.
 /// </remarks>
 public class ViewRendererService(
     IRazorViewEngine viewEngine,
@@ -23,15 +23,17 @@ public class ViewRendererService(
     IHttpContextAccessor httpContextAccessor) : IViewRendererService
 {
     /// <summary>
-    ///     Renders a .cshtml file as an string.
+    ///     Renders a .cshtml file as a string.
     /// </summary>
     public Task<string> RenderViewToStringAsync(string viewNameOrPath)
         => RenderViewToStringAsync(viewNameOrPath, string.Empty);
 
+#pragma warning disable CC001,MA0137
     /// <summary>
-    ///     Renders a .cshtml file as an string.
+    ///     Renders a .cshtml file as a string.
     /// </summary>
     public async Task<string> RenderViewToStringAsync<TModel>(string viewNameOrPath, TModel model)
+#pragma warning restore CC001, MA0137
     {
         var actionContext = GetActionContext();
 

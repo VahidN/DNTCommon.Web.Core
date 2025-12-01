@@ -10,7 +10,8 @@ public static class HttpResponseMessageExtensions
     /// <summary>
     ///     Includes the response's body in the final error message.
     /// </summary>
-    public static async Task EnsureSuccessStatusCodeAsync(this HttpResponseMessage response)
+    public static async Task EnsureSuccessStatusCodeAsync(this HttpResponseMessage response,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(response);
 
@@ -19,7 +20,8 @@ public static class HttpResponseMessageExtensions
             return;
         }
 
-        var content = $"StatusCode: {response.StatusCode}, {await response.Content.ReadAsStringAsync()}";
+        var content =
+            $"StatusCode: {response.StatusCode}, {await response.Content.ReadAsStringAsync(cancellationToken)}";
 
         throw new SimpleHttpResponseException(response.StatusCode, content);
     }

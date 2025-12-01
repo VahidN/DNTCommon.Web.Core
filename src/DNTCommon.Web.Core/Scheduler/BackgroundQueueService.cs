@@ -76,15 +76,15 @@ public class BackgroundQueueService(IServiceProvider serviceProvider) : Backgrou
         {
             try
             {
-                if (_asyncTasksQueue.TryTake(out var asyncWorkItem))
+                if (_asyncTasksQueue.TryTake(out var asyncWorkItem, millisecondsTimeout: 0, stoppingToken))
                 {
-                    using var serviceScope = GetServiceScope();
+                    await using var serviceScope = GetServiceScopeAsync();
                     await asyncWorkItem(stoppingToken, serviceScope.ServiceProvider);
                 }
 
-                if (_syncTasksQueue.TryTake(out var workItem))
+                if (_syncTasksQueue.TryTake(out var workItem, millisecondsTimeout: 0, stoppingToken))
                 {
-                    using var serviceScope = GetServiceScope();
+                    await using var serviceScope = GetServiceScopeAsync();
                     workItem(stoppingToken, serviceScope.ServiceProvider);
                 }
 
@@ -97,7 +97,8 @@ public class BackgroundQueueService(IServiceProvider serviceProvider) : Backgrou
         }
     }
 
-    private IServiceScope GetServiceScope() => serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
+    private AsyncServiceScope GetServiceScopeAsync()
+        => serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateAsyncScope();
 
     /// <summary>
     ///     Triggered when the application host is performing a graceful shutdown.

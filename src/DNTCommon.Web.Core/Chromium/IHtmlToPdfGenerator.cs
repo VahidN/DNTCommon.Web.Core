@@ -20,5 +20,6 @@ public interface IHtmlToPdfGenerator
     ///     Also you should run this command to allow Google-Chrome create its own temp files:
     ///     <![CDATA[ CHROME_DIRS="/var/www/.local /var/www/.config /var/www/.cache /var/www/.pki" && mkdir -p ${CHROME_DIRS} && chown www-data ${CHROME_DIRS} ]]>
     /// </summary>
-    Task<string> GeneratePdfFromHtmlAsync(HtmlToPdfGeneratorOptions options);
+    Task<string> GeneratePdfFromHtmlAsync(HtmlToPdfGeneratorOptions options,
+        CancellationToken cancellationToken = default);
 }

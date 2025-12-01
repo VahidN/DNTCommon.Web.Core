@@ -12,14 +12,17 @@ public static class SpeedCalculator
     ///     Calculates the operation's speed in KB/s
     /// </summary>
     /// <param name="callback"></param>
+    /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public static async Task<(string OperationSpeed, TimeSpan TimeElapsed)> StartAsync(Func<Task<long>> callback)
+    public static async Task<(string OperationSpeed, TimeSpan TimeElapsed)> StartAsync(
+        Func<CancellationToken, Task<long>> callback,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(callback);
 
         Stopwatch stopwatch = new();
         stopwatch.Start();
-        var bytes = await callback();
+        var bytes = await callback(cancellationToken);
         var timeElapsed = stopwatch.Elapsed;
         var speed = bytes / timeElapsed.TotalSeconds;
         var operationSpeed = Math.Round(speed / 1024, digits: 2);

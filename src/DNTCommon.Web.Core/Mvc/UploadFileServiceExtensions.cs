@@ -49,7 +49,9 @@ public static class UploadFileServiceExtensions
     ///     Saves the posted IFormFile to a byte array.
     /// </summary>
     /// <param name="formFile">The posted file.</param>
-    public static async Task<byte[]?> GetPostedFileDataAsync(this IFormFile? formFile)
+    /// <param name="cancellationToken"></param>
+    public static async Task<byte[]?> GetPostedFileDataAsync(this IFormFile? formFile,
+        CancellationToken cancellationToken = default)
     {
         if (formFile.IsNullOrEmpty())
         {
@@ -57,7 +59,7 @@ public static class UploadFileServiceExtensions
         }
 
         await using var memoryStream = new MemoryStream();
-        await formFile.CopyToAsync(memoryStream);
+        await formFile.CopyToAsync(memoryStream, cancellationToken);
 
         return memoryStream.ToArray();
     }
@@ -83,7 +85,10 @@ public static class UploadFileServiceExtensions
     ///     Saves the posted IFormFile to a byte array.
     /// </summary>
     /// <param name="formFile">The posted file.</param>
-    public static Task<byte[]?> ToByteArrayAsync(this IFormFile? formFile) => formFile.GetPostedFileDataAsync();
+    /// <param name="cancellationToken"></param>
+    public static Task<byte[]?> ToByteArrayAsync(this IFormFile? formFile,
+        CancellationToken cancellationToken = default)
+        => formFile.GetPostedFileDataAsync(cancellationToken);
 
     /// <summary>
     ///     Saves the posted IFormFile to a byte array.
@@ -95,7 +100,9 @@ public static class UploadFileServiceExtensions
     ///     Saves the posted IFormFiles to  byte arrays.
     /// </summary>
     /// <param name="fromFiles">The posted files.</param>
-    public static IEnumerable<Task<byte[]?>> ToByteArraysAsync(this IFormFileCollection? fromFiles)
+    /// <param name="cancellationToken"></param>
+    public static IEnumerable<Task<byte[]?>> ToByteArraysAsync(this IFormFileCollection? fromFiles,
+        CancellationToken cancellationToken = default)
     {
         if (fromFiles.IsNullOrEmpty())
         {
@@ -104,7 +111,7 @@ public static class UploadFileServiceExtensions
 
         foreach (var fromFile in fromFiles)
         {
-            yield return fromFile.GetPostedFileDataAsync();
+            yield return fromFile.GetPostedFileDataAsync(cancellationToken);
         }
     }
 
@@ -131,10 +138,12 @@ public static class UploadFileServiceExtensions
     /// <param name="formFile">The posted file.</param>
     /// <param name="uploadsRootFolder">The absolute path of the upload folder.</param>
     /// <param name="allowOverwrite">Creates a unique file name if the file already exists.</param>
+    /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns></returns>
     public static async Task<(bool IsSaved, string SavedFilePath)> SavePostedFileAsync(this IFormFile? formFile,
         string uploadsRootFolder,
-        bool allowOverwrite)
+        bool allowOverwrite,
+        CancellationToken cancellationToken = default)
     {
         if (formFile.IsNullOrEmpty())
         {
@@ -154,7 +163,7 @@ public static class UploadFileServiceExtensions
         // you have to explicitly open the FileStream as asynchronous
         // or else you're just doing synchronous operations on a background thread.
         await using var fileStream = filePath.CreateAsyncFileStream(FileMode.Create, FileAccess.Write);
-        await formFile.CopyToAsync(fileStream);
+        await formFile.CopyToAsync(fileStream, cancellationToken);
 
         return (true, filePath);
     }
@@ -179,7 +188,8 @@ public static class UploadFileServiceExtensions
     /// <summary>
     ///     Converts the posted IFormFiles to a stream.
     /// </summary>
-    public static async Task<Stream?> ToStreamAsync(this IFormFile? formFile)
+    public static async Task<Stream?> ToStreamAsync(this IFormFile? formFile,
+        CancellationToken cancellationToken = default)
     {
         if (formFile.IsNullOrEmpty())
         {
@@ -187,7 +197,7 @@ public static class UploadFileServiceExtensions
         }
 
         var memoryStream = new MemoryStream();
-        await formFile.CopyToAsync(memoryStream);
+        await formFile.CopyToAsync(memoryStream, cancellationToken);
         memoryStream.Seek(offset: 0, SeekOrigin.Begin);
 
         return memoryStream;

@@ -16,7 +16,8 @@ public static class HttpClientExtensions
     public static async Task<bool> IsAvailableRemoteUrlAsync(this HttpClient httpClient,
         string url,
         Action<HttpRequestMessage>? configRequest = null,
-        ILogger? logger = null)
+        ILogger? logger = null,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(httpClient);
 
@@ -24,8 +25,8 @@ public static class HttpClientExtensions
         {
             using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Head, url);
             configRequest?.Invoke(httpRequestMessage);
-            using var response = await httpClient.SendAsync(httpRequestMessage);
-            await response.EnsureSuccessStatusCodeAsync();
+            using var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
+            await response.EnsureSuccessStatusCodeAsync(cancellationToken);
 
             return true;
         }
@@ -89,17 +90,18 @@ public static class HttpClientExtensions
     public static async Task<HttpResponseMessage> GetAsync(this HttpClient httpClient,
         string uri,
         bool ensureSuccess = true,
-        Action<HttpRequestMessage>? configRequest = null)
+        Action<HttpRequestMessage>? configRequest = null,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(httpClient);
 
         using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
         configRequest?.Invoke(httpRequestMessage);
-        var response = await httpClient.SendAsync(httpRequestMessage);
+        var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
 
         if (ensureSuccess)
         {
-            await response.EnsureSuccessStatusCodeAsync();
+            await response.EnsureSuccessStatusCodeAsync(cancellationToken);
         }
 
         return response;
@@ -112,7 +114,8 @@ public static class HttpClientExtensions
         string uri,
         T value,
         bool ensureSuccess = true,
-        Action<HttpRequestMessage>? configRequest = null)
+        Action<HttpRequestMessage>? configRequest = null,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(httpClient);
 
@@ -122,11 +125,11 @@ public static class HttpClientExtensions
             new StringContent(JsonSerializer.Serialize(value), Encoding.UTF8, mediaType: "application/json");
 
         configRequest?.Invoke(httpRequestMessage);
-        var response = await httpClient.SendAsync(httpRequestMessage);
+        var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
 
         if (ensureSuccess)
         {
-            await response.EnsureSuccessStatusCodeAsync();
+            await response.EnsureSuccessStatusCodeAsync(cancellationToken);
         }
 
         return response;
@@ -166,7 +169,8 @@ public static class HttpClientExtensions
         IEnumerable<KeyValuePair<string?, string?>> formKeyValues,
         string path,
         bool ensureSuccess = true,
-        Action<HttpRequestMessage>? configRequest = null)
+        Action<HttpRequestMessage>? configRequest = null,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(httpClient);
 
@@ -175,11 +179,11 @@ public static class HttpClientExtensions
         httpRequestMessage.Content = new FormUrlEncodedContent(formKeyValues);
 
         configRequest?.Invoke(httpRequestMessage);
-        var response = await httpClient.SendAsync(httpRequestMessage);
+        var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
 
         if (ensureSuccess)
         {
-            await response.EnsureSuccessStatusCodeAsync();
+            await response.EnsureSuccessStatusCodeAsync(cancellationToken);
         }
 
         return response;
@@ -218,23 +222,30 @@ public static class HttpClientExtensions
         string path,
         bool ensureSuccess = true,
         Action<HttpRequestMessage>? configRequest = null,
-        Encoding? encoding = null)
+        Encoding? encoding = null,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(httpClient);
 
         using var request = new HttpRequestMessage(HttpMethod.Get, path);
         configRequest?.Invoke(request);
-        using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+
+        using var response =
+            await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
         if (ensureSuccess)
         {
-            await response.EnsureSuccessStatusCodeAsync();
+            await response.EnsureSuccessStatusCodeAsync(cancellationToken);
         }
 
-        await using var responseStream = await response.Content.ReadAsStreamAsync();
+        await using var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
         using var streamReader = new StreamReader(responseStream, encoding ?? Encoding.UTF8);
 
+#if !NET_6
+        return await streamReader.ReadToEndAsync(cancellationToken);
+#else
         return await streamReader.ReadToEndAsync();
+#endif
     }
 
     /// <summary>
@@ -269,17 +280,20 @@ public static class HttpClientExtensions
     public static async Task<byte[]> DownloadDataAsync(this HttpClient httpClient,
         string url,
         bool ensureSuccess = true,
-        Action<HttpRequestMessage>? configRequest = null)
+        Action<HttpRequestMessage>? configRequest = null,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(httpClient);
 
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
         configRequest?.Invoke(request);
-        using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+
+        using var response =
+            await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
         if (ensureSuccess)
         {
-            await response.EnsureSuccessStatusCodeAsync();
+            await response.EnsureSuccessStatusCodeAsync(cancellationToken);
         }
 
         if (response.Content is null)
@@ -287,9 +301,9 @@ public static class HttpClientExtensions
             throw new InvalidOperationException($"`response.Content` of `{url}` is null!");
         }
 
-        await using var inputStream = await response.Content.ReadAsStreamAsync();
+        await using var inputStream = await response.Content.ReadAsStreamAsync(cancellationToken);
         await using var memoryStream = new MemoryStream();
-        await inputStream.CopyToAsync(memoryStream);
+        await inputStream.CopyToAsync(memoryStream, cancellationToken);
 
         return memoryStream.ToArray();
     }
@@ -334,17 +348,20 @@ public static class HttpClientExtensions
         bool allowOverwrite,
         bool ensureSuccess = true,
         Action<string>? logger = null,
-        Action<HttpRequestMessage>? configRequest = null)
+        Action<HttpRequestMessage>? configRequest = null,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(httpClient);
 
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
         configRequest?.Invoke(request);
-        using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+
+        using var response =
+            await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
         if (ensureSuccess)
         {
-            await response.EnsureSuccessStatusCodeAsync();
+            await response.EnsureSuccessStatusCodeAsync(cancellationToken);
         }
 
         var remoteFileSize = response.Content.Headers?.ContentRange?.Length ??
@@ -387,7 +404,7 @@ public static class HttpClientExtensions
             throw new InvalidOperationException($"`response.Content` of `{url}` is null!");
         }
 
-        await SaveToFileAsync(outputFileNamePath, logger, response, remoteFileSize, tempFilePath);
+        await SaveToFileAsync(outputFileNamePath, logger, response, remoteFileSize, tempFilePath, cancellationToken);
     }
 
     /// <summary>
@@ -459,20 +476,22 @@ public static class HttpClientExtensions
         Action<string>? logger,
         HttpResponseMessage response,
         long remoteFileSize,
-        string tempFilePath)
+        string tempFilePath,
+        CancellationToken cancellationToken)
     {
-        const int maxBufferSize = 0x10000;
+        const int MaxBufferSize = 0x10000;
 
-        await using (var inputStream = await response.Content.ReadAsStreamAsync())
+        await using (var inputStream = await response.Content.ReadAsStreamAsync(cancellationToken))
         {
             await using var fileStream = tempFilePath.CreateAsyncFileStream(FileMode.CreateNew, FileAccess.Write);
 
-            var buffer = new byte[maxBufferSize];
+            var buffer = new byte[MaxBufferSize];
             int read;
             var bytesTransferred = 0;
             var readCount = 0L;
 
-            while ((read = await inputStream.ReadAsync(buffer.AsMemory(start: 0, buffer.Length))) > 0)
+            while ((read = await inputStream.ReadAsync(buffer.AsMemory(start: 0, buffer.Length), cancellationToken)) >
+                   0)
             {
                 bytesTransferred += read;
                 readCount++;
@@ -488,7 +507,7 @@ public static class HttpClientExtensions
                     }
                 }
 
-                await fileStream.WriteAsync(buffer.AsMemory(start: 0, read));
+                await fileStream.WriteAsync(buffer.AsMemory(start: 0, read), cancellationToken);
             }
 
             logger?.Invoke(obj: "\rProgress: 100%   \n");
@@ -503,14 +522,14 @@ public static class HttpClientExtensions
         long remoteFileSize,
         string tempFilePath)
     {
-        const int maxBufferSize = 0x10000;
+        const int MaxBufferSize = 0x10000;
 
         using (var inputStream = response.Content.ReadAsStream())
         {
             using var fileStream = new FileStream(tempFilePath, FileMode.CreateNew, FileAccess.Write, FileShare.None,
-                maxBufferSize);
+                MaxBufferSize);
 
-            var buffer = new byte[maxBufferSize];
+            var buffer = new byte[MaxBufferSize];
             int read;
             var bytesTransferred = 0;
             var readCount = 0L;
@@ -545,11 +564,13 @@ public static class HttpClientExtensions
     /// </summary>
     public static async Task<HttpStatusCode?> GetHttpStatusCodeAsync(this HttpClient httpClient,
         string siteUrl,
-        bool throwOnException)
+        bool throwOnException,
+        CancellationToken cancellationToken = default)
     {
         try
         {
-            using var responseMessage = await httpClient.GetAsync(siteUrl, ensureSuccess: false);
+            using var responseMessage =
+                await httpClient.GetAsync(siteUrl, ensureSuccess: false, cancellationToken: cancellationToken);
 
             return responseMessage.StatusCode;
         }
