@@ -73,7 +73,8 @@ public sealed class AntiDosMiddleware : IDisposable
             UserAgent = context.GetUserAgent(),
             UrlReferrer = context.GetReferrerUri(),
             RawUrl = context.GetRawUrl(),
-            IsLocal = context.IsLocal()
+            IsLocal = context.IsLocal(),
+            IsBot = context.IsBot()
         };
 
     private Task BlockClientAsync(HttpContext context)

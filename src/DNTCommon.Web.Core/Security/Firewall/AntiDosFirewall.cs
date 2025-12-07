@@ -152,6 +152,16 @@ public sealed class AntiDosFirewall : IAntiDosFirewall
     {
         ArgumentNullException.ThrowIfNull(requestInfo);
 
+        if (requestInfo.IsBot)
+        {
+            return (true, new ThrottleInfo
+            {
+                ExpiresAt = GetCacheExpiresAt(),
+                RequestsCount = _antiDosConfig.AllowedRequests,
+                BanReason = $"BadBotRequestHeader: {requestInfo.UserAgent}."
+            });
+        }
+
         if (_antiDosConfig.BadBotsRequestHeaders?.Any() != true || requestInfo.RequestHeaders is null)
         {
             return (false, null);

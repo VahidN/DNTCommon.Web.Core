@@ -45,6 +45,11 @@ public class AntiDosFirewallRequestInfo
     public bool IsLocal { set; get; }
 
     /// <summary>
+    ///     Determines whether this request is coming from a Bot
+    /// </summary>
+    public bool IsBot { set; get; }
+
+    /// <summary>
     ///     Represents HttpRequest and HttpResponse headers
     /// </summary>
     public IHeaderDictionary RequestHeaders { get; } = new HeaderDictionary();
