@@ -26,6 +26,11 @@ public class MySitePingClient(HttpClient httpClient, ILogger<MySitePingClient> l
                 await _httpClient.GetStringAsync(_httpClient.BaseAddress, cancellationToken);
             }
         }
+        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
+        {
+            logger.LogWarning(ex.Demystify(),
+                message: "Graceful Shutdown. Cancellation has been requested for this task.");
+        }
         catch (Exception ex)
         {
             _logger.LogCritical(eventId: 0, ex.Demystify(), message: "Failed running the Ping task.");

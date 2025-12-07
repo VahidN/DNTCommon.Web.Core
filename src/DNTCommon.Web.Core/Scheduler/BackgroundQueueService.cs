@@ -90,6 +90,15 @@ public class BackgroundQueueService(IServiceProvider serviceProvider) : Backgrou
 
                 await Task.Delay(_interval, stoppingToken);
             }
+            catch (OperationCanceledException ex) when (stoppingToken.IsCancellationRequested)
+            {
+                logger.LogWarning(ex.Demystify(),
+                    message: "Graceful Shutdown. Cancellation has been requested for this task.");
+            }
+            catch (OperationCanceledException ex)
+            {
+                logger.LogError(ex.Demystify(), message: "Cancellation has been requested for this task.");
+            }
             catch (Exception ex)
             {
                 logger.LogError(ex.Demystify(), message: "An error occurred executing the background job.");
