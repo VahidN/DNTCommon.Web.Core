@@ -32,13 +32,13 @@ public class UploadFileService(IWebHostEnvironment environment) : IUploadFileSer
             return (false, string.Empty);
         }
 
-        var uploadsRootFolder = Path.Combine(_environment.WebRootPath);
+        var uploadsRootFolder = _environment.WebRootPath;
 
         if (destinationDirectoryNames is not null)
         {
             foreach (var folder in destinationDirectoryNames)
             {
-                uploadsRootFolder = Path.Combine(uploadsRootFolder, folder);
+                uploadsRootFolder = uploadsRootFolder.SafePathCombine(folder);
             }
         }
 

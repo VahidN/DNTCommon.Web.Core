@@ -31,7 +31,7 @@ public static class UploadFileServiceExtensions
             return string.Empty;
         }
 
-        var filePath = Path.Combine(uploadsRootFolder, fileName);
+        var filePath = uploadsRootFolder.SafePathCombine(fileName);
 
         if (!File.Exists(filePath))
         {
@@ -41,7 +41,7 @@ public static class UploadFileServiceExtensions
         var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
         var extension = Path.GetExtension(fileName);
 
-        return Path.Combine(uploadsRootFolder,
+        return uploadsRootFolder.SafePathCombine(
             $"{fileNameWithoutExtension}.{DateTime.UtcNow.ToString(format: "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture)}.{Guid.NewGuid():N}{extension}");
     }
 
@@ -152,7 +152,7 @@ public static class UploadFileServiceExtensions
 
         uploadsRootFolder.CreateSafeDir();
 
-        var filePath = Path.Combine(uploadsRootFolder, formFile.FileName);
+        var filePath = uploadsRootFolder.SafePathCombine(formFile.FileName);
 
         if (File.Exists(filePath) && !allowOverwrite)
         {

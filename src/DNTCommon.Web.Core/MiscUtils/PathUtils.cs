@@ -178,7 +178,7 @@ public static class PathUtils
         var ext = extension.IsEmpty() ? ".tmp" : $".{extension.TrimStart(trimChar: '.')}";
         var fileName = $"{Guid.NewGuid():N}{ext}";
 
-        return Path.Combine(path, fileName);
+        return path.SafePathCombine(fileName);
     }
 
     /// <summary>
@@ -312,7 +312,7 @@ public static class PathUtils
 
         foreach (var sourceFile in sourceFiles)
         {
-            var newDir = Path.Combine(destDirPath, sourceFile.Name);
+            var newDir = destDirPath.SafePathCombine(sourceFile.Name);
             sourceFile.CopyTo(newDir, forceOverWrite);
         }
 
@@ -320,7 +320,7 @@ public static class PathUtils
         {
             foreach (var sourceDir in sourceDirs)
             {
-                var newDir = Path.Combine(destDirPath, sourceDir.Name);
+                var newDir = destDirPath.SafePathCombine(sourceDir.Name);
 
                 if (!CopyDirectory(sourceDir.FullName, newDir, copySubDirectories, forceOverWrite))
                 {
@@ -402,7 +402,7 @@ public static class PathUtils
                 return false;
             }
 
-            using var _ = File.Create(Path.Combine(dirPath, Path.GetRandomFileName()), bufferSize: 1,
+            using var _ = File.Create(dirPath.SafePathCombine(Path.GetRandomFileName()), bufferSize: 1,
                 FileOptions.DeleteOnClose);
 
             return true;
@@ -594,4 +594,14 @@ public static class PathUtils
             }
         }
     }
+
+    /// <summary>
+    ///     Concatenates an array of paths into a single path.
+    ///     It uses Path.GetFullPath + Path.Join
+    /// </summary>
+    /// <param name="path"></param>
+    /// <param name="paths"></param>
+    /// <returns></returns>
+    public static string SafePathCombine(this string path, params string[] paths)
+        => Path.GetFullPath(Path.Join([path, ..paths]));
 }

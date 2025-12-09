@@ -14,11 +14,11 @@ public static class ChromeFinder
             // c:\Program Files\Google\Chrome\Application\
             const string subDirectory = "Google\\Chrome\\Application";
 
-            directories.Add(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
-                subDirectory));
+            directories.Add(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)
+                .SafePathCombine(subDirectory));
 
-            directories.Add(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
-                subDirectory));
+            directories.Add(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86)
+                .SafePathCombine(subDirectory));
         }
         else if (OperatingSystem.IsLinux())
         {
@@ -63,7 +63,7 @@ public static class ChromeFinder
 
             if (key is not null)
             {
-                var path = Path.Combine(key.ToInvariantString()!, path2: "chrome.exe");
+                var path = key.ToInvariantString()!.SafePathCombine("chrome.exe");
 
                 if (File.Exists(path))
                 {
@@ -96,7 +96,7 @@ public static class ChromeFinder
 
         foreach (var exeName in exeNames)
         {
-            var path = Path.Combine(currentPath, exeName);
+            var path = currentPath.SafePathCombine(exeName);
 
             if (File.Exists(path))
             {
@@ -108,7 +108,7 @@ public static class ChromeFinder
 
         GetApplicationDirectories(directories);
 
-        return (from exeName in exeNames from directory in directories select Path.Combine(directory, exeName))
+        return (from exeName in exeNames from directory in directories select directory.SafePathCombine(exeName))
             .FirstOrDefault(File.Exists);
     }
 }

@@ -1,4 +1,3 @@
-using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -12,11 +11,9 @@ public class HtmlToPdfController(IHtmlToPdfGenerator htmlToPdfGenerator, IWebHos
     public async Task<IActionResult> Index()
     {
         // Here you can find how define @page settings
-        var inputHtmlFile = Path.Combine(webHostEnvironment.WebRootPath, path2: "html-to-pdf-page-template",
-            path3: "page.html");
+        var inputHtmlFile = webHostEnvironment.WebRootPath.SafePathCombine("html-to-pdf-page-template", "page.html");
 
-        var outputPdfFile = Path.Combine(webHostEnvironment.WebRootPath, path2: "html-to-pdf-page-template",
-            path3: "page.pdf");
+        var outputPdfFile = webHostEnvironment.WebRootPath.SafePathCombine("html-to-pdf-page-template", "page.pdf");
 
         var log = await htmlToPdfGenerator.GeneratePdfFromHtmlAsync(new HtmlToPdfGeneratorOptions
         {

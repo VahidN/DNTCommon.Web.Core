@@ -36,7 +36,7 @@ public class FileNameSanitizerService(ILogger<FileNameSanitizerService> logger, 
             return new SafeFile();
         }
 
-        var filePath = Path.Combine(folderPath, fileName);
+        var filePath = folderPath.SafePathCombine(fileName);
 
         if (!File.Exists(filePath))
         {

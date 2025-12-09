@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,7 +16,7 @@ public class AntiXssController(IAntiXssService antiXssService, IWebHostEnvironme
                                                              <img src="https://www.dntips.ir/File/Image?name=net_blog.jpg" />
                                                              """, remoteImagesOptions: new FixRemoteImagesOptions
         {
-            OutputImageFolder = Path.Combine(webHostEnvironment.WebRootPath, path2: "files"),
+            OutputImageFolder = webHostEnvironment.WebRootPath.SafePathCombine("files"),
             HostUri = HttpContext.GetBaseUri(),
             ImageUrlBuilder = savedFileName => HttpContext.GetBaseUrl()
                 .CombineUrl($"files?name={Uri.EscapeDataString(savedFileName)}", escapeRelativeUrl: false)

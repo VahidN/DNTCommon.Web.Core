@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using SkiaSharp;
@@ -20,7 +19,7 @@ public class ChartsController(IWebHostEnvironment env) : Controller
                 Text = "نمودار پاي است",
                 Font = new ChartFont
                 {
-                    FilePath = Path.Combine(env.WebRootPath, path2: "fonts", path3: "tahoma.ttf"),
+                    FilePath = env.WebRootPath.SafePathCombine("fonts", "tahoma.ttf"),
                     Style = SKFontStyle.Bold,
                     Size = 20
                 }
@@ -51,7 +50,7 @@ public class ChartsController(IWebHostEnvironment env) : Controller
                 Text = "نمودار ميله‌اي است",
                 Font = new ChartFont
                 {
-                    FilePath = Path.Combine(env.WebRootPath, path2: "fonts", path3: "tahoma.ttf"),
+                    FilePath = env.WebRootPath.SafePathCombine("fonts", "tahoma.ttf"),
                     Style = SKFontStyle.Bold,
                     Size = 20
                 }
@@ -82,7 +81,7 @@ public class ChartsController(IWebHostEnvironment env) : Controller
                 Text = "نمودار خطي است",
                 Font = new ChartFont
                 {
-                    FilePath = Path.Combine(env.WebRootPath, path2: "fonts", path3: "tahoma.ttf"),
+                    FilePath = env.WebRootPath.SafePathCombine("fonts", "tahoma.ttf"),
                     Style = SKFontStyle.Bold,
                     Size = 20
                 }

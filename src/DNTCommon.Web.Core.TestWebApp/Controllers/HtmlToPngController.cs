@@ -1,4 +1,3 @@
-using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -10,7 +9,7 @@ public class HtmlToPngController(IHtmlToPngGenerator htmlToPngGenerator, IWebHos
 {
     public async Task<IActionResult> Index()
     {
-        var outputPngFile = Path.Combine(webHostEnvironment.WebRootPath, path2: "files", path3: "test.png");
+        var outputPngFile = webHostEnvironment.WebRootPath.SafePathCombine("files", "test.png");
 
         var log = await htmlToPngGenerator.GeneratePngFromHtmlAsync(new HtmlToPngGeneratorOptions
         {
@@ -20,20 +19,16 @@ public class HtmlToPngController(IHtmlToPngGenerator htmlToPngGenerator, IWebHos
 
         var isBlankImage = outputPngFile.IsBlankImage();
 
-        var isBlankFile = Path.Combine(webHostEnvironment.WebRootPath, path2: "files", path3: "news-19169.jpg")
-            .IsBlankImage();
+        var isBlankFile = webHostEnvironment.WebRootPath.SafePathCombine("files", "news-19169.jpg").IsBlankImage();
 
-        var blankPixelsPercentage1 =
-            Path.Combine(webHostEnvironment.WebRootPath, path2: "files", path3: "news-19598.jpg")
-                .GetImageBlankPixelsPercentage();
+        var blankPixelsPercentage1 = webHostEnvironment.WebRootPath.SafePathCombine("files", "news-19598.jpg")
+            .GetImageBlankPixelsPercentage();
 
-        var blankPixelsPercentage2 =
-            Path.Combine(webHostEnvironment.WebRootPath, path2: "files", path3: "news-19588.jpg")
-                .GetImageBlankPixelsPercentage();
+        var blankPixelsPercentage2 = webHostEnvironment.WebRootPath.SafePathCombine("files", "news-19588.jpg")
+            .GetImageBlankPixelsPercentage();
 
-        var isPartiallyBlankImage =
-            Path.Combine(webHostEnvironment.WebRootPath, path2: "files", path3: "news-19588.jpg")
-                .IsPartiallyBlankImage(whitePixelsPercentage: 80);
+        var isPartiallyBlankImage = webHostEnvironment.WebRootPath.SafePathCombine("files", "news-19588.jpg")
+            .IsPartiallyBlankImage(whitePixelsPercentage: 80);
 
         ViewBag.ImageSrc = "/files/test.png";
 

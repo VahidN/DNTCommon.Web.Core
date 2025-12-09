@@ -292,7 +292,7 @@ public static class ZipArchiveExtensions
 
         foreach (var entry in archive.Entries.Where(archiveEntry => predicate(archiveEntry)))
         {
-            var destinationPath = Path.GetFullPath(Path.Combine(extractPath, entry.FullName));
+            var destinationPath = extractPath.SafePathCombine(entry.FullName);
 
             if (destinationPath.StartsWith(extractPath, StringComparison.Ordinal))
             {

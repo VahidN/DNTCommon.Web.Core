@@ -88,7 +88,7 @@ public class ReplaceRemoteImagesService(BaseHttpClient baseHttpClient, ILogger<R
         }
 
         var fileName = imageUrl.GetSha1Hash() + ext;
-        var filePath = Path.Combine(options.OutputImageFolder, fileName);
+        var filePath = options.OutputImageFolder.SafePathCombine(fileName);
 
         if (File.Exists(filePath))
         {
@@ -122,7 +122,7 @@ public class ReplaceRemoteImagesService(BaseHttpClient baseHttpClient, ILogger<R
         }
 
         var fileName = $"{imageData.GetSha1Hash()}.jpg";
-        var filePath = Path.Combine(options.OutputImageFolder, fileName);
+        var filePath = options.OutputImageFolder.SafePathCombine(fileName);
 
         if (File.Exists(filePath))
         {

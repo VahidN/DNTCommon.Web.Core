@@ -219,7 +219,7 @@ public class WebMailService(
             return;
         }
 
-        var path = Path.Combine(smtpConfig.PickupFolder, $"email-{Guid.NewGuid():N}.eml");
+        var path = smtpConfig.PickupFolder.SafePathCombine($"email-{Guid.NewGuid():N}.eml");
 
         await using var stream = path.CreateAsyncFileStream(FileMode.CreateNew, FileAccess.Write);
 
