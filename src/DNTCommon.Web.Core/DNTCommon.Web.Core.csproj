@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>DNTCommon.Web.Core provides common scenarios' solutions for ASP.NET Core applications.</Description>
-    <VersionPrefix>12.1.0</VersionPrefix>
+    <VersionPrefix>12.1.1</VersionPrefix>
     <Authors>Vahid Nasiri</Authors>
     <TargetFrameworks>net10.0;net9.0;net8.0;net7.0;net6.0;</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -67,7 +67,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Meziantou.Analyzer" Version="2.0.257">
+    <PackageReference Include="Meziantou.Analyzer" Version="2.0.264">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -83,7 +83,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="SonarAnalyzer.CSharp" Version="10.16.1.129956">
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="10.17.0.131074">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -91,7 +91,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Roslynator.Analyzers" Version="4.14.1">
+    <PackageReference Include="Roslynator.Analyzers" Version="4.15.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>	
@@ -107,7 +107,7 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App"/>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
-    <PackageReference Include="DNTPersianUtils.Core" Version="6.7.1"/>
+    <PackageReference Include="DNTPersianUtils.Core" Version="6.7.2"/>
     <PackageReference Include="MailKit" Version="4.14.1"/>
     <PackageReference Include="HtmlAgilityPack" Version="1.12.4"/>
     <PackageReference Include="IPAddressRange" Version="6.3.0"/>
