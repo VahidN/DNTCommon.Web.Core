@@ -136,7 +136,7 @@ public class MvcActionsDiscoveryService : IMvcActionsDiscoveryService
     private static bool IsSecuredAction(MemberInfo controllerTypeInfo, MemberInfo actionMethodInfo)
     {
         var actionHasAllowAnonymousAttribute =
-            actionMethodInfo.GetCustomAttribute<AllowAnonymousAttribute>(inherit: true) is not null;
+            Attribute.IsDefined(actionMethodInfo, typeof(AllowAnonymousAttribute), inherit: true);
 
         if (actionHasAllowAnonymousAttribute)
         {
@@ -144,7 +144,7 @@ public class MvcActionsDiscoveryService : IMvcActionsDiscoveryService
         }
 
         var controllerHasAuthorizeAttribute =
-            controllerTypeInfo.GetCustomAttribute<AuthorizeAttribute>(inherit: true) is not null;
+            Attribute.IsDefined(controllerTypeInfo, typeof(AuthorizeAttribute), inherit: true);
 
         if (controllerHasAuthorizeAttribute)
         {
@@ -152,7 +152,7 @@ public class MvcActionsDiscoveryService : IMvcActionsDiscoveryService
         }
 
         var actionMethodHasAuthorizeAttribute =
-            actionMethodInfo.GetCustomAttribute<AuthorizeAttribute>(inherit: true) is not null;
+            Attribute.IsDefined(actionMethodInfo, typeof(AuthorizeAttribute), inherit: true);
 
         if (actionMethodHasAuthorizeAttribute)
         {

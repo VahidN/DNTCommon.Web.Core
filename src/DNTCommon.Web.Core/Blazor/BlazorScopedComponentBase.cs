@@ -38,7 +38,7 @@ public class BlazorScopedComponentBase : OwningComponentBase
                 [
                     .. type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.NonPublic |
                                           BindingFlags.Public)
-                        .Where(p => p.GetCustomAttribute<InjectComponentScopedAttribute>() is not null)
+                        .Where(p => Attribute.IsDefined(p, typeof(InjectComponentScopedAttribute), inherit: true))
                 ], LazyThreadSafetyMode.ExecutionAndPublication))
         .Value;
 
