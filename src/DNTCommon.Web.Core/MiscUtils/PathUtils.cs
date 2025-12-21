@@ -154,7 +154,9 @@ public static class PathUtils
     /// <summary>
     ///     Removes InvalidFileNameChars and InvalidPathChars from the given input
     /// </summary>
-    public static string RemoveIllegalCharactersFromFileName(this string fileName)
+    public static string RemoveIllegalCharactersFromFileName(this string fileName,
+        string replacement = ".",
+        bool applySlugCleanup = true)
     {
         if (string.IsNullOrWhiteSpace(fileName))
         {
@@ -166,7 +168,9 @@ public static class PathUtils
         var r = new Regex($"[{Regex.Escape(regexSearch)}]", RegexOptions.Compiled | RegexOptions.IgnoreCase,
             MatchTimeout);
 
-        return r.Replace(fileName, replacement: ".").GetPostSlug()!;
+        var replace = r.Replace(fileName, replacement);
+
+        return applySlugCleanup ? replace.GetPostSlug()! : replace;
     }
 
     /// <summary>
@@ -186,7 +190,7 @@ public static class PathUtils
     /// </summary>
     public static string CreateTempFile(this string extension, byte[] contentBytes)
     {
-        var tempFilePath = GetTempFilePath(extension);
+        var tempFilePath = extension.GetTempFilePath();
         File.WriteAllBytes(tempFilePath, contentBytes);
 
         return tempFilePath;
@@ -197,7 +201,7 @@ public static class PathUtils
     /// </summary>
     public static string CreateTempFile(this string extension, string content)
     {
-        var tempFilePath = GetTempFilePath(extension);
+        var tempFilePath = extension.GetTempFilePath();
         File.WriteAllText(tempFilePath, content);
 
         return tempFilePath;
@@ -322,7 +326,7 @@ public static class PathUtils
             {
                 var newDir = destDirPath.SafePathCombine(sourceDir.Name);
 
-                if (!CopyDirectory(sourceDir.FullName, newDir, copySubDirectories, forceOverWrite))
+                if (!sourceDir.FullName.CopyDirectory(newDir, copySubDirectories, forceOverWrite))
                 {
                     return false;
                 }
@@ -422,7 +426,7 @@ public static class PathUtils
     /// <returns></returns>
     public static IReadOnlyList<string>? SplitPath(this string? path)
     {
-        path = NormalizePath(path);
+        path = path.NormalizePath();
 
         return path?.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries).ToList();
     }
@@ -597,11 +601,58 @@ public static class PathUtils
 
     /// <summary>
     ///     Concatenates an array of paths into a single path.
-    ///     It uses Path.GetFullPath + Path.Join
+    ///     It uses Path.GetFullPath + Path.Join + GetSanitizedRelativePath
     /// </summary>
-    /// <param name="path"></param>
-    /// <param name="paths"></param>
+    /// <param name="rootDir"></param>
+    /// <param name="subDirs"></param>
     /// <returns></returns>
-    public static string SafePathCombine(this string path, params string[] paths)
-        => Path.GetFullPath(Path.Join([path, ..paths]));
+    public static string SafePathCombine(this string rootDir, params string[] subDirs)
+    {
+        ArgumentNullException.ThrowIfNull(rootDir);
+        var fullRoot = Path.GetFullPath(rootDir).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+        return Path.GetFullPath(Path.Join([fullRoot, ..subDirs.Select(fullRoot.GetSanitizedRelativePath)]));
+    }
+
+    /// <summary>
+    ///     Returns a safe relative path. Only returns the portion after the rootDir.
+    /// </summary>
+    /// <param name="rootDir"></param>
+    /// <param name="subDir"></param>
+    /// <returns></returns>
+    /// <exception cref="UnauthorizedAccessException"></exception>
+    public static string GetSanitizedRelativePath(this string rootDir, string? subDir)
+    {
+        ArgumentNullException.ThrowIfNull(rootDir);
+
+        if (string.IsNullOrWhiteSpace(subDir))
+        {
+            return string.Empty;
+        }
+
+        // Reject Absolute Inputs: Block attempts like "C:\Windows\System32"
+        subDir = subDir.Trim(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+        if (Path.IsPathRooted(subDir))
+        {
+            throw new UnauthorizedAccessException($"Absolute paths[{subDir}] are not allowed.");
+        }
+
+        // Strip Invalid Characters: Remove illegal OS characters
+        var invalidChars = Path.GetInvalidPathChars();
+        subDir = new string([.. subDir.Where(c => !invalidChars.Contains(c))]);
+
+        // Normalize and Validate: Canonicalize and check against root
+        var fullRoot = Path.GetFullPath(rootDir).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var resolvedPath = Path.GetFullPath(Path.Join(fullRoot, subDir));
+
+        if (!resolvedPath.StartsWith(fullRoot, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new UnauthorizedAccessException(
+                $"Directory traversal attempt detected from the userInput: `{subDir}`. ResolvedPath: `{resolvedPath}`.");
+        }
+
+        // Return Safe Relative Path: Only returns the portion after the root
+        return Path.GetRelativePath(fullRoot, resolvedPath);
+    }
 }
