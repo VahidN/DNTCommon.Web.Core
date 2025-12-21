@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>DNTCommon.Web.Core provides common scenarios' solutions for ASP.NET Core applications.</Description>
-    <VersionPrefix>12.1.1</VersionPrefix>
+    <VersionPrefix>12.1.2</VersionPrefix>
     <Authors>Vahid Nasiri</Authors>
     <TargetFrameworks>net10.0;net9.0;net8.0;net7.0;net6.0;</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -118,7 +118,7 @@
     <PackageReference Include="Ben.Demystifier" Version="0.4.1"/>
     <PackageReference Include="UAParser" Version="3.1.47"/>
     <PackageReference Include="AsyncKeyedLock" Version="7.1.8"/>
-    <PackageReference Include="NetEscapades.AspNetCore.SecurityHeaders" Version="1.3.0"/>
+    <PackageReference Include="NetEscapades.AspNetCore.SecurityHeaders" Version="1.3.1"/>
     <PackageReference Include="iTextSharp.LGPLv2.Core" Version="3.7.12"/>
     <PackageReference Include="Scrutor" Version="7.0.0"/>
   </ItemGroup>
