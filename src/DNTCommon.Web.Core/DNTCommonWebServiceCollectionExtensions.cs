@@ -52,6 +52,7 @@ public static class DntCommonWebServiceCollectionExtensions
         services.AddEnhancedStackTraceService();
         services.AddWebMailService();
         services.AddDownloaderService();
+        services.AddRssReaderService();
         services.AddMiscUtilsService();
         services.AddBaseHttpClient();
         services.AddRedirectUrlFinderService();
