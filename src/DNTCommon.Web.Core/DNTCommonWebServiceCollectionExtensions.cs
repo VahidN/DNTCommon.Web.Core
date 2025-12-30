@@ -53,6 +53,7 @@ public static class DntCommonWebServiceCollectionExtensions
         services.AddWebMailService();
         services.AddDownloaderService();
         services.AddRssReaderService();
+        services.AddGeminiClientService();
         services.AddMiscUtilsService();
         services.AddBaseHttpClient();
         services.AddRedirectUrlFinderService();

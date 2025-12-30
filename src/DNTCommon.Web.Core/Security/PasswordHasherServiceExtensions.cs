@@ -37,6 +37,16 @@ public static class PasswordHasherServiceExtensions
     }
 
     /// <summary>
+    ///     Computes SHA256 of the given stream
+    /// </summary>
+    public static byte[] GetSha256Hash(this Stream stream)
+    {
+        using var sha256 = SHA256.Create();
+
+        return sha256.ComputeHash(stream);
+    }
+
+    /// <summary>
     ///     Creates a custom hash based on SHA1 CryptoServiceProvider.
     /// </summary>
     public static string GetSha1Hash(this string input) => Encoding.UTF8.GetBytes(input).GetSha1Hash();
@@ -124,6 +134,6 @@ public static class PasswordHasherServiceExtensions
             }
         }
 
-        return characterCount * 3 / 4 - paddingCount;
+        return (characterCount * 3 / 4) - paddingCount;
     }
 }
