@@ -59,4 +59,17 @@ public class GeminiGenerationConfig
     [JsonPropertyName(name: "stopSequences")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<string>? StopSequences { get; set; }
+
+    /// <summary>
+    ///     Optional. MIME type of the generated candidate text.
+    ///     Supported MIME types are:
+    ///     text/plain: (default) Text output.
+    ///     application/json: JSON response in the response candidates.
+    ///     text/x.enum: ENUM as a string response in the response candidates.
+    ///     Refer to the docs https://ai.google.dev/gemini-api/docs/prompting_with_media#plain_text_formats
+    ///     for a list of all supported text MIME types.
+    /// </summary>
+    [JsonPropertyName(name: "responseMimeType")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public string? ResponseMimeType { get; set; }
 }

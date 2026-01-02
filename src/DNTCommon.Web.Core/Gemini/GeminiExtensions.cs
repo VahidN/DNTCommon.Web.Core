@@ -119,7 +119,8 @@ public static class GeminiExtensions
                 TopP = 1,
                 MaxOutputTokens = options.MaxOutputTokens,
                 StopSequences = [],
-                ResponseModalities = options.ResponseModalities
+                ResponseModalities = options.ResponseModalities,
+                ResponseMimeType = options.ResponseMimeType
             },
             SafetySettings =
             [
