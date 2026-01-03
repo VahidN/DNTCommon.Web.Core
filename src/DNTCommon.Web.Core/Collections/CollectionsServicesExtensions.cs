@@ -13,6 +13,7 @@ public static class CollectionsServicesExtensions
     public static IServiceCollection AddCollectionsServices(this IServiceCollection services)
     {
         services.AddSingleton(typeof(IBagCacheService<>), typeof(BagCacheService<>));
+        services.AddSingleton(typeof(ILockedDictionaryCacheService<>), typeof(LockedDictionaryCacheService<>));
 
         return services;
     }
