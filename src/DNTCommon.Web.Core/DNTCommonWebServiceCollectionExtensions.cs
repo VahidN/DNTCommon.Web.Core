@@ -75,6 +75,7 @@ public static class DntCommonWebServiceCollectionExtensions
         services.AddSerializationProvider();
         services.AddErrorBoundaryLoggerService();
         services.AddChromeHtmlToPngService();
+        services.AddCollectionsServices();
 
         if (scheduledTasksOptions is not null)
         {
