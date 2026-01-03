@@ -317,4 +317,44 @@ public static class HtmlHelperServiceExtensions
             yield return item.Attributes;
         }
     }
+	
+    /// <summary>
+    /// Converts HTML to plain text.
+    /// </summary>	
+    public static async Task<string> HtmlToTextAsync(this HttpClient httpClient,
+        string url,
+        ILogger? logger = null,
+        CancellationToken ct = default)
+    {
+        var html = await httpClient.DownloadPageAsync(url, cancellationToken: ct);
+
+        return HtmlToText(html, logger);
+    }
+
+    /// <summary>
+    /// Converts HTML to plain text.
+    /// </summary>	
+    public static string HtmlToText(this string html, ILogger? logger = null)
+    {
+        var document = html.CreateHtmlDocument(logger);
+
+        var sb = new StringBuilder();
+
+        foreach (var node in document.DocumentNode.DescendantsAndSelf())
+        {
+            if (node.NodeType == HtmlNodeType.Text &&
+                !string.Equals(node.ParentNode.Name, b: "script", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(node.ParentNode.Name, b: "style", StringComparison.OrdinalIgnoreCase))
+            {
+                var text = node.InnerText;
+
+                if (!text.IsEmpty())
+                {
+                    sb.AppendLine(WebUtility.HtmlDecode(text.Trim()));
+                }
+            }
+        }
+
+        return sb.ToString();
+    }	
 }
