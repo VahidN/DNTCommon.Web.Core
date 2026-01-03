@@ -28,5 +28,5 @@ public sealed class GeminiApiVersions
 
     public override string ToString() => Value;
 
-    public GeminiApiVersions ToGeminiApiVersions(string value) => new(value);
+    public static GeminiApiVersions ToGeminiApiVersions(string value) => new(value);
 }

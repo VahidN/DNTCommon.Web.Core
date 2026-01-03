@@ -6,7 +6,10 @@ public sealed class GeminiClientOptions
 
     public GeminiApiVersions? ApiVersion { get; set; }
 
-    public GeminiModels? ModelId { get; set; }
+    /// <summary>
+    ///     Such as gemma-3-12b-it or gemini-2.5-flash, etc
+    /// </summary>
+    public string? ModelId { get; set; }
 
     public string? SystemInstruction { get; set; }
 
