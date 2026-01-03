@@ -26,26 +26,28 @@ public class ParallelTasksQueueScheduler : TaskScheduler, IDisposable
             numberOfThreads = Environment.ProcessorCount;
         }
 
-        _tasks = new BlockingCollection<Task>();
+        _tasks = [];
 
-        _threads = Enumerable.Range(start: 0, numberOfThreads)
-            .Select(_ =>
-            {
-                var thread = new Thread(() =>
+        _threads =
+        [
+            .. Enumerable.Range(start: 0, numberOfThreads)
+                .Select(_ =>
                 {
-                    foreach (var task in _tasks.GetConsumingEnumerable())
+                    var thread = new Thread(() =>
                     {
-                        TryExecuteTask(task);
-                    }
-                })
-                {
-                    IsBackground = true,
-                    Priority = _threadPriority
-                };
+                        foreach (var task in _tasks.GetConsumingEnumerable())
+                        {
+                            TryExecuteTask(task);
+                        }
+                    })
+                    {
+                        IsBackground = true,
+                        Priority = _threadPriority
+                    };
 
-                return thread;
-            })
-            .ToList();
+                    return thread;
+                })
+        ];
 
         _threads.ForEach(t => t.Start());
     }
