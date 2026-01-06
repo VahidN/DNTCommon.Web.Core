@@ -11,7 +11,7 @@ public static class TokenEstimator
     {
         if (string.IsNullOrEmpty(inputText))
         {
-            return 50; // مقدار پیش فرض برای متن خالی
+            return minOutputTokens; // مقدار پیش فرض برای متن خالی
         }
 
         // تقسیم متن به کلمات (می توانید از روش های پیشرفته تر برای توکن سازی استفاده کنید)
