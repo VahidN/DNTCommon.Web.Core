@@ -1,10 +1,10 @@
-namespace DNTCommon.Web.Core;
+﻿namespace DNTCommon.Web.Core;
 
 /// <summary>
 ///     A typed HttpClient
 /// </summary>
 /// <param name="httpClient"></param>
-public class BaseHttpClient(HttpClient httpClient)
+public class BaseHttpClientWithoutAutoRedirect(HttpClient httpClient)
 {
     /// <summary>
     ///     A typed HttpClient

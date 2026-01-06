@@ -17,7 +17,7 @@ public class RedirectUrlFinderService : IRedirectUrlFinderService
     /// </summary>
     public RedirectUrlFinderService(ICacheService cacheService,
         ILogger<RedirectUrlFinderService> logger,
-        BaseHttpClient baseHttpClient)
+        BaseHttpClientWithoutAutoRedirect baseHttpClient)
     {
         _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
