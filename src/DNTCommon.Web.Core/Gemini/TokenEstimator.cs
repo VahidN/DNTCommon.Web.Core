@@ -4,9 +4,10 @@ public static class TokenEstimator
 {
     private static readonly char[] Separator = [' ', '\t', '\n', '\r', '.', ',', ';', ':', '!', '?'];
 
-    public static int EstimateMaxOutputTokens(string inputText,
+    public static int EstimateMaxOutputTokens(this string inputText,
         double tokensPerWordRatio = 0.75,
-        double safetyFactor = 1.5)
+        double safetyFactor = 1.5,
+        int minOutputTokens = 50)
     {
         if (string.IsNullOrEmpty(inputText))
         {
@@ -25,6 +26,6 @@ public static class TokenEstimator
         var maxOutputTokens = (int)Math.Ceiling(estimatedTokens * safetyFactor);
 
         // اطمینان از اینکه مقدار تخمین زده شده خیلی کم نباشد
-        return Math.Max(val1: 50, maxOutputTokens); // حداقل 50 توکن
+        return Math.Max(minOutputTokens, maxOutputTokens); // حداقل 50 توکن
     }
 }
