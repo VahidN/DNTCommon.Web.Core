@@ -114,7 +114,7 @@ public static class GeminiExtensions
             ],
             GenerationConfig = new GeminiGenerationConfig
             {
-                Temperature = 0,
+                Temperature = 0.3f,
                 TopK = 1,
                 TopP = 1,
                 MaxOutputTokens = options.MaxOutputTokens,
