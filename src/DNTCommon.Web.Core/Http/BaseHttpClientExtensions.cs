@@ -56,14 +56,16 @@ public static class BaseHttpClientExtensions
             CookieContainer = CookieContainer,
             UseCookies = true,
             AutomaticDecompression = DecompressionMethods.All,
-            PooledConnectionLifetime = TimeSpan.FromMinutes(value: 1),
-            PooledConnectionIdleTimeout = TimeSpan.FromSeconds(value: 30),
-            MaxConnectionsPerServer = 200
+            PooledConnectionLifetime = TimeSpan.FromSeconds(value: 10),
+            PooledConnectionIdleTimeout = TimeSpan.FromSeconds(value: 10),
+            MaxConnectionsPerServer = 200,
+            ConnectTimeout = TimeSpan.FromSeconds(value: 10),
+            KeepAlivePingDelay = TimeSpan.FromSeconds(value: 10)
         };
 
     private static void AddDefaultSettings(HttpClient client)
     {
-        client.Timeout = TimeSpan.FromSeconds(value: 15);
+        client.Timeout = TimeSpan.FromSeconds(value: 10);
 
         client.DefaultRequestHeaders.Add(name: "User-Agent",
             value:
