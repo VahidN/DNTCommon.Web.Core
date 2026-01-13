@@ -716,6 +716,7 @@ dotnet_diagnostic.MA0159.severity = suggestion
 dotnet_diagnostic.MA0165.severity = suggestion
 
 dotnet_diagnostic.RCS1021.severity = suggestion
+dotnet_diagnostic.RCS1194.severity = suggestion
 dotnet_diagnostic.RCS1036.severity = none
 dotnet_diagnostic.RCS1037.severity = none
 dotnet_diagnostic.RCS1046.severity = suggestion
