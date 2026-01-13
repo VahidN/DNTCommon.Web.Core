@@ -48,9 +48,11 @@ public sealed class AntiDosMiddleware : IDisposable
     {
         ArgumentNullException.ThrowIfNull(context);
 
+        AntiDosFirewallRequestInfo? requestInfo = null;
+
         if (!_antiDosConfig.Disable)
         {
-            var requestInfo = GetHeadersInfo(context);
+            requestInfo = GetHeadersInfo(context);
             var validationResult = _antiDosFirewall.ShouldBlockClient(requestInfo);
 
             if (validationResult.ShouldBlockClient)
@@ -64,6 +66,17 @@ public sealed class AntiDosMiddleware : IDisposable
         }
 
         await _next(context);
+
+        CheckTooManyClientErrors(context, requestInfo);
+    }
+
+    private void CheckTooManyClientErrors(HttpContext context, AntiDosFirewallRequestInfo? requestInfo)
+    {
+        if (!_antiDosConfig.Disable && context.Response.StatusCode.IsClientErrorHttpStatusCode &&
+            requestInfo is not null)
+        {
+            _antiDosFirewall.IsDosAttack(requestInfo);
+        }
     }
 
     private static AntiDosFirewallRequestInfo GetHeadersInfo(HttpContext context)
