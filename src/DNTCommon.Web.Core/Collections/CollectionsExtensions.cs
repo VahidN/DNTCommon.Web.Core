@@ -255,7 +255,7 @@ public static class CollectionsExtensions
 
         foreach (var item in items)
         {
-            AddIfNotNull(list, item);
+            list.AddIfNotNull(item);
         }
     }
 
@@ -391,6 +391,16 @@ public static class CollectionsExtensions
     public static T ParseInvariant<T>(this string text)
         where T : IParsable<T>
         => T.Parse(text, CultureInfo.InvariantCulture);
+
+    /// <summary>
+    ///     Parses strings into values.
+    /// </summary>
+    /// <param name="values"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static IEnumerable<T> ParseManyInvariant<T>(this IEnumerable<string> values)
+        where T : IParsable<T>
+        => values.Select(ParseInvariant<T>);
 
     /// <summary>
     ///     Tries to parse a string into a value.
