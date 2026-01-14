@@ -2,19 +2,14 @@ namespace DNTCommon.Web.Core;
 
 public static class EmojiIcons
 {
-#if !NET_6
     /// <summary>
     ///     Returns an output like ★★★☆☆ for stars = 3, totalStars = 5
     /// </summary>
     public static string ToStarRatingIcons(this decimal stars, int totalStars = 5)
     {
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(stars, totalStars);
-
         var starsCount = (int)Math.Round(stars);
-
         return new string(c: '★', starsCount) + new string(c: '☆', totalStars - starsCount);
     }
-#endif
 
     public static class TimeScheduling
     {
