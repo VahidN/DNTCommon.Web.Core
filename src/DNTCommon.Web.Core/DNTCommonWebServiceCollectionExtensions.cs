@@ -70,6 +70,7 @@ public static class DntCommonWebServiceCollectionExtensions
         services.AddCommonHttpClientFactory();
         services.AddUploadFileService();
         services.AddAntiDosFirewall();
+        services.AddAsyncLocalCancellationContext();
         services.AddHtmlReaderService();
         services.AddAntiXssService();
         services.AddSerializationProvider();
