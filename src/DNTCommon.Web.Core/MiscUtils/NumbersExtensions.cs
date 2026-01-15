@@ -8,6 +8,12 @@ namespace DNTCommon.Web.Core;
 public static class NumbersExtensions
 {
     /// <summary>
+    ///     Returns a random char from the given text
+    /// </summary>
+    public static char? GetRandomCharacter([NotNullIfNotNull(nameof(text))] this string? text)
+        => text?[RandomNumberGenerator.GetInt32(text.Length)];
+
+    /// <summary>
     ///     Creates an array of bytes with a cryptographically strong random sequence of values.
     /// </summary>
     /// <param name="count">The number of bytes of random values to create.</param>
@@ -147,7 +153,8 @@ public static class NumbersExtensions
             return defaultValue;
         }
 
-        return int.TryParse(data, NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out var result)
+        return int.TryParse(data, NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands,
+            CultureInfo.InvariantCulture, out var result)
             ? result
             : defaultValue;
     }
@@ -234,7 +241,8 @@ public static class NumbersExtensions
     /// <summary>
     ///     Tries to convert a string value to a number
     /// </summary>
-    public static T? ToNumber<T>(this string? data, NumberStyles style = NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands)
+    public static T? ToNumber<T>(this string? data,
+        NumberStyles style = NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands)
         where T : INumber<T>
     {
         var defaultValue = default(T);
@@ -260,5 +268,21 @@ public static class NumbersExtensions
     public static T InchesToCm<T>(T inches)
         where T : INumber<T>
         => inches * T.CreateChecked(value: 2.54f);
+
+    /// <summary>
+    ///     Calculates the percentage change
+    /// </summary>
+    public static T CalculatePercentageChange<T>(this T newValue, T oldValue)
+        where T : INumber<T>
+    {
+        var one100 = T.CreateChecked(value: 100);
+
+        if (T.Abs(oldValue).IsSmallerThan(T.CreateChecked(value: 1e-6)))
+        {
+            return newValue.IsPositive() ? one100 : T.Zero;
+        }
+
+        return (newValue - oldValue) / T.Abs(oldValue) * one100;
+    }
 #endif
 }
