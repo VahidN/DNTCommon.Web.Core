@@ -83,5 +83,15 @@ public static class EnumExtensions
         /// </summary>
         /// <returns></returns>
         public static string[] GetNames() => Enum.GetNames<T>();
+
+        /// <summary>
+        ///     Returns a random item of from a give Enum
+        /// </summary>
+        public static T GetRandomItem()
+        {
+            var values = GetValues<T>();
+
+            return values[RandomNumberGenerator.GetInt32(values.Length)];
+        }
     }
 }
