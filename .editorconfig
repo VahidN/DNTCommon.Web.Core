@@ -682,6 +682,7 @@ dotnet_diagnostic.MA0007.severity = none
 dotnet_diagnostic.MA0011.severity = suggestion
 dotnet_diagnostic.MA0015.severity = suggestion
 dotnet_diagnostic.MA0016.severity = suggestion
+dotnet_diagnostic.MA0018.severity = suggestion
 dotnet_diagnostic.MA0020.severity = none
 dotnet_diagnostic.MA0022.severity = error
 dotnet_diagnostic.MA0023.severity = suggestion
