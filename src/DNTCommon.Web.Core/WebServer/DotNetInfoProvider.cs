@@ -53,7 +53,7 @@ public static class DotNetInfoProvider
     ///     Returns output of `dotnet sdk check`
     ///     https://github.com/dotnet/sdk/blob/a34f1ca17979f6cb283ad74c53ca68f8575fceb9/src/Cli/dotnet/commands/dotnet-sdk/check/LocalizableStrings.resx
     /// </summary>
-    public static bool IsNewSdkVersionAvailable()
+    public static (bool Success, string Info) IsNewSdkVersionAvailable()
     {
         var info = GetSdkCheckInfo();
 
