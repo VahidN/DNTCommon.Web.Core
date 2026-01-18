@@ -76,13 +76,13 @@ public static class EnumExtensions
         ///     Retrieves an array of the values of the constants in a specified enumeration type.
         /// </summary>
         /// <returns></returns>
-        public static T[] GetValues() => Enum.GetValues<T>();
+        public static T[] GetValues() => EnumCache<T>.DefinedValues;
 
         /// <summary>
         ///     Retrieves an array of the names of the constants in a specified enumeration type.
         /// </summary>
         /// <returns></returns>
-        public static string[] GetNames() => Enum.GetNames<T>();
+        public static string[] GetNames() => EnumCache<T>.DefinedNames;
 
         /// <summary>
         ///     Returns a random item of from a give Enum
