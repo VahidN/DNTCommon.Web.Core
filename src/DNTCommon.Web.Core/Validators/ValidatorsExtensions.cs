@@ -12,8 +12,7 @@ public static class ValidatorsExtensions
     /// <summary>
     ///     Tries to parse a string into a Guid-value.
     /// </summary>
-    public static bool IsValidGuid(this string? value)
-        => !value.IsEmpty() && Guid.TryParse(value, CultureInfo.InvariantCulture, out _);
+    public static bool IsValidGuid([NotNullWhen(returnValue: true)] this string? value) => Guid.IsValidGuid(value);
 #endif
 
     public static (bool Success, string? ErrorMessage) IsValidIFormFile(this object? value,

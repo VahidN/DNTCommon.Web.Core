@@ -37,6 +37,28 @@ public static class GuidExtensions
         /// </summary>
         public static string CryptographicallySecureSessionToken => string.Format(CultureInfo.InvariantCulture,
             format: "{0}{0}", Guid.CryptographicallySecureApiToken);
+
+#if !NET_6
+        /// <summary>
+        ///     Tries to parse a string into a value.
+        /// </summary>
+        public static bool IsValidGuid([NotNullWhen(returnValue: true)] string? value)
+            => !value.IsEmpty() && Guid.TryParse(value, CultureInfo.InvariantCulture, out _);
+
+        /// <summary>
+        ///     Converts the string representation of the input value to an
+        ///     equivalent Guid object.
+        /// </summary>
+        public static Guid? FromValue([NotNullIfNotNull(nameof(value))] string? value, Guid? defaultValue = null)
+        {
+            if (value.IsEmpty())
+            {
+                return defaultValue;
+            }
+
+            return Guid.TryParse(value, CultureInfo.InvariantCulture, out var result) ? result : defaultValue;
+        }
+#endif
     }
 
     extension(Guid guid)
