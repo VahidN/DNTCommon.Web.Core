@@ -122,4 +122,17 @@ public static class NetworkExtensions
             return null;
         }
     }
+
+    /// <summary>
+    ///     Gets the port number of the LocalEndPoint(127.0.0.1:0).
+    /// </summary>
+    /// <returns></returns>
+    public static int? FindAvailableNetworkPort()
+    {
+        using var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        socket.Bind(IPEndPoint.Parse(s: "127.0.0.1:0"));
+        var socketLocalEndPoint = socket.LocalEndPoint;
+
+        return socketLocalEndPoint is IPEndPoint endPoint ? endPoint.Port : null;
+    }
 }
