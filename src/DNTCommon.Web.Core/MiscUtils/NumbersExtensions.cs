@@ -21,6 +21,13 @@ public static class NumbersExtensions
     public static byte[] RandomBytes(this int count) => RandomNumberGenerator.GetBytes(count);
 
     /// <summary>
+    ///     Creates an array of bytes with a cryptographically strong random sequence of values.
+    /// </summary>
+    /// <param name="count">The number of bytes of random values to create.</param>
+    /// <returns>An array populated with cryptographically strong random values.</returns>
+    public static string RandomHex(this int count) => Convert.ToHexString(count.RandomBytes());
+
+    /// <summary>
     ///     Fills a span with cryptographically strong random bytes.
     /// </summary>
     /// <param name="randomBytes">The span to fill with cryptographically strong random bytes.</param>

@@ -20,7 +20,7 @@ public sealed class PasswordHasherService : IPasswordHasherService
     /// <summary>
     ///     A cryptographic random number generator
     /// </summary>
-    public Guid CreateCryptographicallySecureGuid() => new(GenerateRandomSalt());
+    public Guid CreateCryptographicallySecureGuid() => Guid.CryptographicallySecureGuid;
 
     /// <summary>
     ///     A cryptographic random number generator
