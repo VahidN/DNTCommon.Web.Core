@@ -130,7 +130,7 @@ public static class NetworkExtensions
     public static int? FindAvailableNetworkPort()
     {
         using var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        socket.Bind(IPEndPoint.Parse(s: "127.0.0.1:0"));
+        socket.Bind(new IPEndPoint(IPAddress.Loopback, port: 0));
         var socketLocalEndPoint = socket.LocalEndPoint;
 
         return socketLocalEndPoint is IPEndPoint endPoint ? endPoint.Port : null;
