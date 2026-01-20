@@ -1,15 +1,24 @@
+using System.Numerics;
+
 namespace DNTCommon.Web.Core;
 
 public static class EmojiIcons
 {
+#if !NET_6
     /// <summary>
     ///     Returns an output like ★★★☆☆ for stars = 3, totalStars = 5
     /// </summary>
-    public static string ToStarRatingIcons(this decimal stars, int totalStars = 5)
+    public static string ToStarRatingIcons<T>(this T stars, int totalStars = 5)
+        where T : IFloatingPoint<T>
     {
-        var starsCount = (int)Math.Round(stars);
-        return new string(c: '★', starsCount) + new string(c: '☆', totalStars - starsCount);
+        var zero = T.Zero;
+        var max = T.CreateChecked(totalStars);
+        var clamped = T.Clamp(stars, zero, max);
+        var filled = int.CreateChecked(T.Round(clamped));
+
+        return new string(c: '★', filled) + new string(c: '☆', totalStars - filled);
     }
+#endif
 
     public static class TimeScheduling
     {
