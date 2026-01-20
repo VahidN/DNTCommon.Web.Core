@@ -57,8 +57,8 @@ public static class DotNetInfoProvider
     {
         var info = GetSdkCheckInfo();
 
-        return info.Contains(value: "is available", StringComparison.OrdinalIgnoreCase) ||
+        return (info.Contains(value: "is available", StringComparison.OrdinalIgnoreCase) ||
                info.Contains(value: "patch", StringComparison.OrdinalIgnoreCase) || (!OperatingSystem.IsLinux() &&
-                   info.Contains(value: "newest", StringComparison.OrdinalIgnoreCase));
+                   info.Contains(value: "newest", StringComparison.OrdinalIgnoreCase)), info);
     }
 }
