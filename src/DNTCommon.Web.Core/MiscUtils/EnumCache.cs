@@ -3,7 +3,7 @@
 public static class EnumCache<T>
     where T : struct, Enum
 {
-    public static readonly T[] DefinedValues = [..Enum.GetValues<T>()];
+    public static readonly T[] DefinedValues = Enum.GetValues<T>();
 
-    public static readonly string[] DefinedNames = [..Enum.GetNames<T>()];
+    public static readonly string[] DefinedNames = Enum.GetNames<T>();
 }
