@@ -20,13 +20,19 @@ public static class BaseHttpClientExtensions
             .ConfigurePrimaryHttpMessageHandler(() => CreateScrapingHandler(allowAutoRedirect: true))
             .AddPolicyHandler(GetTimeoutPolicy())
             .AddPolicyHandler(GetRetryPolicy())
-            .AddPolicyHandler(GetRateLimitPolicy());
+#if !NET_6
+            .AddPolicyHandler(GetRateLimitPolicy())
+#endif
+            ;
 
         services.AddHttpClient<BaseHttpClientWithoutAutoRedirect>(AddDefaultSettings)
             .ConfigurePrimaryHttpMessageHandler(() => CreateScrapingHandler(allowAutoRedirect: false))
             .AddPolicyHandler(GetTimeoutPolicy())
             .AddPolicyHandler(GetRetryPolicy())
-            .AddPolicyHandler(GetRateLimitPolicy());
+#if !NET_6
+            .AddPolicyHandler(GetRateLimitPolicy())
+#endif
+            ;
 
         services.RemoveAll<IHttpMessageHandlerBuilderFilter>(); // Remove logging of the HttpClient
 
@@ -42,7 +48,7 @@ public static class BaseHttpClientExtensions
     }
 
     private static AsyncPolicy<HttpResponseMessage> GetTimeoutPolicy()
-        => Policy.TimeoutAsync<HttpResponseMessage>(TimeSpan.FromSeconds(seconds: 30), TimeoutStrategy.Optimistic);
+        => Policy.TimeoutAsync<HttpResponseMessage>(TimeSpan.FromSeconds(value: 30), TimeoutStrategy.Optimistic);
 
     private static AsyncPolicy<HttpResponseMessage> GetRetryPolicy()
         => Policy<HttpResponseMessage>.Handle<HttpRequestException>()
@@ -53,20 +59,22 @@ public static class BaseHttpClientExtensions
                          TimeSpan.FromMilliseconds(RandomNumberGenerator.GetInt32(fromInclusive: 100,
                              toExclusive: 500)));
 
+#if !NET_6
     private static AsyncPolicy<HttpResponseMessage> GetRateLimitPolicy()
-        => Policy.RateLimitAsync<HttpResponseMessage>(numberOfExecutions: 10, TimeSpan.FromSeconds(seconds: 1));
+        => Policy.RateLimitAsync<HttpResponseMessage>(numberOfExecutions: 10, TimeSpan.FromSeconds(value: 1));
+#endif
 
     private static SocketsHttpHandler CreateScrapingHandler(bool allowAutoRedirect)
         => new()
         {
             AutomaticDecompression = DecompressionMethods.All,
-            PooledConnectionLifetime = TimeSpan.FromMinutes(minutes: 10),
-            PooledConnectionIdleTimeout = TimeSpan.FromMinutes(minutes: 2),
+            PooledConnectionLifetime = TimeSpan.FromMinutes(value: 10),
+            PooledConnectionIdleTimeout = TimeSpan.FromMinutes(value: 2),
             MaxConnectionsPerServer = 50,
-            ConnectTimeout = TimeSpan.FromSeconds(seconds: 15),
+            ConnectTimeout = TimeSpan.FromSeconds(value: 15),
             KeepAlivePingPolicy = HttpKeepAlivePingPolicy.Always,
-            KeepAlivePingDelay = TimeSpan.FromSeconds(seconds: 30),
-            KeepAlivePingTimeout = TimeSpan.FromSeconds(seconds: 10),
+            KeepAlivePingDelay = TimeSpan.FromSeconds(value: 30),
+            KeepAlivePingTimeout = TimeSpan.FromSeconds(value: 10),
             UseCookies = false,
             AllowAutoRedirect = allowAutoRedirect
         };
