@@ -83,6 +83,7 @@ public static class BaseHttpClientExtensions
             KeepAlivePingDelay = TimeSpan.FromSeconds(value: 30),
             KeepAlivePingTimeout = TimeSpan.FromSeconds(value: 10),
             UseCookies = false,
-            AllowAutoRedirect = allowAutoRedirect
+            AllowAutoRedirect = allowAutoRedirect,
+            MaxAutomaticRedirections = 5 // Limit to prevent infinite loops
         };
 }
