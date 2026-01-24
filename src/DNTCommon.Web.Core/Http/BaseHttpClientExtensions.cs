@@ -41,10 +41,17 @@ public static class BaseHttpClientExtensions
 
     private static void AddDefaultSettings(HttpClient client)
     {
-        client.DefaultRequestHeaders.UserAgent.ParseAdd(input: "DNTCommon/1.0");
-        client.DefaultRequestHeaders.Accept.ParseAdd(input: "text/html,application/xhtml+xml");
+        client.DefaultRequestHeaders.Clear();
+
+        client.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgentPool.Random());
+
+        client.DefaultRequestHeaders.Accept.ParseAdd(
+            input: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+
         client.DefaultRequestHeaders.AcceptLanguage.ParseAdd(input: "en-US,en;q=0.9");
         client.DefaultRequestHeaders.AcceptEncoding.ParseAdd(input: "gzip, deflate");
+
+        client.DefaultRequestHeaders.ConnectionClose = false;
     }
 
     private static AsyncPolicy<HttpResponseMessage> GetTimeoutPolicy()
