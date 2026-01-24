@@ -13,5 +13,5 @@ public class LinuxWebServerInfo
     /// <summary>
     ///     Provides output of `apt search dotnet-sdk*`
     /// </summary>
-    public IList<string> AvailableSdkVersions { set; get; } = [];
+    public IList<Version> AvailableSdkVersions { set; get; } = [];
 }

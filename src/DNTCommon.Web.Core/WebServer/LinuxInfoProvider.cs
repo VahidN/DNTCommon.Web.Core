@@ -39,7 +39,7 @@ public static class LinuxInfoProvider
     /// <summary>
     ///     استخراج نسخه‌های کامل مثل 8.0.121 , 9.0.112
     /// </summary>
-    public static IList<string> GetAvailableSdkVersions()
+    public static IList<Version> GetAvailableSdkVersions()
     {
         if (!OperatingSystem.IsLinux())
         {
@@ -60,7 +60,7 @@ public static class LinuxInfoProvider
             return [];
         }
 
-        var versions = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var versions = new HashSet<Version>();
 
         foreach (Match line in RegexLine.Matches(outputText))
         {
@@ -68,7 +68,12 @@ public static class LinuxInfoProvider
 
             if (versionMatch.Success)
             {
-                versions.Add(versionMatch.Groups[groupnum: 1].Value);
+                var versionString = versionMatch.Groups[groupnum: 1].Value;
+
+                if (Version.TryParse(versionString, out var version))
+                {
+                    versions.Add(version);
+                }
             }
         }
 
