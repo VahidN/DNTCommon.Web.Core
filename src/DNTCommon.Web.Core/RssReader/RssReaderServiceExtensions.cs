@@ -28,8 +28,14 @@ public static class RssReaderServiceExtensions
     {
         ArgumentNullException.ThrowIfNull(httpClient);
 
-        var rawXml = await httpClient.GetStringAsync(url, ct);
-        using var stringReader = new StringReader(rawXml);
+        var rawXmlResult = await httpClient.SafeFetchAsync(url, ct);
+
+        if (rawXmlResult.Kind != FetchResultKind.Success || rawXmlResult.Content.IsEmpty())
+        {
+            throw new InvalidOperationException($"{url} -> {rawXmlResult.StatusCode} -> {rawXmlResult.Reason}");
+        }
+
+        using var stringReader = new StringReader(rawXmlResult.Content);
         using var xmlReader = new RssXmlReader(stringReader);
 
         var feed = SyndicationFeed.Load(xmlReader) ?? throw new InvalidOperationException(message: "Invalid RSS feed");

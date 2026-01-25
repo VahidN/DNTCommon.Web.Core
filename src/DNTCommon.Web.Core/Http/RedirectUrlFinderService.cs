@@ -110,12 +110,7 @@ public class RedirectUrlFinderService : IRedirectUrlFinderService
         return CacheReturn(siteUri, redirectUri);
     }
 
-    private void SetHeaders(Uri siteUri)
-    {
-        _client.DefaultRequestHeaders.Add(name: "User-Agent", typeof(RedirectUrlFinderService).Namespace);
-        _client.DefaultRequestHeaders.Add(name: "Keep-Alive", value: "true");
-        _client.DefaultRequestHeaders.Referrer = siteUri;
-    }
+    private void SetHeaders(Uri siteUri) => _client.DefaultRequestHeaders.Referrer = siteUri;
 
     private Uri? CacheReturn(Uri originalUrl, Uri? redirectUrl)
     {

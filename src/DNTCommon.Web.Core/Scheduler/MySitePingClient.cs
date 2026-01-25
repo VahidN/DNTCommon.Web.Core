@@ -23,7 +23,7 @@ public class MySitePingClient(HttpClient httpClient, ILogger<MySitePingClient> l
         {
             if (_httpClient.BaseAddress is not null)
             {
-                await _httpClient.GetStringAsync(_httpClient.BaseAddress, cancellationToken);
+                await _httpClient.SafeFetchAsync(_httpClient.BaseAddress, cancellationToken);
             }
         }
         catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)

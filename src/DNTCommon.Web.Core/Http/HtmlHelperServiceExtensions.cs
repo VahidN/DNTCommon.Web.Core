@@ -317,23 +317,28 @@ public static class HtmlHelperServiceExtensions
             yield return item.Attributes;
         }
     }
-	
+
     /// <summary>
-    /// Converts HTML to plain text.
-    /// </summary>	
+    ///     Converts HTML to plain text.
+    /// </summary>
     public static async Task<string> HtmlToTextAsync(this HttpClient httpClient,
         string url,
         ILogger? logger = null,
         CancellationToken ct = default)
     {
-        var html = await httpClient.DownloadPageAsync(url, cancellationToken: ct);
+        var htmlResult = await httpClient.SafeFetchAsync(url, ct);
 
-        return HtmlToText(html, logger);
+        if (htmlResult.Kind != FetchResultKind.Success || htmlResult.Content.IsEmpty())
+        {
+            throw new InvalidOperationException($"{url} -> {htmlResult.StatusCode} -> {htmlResult.Reason}");
+        }
+
+        return htmlResult.Content.HtmlToText(logger);
     }
 
     /// <summary>
-    /// Converts HTML to plain text.
-    /// </summary>	
+    ///     Converts HTML to plain text.
+    /// </summary>
     public static string HtmlToText(this string html, ILogger? logger = null)
     {
         var document = html.CreateHtmlDocument(logger);
@@ -356,5 +361,5 @@ public static class HtmlHelperServiceExtensions
         }
 
         return sb.ToString();
-    }	
+    }
 }
