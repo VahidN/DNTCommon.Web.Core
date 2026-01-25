@@ -7,7 +7,7 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     This is the updated version of the UAParser library with the latest regexes.yaml file.
 /// </summary>
-public class UAParserService(BaseHttpClient baseHttpClient, ILogger<UAParserService> logger) : IUAParserService
+public class UAParserService(IHttpClientFactory httpClientFactory, ILogger<UAParserService> logger) : IUAParserService
 {
     private Parser? _parser;
 
@@ -61,7 +61,8 @@ public class UAParserService(BaseHttpClient baseHttpClient, ILogger<UAParserServ
 
         try
         {
-            var contentResult = await baseHttpClient.HttpClient.SafeFetchAsync(regexesUrl, cancellationToken);
+            using var client = httpClientFactory.CreateClient(NamedHttpClient.BaseHttpClient);
+            var contentResult = await client.SafeFetchAsync(regexesUrl, cancellationToken);
 
             if (contentResult.Kind != FetchResultKind.Success || contentResult.Content.IsEmpty())
             {

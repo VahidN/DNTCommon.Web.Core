@@ -16,7 +16,11 @@ public static class BaseHttpClientExtensions
     /// </summary>
     public static IServiceCollection AddBaseHttpClient(this IServiceCollection services)
     {
-        services.AddHttpClient<BaseHttpClient>(AddDefaultSettings)
+        services.AddHttpClient(NamedHttpClient.BaseHttpClient, AddDefaultSettings)
+            .ConfigurePrimaryHttpMessageHandler(() => CreateScrapingHandler(allowAutoRedirect: true))
+            .AddPolicyHandler(GetTimeoutPolicy());
+
+        services.AddHttpClient(NamedHttpClient.BaseHttpClientWithRetry, AddDefaultSettings)
             .ConfigurePrimaryHttpMessageHandler(() => CreateScrapingHandler(allowAutoRedirect: true))
             .AddPolicyHandler(GetTimeoutPolicy())
             .AddPolicyHandler(GetRetryPolicy())
@@ -25,14 +29,9 @@ public static class BaseHttpClientExtensions
 #endif
             ;
 
-        services.AddHttpClient<BaseHttpClientWithoutAutoRedirect>(AddDefaultSettings)
+        services.AddHttpClient(NamedHttpClient.BaseHttpClientWithoutAutoRedirect, AddDefaultSettings)
             .ConfigurePrimaryHttpMessageHandler(() => CreateScrapingHandler(allowAutoRedirect: false))
-            .AddPolicyHandler(GetTimeoutPolicy())
-            .AddPolicyHandler(GetRetryPolicy())
-#if !NET_6
-            .AddPolicyHandler(GetRateLimitPolicy())
-#endif
-            ;
+            .AddPolicyHandler(GetTimeoutPolicy());
 
         services.RemoveAll<IHttpMessageHandlerBuilderFilter>(); // Remove logging of the HttpClient
 
@@ -74,6 +73,7 @@ public static class BaseHttpClientExtensions
     private static SocketsHttpHandler CreateScrapingHandler(bool allowAutoRedirect)
         => new()
         {
+            UseProxy = false,
             AutomaticDecompression = DecompressionMethods.All,
             PooledConnectionLifetime = TimeSpan.FromMinutes(value: 10),
             PooledConnectionIdleTimeout = TimeSpan.FromMinutes(value: 2),

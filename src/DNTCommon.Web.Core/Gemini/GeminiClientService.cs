@@ -4,17 +4,9 @@ using System.Text.Json;
 
 namespace DNTCommon.Web.Core;
 
-public class GeminiClientService : IGeminiClientService
+public class GeminiClientService(IHttpClientFactory httpClientFactory) : IGeminiClientService
 {
     private const string BaseUrl = "https://generativelanguage.googleapis.com";
-
-    private readonly HttpClient _client;
-
-    public GeminiClientService(BaseHttpClient baseHttpClient)
-    {
-        var httpClient = baseHttpClient ?? throw new ArgumentNullException(nameof(baseHttpClient));
-        _client = httpClient.HttpClient;
-    }
 
     public async Task<GeminiResponseResult<GeminiRemoteFile?>> FindLocalFileInGeminiFilesStoreAsync(string apiKey,
         string localFilePath,
@@ -24,8 +16,9 @@ public class GeminiClientService : IGeminiClientService
         var queryString = GetQueryString(apiKey, pageSize, pageToken: null);
         var requestUri = $"{BaseUrl}/v1beta/files{queryString}";
 
+        using var client = httpClientFactory.CreateClient(NamedHttpClient.BaseHttpClient);
         using var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-        using var response = await _client.SendAsync(request, cancellationToken);
+        using var response = await client.SendAsync(request, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         var errorResponse = response.GetGeminiErrorResponse(responseBody);
 
@@ -80,8 +73,9 @@ public class GeminiClientService : IGeminiClientService
         var requestUri =
             $"https://generativelanguage.googleapis.com/v1beta/{remoteFileName.GetRemoteGeminiFileId()}?key={apiKey}";
 
+        using var client = httpClientFactory.CreateClient(NamedHttpClient.BaseHttpClient);
         using var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-        using var response = await _client.SendAsync(request, cancellationToken);
+        using var response = await client.SendAsync(request, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         var errorResponse = response.GetGeminiErrorResponse(responseBody);
 
@@ -125,8 +119,9 @@ public class GeminiClientService : IGeminiClientService
         var queryString = GetQueryString(apiKey, pageSize, pageToken);
         var requestUri = $"{BaseUrl}/v1beta/files{queryString}";
 
+        using var client = httpClientFactory.CreateClient(NamedHttpClient.BaseHttpClient);
         using var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-        using var response = await _client.SendAsync(request, cancellationToken);
+        using var response = await client.SendAsync(request, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         var errorResponse = response.GetGeminiErrorResponse(responseBody);
 
@@ -178,7 +173,8 @@ public class GeminiClientService : IGeminiClientService
 
         request.Content = multipartContent;
 
-        using var response = await _client.SendAsync(request, cancellationToken);
+        using var client = httpClientFactory.CreateClient(NamedHttpClient.BaseHttpClient);
+        using var response = await client.SendAsync(request, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         var errorResponse = response.GetGeminiErrorResponse(responseBody);
 
@@ -209,8 +205,10 @@ public class GeminiClientService : IGeminiClientService
         var request = options.CreateGeminiContentRequest();
         var requestUri = options.GetFullApiUri(BaseUrl);
 
+        using var client = httpClientFactory.CreateClient(NamedHttpClient.BaseHttpClient);
+
         using var response =
-            await _client.PostAsJsonAsync(requestUri, request, GeminiExtensions.SerializeOptions, cancellationToken);
+            await client.PostAsJsonAsync(requestUri, request, GeminiExtensions.SerializeOptions, cancellationToken);
 
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         var errorResponse = response.GetGeminiErrorResponse(responseBody);

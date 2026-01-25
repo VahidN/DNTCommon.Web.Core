@@ -5,25 +5,12 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     Redirect Url Finder Service
 /// </summary>
-public class RedirectUrlFinderService : IRedirectUrlFinderService
+public class RedirectUrlFinderService(
+    ICacheService cacheService,
+    ILogger<RedirectUrlFinderService> logger,
+    IHttpClientFactory httpClientFactory) : IRedirectUrlFinderService
 {
     private const string CachePrefix = "LocationFinder::";
-    private readonly ICacheService _cacheService;
-    private readonly HttpClient _client;
-    private readonly ILogger<RedirectUrlFinderService> _logger;
-
-    /// <summary>
-    ///     Redirect Url Finder Service
-    /// </summary>
-    public RedirectUrlFinderService(ICacheService cacheService,
-        ILogger<RedirectUrlFinderService> logger,
-        BaseHttpClientWithoutAutoRedirect baseHttpClient)
-    {
-        _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        var httpClient = baseHttpClient ?? throw new ArgumentNullException(nameof(baseHttpClient));
-        _client = httpClient.HttpClient;
-    }
 
     /// <summary>
     ///     Finds the actual hidden URL after multiple redirects.
@@ -46,21 +33,22 @@ public class RedirectUrlFinderService : IRedirectUrlFinderService
     {
         ArgumentNullException.ThrowIfNull(siteUri);
 
+        using var client = httpClientFactory.CreateClient(NamedHttpClient.BaseHttpClient);
         var redirectUri = siteUri;
         var hops = 1;
 
         try
         {
-            if (_cacheService.TryGetValue($"{CachePrefix}{siteUri}", out string? outUrl) && outUrl is not null)
+            if (cacheService.TryGetValue($"{CachePrefix}{siteUri}", out string? outUrl) && outUrl is not null)
             {
                 return new Uri(outUrl);
             }
 
-            SetHeaders(siteUri);
+            client.DefaultRequestHeaders.Referrer = siteUri;
 
             do
             {
-                using var webResp = await _client.GetAsync(redirectUri, HttpCompletionOption.ResponseHeadersRead,
+                using var webResp = await client.GetAsync(redirectUri, HttpCompletionOption.ResponseHeadersRead,
                     cancellationToken);
 
                 if (webResp is null)
@@ -102,7 +90,7 @@ public class RedirectUrlFinderService : IRedirectUrlFinderService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.Demystify(),
+            logger.LogError(ex.Demystify(),
                 message: "LocationFinderService error. Couldn't find redirect of {SiteUri} after {Hops} tries.",
                 siteUri, hops);
         }
@@ -110,13 +98,11 @@ public class RedirectUrlFinderService : IRedirectUrlFinderService
         return CacheReturn(siteUri, redirectUri);
     }
 
-    private void SetHeaders(Uri siteUri) => _client.DefaultRequestHeaders.Referrer = siteUri;
-
     private Uri? CacheReturn(Uri originalUrl, Uri? redirectUrl)
     {
         if (redirectUrl is not null)
         {
-            _cacheService.Add($"{CachePrefix}{originalUrl}", nameof(RedirectUrlFinderService), redirectUrl,
+            cacheService.Add($"{CachePrefix}{originalUrl}", nameof(RedirectUrlFinderService), redirectUrl,
                 DateTimeOffset.UtcNow.AddMinutes(minutes: 15));
         }
 

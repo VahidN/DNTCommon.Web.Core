@@ -6,8 +6,9 @@ namespace DNTCommon.Web.Core;
 /// <summary>
 ///     A helper method to download and fix remote images linked from other sites
 /// </summary>
-public class ReplaceRemoteImagesService(BaseHttpClient baseHttpClient, ILogger<ReplaceRemoteImagesService> logger)
-    : IReplaceRemoteImagesService
+public class ReplaceRemoteImagesService(
+    IHttpClientFactory httpClientFactory,
+    ILogger<ReplaceRemoteImagesService> logger) : IReplaceRemoteImagesService
 {
     /// <summary>
     ///     A helper method to download and fix remote images linked from other sites
@@ -95,7 +96,8 @@ public class ReplaceRemoteImagesService(BaseHttpClient baseHttpClient, ILogger<R
             return fileName;
         }
 
-        var imageData = baseHttpClient.HttpClient.DownloadData(imageUrl);
+        using var client = httpClientFactory.CreateClient(NamedHttpClient.BaseHttpClient);
+        var imageData = client.DownloadData(imageUrl);
 
         if (!imageData.IsValidImageFile(options.MaxWidth, options.MaxHeight))
         {
