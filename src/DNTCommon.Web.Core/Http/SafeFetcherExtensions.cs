@@ -65,6 +65,12 @@ public static class SafeFetcherExtensions
 		
 		var content = await response.Content.ReadAsStringAsync(ct);
 
+        if (response.StatusCode == HttpStatusCode.Forbidden && IsCloudflare(response))
+        {
+            return new FetchResult(FetchResultKind.Challenge, uri, response.StatusCode, content,
+                Reason: "Cloudflare protection");
+        }
+
         if (response.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.TooManyRequests)
         {
             return new FetchResult(FetchResultKind.Blocked, uri, response.StatusCode, Content: content,
@@ -101,6 +107,11 @@ public static class SafeFetcherExtensions
                path.Contains(value: "challenge", StringComparison.OrdinalIgnoreCase) ||
                path.Contains(value: "auth", StringComparison.OrdinalIgnoreCase);
     }
+	
+    private static bool IsCloudflare(HttpResponseMessage response)
+        => response.Headers.Server?.ToString()?.Contains(value: "cloudflare", StringComparison.OrdinalIgnoreCase) ==
+           true || response.Headers.TryGetValues(name: "CF-RAY", out _) ||
+           response.Headers.TryGetValues(name: "CF-Cache-Status", out _);	
 
     private static bool IsLoginOrChallenge(HttpResponseMessage response)
         => response.Headers.TryGetValues(name: "Set-Cookie", out var cookies) && cookies.Any(c
