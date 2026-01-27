@@ -62,26 +62,26 @@ public static class SafeFetcherExtensions
 
             return await FetchInternalAsync(httpClient, finalUri, redirectCount + 1, ct);
         }
+		
+		var content = await response.Content.ReadAsStringAsync(ct);
 
         if (response.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.TooManyRequests)
         {
-            return new FetchResult(FetchResultKind.Blocked, uri, response.StatusCode, Content: null,
+            return new FetchResult(FetchResultKind.Blocked, uri, response.StatusCode, Content: content,
                 Reason: "403 / 429");
         }
 
         if (IsLoginOrChallenge(response))
         {
-            return new FetchResult(FetchResultKind.Challenge, uri, response.StatusCode, Content: null,
+            return new FetchResult(FetchResultKind.Challenge, uri, response.StatusCode, Content: content,
                 Reason: "Login or bot challenge");
         }
 
         if (!response.IsSuccessStatusCode)
         {
-            return new FetchResult(FetchResultKind.Failed, uri, response.StatusCode, Content: null,
+            return new FetchResult(FetchResultKind.Failed, uri, response.StatusCode, Content: content,
                 Reason: "Non-success status");
-        }
-
-        var content = await response.Content.ReadAsStringAsync(ct);
+        }        
 
         return new FetchResult(FetchResultKind.Success, uri, response.StatusCode, content);
     }
