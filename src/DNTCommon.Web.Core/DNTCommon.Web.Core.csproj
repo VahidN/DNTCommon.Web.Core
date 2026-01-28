@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>DNTCommon.Web.Core provides common scenarios' solutions for ASP.NET Core applications.</Description>
-    <VersionPrefix>12.6.0</VersionPrefix>
+    <VersionPrefix>12.7.0</VersionPrefix>
     <Authors>Vahid Nasiri</Authors>
     <TargetFrameworks>net10.0;net9.0;net8.0;net7.0;net6.0;</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -107,7 +107,7 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App"/>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.102" PrivateAssets="All"/>
-    <PackageReference Include="DNTPersianUtils.Core" Version="6.7.2"/>
+    <PackageReference Include="DNTPersianUtils.Core" Version="6.8.0"/>
     <PackageReference Include="MailKit" Version="4.14.1"/>
     <PackageReference Include="HtmlAgilityPack" Version="1.12.4"/>
     <PackageReference Include="IPAddressRange" Version="6.3.0"/>
