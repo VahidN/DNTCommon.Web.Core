@@ -1,7 +1,9 @@
+using System.Net.Sockets;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
 using Polly;
+using Polly.Extensions.Http;
 using Polly.Timeout;
 
 namespace DNTCommon.Web.Core;
@@ -18,20 +20,11 @@ public static class BaseHttpClientExtensions
     {
         services.AddHttpClient(NamedHttpClient.BaseHttpClient, AddDefaultSettings)
             .ConfigurePrimaryHttpMessageHandler(() => CreateScrapingHandler(allowAutoRedirect: true))
-            .AddPolicyHandler(GetTimeoutPolicy());
-
-        services.AddHttpClient(NamedHttpClient.BaseHttpClientWithRetry, AddDefaultSettings)
-            .ConfigurePrimaryHttpMessageHandler(() => CreateScrapingHandler(allowAutoRedirect: true))
-            .AddPolicyHandler(GetTimeoutPolicy())
-            .AddPolicyHandler(GetRetryPolicy())
-#if !NET_6
-            .AddPolicyHandler(GetRateLimitPolicy())
-#endif
-            ;
+            .AddPolicyHandler(GetResiliencePolicy());
 
         services.AddHttpClient(NamedHttpClient.BaseHttpClientWithoutAutoRedirect, AddDefaultSettings)
             .ConfigurePrimaryHttpMessageHandler(() => CreateScrapingHandler(allowAutoRedirect: false))
-            .AddPolicyHandler(GetTimeoutPolicy());
+            .AddPolicyHandler(GetResiliencePolicy());
 
         services.RemoveAll<IHttpMessageHandlerBuilderFilter>(); // Remove logging of the HttpClient
 
@@ -51,24 +44,11 @@ public static class BaseHttpClientExtensions
         client.DefaultRequestHeaders.AcceptEncoding.ParseAdd(input: "gzip, deflate");
 
         client.DefaultRequestHeaders.ConnectionClose = false;
+        client.DefaultRequestHeaders.ExpectContinue = false;
+
+        client.DefaultRequestVersion = new Version(major: 2, minor: 0); // Prefer HTTP/2
+        client.DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrLower;
     }
-
-    private static AsyncPolicy<HttpResponseMessage> GetTimeoutPolicy()
-        => Policy.TimeoutAsync<HttpResponseMessage>(TimeSpan.FromSeconds(value: 30), TimeoutStrategy.Optimistic);
-
-    private static AsyncPolicy<HttpResponseMessage> GetRetryPolicy()
-        => Policy<HttpResponseMessage>.Handle<HttpRequestException>()
-            .Or<TaskCanceledException>() // network stall
-            .OrResult(r => (int)r.StatusCode >= 500 || r.StatusCode == HttpStatusCode.TooManyRequests)
-            .WaitAndRetryAsync(retryCount: 3,
-                retry => TimeSpan.FromSeconds(Math.Pow(x: 2, retry)) +
-                         TimeSpan.FromMilliseconds(RandomNumberGenerator.GetInt32(fromInclusive: 100,
-                             toExclusive: 500)));
-
-#if !NET_6
-    private static AsyncPolicy<HttpResponseMessage> GetRateLimitPolicy()
-        => Policy.RateLimitAsync<HttpResponseMessage>(numberOfExecutions: 10, TimeSpan.FromSeconds(value: 1));
-#endif
 
     private static SocketsHttpHandler CreateScrapingHandler(bool allowAutoRedirect)
         => new()
@@ -77,14 +57,34 @@ public static class BaseHttpClientExtensions
             AutomaticDecompression = DecompressionMethods.All,
             PooledConnectionLifetime = TimeSpan.FromMinutes(value: 10),
             PooledConnectionIdleTimeout = TimeSpan.FromMinutes(value: 2),
-            MaxConnectionsPerServer = 50,
+            MaxConnectionsPerServer = 100,
             ConnectTimeout = TimeSpan.FromSeconds(value: 15),
-            KeepAlivePingPolicy = HttpKeepAlivePingPolicy.Always,
-            KeepAlivePingDelay = TimeSpan.FromSeconds(value: 30),
-            KeepAlivePingTimeout = TimeSpan.FromSeconds(value: 10),
+            KeepAlivePingPolicy = HttpKeepAlivePingPolicy.WithActiveRequests,
+            KeepAlivePingDelay = TimeSpan.FromMinutes(value: 2),
+            KeepAlivePingTimeout = TimeSpan.FromSeconds(value: 45),
+            ResponseDrainTimeout = TimeSpan.FromMinutes(value: 5),
             UseCookies = true,
             CookieContainer = new CookieContainer(),
             AllowAutoRedirect = allowAutoRedirect,
             MaxAutomaticRedirections = 5 // Limit to prevent infinite loops
         };
+
+    private static AsyncPolicy<HttpResponseMessage> GetResiliencePolicy()
+    {
+        // ۱. پالیسی تلاش مجدد: اگر خطا داد یا تایم‌اوت شد، دوباره تلاش کن
+        var retryPolicy = HttpPolicyExtensions.HandleTransientHttpError() // خطاهای ۵xx و ۴۰۸
+            .Or<TaskCanceledException>() // network stall
+            .Or<TimeoutRejectedException>() // اگر پالیسی تایم‌اوت فعال شد
+            .OrInner<SocketException>() // خطاهای شبکه در لایه‌های پایین
+            .OrResult(r => (int)r.StatusCode >= 500 || r.StatusCode == HttpStatusCode.TooManyRequests)
+            .WaitAndRetryAsync(retryCount: 3,
+                retryAttempt => TimeSpan.FromSeconds(Math.Pow(x: 2, retryAttempt))); // Exponential Backoff: 2s, 4s, 8s
+
+        // ۲. پالیسی تایم‌اوت: برای هر درخواست جداگانه
+        var timeoutPolicy = Policy.TimeoutAsync<HttpResponseMessage>(
+            TimeSpan.FromSeconds(value: 45), TimeoutStrategy.Optimistic);
+
+        // نکته مهم: ریترای دورِ تایم‌اوت را می‌گیرد (Retry wraps Timeout)
+        return Policy.WrapAsync(retryPolicy, timeoutPolicy);
+    }
 }

@@ -4,8 +4,6 @@ public static class NamedHttpClient
 {
     public const string BaseHttpClient = nameof(BaseHttpClient);
 
-    public const string BaseHttpClientWithRetry = nameof(BaseHttpClientWithRetry);
-
     public const string BaseHttpClientWithoutAutoRedirect = nameof(BaseHttpClientWithoutAutoRedirect);
 
     extension(IHttpClientFactory httpClientFactory)
@@ -15,13 +13,6 @@ public static class NamedHttpClient
             ArgumentNullException.ThrowIfNull(httpClientFactory);
 
             return httpClientFactory.CreateClient(BaseHttpClient);
-        }
-
-        public HttpClient CreateBaseHttpClientWithRetry()
-        {
-            ArgumentNullException.ThrowIfNull(httpClientFactory);
-
-            return httpClientFactory.CreateClient(BaseHttpClientWithRetry);
         }
 
         public HttpClient CreateBaseHttpClientWithoutAutoRedirect()

@@ -47,18 +47,8 @@ public static class SchedulerServiceCollectionExtensions
             return;
         }
 
-        services.AddHttpClient<MySitePingClient>(client =>
-            {
-                client.BaseAddress = new Uri(storage.SiteRootUrl);
-                client.DefaultRequestHeaders.ConnectionClose = true;
-                client.DefaultRequestHeaders.Add(name: "User-Agent", value: "DNTScheduler 1.0");
-            })
-            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
-            {
-                AutomaticDecompression = DecompressionMethods.All
-            });
-
-        storage.AddScheduledTask<PingTask>(utcNow => utcNow.Second == 1);
+        storage.AddScheduledTask<PingTask>(utcNow => utcNow.Minute % 2 == 0 && utcNow.Second == 1);
+		services.TryAddSingleton<MySitePingClient>();
         services.TryAddSingleton<PingTask>();
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace DNTCommon.Web.Core;
 
@@ -9,11 +10,11 @@ namespace DNTCommon.Web.Core;
 /// <remarks>
 ///     Pings the site's root url.
 /// </remarks>
-public class MySitePingClient(HttpClient httpClient, ILogger<MySitePingClient> logger)
+public class MySitePingClient(
+    IHttpClientFactory httpClientFactory,
+    IOptions<ScheduledTasksStorage> tasksStorage,
+    ILogger<MySitePingClient> logger)
 {
-    private readonly HttpClient _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-    private readonly ILogger<MySitePingClient> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
     /// <summary>
     ///     Pings the site's root url.
     /// </summary>
@@ -21,10 +22,15 @@ public class MySitePingClient(HttpClient httpClient, ILogger<MySitePingClient> l
     {
         try
         {
-            if (_httpClient.BaseAddress is not null)
+            var siteRootUrl = tasksStorage.Value.SiteRootUrl;
+
+            if (siteRootUrl.IsEmpty())
             {
-                await _httpClient.SafeFetchAsync(_httpClient.BaseAddress, cancellationToken);
+                return;
             }
+
+            using var httpClient = httpClientFactory.CreateClient(NamedHttpClient.BaseHttpClient);
+            await httpClient.SafeFetchAsync(siteRootUrl, cancellationToken);
         }
         catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
         {
@@ -33,7 +39,7 @@ public class MySitePingClient(HttpClient httpClient, ILogger<MySitePingClient> l
         }
         catch (Exception ex)
         {
-            _logger.LogCritical(eventId: 0, ex.Demystify(), message: "Failed running the Ping task.");
+            logger.LogCritical(eventId: 0, ex.Demystify(), message: "Failed running the Ping task.");
         }
     }
 }
