@@ -8,7 +8,10 @@ public static class GeminiExtensions
 {
     public static readonly JsonSerializerOptions DeserializeOptions = new()
     {
-        PropertyNameCaseInsensitive = true
+        PropertyNameCaseInsensitive = true,
+
+        // In case the API returns numbers as strings
+        NumberHandling = JsonNumberHandling.AllowReadingFromString
     };
 
     public static readonly JsonSerializerOptions SerializeOptions = new()
@@ -60,6 +63,35 @@ public static class GeminiExtensions
         {
             return null;
         }
+    }
+
+    public static bool SupportsTextOutput(this GeminiModelInfo? modelInfo)
+    {
+        if (modelInfo is null)
+        {
+            return false;
+        }
+
+        var modelName = modelInfo.Name;
+
+        // 1. Exclude specialized media-only models by name suffix
+        if (modelName.Contains(value: "tts", StringComparison.OrdinalIgnoreCase) ||
+            modelName.Contains(value: "image", StringComparison.OrdinalIgnoreCase) ||
+            modelName.Contains(value: "audio", StringComparison.OrdinalIgnoreCase) ||
+            modelName.Contains(value: "robot", StringComparison.OrdinalIgnoreCase) ||
+            modelName.Contains(value: "veo", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        // 2. Ensure it supports standard content generation
+        var hasGenerateMethod =
+            modelInfo.SupportedGenerationMethods.Contains(value: "generateContent", StringComparer.OrdinalIgnoreCase);
+
+        // 3. Exclude Embedding models (which output vectors, not text)
+        var isEmbedding = modelName.Contains(value: "embedding", StringComparison.OrdinalIgnoreCase);
+
+        return hasGenerateMethod && !isEmbedding;
     }
 
     public static string GetRemoteGeminiFileId(this string fileName)

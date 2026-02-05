@@ -277,6 +277,30 @@ public class GeminiClientService(IHttpClientFactory httpClientFactory) : IGemini
         return responseResult;
     }
 
+    public async Task<IList<GeminiModelInfo>?> GetGeminiModelsListAsync(string apiKey,
+        CancellationToken cancellationToken = default)
+    {
+        var requestUri = $"https://generativelanguage.googleapis.com/v1beta/models?key={apiKey}";
+        using var client = httpClientFactory.CreateClient(NamedHttpClient.BaseHttpClient);
+
+        var result =
+            await client.GetFromJsonAsync<GeminiModelList>(requestUri, GeminiExtensions.SerializeOptions,
+                cancellationToken);
+
+        return result?.Models;
+    }
+
+    /// <summary>
+    ///     Filters models with text-only output
+    /// </summary>
+    public async Task<IList<GeminiModelInfo>?> GetGeminiModelsWithTextOutputSupportAsync(string apiKey,
+        CancellationToken cancellationToken = default)
+    {
+        var models = await GetGeminiModelsListAsync(apiKey, cancellationToken);
+
+        return models?.Where(info => info.SupportsTextOutput()).ToList();
+    }
+
     private static string GetQueryString(string apiKey, int? pageSize, string? pageToken)
     {
         var queryParams = new List<string>

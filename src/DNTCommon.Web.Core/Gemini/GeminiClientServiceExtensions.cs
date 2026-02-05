@@ -13,6 +13,7 @@ public static class GeminiClientServiceExtensions
     public static IServiceCollection AddGeminiClientService(this IServiceCollection services)
     {
         services.AddScoped<IGeminiClientService, GeminiClientService>();
+        services.AddScoped<IGeminiLanguageAnalysisService, GeminiLanguageAnalysisService>();
 
         return services;
     }

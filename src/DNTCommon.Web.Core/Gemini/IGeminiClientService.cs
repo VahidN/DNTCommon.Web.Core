@@ -36,4 +36,7 @@ public interface IGeminiClientService
     Task<GeminiResponseResult<GeminiGenerateContentResponse?>> RunGenerateContentPromptsAsync(
         GeminiClientOptions options,
         CancellationToken cancellationToken = default);
+
+    Task<IList<GeminiModelInfo>?> GetGeminiModelsListAsync(string apiKey,
+        CancellationToken cancellationToken = default);
 }
