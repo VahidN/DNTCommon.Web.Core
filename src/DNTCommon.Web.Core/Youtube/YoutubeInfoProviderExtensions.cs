@@ -60,7 +60,7 @@ public static partial class YoutubeInfoProviderExtensions
 
     public static async Task<string?> GetYoutubeVideoDescriptionAsync(this HttpClient httpClient,
         string? url,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(httpClient);
 
@@ -69,17 +69,17 @@ public static partial class YoutubeInfoProviderExtensions
             return null;
         }
 
-        var htmlContentResult = await httpClient.SafeFetchAsync(url, ct);
+        var htmlContentResult = await httpClient.SafeFetchAsync(url, cancellationToken: cancellationToken);
 
-        if (htmlContentResult.Kind != FetchResultKind.Success || htmlContentResult.Content.IsEmpty())
+        if (htmlContentResult.Kind != FetchResultKind.Success || htmlContentResult.TextContent.IsEmpty())
         {
             return null;
         }
 
 #if !NET_6
-        var match = PlayerResponse().Match(htmlContentResult.Content);
+        var match = PlayerResponse().Match(htmlContentResult.TextContent);
 #else
-        var match = PlayerResponse.Match(htmlContentResult.Content);
+        var match = PlayerResponse.Match(htmlContentResult.TextContent);
 #endif
 
         if (!match.Success || match.Groups.Count < 2)
@@ -125,14 +125,14 @@ public static partial class YoutubeInfoProviderExtensions
 
         var url = $"https://www.googleapis.com/youtube/v3/videos?id={videoId}&part=snippet&key={apiKey}";
 
-        var responseResult = await httpClient.SafeFetchAsync(url, cancellationToken);
+        var responseResult = await httpClient.SafeFetchAsync(url, cancellationToken: cancellationToken);
 
-        if (responseResult.Kind != FetchResultKind.Success || responseResult.Content.IsEmpty())
+        if (responseResult.Kind != FetchResultKind.Success || responseResult.TextContent.IsEmpty())
         {
             return null;
         }
 
-        var data = JsonSerializer.Deserialize<YouTubeVideoResponse>(responseResult.Content, JsonOptions);
+        var data = JsonSerializer.Deserialize<YouTubeVideoResponse>(responseResult.TextContent, JsonOptions);
 
         return data?.Items.FirstOrDefault()?.Snippet;
     }
@@ -142,7 +142,7 @@ public static partial class YoutubeInfoProviderExtensions
         RegexOptions.Compiled | RegexOptions.Singleline, matchTimeoutMilliseconds: 3000)]
     private static partial Regex PlayerResponse();
 #else
-    private static readonly Regex PlayerResponse = new Regex(@"var ytInitialPlayerResponse = (\{.+?\});",
-        RegexOptions.Compiled | RegexOptions.Singleline, TimeSpan.FromMilliseconds(3000));
+    private static readonly Regex PlayerResponse = new(pattern: @"var ytInitialPlayerResponse = (\{.+?\});",
+        RegexOptions.Compiled | RegexOptions.Singleline, TimeSpan.FromMilliseconds(value: 3000));
 #endif
 }

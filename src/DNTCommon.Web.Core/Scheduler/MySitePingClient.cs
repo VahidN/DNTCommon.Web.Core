@@ -30,7 +30,7 @@ public class MySitePingClient(
             }
 
             using var httpClient = httpClientFactory.CreateClient(NamedHttpClient.BaseHttpClient);
-            await httpClient.SafeFetchAsync(siteRootUrl, cancellationToken);
+            await httpClient.SafeFetchAsync(siteRootUrl, cancellationToken: cancellationToken);
         }
         catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
         {

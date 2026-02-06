@@ -62,15 +62,15 @@ public class UAParserService(IHttpClientFactory httpClientFactory, ILogger<UAPar
         try
         {
             using var client = httpClientFactory.CreateClient(NamedHttpClient.BaseHttpClient);
-            var contentResult = await client.SafeFetchAsync(regexesUrl, cancellationToken);
+            var contentResult = await client.SafeFetchAsync(regexesUrl, cancellationToken: cancellationToken);
 
-            if (contentResult.Kind != FetchResultKind.Success || contentResult.Content.IsEmpty())
+            if (contentResult.Kind != FetchResultKind.Success || contentResult.TextContent.IsEmpty())
             {
                 throw new InvalidOperationException(
                     $"{regexesUrl} -> {contentResult.StatusCode} -> {contentResult.Reason}");
             }
 
-            return Parser.FromYaml(contentResult.Content, new ParserOptions
+            return Parser.FromYaml(contentResult.TextContent, new ParserOptions
             {
                 UseCompiledRegex = true
             });

@@ -12,7 +12,7 @@ public class SafeFetcherExtensionsTests : TestsBase
         => await ServiceProvider.RunScopedServiceAsync<IHttpClientFactory>(async (httpClientFactory, ct) =>
         {
             using var client = httpClientFactory.CreateClient(NamedHttpClient.BaseHttpClient);
-            var result = await client.SafeFetchAsync(uri: "https://petabridge.com/blog/ai-wont-kill-open-source", ct);
+            var result = await client.SafeFetchAsync(uri: "https://petabridge.com/blog/ai-wont-kill-open-source", cancellationToken: ct);
 
             Assert.AreEqual(FetchResultKind.Success, result.Kind);
         });

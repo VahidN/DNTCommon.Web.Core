@@ -4,5 +4,7 @@ public sealed record FetchResult(
     FetchResultKind Kind,
     Uri? FinalUri,
     HttpStatusCode? StatusCode,
-    string? Content,
+    string? TextContent = null,
+    byte[]? BinaryContent = null,
+    string? ContentType = null,
     string? Reason = null);

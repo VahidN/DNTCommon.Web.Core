@@ -41,7 +41,7 @@ public class GeminiLanguageAnalysisService(IGeminiClientService geminiClientServ
 
     public const string ConfidenceLabel = "CONFIDENCE RATING";
 
-    private static readonly TimeSpan MatchTimeout = TimeSpan.FromSeconds(seconds: 3);
+    private static readonly TimeSpan MatchTimeout = TimeSpan.FromSeconds(value: 3);
 
     public static readonly string[] SectionLabels = ["1. Translation Result", "2. Explanation Result"];
 

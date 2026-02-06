@@ -324,16 +324,16 @@ public static class HtmlHelperServiceExtensions
     public static async Task<string> HtmlToTextAsync(this HttpClient httpClient,
         string url,
         ILogger? logger = null,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
     {
-        var htmlResult = await httpClient.SafeFetchAsync(url, ct);
+        var htmlResult = await httpClient.SafeFetchAsync(url, cancellationToken: cancellationToken);
 
-        if (htmlResult.Kind != FetchResultKind.Success || htmlResult.Content.IsEmpty())
+        if (htmlResult.Kind != FetchResultKind.Success || htmlResult.TextContent.IsEmpty())
         {
             throw new InvalidOperationException($"{url} -> {htmlResult.StatusCode} -> {htmlResult.Reason}");
         }
 
-        return htmlResult.Content.HtmlToText(logger);
+        return htmlResult.TextContent.HtmlToText(logger);
     }
 
     /// <summary>

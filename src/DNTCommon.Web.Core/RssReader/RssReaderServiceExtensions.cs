@@ -24,18 +24,18 @@ public static class RssReaderServiceExtensions
     /// <exception cref="InvalidOperationException"></exception>
     public static async Task<FeedChannel<FeedItem>> ReadRssAsync(this HttpClient httpClient,
         string url,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(httpClient);
 
-        var rawXmlResult = await httpClient.SafeFetchAsync(url, ct);
+        var rawXmlResult = await httpClient.SafeFetchAsync(url, cancellationToken: cancellationToken);
 
-        if (rawXmlResult.Kind != FetchResultKind.Success || rawXmlResult.Content.IsEmpty())
+        if (rawXmlResult.Kind != FetchResultKind.Success || rawXmlResult.TextContent.IsEmpty())
         {
             throw new InvalidOperationException($"{url} -> {rawXmlResult.StatusCode} -> {rawXmlResult.Reason}");
         }
 
-        using var stringReader = new StringReader(rawXmlResult.Content);
+        using var stringReader = new StringReader(rawXmlResult.TextContent);
         using var xmlReader = new RssXmlReader(stringReader);
 
         var feed = SyndicationFeed.Load(xmlReader) ?? throw new InvalidOperationException(message: "Invalid RSS feed");
