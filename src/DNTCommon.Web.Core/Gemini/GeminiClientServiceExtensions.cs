@@ -12,8 +12,8 @@ public static class GeminiClientServiceExtensions
     /// </summary>
     public static IServiceCollection AddGeminiClientService(this IServiceCollection services)
     {
-        services.AddScoped<IGeminiClientService, GeminiClientService>();
-        services.AddScoped<IGeminiLanguageAnalysisService, GeminiLanguageAnalysisService>();
+        services.AddSingleton<IGeminiClientService, GeminiClientService>();
+        services.AddSingleton<IGeminiLanguageAnalysisService, GeminiLanguageAnalysisService>();
 
         return services;
     }

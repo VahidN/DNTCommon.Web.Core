@@ -112,10 +112,7 @@ public class GeminiLanguageAnalysisService(IGeminiClientService geminiClientServ
                 continue;
             }
 
-            if (result.ConfidenceRating >= minConfidenceRating && result.Translation.ContainsFarsi() &&
-                result.Explanation.ContainsFarsi() && result.CloudComputing.ContainsFarsi() &&
-                result.MachineLearning.ContainsFarsi() && result.OpenSource.ContainsFarsi() &&
-                result.DataStructure.ContainsFarsi())
+            if (ContainsFarsi(minConfidenceRating, result))
             {
                 results.Add(model);
             }
@@ -123,6 +120,12 @@ public class GeminiLanguageAnalysisService(IGeminiClientService geminiClientServ
 
         return results;
     }
+
+    private static bool ContainsFarsi(int minConfidenceRating, GeminiLanguageAnalysisResult result)
+        => result.ConfidenceRating >= minConfidenceRating && result.Translation.ContainsFarsi() &&
+           result.Explanation.ContainsFarsi() && result.CloudComputing.ContainsFarsi() &&
+           result.MachineLearning.ContainsFarsi() && result.OpenSource.ContainsFarsi() &&
+           result.DataStructure.ContainsFarsi();
 
     private static string BuildBoundaryRegex()
     {
