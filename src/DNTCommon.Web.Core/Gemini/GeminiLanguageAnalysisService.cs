@@ -47,6 +47,8 @@ public class GeminiLanguageAnalysisService(IGeminiClientService geminiClientServ
 
     public static readonly string[] TerminologyLabels = ["A.", "B.", "C.", "D."];
 
+    private List<GeminiModelInfo>? _geminiModelsWithPersianLanguageSupport;
+
     public async Task<GeminiLanguageAnalysisResult?> GetGeminiPersianLanguageAnalysisResultAsync(string apiKey,
         string model,
         CancellationToken cancellationToken = default)
@@ -85,6 +87,11 @@ public class GeminiLanguageAnalysisService(IGeminiClientService geminiClientServ
         int minConfidenceRating = 8,
         CancellationToken cancellationToken = default)
     {
+        if (_geminiModelsWithPersianLanguageSupport is not null)
+        {
+            return _geminiModelsWithPersianLanguageSupport;
+        }
+
         var models = await geminiClientService.GetGeminiModelsListAsync(apiKey, cancellationToken);
 
         if (models is null)
@@ -92,7 +99,7 @@ public class GeminiLanguageAnalysisService(IGeminiClientService geminiClientServ
             return null;
         }
 
-        List<GeminiModelInfo> results = [];
+        _geminiModelsWithPersianLanguageSupport = [];
 
         foreach (var model in models)
         {
@@ -114,11 +121,11 @@ public class GeminiLanguageAnalysisService(IGeminiClientService geminiClientServ
 
             if (ContainsFarsi(minConfidenceRating, result))
             {
-                results.Add(model);
+                _geminiModelsWithPersianLanguageSupport.Add(model);
             }
         }
 
-        return results;
+        return _geminiModelsWithPersianLanguageSupport;
     }
 
     private static bool ContainsFarsi(int minConfidenceRating, GeminiLanguageAnalysisResult result)
