@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using DNTPersianUtils.Core;
 
 namespace DNTCommon.Web.Core;
 
@@ -111,7 +112,10 @@ public class GeminiLanguageAnalysisService(IGeminiClientService geminiClientServ
                 continue;
             }
 
-            if (result.ConfidenceRating >= minConfidenceRating)
+            if (result.ConfidenceRating >= minConfidenceRating && result.Translation.ContainsFarsi() &&
+                result.Explanation.ContainsFarsi() && result.CloudComputing.ContainsFarsi() &&
+                result.MachineLearning.ContainsFarsi() && result.OpenSource.ContainsFarsi() &&
+                result.DataStructure.ContainsFarsi())
             {
                 results.Add(model);
             }
