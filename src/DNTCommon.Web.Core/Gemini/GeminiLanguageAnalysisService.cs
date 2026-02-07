@@ -105,7 +105,7 @@ public class GeminiLanguageAnalysisService(IGeminiClientService geminiClientServ
         {
             await Task.Delay(MatchTimeout, cancellationToken);
 
-            var modelName = model.Name.TrimStart(value: "models/", StringComparison.OrdinalIgnoreCase);
+            var modelName = model.Name;
 
             if (modelName.IsEmpty())
             {

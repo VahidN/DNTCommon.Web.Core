@@ -115,7 +115,9 @@ public static class GeminiExtensions
     {
         ArgumentNullException.ThrowIfNull(options);
 
-        return new Uri($"{baseUrl}/{options.ApiVersion}/models/{options.ModelId}:generateContent?key={options.ApiKey}");
+        var modelId = options.ModelId.TrimStart(value: "models/", StringComparison.OrdinalIgnoreCase);
+
+        return new Uri($"{baseUrl}/{options.ApiVersion}/models/{modelId}:generateContent?key={options.ApiKey}");
     }
 
     public static GeminiGenerateContentRequest CreateGeminiContentRequest(this GeminiClientOptions options)

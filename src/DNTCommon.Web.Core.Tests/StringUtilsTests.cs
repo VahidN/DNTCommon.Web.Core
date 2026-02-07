@@ -8,8 +8,15 @@ public class StringUtilsTests : TestsBase
 {
     [TestMethod]
     public void TestTrimStart()
-        => Assert.AreEqual(expected: "xyz test",
-            "tests 1 xyz test".TrimStart(value: "tests 1", StringComparison.Ordinal));
+    {
+        Assert.AreEqual(expected: "xyz test", "tests 1 xyz test".TrimStart(value: "tests 1", StringComparison.Ordinal));
+
+        Assert.AreEqual(expected: "gemma-3n-e4b-it",
+            "models/gemma-3n-e4b-it".TrimStart(value: "models/", StringComparison.Ordinal));
+
+        Assert.AreEqual(expected: "gemma-3n-e4b-it",
+            "gemma-3n-e4b-it".TrimStart(value: "models/", StringComparison.Ordinal));
+    }
 
     [TestMethod]
     public void TestTrimEnd()
