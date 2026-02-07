@@ -986,6 +986,7 @@ dotnet_diagnostic.VSTHRD200.severity = suggestion
 
 dotnet_diagnostic.DI007.severity = suggestion
 dotnet_diagnostic.DI011.severity = suggestion
+dotnet_diagnostic.DI015.severity = suggestion
 
 dotnet_naming_rule.camel_case_for_private_internal_fields.severity = suggestion
 dotnet_naming_rule.camel_case_for_private_internal_fields.style = camel_case_underscore_style
