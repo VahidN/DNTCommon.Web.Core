@@ -39,10 +39,13 @@ public static class HtmlReaderServiceExtensions
         {
             foreach (var error in doc.ParseErrors)
             {
-                logger.LogInformation(
-                    message:
-                    "LoadHtml Error. SourceText: {ErrorSourceText} -> Code: {ErrorCode} -> Reason: {ErrorReason}",
-                    error.SourceText, error.Code, error.Reason);
+                if (logger.IsEnabled(LogLevel.Information))
+                {
+                    logger.LogInformation(
+                        message:
+                        "LoadHtml Error. SourceText: {ErrorSourceText} -> Code: {ErrorCode} -> Reason: {ErrorReason}",
+                        error.SourceText, error.Code, error.Reason);
+                }
             }
         }
 
@@ -60,7 +63,7 @@ public static class HtmlReaderServiceExtensions
             throw new ArgumentNullException(nameof(html));
         }
 
-        var doc = CreateHtmlDocument(html, logger);
+        var doc = html.CreateHtmlDocument(logger);
 
         return (doc, HandleChildren(doc.DocumentNode.ChildNodes));
     }

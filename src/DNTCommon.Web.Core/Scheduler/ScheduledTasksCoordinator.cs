@@ -70,7 +70,11 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
 
                 if (taskStatus.IsRunning)
                 {
-                    _logger.LogInformation(message: "Ignoring `{TaskStatus}` task. It's still running.", taskStatus);
+                    if (_logger.IsEnabled(LogLevel.Information))
+                    {
+                        _logger.LogInformation(message: "Ignoring `{TaskStatus}` task. It's still running.",
+                            taskStatus);
+                    }
 
                     continue;
                 }
@@ -165,18 +169,29 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
             taskStatus.IsRunning = true;
             taskStatus.LastRun = now;
 
-            _logger.LogInformation(message: "Start running `{Name}` task @ {Now}.", name, now);
+            if (_logger.IsEnabled(LogLevel.Information))
+            {
+                _logger.LogInformation(message: "Start running `{Name}` task @ {Now}.", name, now);
+            }
+
             scheduledTask.RunAsync(_cancellationTokenSource.Token).Wait();
 
-            _logger.LogInformation(message: "Finished running `{Name}` task @ {Now}.", name, now);
+            if (_logger.IsEnabled(LogLevel.Information))
+            {
+                _logger.LogInformation(message: "Finished running `{Name}` task @ {Now}.", name, now);
+            }
+
             taskStatus.IsLastRunSuccessful = true;
         }
         catch (Exception ex)
         {
             var exception = ex.Demystify();
 
-            _logger.LogCritical(eventId: 0, exception, message: "Failed running `{Name}` after `{Time}`.", name,
-                watch.Elapsed);
+            if (_logger.IsEnabled(LogLevel.Critical))
+            {
+                _logger.LogCritical(eventId: 0, exception, message: "Failed running `{Name}` after `{Time}`.", name,
+                    watch.Elapsed);
+            }
 
             taskStatus.IsLastRunSuccessful = false;
             taskStatus.LastException = exception;

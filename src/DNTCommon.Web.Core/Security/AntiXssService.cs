@@ -136,7 +136,11 @@ public sealed class AntiXssService : IAntiXssService
 
         if (emptyLinesCount > htmlModificationRules.MaxAllowedConsecutiveEmptyLines)
         {
-            _logger.LogInformation(message: "Removed an empty line: `{NodeOuterHtml}`.", node.OuterHtml);
+            if (_logger.IsEnabled(LogLevel.Information))
+            {
+                _logger.LogInformation(message: "Removed an empty line: `{NodeOuterHtml}`.", node.OuterHtml);
+            }
+
             node.RemoveAll();
             node.Remove();
         }
@@ -158,7 +162,11 @@ public sealed class AntiXssService : IAntiXssService
 
             if (href.IsEmpty())
             {
-                _logger.LogInformation(message: "Removed an empty link: `{NodeOuterHtml}`.", node.OuterHtml);
+                if (_logger.IsEnabled(LogLevel.Information))
+                {
+                    _logger.LogInformation(message: "Removed an empty link: `{NodeOuterHtml}`.", node.OuterHtml);
+                }
+
                 node.Remove();
 
                 return;
@@ -179,9 +187,12 @@ public sealed class AntiXssService : IAntiXssService
                 if (string.Equals(attribute.Name, b: "rel", StringComparison.OrdinalIgnoreCase) ||
                     string.Equals(attribute.Name, b: "target", StringComparison.OrdinalIgnoreCase))
                 {
-                    _logger.LogInformation(
-                        message: "Removed `rel` or `target` attribute from the link: `{NodeOuterHtml}`.",
-                        node.OuterHtml);
+                    if (_logger.IsEnabled(LogLevel.Information))
+                    {
+                        _logger.LogInformation(
+                            message: "Removed `rel` or `target` attribute from the link: `{NodeOuterHtml}`.",
+                            node.OuterHtml);
+                    }
 
                     attribute.Remove();
                 }
@@ -243,9 +254,12 @@ public sealed class AntiXssService : IAntiXssService
         if (node.NodeType == HtmlNodeType.Text &&
             (string.IsNullOrWhiteSpace(node.InnerText) || string.IsNullOrEmpty(node.InnerText.Trim())))
         {
-            _logger.LogInformation(
-                message: "Cleaned the whitespaces between tags. InnerStartIndex:`{InnerStartIndex}`.",
-                node.InnerStartIndex);
+            if (_logger.IsEnabled(LogLevel.Information))
+            {
+                _logger.LogInformation(
+                    message: "Cleaned the whitespaces between tags. InnerStartIndex:`{InnerStartIndex}`.",
+                    node.InnerStartIndex);
+            }
 
             node.ParentNode?.RemoveChild(node);
 
@@ -266,8 +280,12 @@ public sealed class AntiXssService : IAntiXssService
         {
             if (string.IsNullOrWhiteSpace(attribute.Value))
             {
-                _logger.LogInformation(message: "Removed an empty attribute: `{AttributeName}` from `{NodeOuterHtml}`.",
-                    attribute.Name, node.OuterHtml);
+                if (_logger.IsEnabled(LogLevel.Information))
+                {
+                    _logger.LogInformation(
+                        message: "Removed an empty attribute: `{AttributeName}` from `{NodeOuterHtml}`.",
+                        attribute.Name, node.OuterHtml);
+                }
 
                 attribute.Remove();
 
@@ -329,14 +347,18 @@ public sealed class AntiXssService : IAntiXssService
     private bool IsAllowedAttribute(HtmlAttribute attribute, bool allowDataAttributes)
         => (allowDataAttributes &&
             attribute.Name?.StartsWith(value: "data-", StringComparison.OrdinalIgnoreCase) == true) ||
-           _antiXssConfig.ValidHtmlTags.Any(
-               tag => attribute.Name is not null && tag.Attributes.Contains(attribute.Name));
+           _antiXssConfig.ValidHtmlTags.Any(tag
+               => attribute.Name is not null && tag.Attributes.Contains(attribute.Name));
 
     private bool CleanComments(HtmlNode node)
     {
         if (node.NodeType == HtmlNodeType.Comment)
         {
-            _logger.LogInformation(message: "Removed a comment: `{NodeOuterHtml}`.", node.OuterHtml);
+            if (_logger.IsEnabled(LogLevel.Information))
+            {
+                _logger.LogInformation(message: "Removed a comment: `{NodeOuterHtml}`.", node.OuterHtml);
+            }
+
             node.ParentNode?.RemoveChild(node);
 
             return true;

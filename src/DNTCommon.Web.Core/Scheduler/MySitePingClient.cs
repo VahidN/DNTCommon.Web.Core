@@ -39,7 +39,10 @@ public class MySitePingClient(
         }
         catch (Exception ex)
         {
-            logger.LogCritical(eventId: 0, ex.Demystify(), message: "Failed running the Ping task.");
+            if (logger.IsEnabled(LogLevel.Critical))
+            {
+                logger.LogCritical(eventId: 0, ex.Demystify(), message: "Failed running the Ping task.");
+            }
         }
     }
 }
