@@ -10,12 +10,16 @@ public interface IBackgroundQueueService : IDisposable
     ///     The provided IServiceProvider is created from an IServiceScope.
     ///     Usage: _queueService.QueueBackgroundWorkItem(async (cancellationToken, serviceProvider) => {    });
     /// </summary>
-    void QueueBackgroundWorkItem(Func<CancellationToken, IServiceProvider, Task> workItem);
+    ValueTask QueueBackgroundWorkItemAsync(string group,
+        Func<CancellationToken, IServiceProvider, Task>? workItem,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Schedules a task which can run in the background, independent of any request.
     ///     The provided IServiceProvider is created from an IServiceScope.
     ///     Usage: _queueService.QueueBackgroundWorkItem((cancellationToken, serviceProvider) => {    });
     /// </summary>
-    void QueueBackgroundWorkItem(Action<CancellationToken, IServiceProvider> workItem);
+    ValueTask QueueBackgroundWorkItemAsync(string group,
+        Action<CancellationToken, IServiceProvider>? workItem,
+        CancellationToken cancellationToken = default);
 }

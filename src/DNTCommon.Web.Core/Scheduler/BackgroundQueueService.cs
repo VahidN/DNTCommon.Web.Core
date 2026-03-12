@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+using System.Threading.Channels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -14,13 +14,22 @@ namespace DNTCommon.Web.Core;
 /// </remarks>
 public class BackgroundQueueService(IServiceProvider serviceProvider) : BackgroundService, IBackgroundQueueService
 {
-    private readonly BlockingCollection<Func<CancellationToken, IServiceProvider, Task>> _asyncTasksQueue =
-        new(new ConcurrentQueue<Func<CancellationToken, IServiceProvider, Task>>());
+    private const int ChannelCapacity = 1000;
 
-    private readonly TimeSpan _interval = TimeSpan.FromSeconds(value: 0.5);
+    private static readonly BoundedChannelOptions BoundedChannelOptions = new(ChannelCapacity)
+    {
+        FullMode = BoundedChannelFullMode.Wait,
+        SingleReader = true,
+        SingleWriter = false
+    };
 
-    private readonly BlockingCollection<Action<CancellationToken, IServiceProvider>> _syncTasksQueue =
-        new(new ConcurrentQueue<Action<CancellationToken, IServiceProvider>>());
+    private readonly ConcurrentDictionaryLocked<string, Channel<Func<CancellationToken, IServiceProvider, Task>>>
+        _asyncTasksChannels = new(StringComparer.OrdinalIgnoreCase);
+
+    private readonly TimeSpan _interval = TimeSpan.FromMilliseconds(value: 10);
+
+    private readonly ConcurrentDictionaryLocked<string, Channel<Action<CancellationToken, IServiceProvider>>>
+        _syncTasksChannels = new(StringComparer.OrdinalIgnoreCase);
 
     private bool _isDisposed;
 
@@ -32,27 +41,35 @@ public class BackgroundQueueService(IServiceProvider serviceProvider) : Backgrou
     /// <summary>
     ///     Queues a background Task
     /// </summary>
-    public void QueueBackgroundWorkItem(Func<CancellationToken, IServiceProvider, Task> workItem)
+    public ValueTask QueueBackgroundWorkItemAsync(string group,
+        Func<CancellationToken, IServiceProvider, Task>? workItem,
+        CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(workItem);
-
-        if (!_asyncTasksQueue.IsAddingCompleted)
+        if (workItem is null)
         {
-            _asyncTasksQueue.Add(workItem);
+            return ValueTask.CompletedTask;
         }
+
+        var channel = _asyncTasksChannels.LockedGetOrAdd(group, _ => CreateAsyncTasksQueue());
+
+        return channel.Writer.WriteAsync(workItem, cancellationToken);
     }
 
     /// <summary>
     ///     Queues a background Task
     /// </summary>
-    public void QueueBackgroundWorkItem(Action<CancellationToken, IServiceProvider> workItem)
+    public ValueTask QueueBackgroundWorkItemAsync(string group,
+        Action<CancellationToken, IServiceProvider>? workItem,
+        CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(workItem);
-
-        if (!_syncTasksQueue.IsAddingCompleted)
+        if (workItem is null)
         {
-            _syncTasksQueue.Add(workItem);
+            return ValueTask.CompletedTask;
         }
+
+        var channel = _syncTasksChannels.LockedGetOrAdd(group, _ => CreateSyncTasksQueue());
+
+        return channel.Writer.WriteAsync(workItem, cancellationToken);
     }
 
     /// <summary>
@@ -76,17 +93,9 @@ public class BackgroundQueueService(IServiceProvider serviceProvider) : Backgrou
         {
             try
             {
-                if (_asyncTasksQueue.TryTake(out var asyncWorkItem, millisecondsTimeout: 0, stoppingToken))
-                {
-                    await using var serviceScope = GetServiceScopeAsync();
-                    await asyncWorkItem(stoppingToken, serviceScope.ServiceProvider);
-                }
+                await ProcessAsyncTasksAsync(stoppingToken);
 
-                if (_syncTasksQueue.TryTake(out var workItem, millisecondsTimeout: 0, stoppingToken))
-                {
-                    await using var serviceScope = GetServiceScopeAsync();
-                    workItem(stoppingToken, serviceScope.ServiceProvider);
-                }
+                await ProcessSyncTasksAsync(stoppingToken);
 
                 await Task.Delay(_interval, stoppingToken);
             }
@@ -106,8 +115,47 @@ public class BackgroundQueueService(IServiceProvider serviceProvider) : Backgrou
         }
     }
 
-    private AsyncServiceScope GetServiceScopeAsync()
-        => serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateAsyncScope();
+    private async Task ProcessSyncTasksAsync(CancellationToken stoppingToken)
+    {
+        foreach (var channel in GetSyncTasksChannelsList())
+        {
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                if (channel.Reader.TryRead(out var workItem))
+                {
+                    await using var serviceScope = GetServiceScopeAsync();
+                    workItem(stoppingToken, serviceScope.ServiceProvider);
+                }
+                else
+                {
+                    break;
+                }
+
+                await Task.Delay(_interval, stoppingToken);
+            }
+        }
+    }
+
+    private async Task ProcessAsyncTasksAsync(CancellationToken stoppingToken)
+    {
+        foreach (var channel in GetAsyncTasksChannelsList())
+        {
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                if (channel.Reader.TryRead(out var asyncWorkItem))
+                {
+                    await using var serviceScope = GetServiceScopeAsync();
+                    await asyncWorkItem(stoppingToken, serviceScope.ServiceProvider);
+                }
+                else
+                {
+                    break;
+                }
+
+                await Task.Delay(_interval, stoppingToken);
+            }
+        }
+    }
 
     /// <summary>
     ///     Triggered when the application host is performing a graceful shutdown.
@@ -121,8 +169,15 @@ public class BackgroundQueueService(IServiceProvider serviceProvider) : Backgrou
 
     private void StopQueue()
     {
-        _asyncTasksQueue.CompleteAdding();
-        _syncTasksQueue.CompleteAdding();
+        foreach (var channel in GetAsyncTasksChannelsList())
+        {
+            channel.Writer.TryComplete();
+        }
+
+        foreach (var channel in GetSyncTasksChannelsList())
+        {
+            channel.Writer.TryComplete();
+        }
     }
 
     /// <summary>
@@ -140,8 +195,6 @@ public class BackgroundQueueService(IServiceProvider serviceProvider) : Backgrou
             if (disposing)
             {
                 StopQueue();
-                _asyncTasksQueue.Dispose();
-                _syncTasksQueue.Dispose();
             }
         }
         finally
@@ -151,4 +204,19 @@ public class BackgroundQueueService(IServiceProvider serviceProvider) : Backgrou
 
         base.Dispose();
     }
+
+    private List<Channel<Func<CancellationToken, IServiceProvider, Task>>> GetAsyncTasksChannelsList()
+        => [.. _asyncTasksChannels.Values.Select(c => c.Value)];
+
+    private List<Channel<Action<CancellationToken, IServiceProvider>>> GetSyncTasksChannelsList()
+        => [.._syncTasksChannels.Values.Select(c => c.Value)];
+
+    private static Channel<Func<CancellationToken, IServiceProvider, Task>> CreateAsyncTasksQueue()
+        => Channel.CreateBounded<Func<CancellationToken, IServiceProvider, Task>>(BoundedChannelOptions);
+
+    private static Channel<Action<CancellationToken, IServiceProvider>> CreateSyncTasksQueue()
+        => Channel.CreateBounded<Action<CancellationToken, IServiceProvider>>(BoundedChannelOptions);
+
+    private AsyncServiceScope GetServiceScopeAsync()
+        => serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateAsyncScope();
 }

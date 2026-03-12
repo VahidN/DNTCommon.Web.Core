@@ -10,7 +10,7 @@ public interface IWebMailService
     /// <summary>
     ///     Queues sending an email using the `MailKit` library and IBackgroundQueueService.
     /// </summary>
-    void BackgroundQueueSendEmail(SmtpConfig smtpConfig,
+    ValueTask BackgroundQueueSendEmailAsync(SmtpConfig smtpConfig,
         IEnumerable<MailAddress> emails,
         string subject,
         string message,
@@ -42,7 +42,7 @@ public interface IWebMailService
     ///     Queues sending an email using the `MailKit` library and IBackgroundQueueService.
     ///     This method converts a razor template file to a string and then uses it as the email's message.
     /// </summary>
-    void BackgroundQueueSendEmail<T>(SmtpConfig smtpConfig,
+    ValueTask BackgroundQueueSendEmailAsync<T>(SmtpConfig smtpConfig,
         IEnumerable<MailAddress> emails,
         string subject,
         string viewNameOrPath,
@@ -96,7 +96,7 @@ public interface IWebMailService
     ///     Queues sending an email using the `MailKit` library and IBackgroundQueueService.
     ///     This method converts a blazor .razor template file to a string and then uses it as the email's message.
     /// </summary>
-    void BackgroundQueueSendEmail<T>(SmtpConfig smtpConfig,
+    ValueTask BackgroundQueueSendEmailAsync<T>(SmtpConfig smtpConfig,
         IEnumerable<MailAddress> emails,
         string subject,
         IDictionary<string, object?> viewModel,

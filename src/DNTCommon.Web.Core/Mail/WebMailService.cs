@@ -32,7 +32,7 @@ public class WebMailService(
     /// <summary>
     ///     Queues sending an email using the `MailKit` library.
     /// </summary>
-    public void BackgroundQueueSendEmail(SmtpConfig smtpConfig,
+    public ValueTask BackgroundQueueSendEmailAsync(SmtpConfig smtpConfig,
         IEnumerable<MailAddress> emails,
         string subject,
         string message,
@@ -43,9 +43,9 @@ public class WebMailService(
         IEnumerable<string>? attachmentFiles = null,
         MailHeaders? headers = null,
         bool shouldValidateServerCertificate = true)
-        => backgroundQueueService.QueueBackgroundWorkItem((_, _) => SendEmailAsync(smtpConfig, emails, subject, message,
-            blindCarpbonCopies, carpbonCopies, replyTos, delayDelivery, attachmentFiles, headers,
-            shouldValidateServerCertificate));
+        => backgroundQueueService.QueueBackgroundWorkItemAsync(nameof(WebMailService),
+            (_, _) => SendEmailAsync(smtpConfig, emails, subject, message, blindCarpbonCopies, carpbonCopies, replyTos,
+                delayDelivery, attachmentFiles, headers, shouldValidateServerCertificate));
 
     /// <summary>
     ///     Sends an email using the `MailKit` library.
@@ -75,7 +75,7 @@ public class WebMailService(
     ///     Queues sending an email using the `MailKit` library.
     ///     This method converts a razor template file to a string and then uses it as the email's message.
     /// </summary>
-    public void BackgroundQueueSendEmail<T>(SmtpConfig smtpConfig,
+    public ValueTask BackgroundQueueSendEmailAsync<T>(SmtpConfig smtpConfig,
         IEnumerable<MailAddress> emails,
         string subject,
         string viewNameOrPath,
@@ -87,9 +87,9 @@ public class WebMailService(
         IEnumerable<string>? attachmentFiles = null,
         MailHeaders? headers = null,
         bool shouldValidateServerCertificate = true)
-        => backgroundQueueService.QueueBackgroundWorkItem((_, _) => SendEmailAsync(smtpConfig, emails, subject,
-            viewNameOrPath, viewModel, blindCarpbonCopies, carpbonCopies, replyTos, delayDelivery, attachmentFiles,
-            headers, shouldValidateServerCertificate));
+        => backgroundQueueService.QueueBackgroundWorkItemAsync(nameof(WebMailService),
+            (_, _) => SendEmailAsync(smtpConfig, emails, subject, viewNameOrPath, viewModel, blindCarpbonCopies,
+                carpbonCopies, replyTos, delayDelivery, attachmentFiles, headers, shouldValidateServerCertificate));
 
     /// <summary>
     ///     Sends an email using the `MailKit` library.
@@ -358,7 +358,7 @@ public class WebMailService(
     ///     Queues sending an email using the `MailKit` library.
     ///     This method converts a blazor .razor template file to a string and then uses it as the email's message.
     /// </summary>
-    public void BackgroundQueueSendEmail<T>(SmtpConfig smtpConfig,
+    public ValueTask BackgroundQueueSendEmailAsync<T>(SmtpConfig smtpConfig,
         IEnumerable<MailAddress> emails,
         string subject,
         IDictionary<string, object?> viewModel,
@@ -370,9 +370,9 @@ public class WebMailService(
         MailHeaders? headers = null,
         bool shouldValidateServerCertificate = true)
         where T : IComponent
-        => backgroundQueueService.QueueBackgroundWorkItem((_, _) => SendEmailAsync<T>(smtpConfig, emails, subject,
-            viewModel, blindCarpbonCopies, carpbonCopies, replyTos, delayDelivery, attachmentFiles, headers,
-            shouldValidateServerCertificate));
+        => backgroundQueueService.QueueBackgroundWorkItemAsync(nameof(WebMailService),
+            (_, _) => SendEmailAsync<T>(smtpConfig, emails, subject, viewModel, blindCarpbonCopies, carpbonCopies,
+                replyTos, delayDelivery, attachmentFiles, headers, shouldValidateServerCertificate));
 
 #endif
 }
