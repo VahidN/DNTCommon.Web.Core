@@ -93,11 +93,8 @@ public class BackgroundQueueService(IServiceProvider serviceProvider) : Backgrou
         {
             try
             {
-                await ProcessAsyncTasksAsync(stoppingToken);
-
-                await ProcessSyncTasksAsync(stoppingToken);
-
-                await Task.Delay(_interval, stoppingToken);
+                await Task.WhenAll(ProcessAsyncTasksAsync(stoppingToken), ProcessSyncTasksAsync(stoppingToken),
+                    Task.Delay(_interval, stoppingToken));
             }
             catch (OperationCanceledException ex) when (stoppingToken.IsCancellationRequested)
             {
@@ -111,48 +108,6 @@ public class BackgroundQueueService(IServiceProvider serviceProvider) : Backgrou
             catch (Exception ex)
             {
                 logger.LogError(ex.Demystify(), message: "An error occurred executing the background job.");
-            }
-        }
-    }
-
-    private async Task ProcessSyncTasksAsync(CancellationToken stoppingToken)
-    {
-        foreach (var channel in GetSyncTasksChannelsList())
-        {
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                if (channel.Reader.TryRead(out var workItem))
-                {
-                    await using var serviceScope = GetServiceScopeAsync();
-                    workItem(stoppingToken, serviceScope.ServiceProvider);
-                }
-                else
-                {
-                    break;
-                }
-
-                await Task.Delay(_interval, stoppingToken);
-            }
-        }
-    }
-
-    private async Task ProcessAsyncTasksAsync(CancellationToken stoppingToken)
-    {
-        foreach (var channel in GetAsyncTasksChannelsList())
-        {
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                if (channel.Reader.TryRead(out var asyncWorkItem))
-                {
-                    await using var serviceScope = GetServiceScopeAsync();
-                    await asyncWorkItem(stoppingToken, serviceScope.ServiceProvider);
-                }
-                else
-                {
-                    break;
-                }
-
-                await Task.Delay(_interval, stoppingToken);
             }
         }
     }
@@ -219,4 +174,60 @@ public class BackgroundQueueService(IServiceProvider serviceProvider) : Backgrou
 
     private AsyncServiceScope GetServiceScopeAsync()
         => serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateAsyncScope();
+
+#pragma warning disable CC001,CC002
+    private async Task ProcessSyncTasksAsync(CancellationToken stoppingToken)
+    {
+        var syncTasksChannelsList = GetSyncTasksChannelsList();
+
+        await Parallel.ForEachAsync(syncTasksChannelsList, new ParallelOptions
+        {
+            CancellationToken = stoppingToken,
+            MaxDegreeOfParallelism = Environment.ProcessorCount
+        }, async (channel, ct) =>
+        {
+            while (!ct.IsCancellationRequested)
+            {
+                if (channel.Reader.TryRead(out var workItem))
+                {
+                    await using var serviceScope = GetServiceScopeAsync();
+                    workItem(stoppingToken, serviceScope.ServiceProvider);
+                }
+                else
+                {
+                    break;
+                }
+
+                await Task.Delay(_interval, ct);
+            }
+        });
+    }
+
+    private async Task ProcessAsyncTasksAsync(CancellationToken stoppingToken)
+    {
+        var asyncTasksChannelsList = GetAsyncTasksChannelsList();
+
+        await Parallel.ForEachAsync(asyncTasksChannelsList, new ParallelOptions
+        {
+            CancellationToken = stoppingToken,
+            MaxDegreeOfParallelism = Environment.ProcessorCount
+        }, async (channel, ct) =>
+        {
+            while (!ct.IsCancellationRequested)
+            {
+                if (channel.Reader.TryRead(out var asyncWorkItem))
+                {
+                    await using var serviceScope = GetServiceScopeAsync();
+                    await asyncWorkItem(ct, serviceScope.ServiceProvider);
+                }
+                else
+                {
+                    break;
+                }
+
+                await Task.Delay(_interval, ct);
+            }
+        });
+    }
+#pragma warning restore CC001,CC002
 }
