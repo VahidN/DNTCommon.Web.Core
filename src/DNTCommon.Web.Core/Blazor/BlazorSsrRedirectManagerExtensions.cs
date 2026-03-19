@@ -108,7 +108,7 @@ public static class BlazorSsrRedirectManagerExtensions
     /// <param name="queryParameters"></param>
     public static void SsrRedirectTo(this HttpContext httpContext,
         NavigationManager navigationManager,
-        string uri,
+        [StringSyntax(syntax: "Uri")] string uri,
         IReadOnlyDictionary<string, object?> queryParameters)
     {
         ArgumentNullException.ThrowIfNull(httpContext);
@@ -153,7 +153,7 @@ public static class BlazorSsrRedirectManagerExtensions
     /// <param name="queryParameters"></param>
     [DoesNotReturn]
     public static void SsrRedirectTo(this NavigationManager navigationManager,
-        string uri,
+        [StringSyntax(syntax: "Uri")] string uri,
         IReadOnlyDictionary<string, object?> queryParameters)
     {
         ArgumentNullException.ThrowIfNull(navigationManager);
@@ -172,7 +172,7 @@ public static class BlazorSsrRedirectManagerExtensions
     /// <param name="context"></param>
     [DoesNotReturn]
     public static void SsrRedirectToWithStatus(this NavigationManager navigationManager,
-        string uri,
+        [StringSyntax(syntax: "Uri")] string uri,
         string message,
         HttpContext context)
     {

@@ -8,8 +8,8 @@ public interface IUrlNormalizationService
     /// <summary>
     ///     Uses NormalizeUrlAsync method to find the normalized URLs and then compares them.
     /// </summary>
-    Task<bool> AreTheSameUrlsAsync(string url1,
-        string url2,
+    Task<bool> AreTheSameUrlsAsync([StringSyntax(syntax: "Uri")] string url1,
+        [StringSyntax(syntax: "Uri")] string url2,
         bool findRedirectUrl,
         string defaultProtocol = "http",
         NormalizeUrlRules normalizeUrlRules = NormalizeUrlRules.All,
@@ -43,7 +43,7 @@ public interface IUrlNormalizationService
     ///     syntactically different URLs may be equivalent.
     ///     https://en.wikipedia.org/wiki/URL_normalization
     /// </summary>
-    Task<string> NormalizeUrlAsync(string url,
+    Task<string> NormalizeUrlAsync([StringSyntax(syntax: "Uri")] string url,
         bool findRedirectUrl,
         string defaultProtocol = "http",
         NormalizeUrlRules normalizeUrlRules = NormalizeUrlRules.All,
@@ -60,8 +60,8 @@ public interface IUrlNormalizationService
     /// <summary>
     ///     Uses NormalizeUrl method to find the normalized URLs and then compares them.
     /// </summary>
-    bool AreTheSameUrls(string url1,
-        string url2,
+    bool AreTheSameUrls([StringSyntax(syntax: "Uri")] string url1,
+        [StringSyntax(syntax: "Uri")] string url2,
         string defaultProtocol = "http",
         NormalizeUrlRules normalizeUrlRules = NormalizeUrlRules.All);
 
@@ -81,7 +81,7 @@ public interface IUrlNormalizationService
     ///     syntactically different URLs may be equivalent.
     ///     https://en.wikipedia.org/wiki/URL_normalization
     /// </summary>
-    string NormalizeUrl(string url,
+    string NormalizeUrl([StringSyntax(syntax: "Uri")] string url,
         string defaultProtocol = "http",
         NormalizeUrlRules normalizeUrlRules = NormalizeUrlRules.All);
 }

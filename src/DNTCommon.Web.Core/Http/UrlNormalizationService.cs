@@ -14,8 +14,8 @@ public class UrlNormalizationService(IRedirectUrlFinderService locationFinder) :
     /// <summary>
     ///     Uses NormalizeUrlAsync method to find the normalized URLs and then compares them.
     /// </summary>
-    public async Task<bool> AreTheSameUrlsAsync(string url1,
-        string url2,
+    public async Task<bool> AreTheSameUrlsAsync([StringSyntax(syntax: "Uri")] string url1,
+        [StringSyntax(syntax: "Uri")] string url2,
         bool findRedirectUrl,
         string defaultProtocol = "http",
         NormalizeUrlRules normalizeUrlRules = NormalizeUrlRules.All,
@@ -75,7 +75,7 @@ public class UrlNormalizationService(IRedirectUrlFinderService locationFinder) :
     ///     syntactically different URLs may be equivalent.
     ///     https://en.wikipedia.org/wiki/URL_normalization
     /// </summary>
-    public Task<string> NormalizeUrlAsync(string url,
+    public Task<string> NormalizeUrlAsync([StringSyntax(syntax: "Uri")] string url,
         bool findRedirectUrl,
         string defaultProtocol = "http",
         NormalizeUrlRules normalizeUrlRules = NormalizeUrlRules.All,
@@ -94,8 +94,8 @@ public class UrlNormalizationService(IRedirectUrlFinderService locationFinder) :
     /// <summary>
     ///     Uses NormalizeUrl method to find the normalized URLs and then compares them.
     /// </summary>
-    public bool AreTheSameUrls(string url1,
-        string url2,
+    public bool AreTheSameUrls([StringSyntax(syntax: "Uri")] string url1,
+        [StringSyntax(syntax: "Uri")] string url2,
         string defaultProtocol = "http",
         NormalizeUrlRules normalizeUrlRules = NormalizeUrlRules.All)
         => url1.AreTheSameUrls(url2, defaultProtocol, normalizeUrlRules);
@@ -117,7 +117,7 @@ public class UrlNormalizationService(IRedirectUrlFinderService locationFinder) :
     ///     syntactically different URLs may be equivalent.
     ///     https://en.wikipedia.org/wiki/URL_normalization
     /// </summary>
-    public string NormalizeUrl(string url,
+    public string NormalizeUrl([StringSyntax(syntax: "Uri")] string url,
         string defaultProtocol = "http",
         NormalizeUrlRules normalizeUrlRules = NormalizeUrlRules.All)
         => url.NormalizeUrl(defaultProtocol, normalizeUrlRules);

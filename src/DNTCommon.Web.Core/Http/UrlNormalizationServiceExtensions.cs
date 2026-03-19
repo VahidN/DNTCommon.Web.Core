@@ -90,10 +90,10 @@ public static class UrlNormalizationServiceExtensions
     ///     syntactically different URLs may be equivalent.
     ///     https://en.wikipedia.org/wiki/URL_normalization
     /// </summary>
-    public static string NormalizeUrl(this string url,
+    public static string NormalizeUrl([StringSyntax(syntax: "Uri")] this string url,
         string defaultProtocol = "http",
         NormalizeUrlRules normalizeUrlRules = NormalizeUrlRules.All)
-        => NormalizeUrl(new Uri(url), defaultProtocol, normalizeUrlRules);
+        => new Uri(url).NormalizeUrl(defaultProtocol, normalizeUrlRules);
 
     private static string RemoveFeedburnerPart1(string url)
     {
@@ -176,8 +176,8 @@ public static class UrlNormalizationServiceExtensions
         string defaultProtocol = "http",
         NormalizeUrlRules normalizeUrlRules = NormalizeUrlRules.All)
     {
-        var url1 = NormalizeUrl(uri1, defaultProtocol, normalizeUrlRules);
-        var url2 = NormalizeUrl(uri2, defaultProtocol, normalizeUrlRules);
+        var url1 = uri1.NormalizeUrl(defaultProtocol, normalizeUrlRules);
+        var url2 = uri2.NormalizeUrl(defaultProtocol, normalizeUrlRules);
 
         return url1.Equals(url2, StringComparison.OrdinalIgnoreCase);
     }
@@ -185,13 +185,13 @@ public static class UrlNormalizationServiceExtensions
     /// <summary>
     ///     Uses NormalizeUrl method to find the normalized URLs and then compares them.
     /// </summary>
-    public static bool AreTheSameUrls(this string url1,
-        string url2,
+    public static bool AreTheSameUrls([StringSyntax(syntax: "Uri")] this string url1,
+        [StringSyntax(syntax: "Uri")] string url2,
         string defaultProtocol = "http",
         NormalizeUrlRules normalizeUrlRules = NormalizeUrlRules.All)
     {
-        url1 = NormalizeUrl(new Uri(url1), defaultProtocol, normalizeUrlRules);
-        url2 = NormalizeUrl(new Uri(url2), defaultProtocol, normalizeUrlRules);
+        url1 = new Uri(url1).NormalizeUrl(defaultProtocol, normalizeUrlRules);
+        url2 = new Uri(url2).NormalizeUrl(defaultProtocol, normalizeUrlRules);
 
         return url1.Equals(url2, StringComparison.OrdinalIgnoreCase);
     }

@@ -26,14 +26,14 @@ public static class DownloaderServiceExtensions
     ///     Downloads a file from a given url and then stores it as a local file.
     /// </summary>
     public static Task<DownloadStatus?> DownloadFileWithStatusReportAsync(this HttpClient client,
-        string url,
+        [StringSyntax(syntax: "Uri")] string url,
         string outputFilePath,
         AutoRetriesPolicy? autoRetries = null,
         Action<DownloadStatus>? onDownloadStatusChanged = null,
         Action<DownloadStatus>? onDownloadCompleted = null,
         CancellationToken cancellationToken = default)
         => DownloadAsync(
-            ct => DoDownloadFileAsync(client, url, outputFilePath, onDownloadStatusChanged, onDownloadCompleted, ct),
+            ct => client.DoDownloadFileAsync(url, outputFilePath, onDownloadStatusChanged, onDownloadCompleted, ct),
             autoRetries, cancellationToken);
 
     /// <summary>
@@ -41,12 +41,12 @@ public static class DownloaderServiceExtensions
     /// </summary>
     public static Task<(byte[] Data, DownloadStatus DownloadStatus)> DownloadDataWithStatusReportAsync(
         this HttpClient client,
-        string url,
+        [StringSyntax(syntax: "Uri")] string url,
         AutoRetriesPolicy? autoRetries = null,
         Action<DownloadStatus>? onDownloadStatusChanged = null,
         Action<DownloadStatus>? onDownloadCompleted = null,
         CancellationToken cancellationToken = default)
-        => DownloadAsync(ct => DoDownloadDataAsync(client, url, onDownloadCompleted, onDownloadStatusChanged, ct),
+        => DownloadAsync(ct => client.DoDownloadDataAsync(url, onDownloadCompleted, onDownloadStatusChanged, ct),
             autoRetries, cancellationToken);
 
     /// <summary>
@@ -54,13 +54,13 @@ public static class DownloaderServiceExtensions
     /// </summary>
     public static async Task<(string Data, DownloadStatus DownloadStatus)> DownloadPageWithStatusReportAsync(
         this HttpClient client,
-        string url,
+        [StringSyntax(syntax: "Uri")] string url,
         AutoRetriesPolicy? autoRetries = null,
         Action<DownloadStatus>? onDownloadStatusChanged = null,
         Action<DownloadStatus>? onDownloadCompleted = null,
         CancellationToken cancellationToken = default)
     {
-        var (data, downloadStatus) = await DownloadDataWithStatusReportAsync(client, url, autoRetries,
+        var (data, downloadStatus) = await client.DownloadDataWithStatusReportAsync(url, autoRetries,
             onDownloadStatusChanged, onDownloadCompleted, cancellationToken);
 
         return data is null ? (string.Empty, downloadStatus) : (Encoding.UTF8.GetString(data), downloadStatus);
@@ -135,7 +135,7 @@ public static class DownloaderServiceExtensions
     }
 
     private static async Task<DownloadStatus> DoDownloadFileAsync(this HttpClient client,
-        string url,
+        [StringSyntax(syntax: "Uri")] string url,
         string outputFilePath,
         Action<DownloadStatus>? onDownloadStatusChanged,
         Action<DownloadStatus>? onDownloadCompleted,
@@ -218,7 +218,7 @@ public static class DownloaderServiceExtensions
     }
 
     private static async Task<HttpResponseMessage> ReadResponseHeadersAsync(HttpClient client,
-        string url,
+        [StringSyntax(syntax: "Uri")] string url,
         DownloadStatus downloadStatus,
         CancellationToken cancellationToken)
     {
@@ -240,7 +240,7 @@ public static class DownloaderServiceExtensions
     }
 
     private static async Task<(byte[] Data, DownloadStatus DownloadStatus)> DoDownloadDataAsync(this HttpClient client,
-        string url,
+        [StringSyntax(syntax: "Uri")] string url,
         Action<DownloadStatus>? onDownloadCompleted,
         Action<DownloadStatus>? onDownloadStatusChanged,
         CancellationToken cancellationToken)

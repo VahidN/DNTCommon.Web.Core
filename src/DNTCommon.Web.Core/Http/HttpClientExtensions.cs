@@ -14,7 +14,7 @@ public static class HttpClientExtensions
     ///     Is the given remote url still available?
     /// </summary>
     public static async Task<bool> IsAvailableRemoteUrlAsync(this HttpClient httpClient,
-        string url,
+        [StringSyntax(syntax: "Uri")] string url,
         Action<HttpRequestMessage>? configRequest = null,
         ILogger? logger = null,
         CancellationToken cancellationToken = default)
@@ -66,7 +66,7 @@ public static class HttpClientExtensions
     ///     Allows manipulation of the request headers before it is sent, when you are using a singleton httpClient.
     /// </summary>
     public static HttpResponseMessage Get(this HttpClient httpClient,
-        string uri,
+        [StringSyntax(syntax: "Uri")] string uri,
         bool ensureSuccess = true,
         Action<HttpRequestMessage>? configRequest = null)
     {
@@ -88,7 +88,7 @@ public static class HttpClientExtensions
     ///     Allows manipulation of the request headers before it is sent, when you are using a singleton httpClient.
     /// </summary>
     public static async Task<HttpResponseMessage> GetAsync(this HttpClient httpClient,
-        string uri,
+        [StringSyntax(syntax: "Uri")] string uri,
         bool ensureSuccess = true,
         Action<HttpRequestMessage>? configRequest = null,
         CancellationToken cancellationToken = default)
@@ -111,7 +111,7 @@ public static class HttpClientExtensions
     ///     Allows manipulation of the request headers before it is sent, when you are using a singleton httpClient.
     /// </summary>
     public static async Task<HttpResponseMessage> PostAsJsonAsync<T>(this HttpClient httpClient,
-        string uri,
+        [StringSyntax(syntax: "Uri")] string uri,
         T value,
         bool ensureSuccess = true,
         Action<HttpRequestMessage>? configRequest = null,
@@ -139,7 +139,7 @@ public static class HttpClientExtensions
     ///     Allows manipulation of the request headers before it is sent, when you are using a singleton httpClient.
     /// </summary>
     public static HttpResponseMessage PostAsJson<T>(this HttpClient httpClient,
-        string uri,
+        [StringSyntax(syntax: "Uri")] string uri,
         T value,
         bool ensureSuccess = true,
         Action<HttpRequestMessage>? configRequest = null)
@@ -278,7 +278,7 @@ public static class HttpClientExtensions
     ///     Downloads a URL as a binary file.
     /// </summary>
     public static async Task<byte[]> DownloadDataAsync(this HttpClient httpClient,
-        string url,
+        [StringSyntax(syntax: "Uri")] string url,
         bool ensureSuccess = true,
         Action<HttpRequestMessage>? configRequest = null,
         CancellationToken cancellationToken = default)
@@ -312,7 +312,7 @@ public static class HttpClientExtensions
     ///     Downloads a URL as a binary file.
     /// </summary>
     public static byte[] DownloadData(this HttpClient httpClient,
-        string url,
+        [StringSyntax(syntax: "Uri")] string url,
         bool ensureSuccess = true,
         Action<HttpRequestMessage>? configRequest = null)
     {
@@ -343,7 +343,7 @@ public static class HttpClientExtensions
     ///     Downloads a URL as a binary file.
     /// </summary>
     public static async Task DownloadFileAsync(this HttpClient httpClient,
-        string url,
+        [StringSyntax(syntax: "Uri")] string url,
         string outputFileNamePath,
         bool allowOverwrite,
         bool ensureSuccess = true,
@@ -411,7 +411,7 @@ public static class HttpClientExtensions
     ///     Downloads a URL as a binary file.
     /// </summary>
     public static void DownloadFile(this HttpClient httpClient,
-        string url,
+        [StringSyntax(syntax: "Uri")] string url,
         string outputFileNamePath,
         bool allowOverwrite,
         bool ensureSuccess = true,

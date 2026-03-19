@@ -13,7 +13,7 @@ public static class UrlUtils
     /// <param name="thumbnailUrl"></param>
     /// <returns></returns>
     public static string? TryGetImageFormat(this string? thumbnailUrl)
-        => TryExtractFileName(thumbnailUrl)?.Pipe(Path.GetExtension)?.Trim(trimChar: '.');
+        => thumbnailUrl.TryExtractFileName()?.Pipe(Path.GetExtension)?.Trim(trimChar: '.');
 
     /// <summary>
     ///     Tries to extract a file name form a url
@@ -56,7 +56,7 @@ public static class UrlUtils
     /// <summary>
     ///     Allows adding params to the given URI.
     /// </summary>
-    public static Uri AddQueryString(this string uri, string key, string value)
+    public static Uri AddQueryString([StringSyntax(syntax: "Uri")] this string uri, string key, string value)
         => new UriBuilderExtensions(uri).AddParameter(key, value).Uri;
 
     /// <summary>
@@ -68,7 +68,7 @@ public static class UrlUtils
     /// <summary>
     ///     Allows adding or replacing params to the given URI.
     /// </summary>
-    public static Uri AddOrUpdateQueryString(this string uri, string key, string value)
+    public static Uri AddOrUpdateQueryString([StringSyntax(syntax: "Uri")] this string uri, string key, string value)
         => new UriBuilderExtensions(uri).AddOrUpdateParameter(key, value).Uri;
 
     /// <summary>
@@ -80,7 +80,7 @@ public static class UrlUtils
     /// <summary>
     ///     Allows replacing existing params to the given URI.
     /// </summary>
-    public static Uri UpdateQueryString(this string uri, string key, string value)
+    public static Uri UpdateQueryString([StringSyntax(syntax: "Uri")] this string uri, string key, string value)
         => new UriBuilderExtensions(uri).UpdateParameter(key, value).Uri;
 
     /// <summary>
@@ -92,6 +92,6 @@ public static class UrlUtils
     /// <summary>
     ///     Allows removing params to the given URI.
     /// </summary>
-    public static Uri UpdateQueryString(this string uri, string key)
+    public static Uri UpdateQueryString([StringSyntax(syntax: "Uri")] this string uri, string key)
         => new UriBuilderExtensions(uri).RemoveParameter(key).Uri;
 }

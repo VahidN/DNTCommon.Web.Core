@@ -33,7 +33,8 @@ public interface IHtmlHelperService
     /// <summary>
     ///     Download the given uri and then extracts its title.
     /// </summary>
-    Task<string> GetUrlTitleAsync(string url, CancellationToken cancellationToken = default);
+    Task<string> GetUrlTitleAsync([StringSyntax(syntax: "Uri")] string url,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Extracts the given HTML page's title.

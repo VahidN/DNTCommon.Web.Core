@@ -8,5 +8,5 @@ public interface IRssReaderService
     /// <summary>
     ///     Loads a syndication feed from the specified url.
     /// </summary>
-    Task<FeedChannel<FeedItem>> ReadRssAsync(string url, CancellationToken ct = default);
+    Task<FeedChannel<FeedItem>> ReadRssAsync([StringSyntax(syntax: "Uri")] string url, CancellationToken ct = default);
 }

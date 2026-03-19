@@ -27,7 +27,7 @@ public class UriBuilderExtensions
     ///     Allows adding params to the given URI.
     /// </summary>
     /// <param name="uri"></param>
-    public UriBuilderExtensions(string uri)
+    public UriBuilderExtensions([StringSyntax(syntax: "Uri")] string uri)
     {
         ArgumentNullException.ThrowIfNull(uri);
 

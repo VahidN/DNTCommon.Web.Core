@@ -322,7 +322,7 @@ public static class HtmlHelperServiceExtensions
     ///     Converts HTML to plain text.
     /// </summary>
     public static async Task<string> HtmlToTextAsync(this HttpClient httpClient,
-        string url,
+        [StringSyntax(syntax: "Uri")] string url,
         ILogger? logger = null,
         CancellationToken cancellationToken = default)
     {

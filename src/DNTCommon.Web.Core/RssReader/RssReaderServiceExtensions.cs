@@ -23,7 +23,7 @@ public static class RssReaderServiceExtensions
     /// </summary>
     /// <exception cref="InvalidOperationException"></exception>
     public static async Task<FeedChannel<FeedItem>> ReadRssAsync(this HttpClient httpClient,
-        string url,
+        [StringSyntax(syntax: "Uri")] string url,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(httpClient);

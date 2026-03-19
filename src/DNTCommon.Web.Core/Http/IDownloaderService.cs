@@ -18,7 +18,7 @@ public interface IDownloaderService
     /// <summary>
     ///     Downloads a file from a given url and then returns it as a byte array.
     /// </summary>
-    Task<(byte[] Data, DownloadStatus DownloadStatus)> DownloadDataAsync(string url,
+    Task<(byte[] Data, DownloadStatus DownloadStatus)> DownloadDataAsync([StringSyntax(syntax: "Uri")] string url,
         AutoRetriesPolicy? autoRetries = null,
         Action<DownloadStatus>? onDownloadStatusChanged = null,
         Action<DownloadStatus>? onDownloadCompleted = null,
@@ -27,7 +27,7 @@ public interface IDownloaderService
     /// <summary>
     ///     Downloads a file from a given url and then returns it as a text.
     /// </summary>
-    Task<(string Data, DownloadStatus DownloadStatus)> DownloadPageAsync(string url,
+    Task<(string Data, DownloadStatus DownloadStatus)> DownloadPageAsync([StringSyntax(syntax: "Uri")] string url,
         AutoRetriesPolicy? autoRetries = null,
         Action<DownloadStatus>? onDownloadStatusChanged = null,
         Action<DownloadStatus>? onDownloadCompleted = null,

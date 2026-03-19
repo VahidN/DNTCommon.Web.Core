@@ -208,7 +208,8 @@ public class HtmlHelperService(
     /// <summary>
     ///     Download the given uri and then extracts its title.
     /// </summary>
-    public Task<string> GetUrlTitleAsync(string url, CancellationToken cancellationToken = default)
+    public Task<string> GetUrlTitleAsync([StringSyntax(syntax: "Uri")] string url,
+        CancellationToken cancellationToken = default)
         => GetUrlTitleAsync(new Uri(url), cancellationToken);
 
     /// <summary>

@@ -5,7 +5,7 @@ public static class SafeFetcherExtensions
     private const int MaxRedirects = 5;
 
     public static async Task<FetchResult> SafeFetchAsync(this HttpClient httpClient,
-        string uri,
+        [StringSyntax(syntax: "Uri")] string uri,
         bool downloadBinaryContent = false,
         int maxAllowedSizeContentInBytes = 15 * 1024 * 1024,
         CancellationToken cancellationToken = default)

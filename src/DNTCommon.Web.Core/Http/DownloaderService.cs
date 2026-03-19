@@ -8,7 +8,7 @@ public class DownloaderService(IHttpClientFactory httpClientFactory) : IDownload
     /// <summary>
     ///     Downloads a file from a given url and then stores it as a local file.
     /// </summary>
-    public async Task<DownloadStatus?> DownloadFileAsync(string url,
+    public async Task<DownloadStatus?> DownloadFileAsync([StringSyntax(syntax: "Uri")] string url,
         string outputFilePath,
         AutoRetriesPolicy? autoRetries = null,
         Action<DownloadStatus>? onDownloadStatusChanged = null,
@@ -24,7 +24,8 @@ public class DownloaderService(IHttpClientFactory httpClientFactory) : IDownload
     /// <summary>
     ///     Downloads a file from a given url and then returns it as a byte array.
     /// </summary>
-    public async Task<(byte[] Data, DownloadStatus DownloadStatus)> DownloadDataAsync(string url,
+    public async Task<(byte[] Data, DownloadStatus DownloadStatus)> DownloadDataAsync(
+        [StringSyntax(syntax: "Uri")] string url,
         AutoRetriesPolicy? autoRetries = null,
         Action<DownloadStatus>? onDownloadStatusChanged = null,
         Action<DownloadStatus>? onDownloadCompleted = null,
@@ -39,7 +40,8 @@ public class DownloaderService(IHttpClientFactory httpClientFactory) : IDownload
     /// <summary>
     ///     Downloads a file from a given url and then returns it as a text.
     /// </summary>
-    public async Task<(string Data, DownloadStatus DownloadStatus)> DownloadPageAsync(string url,
+    public async Task<(string Data, DownloadStatus DownloadStatus)> DownloadPageAsync(
+        [StringSyntax(syntax: "Uri")] string url,
         AutoRetriesPolicy? autoRetries = null,
         Action<DownloadStatus>? onDownloadStatusChanged = null,
         Action<DownloadStatus>? onDownloadCompleted = null,
