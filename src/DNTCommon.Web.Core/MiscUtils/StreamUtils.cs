@@ -373,4 +373,80 @@ public static class StreamUtils
     ///     Span of T is in use.
     /// </summary>
     public static Span<T> ToSpan<T>(this List<T>? values) => values is null ? [] : CollectionsMarshal.AsSpan(values);
+
+    public static async Task<IList<string>> SplitFileToMultiplePartsAsync(this string? inputFilePath,
+        string? outputDir,
+        Func<int, string> partFileName,
+        long maxPartSizeInBytes,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(partFileName);
+
+        var outputFiles = new List<string>();
+
+        inputFilePath = inputFilePath.NormalizePath();
+
+        if (!inputFilePath.FileExists())
+        {
+            throw new InvalidOperationException($"Input file: `{inputFilePath}` doesn't exist.");
+        }
+
+        outputDir = outputDir.NormalizePath();
+
+        if (outputDir.IsEmpty())
+        {
+            throw new InvalidOperationException(message: "Output dir is not set");
+        }
+
+        outputDir.TryCreateDirectory();
+
+        var totalParts = (int)Math.Ceiling((double)new FileInfo(inputFilePath).Length / maxPartSizeInBytes);
+
+        await using var sourceStream = File.OpenRead(inputFilePath);
+
+        for (var i = 0; i < totalParts; i++)
+        {
+            var partNumber = i + 1;
+
+            var outputPartFilePath = outputDir.SafePathCombine(partFileName(partNumber));
+
+            if (outputPartFilePath.IsEmpty())
+            {
+                throw new InvalidOperationException(message: "Output dir is not set");
+            }
+
+            await using var outputFileStream =
+                outputPartFilePath.CreateAsyncFileStream(FileMode.Create, FileAccess.Write);
+
+            outputFiles.Add(outputPartFilePath);
+
+            long bytesCopied = 0;
+            var bytesToCopy = maxPartSizeInBytes;
+
+            var memoryBuffer = new byte[MaxBufferSize];
+
+            while (bytesToCopy > 0)
+            {
+                var availableBytes = (int)Math.Min(memoryBuffer.Length, bytesToCopy);
+
+                var bytesRead = await sourceStream.ReadAsync(memoryBuffer.AsMemory(start: 0, availableBytes),
+                    cancellationToken);
+
+                if (bytesRead == 0)
+                {
+                    break;
+                }
+
+                await outputFileStream.WriteAsync(memoryBuffer.AsMemory(start: 0, bytesRead), cancellationToken);
+
+                bytesCopied += bytesRead;
+                bytesToCopy -= bytesRead;
+            }
+
+            outputFileStream.Close();
+            sourceStream.Seek(sourceStream.Position - bytesCopied, SeekOrigin.Current);
+        }
+
+        return outputFiles;
+    }
 }
