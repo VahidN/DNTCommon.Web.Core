@@ -221,6 +221,11 @@ public class WebMailService(
 
         var path = smtpConfig.PickupFolder.SafePathCombine($"email-{Guid.NewGuid():N}.eml");
 
+        if (path.IsEmpty())
+        {
+            throw new InvalidOperationException(message: "`PickupFolder` is null or empty.");
+        }
+
         await using var stream = path.CreateAsyncFileStream(FileMode.CreateNew, FileAccess.Write);
 
         using var emailMessage = GetEmailMessage(email.ToName, email.ToAddress, subject, message, attachmentFiles,

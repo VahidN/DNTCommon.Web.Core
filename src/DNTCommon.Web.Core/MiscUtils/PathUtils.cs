@@ -23,15 +23,26 @@ public static class PathUtils
     /// <param name="filePath"></param>
     /// <returns></returns>
     public static string? GetFormattedFileSize(this string? filePath)
-        => filePath.FileExists() ? new FileInfo(filePath).Length.ToFormattedFileSize() : null;
+    {
+        filePath = filePath.NormalizePath();
+
+        return filePath.FileExists() ? new FileInfo(filePath).Length.ToFormattedFileSize() : null;
+    }
 
     /// <summary>
     ///     Computes the hash value for the specified Stream object.
     /// </summary>
     /// <param name="filePath"></param>
     /// <returns>A string representation that is encoded with uppercase hex characters</returns>
-    public static string GetContentsSHA256(this string filePath)
+    public static string? GetContentsSHA256([NotNullIfNotNull(nameof(filePath))] this string? filePath)
     {
+        filePath = filePath.NormalizePath();
+
+        if (!filePath.FileExists())
+        {
+            return null;
+        }
+
         using var sha256 = SHA256.Create();
 
         return filePath.GetContentsHash(sha256);
@@ -43,9 +54,17 @@ public static class PathUtils
     /// <param name="filePath"></param>
     /// <param name="hashAlgorithm">Such as `using var sha256 = SHA256.Create();`</param>
     /// <returns>A string representation that is encoded with uppercase hex characters</returns>
-    public static string GetContentsHash(this string filePath, HashAlgorithm hashAlgorithm)
+    public static string? GetContentsHash([NotNullIfNotNull(nameof(filePath))] this string? filePath,
+        HashAlgorithm hashAlgorithm)
     {
         ArgumentNullException.ThrowIfNull(hashAlgorithm);
+
+        filePath = filePath.NormalizePath();
+
+        if (!filePath.FileExists())
+        {
+            return null;
+        }
 
         using var stream = File.OpenRead(filePath);
         var checksum = hashAlgorithm.ComputeHash(stream);
@@ -58,8 +77,15 @@ public static class PathUtils
     /// </summary>
     /// <param name="filePath"></param>
     /// <returns>A string representation that is encoded with uppercase hex characters</returns>
-    public static string GetContentsSHA1(this string filePath)
+    public static string? GetContentsSHA1([NotNullIfNotNull(nameof(filePath))] this string? filePath)
     {
+        filePath = filePath.NormalizePath();
+
+        if (!filePath.FileExists())
+        {
+            return null;
+        }
+
         using var sha1 = SHA1.Create();
 
         return filePath.GetContentsHash(sha1);
@@ -70,7 +96,22 @@ public static class PathUtils
     /// </summary>
     /// <param name="filePath"></param>
     public static bool FileExists([NotNullWhen(returnValue: true)] this string? filePath)
-        => !filePath.IsEmpty() && File.Exists(filePath);
+    {
+        filePath = filePath.NormalizePath();
+
+        return !filePath.IsEmpty() && File.Exists(filePath);
+    }
+
+    /// <summary>
+    ///     Determines whether the specified dir exists.
+    /// </summary>
+    /// <param name="dirPath"></param>
+    public static bool DirectoryExists([NotNullWhen(returnValue: true)] this string? dirPath)
+    {
+        dirPath = dirPath.NormalizePath();
+
+        return !dirPath.IsEmpty() && Directory.Exists(dirPath);
+    }
 
     /// <summary>
     ///     Tries to delete a file without throwing an exception
@@ -81,6 +122,8 @@ public static class PathUtils
     {
         try
         {
+            filePath = filePath.NormalizePath();
+
             if (!filePath.IsEmpty() && File.Exists(filePath))
             {
                 File.Delete(filePath);
@@ -91,6 +134,32 @@ public static class PathUtils
         catch (Exception ex)
         {
             logger?.LogError(ex.Demystify(), message: "Failed to delete `{Path}` file.", filePath);
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    ///     Tries to delete a dir without throwing an exception
+    /// </summary>
+    /// <param name="dirPath"></param>
+    /// <param name="logger"></param>
+    public static bool TryDeleteDirectory(this string? dirPath, ILogger? logger = null)
+    {
+        try
+        {
+            dirPath = dirPath.NormalizePath();
+
+            if (!dirPath.IsEmpty() && Directory.Exists(dirPath))
+            {
+                Directory.Delete(dirPath, recursive: true);
+
+                return true;
+            }
+        }
+        catch (Exception ex)
+        {
+            logger?.LogError(ex.Demystify(), message: "Failed to delete `{Path}` dir.", dirPath);
         }
 
         return false;
@@ -132,8 +201,12 @@ public static class PathUtils
     /// <param name="path"></param>
     /// <param name="searchOption"></param>
     /// <param name="extensions"></param>
-    public static void DeleteFiles(this string path, SearchOption searchOption, params string[] extensions)
+    public static void DeleteFiles(this string? path, SearchOption searchOption, params string[] extensions)
     {
+        path = path.NormalizePath();
+
+        if (!path.DirectoryExists()) { return; }
+
         foreach (var file in new DirectoryInfo(path).GetFilesByExtensions(searchOption, extensions))
         {
             file.Delete();
@@ -145,8 +218,15 @@ public static class PathUtils
     ///     so that its size is zero bytes.
     /// </summary>
     /// <param name="filePath"></param>
-    public static void CleanFileContent(string filePath)
+    public static void CleanFileContent(this string? filePath)
     {
+        filePath = filePath.NormalizePath();
+
+        if (!filePath.FileExists())
+        {
+            return;
+        }
+
         using var fs = new FileStream(filePath, FileMode.Truncate, FileAccess.ReadWrite);
         fs.Close();
     }
@@ -154,11 +234,11 @@ public static class PathUtils
     /// <summary>
     ///     Removes InvalidFileNameChars and InvalidPathChars from the given input
     /// </summary>
-    public static string RemoveIllegalCharactersFromFileName(this string fileName,
+    public static string RemoveIllegalCharactersFromFileName(this string? fileName,
         string replacement = ".",
         bool applySlugCleanup = true)
     {
-        if (string.IsNullOrWhiteSpace(fileName))
+        if (fileName.IsEmpty())
         {
             return string.Empty;
         }
@@ -176,7 +256,7 @@ public static class PathUtils
     /// <summary>
     ///     Creates a temporary file path with the given extension and returns its full path.
     /// </summary>
-    public static string GetTempFilePath(this string? extension)
+    public static string? GetTempFilePath(this string? extension)
     {
         var path = Path.GetTempPath();
         var ext = extension.IsEmpty() ? ".tmp" : $".{extension.TrimStart(trimChar: '.')}";
@@ -188,9 +268,15 @@ public static class PathUtils
     /// <summary>
     ///     Creates a temporary file with the given extension and returns its full path.
     /// </summary>
-    public static string CreateTempFile(this string extension, byte[] contentBytes)
+    public static string? CreateTempFile(this string extension, byte[] contentBytes)
     {
         var tempFilePath = extension.GetTempFilePath();
+
+        if (tempFilePath.IsEmpty())
+        {
+            return null;
+        }
+
         File.WriteAllBytes(tempFilePath, contentBytes);
 
         return tempFilePath;
@@ -199,9 +285,15 @@ public static class PathUtils
     /// <summary>
     ///     Creates a temporary file with the given extension and returns its full path.
     /// </summary>
-    public static string CreateTempFile(this string extension, string content)
+    public static string? CreateTempFile(this string extension, string content)
     {
         var tempFilePath = extension.GetTempFilePath();
+
+        if (tempFilePath.IsEmpty())
+        {
+            return null;
+        }
+
         File.WriteAllText(tempFilePath, content);
 
         return tempFilePath;
@@ -213,10 +305,17 @@ public static class PathUtils
     /// <param name="filePath">The file to open</param>
     /// <param name="logger"></param>
     /// <returns></returns>
-    public static bool IsReadableFile(this string filePath, ILogger? logger = null)
+    public static bool IsReadableFile([NotNullWhen(returnValue: true)] this string? filePath, ILogger? logger = null)
     {
         try
         {
+            filePath = filePath.NormalizePath();
+
+            if (!filePath.FileExists())
+            {
+                return false;
+            }
+
             using var _ = File.Open(filePath, FileMode.Append, FileAccess.Read);
 
             return true;
@@ -235,10 +334,17 @@ public static class PathUtils
     /// <param name="filePath">The file to open</param>
     /// <param name="logger"></param>
     /// <returns></returns>
-    public static bool IsWritableFile(this string filePath, ILogger? logger = null)
+    public static bool IsWritableFile([NotNullWhen(returnValue: true)] this string? filePath, ILogger? logger = null)
     {
         try
         {
+            filePath = filePath.NormalizePath();
+
+            if (!filePath.FileExists())
+            {
+                return false;
+            }
+
             using var _ = File.Open(filePath, FileMode.Append, FileAccess.Write);
 
             return true;
@@ -257,14 +363,23 @@ public static class PathUtils
     /// <param name="filePath"></param>
     /// <returns></returns>
     public static string? GetExtension([NotNullIfNotNull(nameof(filePath))] this string? filePath)
-        => Path.GetExtension(filePath);
+    {
+        filePath = filePath.NormalizePath();
+
+        return Path.GetExtension(filePath);
+    }
 
     /// <summary>
     ///     Returns the file name and extension of the specified path string.
     /// </summary>
     /// <param name="filePath"></param>
     /// <returns></returns>
-    public static string GetFileName(this string filePath) => Path.GetFileName(filePath);
+    public static string? GetFileName([NotNullIfNotNull(nameof(filePath))] this string? filePath)
+    {
+        filePath = filePath.NormalizePath();
+
+        return Path.GetFileName(filePath);
+    }
 
     /// <summary>
     ///     Returns the directory information for the specified path.
@@ -274,19 +389,32 @@ public static class PathUtils
     ///     Directory information for path, or null if path denotes a root directory or is null. Returns Empty if path
     ///     does not contain directory information.
     /// </returns>
-    public static string? GetDirectoryName(this string dirPath) => Path.GetDirectoryName(dirPath);
+    public static string? GetDirectoryName(this string? dirPath)
+    {
+        dirPath = dirPath.NormalizePath();
+
+        return Path.GetDirectoryName(dirPath);
+    }
 
     /// <summary>
     ///     Initializes a new instance of the DirectoryInfo class on the specified path.
     /// </summary>
     public static DirectoryInfo? ToDirectoryInfo([NotNullIfNotNull(nameof(dirPath))] this string? dirPath)
-        => dirPath.IsEmpty() ? null : new DirectoryInfo(dirPath);
+    {
+        dirPath = dirPath.NormalizePath();
+
+        return dirPath.IsEmpty() ? null : new DirectoryInfo(dirPath);
+    }
 
     /// <summary>
     ///     Initializes a new instance of the FileInfo class, which acts as a wrapper for a file path.
     /// </summary>
     public static FileInfo? ToFileInfo([NotNullIfNotNull(nameof(fileName))] this string? fileName)
-        => fileName.IsEmpty() ? null : new FileInfo(fileName);
+    {
+        fileName = fileName.NormalizePath();
+
+        return fileName.IsEmpty() ? null : new FileInfo(fileName);
+    }
 
     /// <summary>
     ///     Copies an existing dir to a new dir. Creates the destDirPath if it doesn't exist.
@@ -296,11 +424,18 @@ public static class PathUtils
     /// <param name="copySubDirectories"></param>
     /// <param name="forceOverWrite"></param>
     /// <returns></returns>
-    public static bool CopyDirectory(this string sourceDirPath,
-        string destDirPath,
+    public static bool CopyDirectory(this string? sourceDirPath,
+        string? destDirPath,
         bool copySubDirectories = true,
         bool forceOverWrite = true)
     {
+        sourceDirPath = sourceDirPath.NormalizePath();
+
+        if (sourceDirPath.IsEmpty())
+        {
+            return false;
+        }
+
         var sourceDirInfo = new DirectoryInfo(sourceDirPath);
 
         if (!sourceDirInfo.Exists)
@@ -310,13 +445,19 @@ public static class PathUtils
 
         var sourceDirs = sourceDirInfo.GetDirectories();
 
-        destDirPath.CreateSafeDir();
+        destDirPath = destDirPath.CreateSafeDir();
 
         var sourceFiles = sourceDirInfo.GetFiles();
 
         foreach (var sourceFile in sourceFiles)
         {
             var newDir = destDirPath.SafePathCombine(sourceFile.Name);
+
+            if (newDir.IsEmpty())
+            {
+                continue;
+            }
+
             sourceFile.CopyTo(newDir, forceOverWrite);
         }
 
@@ -325,6 +466,11 @@ public static class PathUtils
             foreach (var sourceDir in sourceDirs)
             {
                 var newDir = destDirPath.SafePathCombine(sourceDir.Name);
+
+                if (newDir.IsEmpty())
+                {
+                    continue;
+                }
 
                 if (!sourceDir.FullName.CopyDirectory(newDir, copySubDirectories, forceOverWrite))
                 {
@@ -351,9 +497,11 @@ public static class PathUtils
     /// <param name="searchPattern"></param>
     /// <param name="includeSubDirectories"></param>
     /// <returns></returns>
-    public static long GetDirectorySize(this string path, string searchPattern, bool includeSubDirectories)
+    public static long GetDirectorySize(this string? path, string searchPattern, bool includeSubDirectories)
     {
-        if (!Directory.Exists(path))
+        path = path.NormalizePath();
+
+        if (!path.DirectoryExists())
         {
             return 0;
         }
@@ -372,13 +520,27 @@ public static class PathUtils
     /// <param name="forceOverWrite"></param>
     /// <param name="logger"></param>
     /// <returns></returns>
-    public static bool TryCopyFileTo(this string sourceFilePath,
-        string destFilePath,
+    public static bool TryCopyFileTo(this string? sourceFilePath,
+        string? destFilePath,
         bool forceOverWrite,
         ILogger? logger = null)
     {
         try
         {
+            sourceFilePath = sourceFilePath.NormalizePath();
+
+            if (!sourceFilePath.FileExists())
+            {
+                return false;
+            }
+
+            destFilePath = destFilePath.NormalizePath();
+
+            if (destFilePath.IsEmpty())
+            {
+                return false;
+            }
+
             File.Copy(sourceFilePath, destFilePath, forceOverWrite);
 
             return true;
@@ -401,13 +563,21 @@ public static class PathUtils
     {
         try
         {
-            if (dirPath.IsEmpty())
+            dirPath = dirPath.NormalizePath();
+
+            if (!dirPath.DirectoryExists())
             {
                 return false;
             }
 
-            using var _ = File.Create(dirPath.SafePathCombine(Path.GetRandomFileName()), bufferSize: 1,
-                FileOptions.DeleteOnClose);
+            var path = dirPath.SafePathCombine(Path.GetRandomFileName());
+
+            if (path.IsEmpty())
+            {
+                return false;
+            }
+
+            using var _ = File.Create(path, bufferSize: 1, FileOptions.DeleteOnClose);
 
             return true;
         }
@@ -436,8 +606,8 @@ public static class PathUtils
     /// </summary>
     /// <param name="path"></param>
     /// <returns></returns>
-    public static string? NormalizePath(this string? path)
-        => string.IsNullOrEmpty(path)
+    public static string? NormalizePath([NotNullIfNotNull(nameof(path))] this string? path)
+        => path.IsEmpty()
             ? path
             : Path.DirectorySeparatorChar switch
             {
@@ -454,8 +624,10 @@ public static class PathUtils
     /// </summary>
     /// <param name="dirPath">the full path of the directory.</param>
     /// <returns>the full path of the directory.</returns>
-    public static string? CreateSafeDir(this string? dirPath)
+    public static string? CreateSafeDir([NotNullIfNotNull(nameof(dirPath))] this string? dirPath)
     {
+        dirPath = dirPath.NormalizePath();
+
         if (dirPath.IsEmpty())
         {
             return null;
@@ -483,11 +655,20 @@ public static class PathUtils
     ///     Asynchronously creates a new file, writes the specified string to the file using the specified encoding, and then
     ///     closes the file. If the target file already exists, it is truncated and overwritten.
     /// </summary>
-    public static Task CreateTextFileAsync(this string path,
+    public static Task CreateTextFileAsync(this string? path,
         string content,
         Encoding? encoding = null,
         CancellationToken cancellationToken = default)
-        => File.WriteAllTextAsync(path, content, encoding ?? Encoding.UTF8, cancellationToken);
+    {
+        path = path.NormalizePath();
+
+        if (path.IsEmpty())
+        {
+            return Task.FromException(new ArgumentNullException(nameof(path)));
+        }
+
+        return File.WriteAllTextAsync(path, content, encoding ?? Encoding.UTF8, cancellationToken);
+    }
 
     /// <summary>
     ///     Asynchronously opens a text file, reads all text in the file with the specified encoding, and then closes the file.
@@ -585,8 +766,15 @@ public static class PathUtils
     /// <summary>
     ///     Get text files from a directory (optionally recursively).
     /// </summary>
-    public static IEnumerable<string> FindTextFiles(this string dir, bool recursive = false)
+    public static IEnumerable<string> FindTextFiles(this string? dir, bool recursive = false)
     {
+        dir = dir.NormalizePath();
+
+        if (!dir.DirectoryExists())
+        {
+            yield break;
+        }
+
         var files = Directory.EnumerateFiles(dir, searchPattern: "*.*",
             recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
 
@@ -606,9 +794,16 @@ public static class PathUtils
     /// <param name="rootDir"></param>
     /// <param name="subDirs"></param>
     /// <returns></returns>
-    public static string SafePathCombine(this string rootDir, params string[] subDirs)
+    public static string? SafePathCombine([NotNullIfNotNull(nameof(rootDir))] this string? rootDir,
+        params string[] subDirs)
     {
-        ArgumentNullException.ThrowIfNull(rootDir);
+        rootDir = rootDir.NormalizePath();
+
+        if (rootDir.IsEmpty())
+        {
+            return null;
+        }
+
         var fullRoot = Path.GetFullPath(rootDir).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
         return Path.GetFullPath(Path.Join([fullRoot, ..subDirs.Select(fullRoot.GetSanitizedRelativePath)]));
@@ -621,13 +816,18 @@ public static class PathUtils
     /// <param name="subDir"></param>
     /// <returns></returns>
     /// <exception cref="UnauthorizedAccessException"></exception>
-    public static string GetSanitizedRelativePath(this string rootDir, string? subDir)
+    public static string? GetSanitizedRelativePath(this string? rootDir, string? subDir)
     {
-        ArgumentNullException.ThrowIfNull(rootDir);
+        rootDir = rootDir.NormalizePath();
 
-        if (string.IsNullOrWhiteSpace(subDir))
+        if (rootDir.IsEmpty())
         {
-            return string.Empty;
+            return null;
+        }
+
+        if (subDir.IsEmpty())
+        {
+            return null;
         }
 
         // Reject Absolute Inputs: Block attempts like "C:\Windows\System32"

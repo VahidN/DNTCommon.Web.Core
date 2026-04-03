@@ -344,7 +344,7 @@ public static class HttpClientExtensions
     /// </summary>
     public static async Task DownloadFileAsync(this HttpClient httpClient,
         [StringSyntax(syntax: "Uri")] string url,
-        string outputFileNamePath,
+        string? outputFileNamePath,
         bool allowOverwrite,
         bool ensureSuccess = true,
         Action<string>? logger = null,
@@ -368,6 +368,11 @@ public static class HttpClientExtensions
                              response.Content?.Headers?.ContentLength ?? 0;
 
         logger?.Invoke($"File Size: {remoteFileSize.ToFormattedFileSize()}");
+
+        if (outputFileNamePath.IsEmpty())
+        {
+            throw new InvalidOperationException(message: "Save path is unknown.");
+        }
 
         var outputFileInfo = new FileInfo(outputFileNamePath);
 
@@ -412,13 +417,18 @@ public static class HttpClientExtensions
     /// </summary>
     public static void DownloadFile(this HttpClient httpClient,
         [StringSyntax(syntax: "Uri")] string url,
-        string outputFileNamePath,
+        string? outputFileNamePath,
         bool allowOverwrite,
         bool ensureSuccess = true,
         Action<string>? logger = null,
         Action<HttpRequestMessage>? configRequest = null)
     {
         ArgumentNullException.ThrowIfNull(httpClient);
+
+        if (outputFileNamePath.IsEmpty())
+        {
+            throw new InvalidOperationException(message: "Output path is not set.");
+        }
 
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
         configRequest?.Invoke(request);
@@ -472,14 +482,24 @@ public static class HttpClientExtensions
         SaveToFile(outputFileNamePath, logger, response, remoteFileSize, tempFilePath);
     }
 
-    private static async Task SaveToFileAsync(string outputFileNamePath,
+    private static async Task SaveToFileAsync(string? outputFileNamePath,
         Action<string>? logger,
         HttpResponseMessage response,
         long remoteFileSize,
-        string tempFilePath,
+        string? tempFilePath,
         CancellationToken cancellationToken)
     {
         const int MaxBufferSize = 0x10000;
+
+        if (outputFileNamePath.IsEmpty())
+        {
+            throw new InvalidOperationException(message: "Output path is not set.");
+        }
+
+        if (tempFilePath.IsEmpty())
+        {
+            throw new InvalidOperationException(message: "Output temp-file path is not set.");
+        }
 
         await using (var inputStream = await response.Content.ReadAsStreamAsync(cancellationToken))
         {
@@ -516,12 +536,22 @@ public static class HttpClientExtensions
         File.Move(tempFilePath, outputFileNamePath);
     }
 
-    private static void SaveToFile(string outputFileNamePath,
+    private static void SaveToFile(string? outputFileNamePath,
         Action<string>? logger,
         HttpResponseMessage response,
         long remoteFileSize,
-        string tempFilePath)
+        string? tempFilePath)
     {
+        if (outputFileNamePath.IsEmpty())
+        {
+            throw new InvalidOperationException(message: "Output path is not set.");
+        }
+
+        if (tempFilePath.IsEmpty())
+        {
+            throw new InvalidOperationException(message: "Output temp-file path is not set.");
+        }
+
         const int MaxBufferSize = 0x10000;
 
         using (var inputStream = response.Content.ReadAsStream())

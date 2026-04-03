@@ -14,11 +14,21 @@ public static class ChromeFinder
             // c:\Program Files\Google\Chrome\Application\
             const string subDirectory = "Google\\Chrome\\Application";
 
-            directories.Add(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)
-                .SafePathCombine(subDirectory));
+            var programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)
+                .SafePathCombine(subDirectory);
 
-            directories.Add(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86)
-                .SafePathCombine(subDirectory));
+            if (!programFiles.IsEmpty())
+            {
+                directories.Add(programFiles);
+            }
+
+            var programFilesX86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86)
+                .SafePathCombine(subDirectory);
+
+            if (!programFilesX86.IsEmpty())
+            {
+                directories.Add(programFilesX86);
+            }
         }
         else if (OperatingSystem.IsLinux())
         {

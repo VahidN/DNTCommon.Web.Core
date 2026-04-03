@@ -24,16 +24,16 @@ public static class UploadFileServiceExtensions
     /// <param name="fileName">The posted file.</param>
     /// <param name="uploadsRootFolder">The absolute path of the upload folder.</param>
     /// <returns></returns>
-    public static string GetUniqueFilePath(this string? fileName, string uploadsRootFolder)
+    public static string? GetUniqueFilePath(this string? fileName, string? uploadsRootFolder)
     {
         if (fileName is null)
         {
-            return string.Empty;
+            return null;
         }
 
         var filePath = uploadsRootFolder.SafePathCombine(fileName);
 
-        if (!File.Exists(filePath))
+        if (!filePath.FileExists())
         {
             return filePath;
         }
@@ -141,7 +141,7 @@ public static class UploadFileServiceExtensions
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns></returns>
     public static async Task<(bool IsSaved, string SavedFilePath)> SavePostedFileAsync(this IFormFile? formFile,
-        string uploadsRootFolder,
+        string? uploadsRootFolder,
         bool allowOverwrite,
         CancellationToken cancellationToken = default)
     {
@@ -150,13 +150,18 @@ public static class UploadFileServiceExtensions
             return (false, string.Empty);
         }
 
-        uploadsRootFolder.CreateSafeDir();
+        uploadsRootFolder = uploadsRootFolder.CreateSafeDir();
 
         var filePath = uploadsRootFolder.SafePathCombine(formFile.FileName);
 
-        if (File.Exists(filePath) && !allowOverwrite)
+        if (filePath.IsEmpty())
         {
-            filePath = GetUniqueFilePath(formFile.FileName, uploadsRootFolder) ??
+            throw new InvalidOperationException(message: "uploadsRootFolder is null");
+        }
+
+        if (filePath.FileExists() && !allowOverwrite)
+        {
+            filePath = formFile.FileName.GetUniqueFilePath(uploadsRootFolder) ??
                        throw new InvalidOperationException(message: "Posted file is null");
         }
 

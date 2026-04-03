@@ -87,7 +87,7 @@ public static class ZipArchiveExtensions
     {
         ArgumentNullException.ThrowIfNull(zipEntry);
 
-        CopyToZipEntryStream(zipEntry, Encoding.UTF8.GetBytes(data));
+        zipEntry.CopyToZipEntryStream(Encoding.UTF8.GetBytes(data));
     }
 
     /// <summary>
@@ -293,6 +293,11 @@ public static class ZipArchiveExtensions
         foreach (var entry in archive.Entries.Where(archiveEntry => predicate(archiveEntry)))
         {
             var destinationPath = extractPath.SafePathCombine(entry.FullName);
+
+            if (destinationPath.IsEmpty())
+            {
+                continue;
+            }
 
             if (destinationPath.StartsWith(extractPath, StringComparison.Ordinal))
             {

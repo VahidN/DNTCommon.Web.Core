@@ -54,7 +54,7 @@ public class UploadFileService(IWebHostEnvironment environment) : IUploadFileSer
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     public Task<(bool IsSaved, string SavedFilePath)> SavePostedFileAsync(IFormFile? formFile,
-        string uploadsRootFolder,
+        string? uploadsRootFolder,
         bool allowOverwrite,
         CancellationToken cancellationToken = default)
         => formFile.SavePostedFileAsync(uploadsRootFolder, allowOverwrite, cancellationToken);
@@ -73,6 +73,6 @@ public class UploadFileService(IWebHostEnvironment environment) : IUploadFileSer
     /// <param name="formFile">The posted file.</param>
     /// <param name="uploadsRootFolder">The absolute path of the upload folder.</param>
     /// <returns></returns>
-    public string? GetUniqueFilePath(IFormFile? formFile, string uploadsRootFolder)
+    public string? GetUniqueFilePath(IFormFile? formFile, string? uploadsRootFolder)
         => formFile?.FileName.GetUniqueFilePath(uploadsRootFolder);
 }

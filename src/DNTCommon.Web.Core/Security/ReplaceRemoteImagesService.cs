@@ -91,7 +91,12 @@ public class ReplaceRemoteImagesService(
         var fileName = imageUrl.GetSha1Hash() + ext;
         var filePath = options.OutputImageFolder.SafePathCombine(fileName);
 
-        if (File.Exists(filePath))
+        if (filePath.IsEmpty())
+        {
+            throw new InvalidOperationException(message: "OutputImageFolder is null.");
+        }
+
+        if (filePath.FileExists())
         {
             return fileName;
         }
@@ -126,7 +131,12 @@ public class ReplaceRemoteImagesService(
         var fileName = $"{imageData.GetSha1Hash()}.jpg";
         var filePath = options.OutputImageFolder.SafePathCombine(fileName);
 
-        if (File.Exists(filePath))
+        if (filePath.IsEmpty())
+        {
+            throw new InvalidOperationException(message: "OutputImageFolder is null.");
+        }
+
+        if (filePath.FileExists())
         {
             return fileName;
         }
