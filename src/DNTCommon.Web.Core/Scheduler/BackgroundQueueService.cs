@@ -56,6 +56,21 @@ public class BackgroundQueueService(IServiceProvider serviceProvider) : Backgrou
     }
 
     /// <summary>
+    ///     Attempts to queue a background Task
+    /// </summary>
+    public bool TryQueueBackgroundWorkItem(string group, Func<CancellationToken, IServiceProvider, Task>? workItem)
+    {
+        if (workItem is null)
+        {
+            return false;
+        }
+
+        var channel = _asyncTasksChannels.LockedGetOrAdd(group, _ => CreateAsyncTasksQueue());
+
+        return channel.Writer.TryWrite(workItem);
+    }
+
+    /// <summary>
     ///     Queues a background Task
     /// </summary>
     public ValueTask QueueBackgroundWorkItemAsync(string group,
@@ -79,6 +94,21 @@ public class BackgroundQueueService(IServiceProvider serviceProvider) : Backgrou
     {
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    ///     Attempts to queue a background Task
+    /// </summary>
+    public bool TryQueueBackgroundWorkItem(string group, Action<CancellationToken, IServiceProvider>? workItem)
+    {
+        if (workItem is null)
+        {
+            return false;
+        }
+
+        var channel = _syncTasksChannels.LockedGetOrAdd(group, _ => CreateSyncTasksQueue());
+
+        return channel.Writer.TryWrite(workItem);
     }
 
     /// <summary>
