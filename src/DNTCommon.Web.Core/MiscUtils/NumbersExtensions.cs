@@ -1,4 +1,5 @@
 using System.Numerics;
+using DNTPersianUtils.Core;
 
 namespace DNTCommon.Web.Core;
 
@@ -295,6 +296,35 @@ public static class NumbersExtensions
     public static int CountDigits<T>(this T number)
         where T : INumber<T>
         => number.IsZero() ? 1 : (int)Math.Floor(Math.Log10(double.CreateChecked(T.Abs(number))) + 1);
+
+    /// <summary>
+    ///     Returns a new string that right-aligns the characters in this instance by padding them on the left with a specified
+    ///     Unicode character, for a specified total length.
+    /// </summary>
+    /// <param name="number"></param>
+    /// <param name="totalWidth">
+    ///     The number of characters in the resulting string, equal to the number of original characters
+    ///     plus any additional padding characters.
+    /// </param>
+    /// <param name="paddingChar">A Unicode padding character.</param>
+    /// <param name="convertToPersianNumbers"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns>
+    ///     A new string that is equivalent to this instance, but right-aligned and padded on the left with as many paddingChar
+    ///     characters as needed to create a length of totalWidth. However, if totalWidth is less than the length of this
+    ///     instance, the method returns a reference to the existing instance. If totalWidth is equal to the length of this
+    ///     instance, the method returns a new string that is identical to this instance.
+    /// </returns>
+    public static string ToStringPadLeft<T>(this T number,
+        int totalWidth,
+        char paddingChar = '0',
+        bool convertToPersianNumbers = false)
+        where T : INumber<T>
+    {
+        var result = string.Create(CultureInfo.InvariantCulture, $"{number}").PadLeft(totalWidth, paddingChar);
+
+        return convertToPersianNumbers ? result.ToPersianNumbers() : result;
+    }
 
 #endif
 }
