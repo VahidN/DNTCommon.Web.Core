@@ -291,5 +291,10 @@ public static class NumbersExtensions
 
         return (newValue - oldValue) / T.Abs(oldValue) * one100;
     }
+
+    public static int CountDigits<T>(this T number)
+        where T : INumber<T>
+        => number.IsZero() ? 1 : (int)Math.Floor(Math.Log10(double.CreateChecked(T.Abs(number))) + 1);
+
 #endif
 }

@@ -22,6 +22,13 @@ public static class ComparisonsUtils
         => value.IsApproximately(other, T.CreateChecked(value: 1e-6));
 
     /// <summary>
+    ///     Determines if a value is zero.
+    /// </summary>
+    public static bool IsZero<T>(this T value)
+        where T : INumber<T>
+        => T.IsZero(value);
+
+    /// <summary>
     ///     Asserts that the <paramref name="value" /> numeric value is positive (greater than zero).
     /// </summary>
     public static bool IsPositive<T>(this T value)
