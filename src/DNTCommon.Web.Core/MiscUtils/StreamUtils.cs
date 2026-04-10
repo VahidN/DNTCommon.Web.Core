@@ -376,7 +376,7 @@ public static class StreamUtils
 
     public static async Task<IList<string>> SplitFileToMultiplePartsAsync(this string? inputFilePath,
         string? outputDir,
-        Func<int, string> partFileName,
+        Func<(int PartNumber, int TotalParts), string> partFileName,
         long maxPartSizeInBytes,
         CancellationToken cancellationToken)
     {
@@ -408,7 +408,7 @@ public static class StreamUtils
         {
             var partNumber = i + 1;
 
-            var outputPartFilePath = outputDir.SafePathCombine(partFileName(partNumber));
+            var outputPartFilePath = outputDir.SafePathCombine(partFileName((partNumber, totalParts)));
 
             if (outputPartFilePath.IsEmpty())
             {
