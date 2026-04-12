@@ -71,6 +71,47 @@ public static class HtmlHelperServiceExtensions
     }
 
     /// <summary>
+    ///     urlBuilder delegate gives you an anchor's href, and then you can return its new url.
+    /// </summary>
+    public static string ReplaceAnchorUrlsWithNewUrls(this string html,
+        Func<string, string?> urlBuilder,
+        ILogger? logger = null)
+    {
+        ArgumentNullException.ThrowIfNull(html);
+        ArgumentNullException.ThrowIfNull(urlBuilder);
+
+        var htmlDocument = html.CreateHtmlDocument(logger);
+        var nodes = htmlDocument.DocumentNode.SelectNodes(xpath: "//a[@href]");
+
+        if (nodes is null)
+        {
+            return html;
+        }
+
+        foreach (var node in nodes)
+        {
+            var hrefAttribute = node.GetHrefAttribute();
+            var value = hrefAttribute?.Value?.Trim();
+
+            if (hrefAttribute is null || value.IsEmpty())
+            {
+                continue;
+            }
+
+            var newUrl = urlBuilder(value);
+
+            if (newUrl is null)
+            {
+                continue;
+            }
+
+            hrefAttribute.Value = newUrl;
+        }
+
+        return htmlDocument.DocumentNode.OuterHtml;
+    }
+
+    /// <summary>
     ///     imageBuilder delegate gives you an image's src, and then you can return its equivalent data bytes to be inserted as
     ///     an embedded data:image
     /// </summary>
@@ -189,6 +230,12 @@ public static class HtmlHelperServiceExtensions
     /// </summary>
     public static HtmlAttribute? GetSrcAttribute(this HtmlNode? node)
         => node?.Attributes.FirstOrDefault(attr => attr.Name.Equals(value: "src", StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>
+    ///     Returns the href value of an HTML element
+    /// </summary>
+    public static HtmlAttribute? GetHrefAttribute(this HtmlNode? node)
+        => node?.Attributes.FirstOrDefault(attr => attr.Name.Equals(value: "href", StringComparison.OrdinalIgnoreCase));
 
     /// <summary>
     ///     Is Base64 encoded image?
