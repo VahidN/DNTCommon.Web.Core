@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>DNTCommon.Web.Core provides common scenarios' solutions for ASP.NET Core applications.</Description>
-    <VersionPrefix>13.3.0</VersionPrefix>
+    <VersionPrefix>13.4.0</VersionPrefix>
     <Authors>Vahid Nasiri</Authors>
     <TargetFrameworks>net10.0;net9.0;net8.0;net7.0;net6.0;</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -94,7 +94,7 @@
     <PackageReference Include="Roslynator.Analyzers" Version="4.15.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>	
+    </PackageReference>
     <PackageReference Include="CancelCop.Analyzer" Version="1.1.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -102,7 +102,7 @@
     <PackageReference Include="DependencyInjection.Lifetime.Analyzers" Version="2.1.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>	
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App"/>

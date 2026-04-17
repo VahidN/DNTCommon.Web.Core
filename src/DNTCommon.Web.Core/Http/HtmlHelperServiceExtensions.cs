@@ -37,37 +37,53 @@ public static class HtmlHelperServiceExtensions
         ArgumentNullException.ThrowIfNull(html);
         ArgumentNullException.ThrowIfNull(imageUrlBuilder);
 
-        var htmlDocument = html.CreateHtmlDocument(logger);
-        var imageNodes = htmlDocument.DocumentNode.SelectNodes(xpath: "//img[@src]");
+        var items = html.ExtractImagesLinks(includeBase64EncodedImages: false, logger);
+        HtmlDocument? htmlDocument = null;
 
-        if (imageNodes is null)
+        foreach (var item in items)
         {
-            return html;
-        }
-
-        foreach (var imageNode in imageNodes)
-        {
-            var imageSrcAttribute = imageNode.GetSrcAttribute();
-            var imageSrcValue = imageSrcAttribute?.Value?.Trim();
-
-            if (imageSrcAttribute is null ||
-                imageSrcValue?.StartsWith(value: "file:/", StringComparison.OrdinalIgnoreCase) != false ||
-                imageSrcValue.IsBase64EncodedImage())
-            {
-                continue;
-            }
-
-            var newUrl = imageUrlBuilder(imageSrcValue);
+            htmlDocument = item.HtmlDocument;
+            var newUrl = imageUrlBuilder(item.Attribute.Value);
 
             if (newUrl is null)
             {
                 continue;
             }
 
-            imageSrcAttribute.Value = newUrl;
+            item.Attribute.Value = newUrl;
         }
 
-        return htmlDocument.DocumentNode.OuterHtml;
+        return htmlDocument?.DocumentNode.OuterHtml ?? html;
+    }
+
+    /// <summary>
+    ///     imageUrlBuilder delegate gives you an image's src, and then you can return its new url.
+    /// </summary>
+    public static async Task<string> ReplaceImageUrlsWithNewImageUrlsAsync(this string html,
+        Func<string, CancellationToken, Task<string?>> imageUrlBuilder,
+        ILogger? logger = null,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(html);
+        ArgumentNullException.ThrowIfNull(imageUrlBuilder);
+
+        var items = html.ExtractImagesLinks(includeBase64EncodedImages: false, logger);
+        HtmlDocument? htmlDocument = null;
+
+        foreach (var item in items)
+        {
+            htmlDocument = item.HtmlDocument;
+            var newUrl = await imageUrlBuilder(item.Attribute.Value, cancellationToken);
+
+            if (newUrl is null)
+            {
+                continue;
+            }
+
+            item.Attribute.Value = newUrl;
+        }
+
+        return htmlDocument?.DocumentNode.OuterHtml ?? html;
     }
 
     /// <summary>
@@ -80,35 +96,53 @@ public static class HtmlHelperServiceExtensions
         ArgumentNullException.ThrowIfNull(html);
         ArgumentNullException.ThrowIfNull(urlBuilder);
 
-        var htmlDocument = html.CreateHtmlDocument(logger);
-        var nodes = htmlDocument.DocumentNode.SelectNodes(xpath: "//a[@href]");
+        var items = html.ExtractLinks(logger);
+        HtmlDocument? htmlDocument = null;
 
-        if (nodes is null)
+        foreach (var item in items)
         {
-            return html;
-        }
-
-        foreach (var node in nodes)
-        {
-            var hrefAttribute = node.GetHrefAttribute();
-            var value = hrefAttribute?.Value?.Trim();
-
-            if (hrefAttribute is null || value.IsEmpty())
-            {
-                continue;
-            }
-
-            var newUrl = urlBuilder(value);
+            htmlDocument = item.HtmlDocument;
+            var newUrl = urlBuilder(item.Attribute.Value);
 
             if (newUrl is null)
             {
                 continue;
             }
 
-            hrefAttribute.Value = newUrl;
+            item.Attribute.Value = newUrl;
         }
 
-        return htmlDocument.DocumentNode.OuterHtml;
+        return htmlDocument?.DocumentNode.OuterHtml ?? html;
+    }
+
+    /// <summary>
+    ///     urlBuilder delegate gives you an anchor's href, and then you can return its new url.
+    /// </summary>
+    public static async Task<string> ReplaceAnchorUrlsWithNewUrlsAsync(this string html,
+        Func<string, CancellationToken, Task<string?>> urlBuilder,
+        ILogger? logger = null,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(html);
+        ArgumentNullException.ThrowIfNull(urlBuilder);
+
+        var items = html.ExtractLinks(logger);
+        HtmlDocument? htmlDocument = null;
+
+        foreach (var item in items)
+        {
+            htmlDocument = item.HtmlDocument;
+            var newUrl = await urlBuilder(item.Attribute.Value, cancellationToken);
+
+            if (newUrl is null)
+            {
+                continue;
+            }
+
+            item.Attribute.Value = newUrl;
+        }
+
+        return htmlDocument?.DocumentNode.OuterHtml ?? html;
     }
 
     /// <summary>
@@ -122,51 +156,62 @@ public static class HtmlHelperServiceExtensions
         ArgumentNullException.ThrowIfNull(html);
         ArgumentNullException.ThrowIfNull(imageBuilder);
 
-        var htmlDocument = html.CreateHtmlDocument(logger);
-        var imageNodes = htmlDocument.DocumentNode.SelectNodes(xpath: "//img[@src]");
+        var items = html.ExtractImagesLinks(includeBase64EncodedImages: false, logger);
+        HtmlDocument? htmlDocument = null;
 
-        if (imageNodes is null)
+        foreach (var item in items)
         {
-            return html;
-        }
-
-        foreach (var imageNode in imageNodes)
-        {
-            var imageSrcAttribute = imageNode.GetSrcAttribute();
-            var imageSrcValue = imageSrcAttribute?.Value?.Trim();
-
-            if (imageSrcAttribute is null ||
-                imageSrcValue?.StartsWith(value: "file:/", StringComparison.OrdinalIgnoreCase) != false ||
-                imageSrcValue.IsBase64EncodedImage())
-            {
-                continue;
-            }
-
+            htmlDocument = item.HtmlDocument;
+            var imageSrcValue = item.Attribute.Value;
             var imageBytes = imageBuilder(imageSrcValue);
+            var newSrc = imageBytes.BytesToBase64DataImage(imageSrcValue);
 
-            if (imageBytes is null || imageBytes.Length == 0)
+            if (!newSrc.IsEmpty())
             {
-                continue;
+                item.Attribute.Value = newSrc;
             }
-
-            var ext = imageSrcValue.GetUriExtension();
-
-            if (string.IsNullOrWhiteSpace(ext))
-            {
-                ext = ".jpg";
-            }
-
-            imageSrcAttribute.Value =
-                $"data:image/{ext.TrimStart(trimChar: '.')};base64,{Convert.ToBase64String(imageBytes, Base64FormattingOptions.None)}";
         }
 
-        return htmlDocument.DocumentNode.OuterHtml;
+        return htmlDocument?.DocumentNode.OuterHtml ?? html;
+    }
+
+    /// <summary>
+    ///     imageBuilder delegate gives you an image's src, and then you can return its equivalent data bytes to be inserted as
+    ///     an embedded data:image
+    /// </summary>
+    public static async Task<string> ReplaceImageUrlsWithEmbeddedDataImagesAsync(this string html,
+        Func<string, CancellationToken, Task<byte[]?>> imageBuilder,
+        ILogger? logger = null,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(html);
+        ArgumentNullException.ThrowIfNull(imageBuilder);
+
+        var items = html.ExtractImagesLinks(includeBase64EncodedImages: false, logger);
+        HtmlDocument? htmlDocument = null;
+
+        foreach (var item in items)
+        {
+            htmlDocument = item.HtmlDocument;
+            var imageSrcValue = item.Attribute.Value;
+            var imageBytes = await imageBuilder(imageSrcValue, cancellationToken);
+            var newSrc = imageBytes.BytesToBase64DataImage(imageSrcValue);
+
+            if (!newSrc.IsEmpty())
+            {
+                item.Attribute.Value = newSrc;
+            }
+        }
+
+        return htmlDocument?.DocumentNode.OuterHtml ?? html;
     }
 
     /// <summary>
     ///     Returns the src list of img tags.
     /// </summary>
-    public static IEnumerable<string> ExtractImagesLinks(this string html, ILogger? logger = null)
+    public static IEnumerable<HtmlProcessingItem> ExtractImagesLinks(this string html,
+        bool includeBase64EncodedImages = false,
+        ILogger? logger = null)
     {
         var doc = html.CreateHtmlDocument(logger);
         var nodes = doc.DocumentNode.SelectNodes(xpath: "//img[@src]");
@@ -181,7 +226,19 @@ public static class HtmlHelperServiceExtensions
             foreach (var attribute in image.Attributes.Where(attr
                          => attr.Name.Equals(value: "src", StringComparison.OrdinalIgnoreCase)))
             {
-                yield return attribute.Value;
+                var src = attribute.Value;
+
+                if (src.IsEmpty())
+                {
+                    continue;
+                }
+
+                if (!includeBase64EncodedImages && src.IsBase64EncodedImage())
+                {
+                    continue;
+                }
+
+                yield return new HtmlProcessingItem(doc, image, attribute);
             }
         }
     }
@@ -189,7 +246,7 @@ public static class HtmlHelperServiceExtensions
     /// <summary>
     ///     Returns the href list of anchor tags.
     /// </summary>
-    public static IEnumerable<string> ExtractLinks(this string html, ILogger? logger = null)
+    public static IEnumerable<HtmlProcessingItem> ExtractLinks(this string html, ILogger? logger = null)
     {
         var doc = html.CreateHtmlDocument(logger);
         var nodes = doc.DocumentNode.SelectNodes(xpath: "//a[@href]");
@@ -204,7 +261,14 @@ public static class HtmlHelperServiceExtensions
             foreach (var attribute in image.Attributes.Where(attr
                          => attr.Name.Equals(value: "href", StringComparison.OrdinalIgnoreCase)))
             {
-                yield return attribute.Value;
+                var value = attribute?.Value?.Trim();
+
+                if (attribute is null || value.IsEmpty())
+                {
+                    continue;
+                }
+
+                yield return new HtmlProcessingItem(doc, image, attribute);
             }
         }
     }

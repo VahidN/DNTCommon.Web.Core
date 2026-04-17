@@ -17,17 +17,34 @@ public static class TextToImageExtensions
     {
         ArgumentNullException.ThrowIfNull(text);
 
-        return text.TextToImage(options).BytesToBase64DataImage(contentType);
+        return text.TextToImage(options).BytesToBase64DataImage(contentType)!;
     }
 
     /// <summary>
     ///     returns data as a data:image/png;base64.
     /// </summary>
-    public static string BytesToBase64DataImage(this byte[] data, string contentType = "image/png")
+    public static string? BytesToBase64DataImage([NotNullIfNotNull(nameof(imageBytes))] this byte[]? imageBytes,
+        string? imageSrcValue = null,
+        string? contentType = null)
     {
-        ArgumentNullException.ThrowIfNull(data);
+        if (imageBytes is null || imageBytes.Length == 0)
+        {
+            return null;
+        }
 
-        return $"data:{contentType};base64,{Convert.ToBase64String(data)}";
+        if (contentType.IsEmpty())
+        {
+            var ext = imageSrcValue.GetUriExtension();
+
+            if (string.IsNullOrWhiteSpace(ext))
+            {
+                ext = ".jpg";
+            }
+
+            contentType = $"image/{ext.TrimStart(trimChar: '.')}";
+        }
+
+        return $"data:{contentType};base64,{Convert.ToBase64String(imageBytes, Base64FormattingOptions.None)}";
     }
 
     /// <summary>

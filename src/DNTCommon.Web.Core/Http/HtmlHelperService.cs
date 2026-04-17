@@ -30,12 +30,13 @@ public class HtmlHelperService(
     /// <summary>
     ///     Returns the src list of img tags.
     /// </summary>
-    public IEnumerable<string> ExtractImagesLinks(string html) => html.ExtractImagesLinks(_logger);
+    public IEnumerable<string> ExtractImagesLinks(string html)
+        => html.ExtractImagesLinks(includeBase64EncodedImages: false, _logger).Select(x => x.Attribute.Value);
 
     /// <summary>
     ///     Returns the href list of anchor tags.
     /// </summary>
-    public IEnumerable<string> ExtractLinks(string html) => html.ExtractLinks(_logger);
+    public IEnumerable<string> ExtractLinks(string html) => html.ExtractLinks(_logger).Select(x => x.Attribute.Value);
 
     /// <summary>
     ///     Parses an HTML content and tries to convert its relative URLs to absolute urls based on the siteBaseUrl.
