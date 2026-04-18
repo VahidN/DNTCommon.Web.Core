@@ -108,7 +108,7 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App"/>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.102" PrivateAssets="All"/>
     <PackageReference Include="DNTPersianUtils.Core" Version="6.9.0"/>
-    <PackageReference Include="MailKit" Version="4.14.1"/>
+    <PackageReference Include="MailKit" Version="4.16.0"/>
     <PackageReference Include="HtmlAgilityPack" Version="1.12.4"/>
     <PackageReference Include="IPAddressRange" Version="6.3.0"/>
     <PackageReference Include="SkiaSharp" Version="3.119.1"/>
