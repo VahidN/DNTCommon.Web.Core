@@ -78,6 +78,8 @@ public static class HtmlReaderServiceExtensions
 
                 if (body is not null)
                 {
+                    yield return body;
+
                     foreach (var bodyNode in HandleChildren(body.ChildNodes))
                     {
                         yield return bodyNode;
@@ -92,6 +94,38 @@ public static class HtmlReaderServiceExtensions
                 {
                     yield return childNode;
                 }
+            }
+        }
+    }
+
+    public static IEnumerable<HtmlNode> GetHtmlNodesByName(this string? html, string nodeName, ILogger? logger = null)
+    {
+        if (string.IsNullOrWhiteSpace(html))
+        {
+            yield break;
+        }
+
+        foreach (var node in html.ParseHtml(logger).HtmlNodes)
+        {
+            if (node.Name.Equals(nodeName, StringComparison.OrdinalIgnoreCase))
+            {
+                yield return node;
+            }
+        }
+    }
+
+    public static IEnumerable<HtmlNode> GetHtmlNodesByNames(this string? html, params ICollection<string>? nodeNames)
+    {
+        if (string.IsNullOrWhiteSpace(html))
+        {
+            yield break;
+        }
+
+        foreach (var node in html.ParseHtml().HtmlNodes)
+        {
+            if (nodeNames?.Contains(node.Name, StringComparer.OrdinalIgnoreCase) != false)
+            {
+                yield return node;
             }
         }
     }

@@ -9,20 +9,21 @@ public class HtmlReaderServiceTests : TestsBase
     [TestMethod]
     public void TestExtractImagesLinksReturnsAllImages()
     {
-        ServiceProvider.RunScopedService<IHtmlReaderService>(htmlReaderService =>
-        {
-            var items = htmlReaderService.ParseHtml(HtmlHelperServiceTests.Html).HtmlNodes.ToList();
-            Assert.AreEqual(expected: 8, actual: items.Count(node => node.Name == "img"));
-        });
+        var items = HtmlHelperServiceTests.Html.GetHtmlNodesByName(nodeName: "img").ToList();
+        Assert.AreEqual(expected: 8, items.Count);
     }
 
     [TestMethod]
     public void TestExtractLinksReturnsAllLinks()
     {
-        ServiceProvider.RunScopedService<IHtmlReaderService>(htmlReaderService =>
-        {
-            var items = htmlReaderService.ParseHtml(HtmlHelperServiceTests.Html).HtmlNodes.ToList();
-            Assert.AreEqual(expected: 4, actual: items.Count(node => node.Name == "a"));
-        });
+        var items = HtmlHelperServiceTests.Html.GetHtmlNodesByName(nodeName: "a").ToList();
+        Assert.AreEqual(expected: 4, items.Count);
+    }
+
+    [TestMethod]
+    public void TestExtractBodyReturnsOne()
+    {
+        var items = HtmlHelperServiceTests.Html.GetHtmlNodesByName(nodeName: "body").ToList();
+        Assert.AreEqual(expected: 1, items.Count);
     }
 }
