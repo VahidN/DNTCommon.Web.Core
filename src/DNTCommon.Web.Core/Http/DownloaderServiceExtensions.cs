@@ -176,7 +176,9 @@ public static class DownloaderServiceExtensions
 
         await using var fileStream = outputFilePath.CreateAsyncFileStream(fileMode, FileAccess.Write);
 
-        if (response.Headers.AcceptRanges is null && fileStream.Length > 0)
+        var supportsRange = response.Headers.AcceptRanges.Contains(value: "bytes", StringComparer.OrdinalIgnoreCase);
+
+        if (!supportsRange && fileStream.Length > 0)
         {
             // Resume is not supported. Starting over.
             fileStream.SetLength(value: 0);
