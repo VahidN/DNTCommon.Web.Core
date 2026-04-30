@@ -14,7 +14,7 @@ public static class EmojiIcons
         var zero = T.Zero;
         var max = T.CreateChecked(totalStars);
         var clamped = T.Clamp(stars, zero, max);
-        var filled = int.CreateChecked(T.Round(clamped));
+        var filled = int.CreateChecked(T.Round(clamped, MidpointRounding.AwayFromZero));
 
         return new string(c: '★', filled) + new string(c: '☆', totalStars - filled);
     }

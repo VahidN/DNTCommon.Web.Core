@@ -10,7 +10,7 @@ public class ScheduledTasksStorage
     /// </summary>
     public ScheduledTasksStorage() => Tasks = new HashSet<ScheduledTaskStatus>();
 
-    internal string SiteRootUrl { set; get; } = default!;
+    internal string? SiteRootUrl { set; get; }
 
     /// <summary>
     ///     Gets the list of the scheduled tasks.

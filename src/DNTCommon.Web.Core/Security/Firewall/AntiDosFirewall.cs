@@ -23,13 +23,8 @@ public sealed class AntiDosFirewall : IAntiDosFirewall
     {
         ArgumentNullException.ThrowIfNull(antiDosConfig);
 
-        _antiDosConfig = antiDosConfig.CurrentValue;
-
-        if (_antiDosConfig is null)
-        {
-            throw new ArgumentNullException(nameof(antiDosConfig),
-                message: "Please add AntiDosConfig to your appsettings.json file.");
-        }
+        _antiDosConfig = antiDosConfig.CurrentValue ?? throw new ArgumentNullException(nameof(antiDosConfig),
+            message: "Please add AntiDosConfig to your appsettings.json file.");
 
         _disposable = antiDosConfig.OnChange(options => { _antiDosConfig = options; });
 

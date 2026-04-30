@@ -8,22 +8,22 @@ public class WebServerOS
     /// <summary>
     ///     Gets the platform architecture on which the current app is running.
     /// </summary>
-    public string Architecture { set; get; } = default!;
+    public string Architecture { set; get; } = null!;
 
     /// <summary>
     ///     Gets a string that describes the operating system on which the app is running.
     /// </summary>
-    public string Description { set; get; } = default!;
+    public string Description { set; get; } = null!;
 
     /// <summary>
     ///     Retrieves all environment variable names and their values from the current process.
     /// </summary>
-    public IList<(string Key, string Value)> EnvironmentVariables { set; get; } = default!;
+    public IList<(string Key, string Value)> EnvironmentVariables { set; get; } = null!;
 
     /// <summary>
     ///     Gets the NetBIOS name of this local computer.
     /// </summary>
-    public string ComputerName { set; get; } = default!;
+    public string ComputerName { set; get; } = null!;
 
     /// <summary>
     ///     The server's time
@@ -33,22 +33,22 @@ public class WebServerOS
     /// <summary>
     ///     Gets the username of the person who is associated with the current thread.
     /// </summary>
-    public string UserName { set; get; } = default!;
+    public string UserName { set; get; } = null!;
 
     /// <summary>
     ///     A string that contains the DNS host name of the local computer.
     /// </summary>
-    public string HostName { set; get; } = default!;
+    public string HostName { set; get; } = null!;
 
     /// <summary>
     ///     Returns the Internet Protocol (IP) addresses for the specified host.
     /// </summary>
-    public string HostAddresses { set; get; } = default!;
+    public string HostAddresses { set; get; } = null!;
 
     /// <summary>
     ///     The server's uptime
     /// </summary>
-    public TimeSpan UpTime { set; get; } = default!;
+    public TimeSpan UpTime { set; get; } = TimeSpan.Zero;
 
     /// <summary>
     ///     Sets or gets the number of active connections.

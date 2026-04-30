@@ -26,13 +26,9 @@ public sealed class AntiDosMiddleware : IDisposable
 
         _next = next;
         _antiDosFirewall = antiDosFirewall;
-        _antiDosConfig = antiDosConfig.CurrentValue;
 
-        if (_antiDosConfig is null)
-        {
-            throw new ArgumentNullException(nameof(antiDosConfig),
-                message: "Please add AntiDosConfig to your appsettings.json file.");
-        }
+        _antiDosConfig = antiDosConfig.CurrentValue ?? throw new ArgumentNullException(nameof(antiDosConfig),
+            message: "Please add AntiDosConfig to your appsettings.json file.");
 
         _disposableOnChange = antiDosConfig.OnChange(options => { _antiDosConfig = options; });
     }

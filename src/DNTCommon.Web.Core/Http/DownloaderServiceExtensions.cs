@@ -291,7 +291,8 @@ public static class DownloaderServiceExtensions
         }
 
         downloadStatus.PercentComplete =
-            Math.Round((decimal)downloadStatus.BytesTransferred * 100 / downloadStatus.RemoteFileSize, decimals: 2);
+            Math.Round((decimal)downloadStatus.BytesTransferred * 100 / downloadStatus.RemoteFileSize, decimals: 2,
+                MidpointRounding.AwayFromZero);
 
         var elapsedTime = DateTimeOffset.UtcNow - downloadStatus.StartTime;
         downloadStatus.BytesPerSecond = downloadStatus.BytesTransferred / elapsedTime.TotalSeconds;

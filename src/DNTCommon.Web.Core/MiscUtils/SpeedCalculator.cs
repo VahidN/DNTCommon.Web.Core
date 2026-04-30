@@ -25,7 +25,7 @@ public static class SpeedCalculator
         var bytes = await callback(cancellationToken);
         var timeElapsed = stopwatch.Elapsed;
         var speed = bytes / timeElapsed.TotalSeconds;
-        var operationSpeed = Math.Round(speed / 1024, digits: 2);
+        var operationSpeed = Math.Round(speed / 1024, digits: 2, MidpointRounding.AwayFromZero);
         stopwatch.Stop();
 
         return (string.Create(CultureInfo.InvariantCulture, $"{operationSpeed} KB/s"), timeElapsed);
@@ -39,7 +39,7 @@ public static class SpeedCalculator
         ArgumentNullException.ThrowIfNull(watch);
 
         var speed = receivedBytes / watch.Elapsed.TotalSeconds;
-        var operationSpeed = Math.Round(speed / 1024, digits);
+        var operationSpeed = Math.Round(speed / 1024, digits, MidpointRounding.AwayFromZero);
 
         return operationSpeed;
     }

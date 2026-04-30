@@ -8,17 +8,17 @@ public class FeedItem
     /// <summary>
     ///     Item's title
     /// </summary>
-    public string Title { set; get; } = default!;
+    public string Title { set; get; } = null!;
 
     /// <summary>
     ///     Item's Author Name
     /// </summary>
-    public string AuthorName { set; get; } = default!;
+    public string AuthorName { set; get; } = null!;
 
     /// <summary>
     ///     Item's description
     /// </summary>
-    public string Content { set; get; } = default!;
+    public string Content { set; get; } = null!;
 
     /// <summary>
     ///     Item's Categories
@@ -28,15 +28,15 @@ public class FeedItem
     /// <summary>
     ///     Item's absolute URL
     /// </summary>
-    public string Url { set; get; } = default!;
+    public string Url { set; get; } = null!;
 
     /// <summary>
     ///     Item's Last Updated Time
     /// </summary>
-    public DateTimeOffset LastUpdatedTime { set; get; } = default!;
+    public DateTimeOffset LastUpdatedTime { set; get; }
 
     /// <summary>
     ///     Item's Publish Date
     /// </summary>
-    public DateTimeOffset PublishDate { set; get; } = default!;
+    public DateTimeOffset PublishDate { set; get; }
 }

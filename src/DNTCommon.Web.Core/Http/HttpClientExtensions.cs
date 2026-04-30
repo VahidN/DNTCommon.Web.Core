@@ -518,7 +518,8 @@ public static class HttpClientExtensions
 
                 if (remoteFileSize > 0 && bytesTransferred > 0)
                 {
-                    var percentComplete = Math.Round((decimal)bytesTransferred * 100 / remoteFileSize, decimals: 2);
+                    var percentComplete = Math.Round((decimal)bytesTransferred * 100 / remoteFileSize, decimals: 2,
+                        MidpointRounding.AwayFromZero);
 
                     if (readCount % 100 == 0)
                     {
@@ -571,7 +572,8 @@ public static class HttpClientExtensions
 
                 if (remoteFileSize > 0 && bytesTransferred > 0)
                 {
-                    var percentComplete = Math.Round((decimal)bytesTransferred * 100 / remoteFileSize, decimals: 2);
+                    var percentComplete = Math.Round((decimal)bytesTransferred * 100 / remoteFileSize, decimals: 2,
+                        MidpointRounding.AwayFromZero);
 
                     if (readCount % 100 == 0)
                     {
