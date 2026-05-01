@@ -75,7 +75,7 @@ public sealed class RsaKeys
 
     private static X509Certificate2 GetX509Certificate2(string pfxFilePath, string pfxPassword)
     {
-#if NET_8 || NET_7 || NET_6
+#if NET_8
         return new X509Certificate2(pfxFilePath, pfxPassword, X509KeyStorageFlags.EphemeralKeySet);
 #else
         return X509CertificateLoader.LoadPkcs12FromFile(pfxFilePath, pfxPassword, X509KeyStorageFlags.EphemeralKeySet);

@@ -241,11 +241,7 @@ public static class HttpClientExtensions
         await using var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
         using var streamReader = new StreamReader(responseStream, encoding ?? Encoding.UTF8);
 
-#if !NET_6
         return await streamReader.ReadToEndAsync(cancellationToken);
-#else
-        return await streamReader.ReadToEndAsync();
-#endif
     }
 
     /// <summary>

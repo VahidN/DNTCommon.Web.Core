@@ -8,12 +8,10 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public static class ValidatorsExtensions
 {
-#if !NET_6
     /// <summary>
     ///     Tries to parse a string into a Guid-value.
     /// </summary>
     public static bool IsValidGuid([NotNullWhen(returnValue: true)] this string? value) => Guid.IsValidGuid(value);
-#endif
 
     public static (bool Success, string? ErrorMessage) IsValidIFormFile(this object? value,
         Func<IFormFile, (bool Success, string? ErrorMessage)> isValidFile,

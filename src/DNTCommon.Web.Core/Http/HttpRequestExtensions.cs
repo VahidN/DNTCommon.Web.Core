@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
@@ -10,9 +11,6 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
-#if !NET_6
-using System.Text.RegularExpressions;
-#endif
 
 namespace DNTCommon.Web.Core;
 
@@ -232,7 +230,7 @@ public static partial class HttpRequestExtensions
     /// </summary>
     public static string GetBaseUrl(this HttpContext httpContext)
     {
-        RequestSanityCheck(httpContext);
+        httpContext.RequestSanityCheck();
         var request = httpContext.Request;
 
         return $"{request.Scheme}://{request.Host.ToUriComponent()}";
@@ -243,7 +241,7 @@ public static partial class HttpRequestExtensions
     /// </summary>
     public static string GetRawUrl(this HttpContext httpContext)
     {
-        RequestSanityCheck(httpContext);
+        httpContext.RequestSanityCheck();
 
         return httpContext.Request.GetDisplayUrl();
     }
@@ -251,7 +249,7 @@ public static partial class HttpRequestExtensions
     /// <summary>
     ///     Gets the current HttpContext.Request's address.
     /// </summary>
-    public static Uri GetRawUri(this HttpContext httpContext) => new(GetRawUrl(httpContext));
+    public static Uri GetRawUri(this HttpContext httpContext) => new(httpContext.GetRawUrl());
 
     /// <summary>
     ///     Gets the current HttpContext.Request's IUrlHelper.
@@ -286,17 +284,10 @@ public static partial class HttpRequestExtensions
 #pragma warning disable CC001
     public static async Task<T?> DeserializeRequestJsonBodyAsAsync<T>(this HttpContext httpContext
 #pragma warning restore CC001
-#if !NET_6
         ,
-        CancellationToken cancellationToken = default
-#endif
-    )
+        CancellationToken cancellationToken = default)
     {
-        var body = await httpContext.ReadRequestBodyAsStringAsync(
-#if !NET_6
-            cancellationToken
-#endif
-        );
+        var body = await httpContext.ReadRequestBodyAsStringAsync(cancellationToken);
 
         return JsonSerializer.Deserialize<T>(body);
     }
@@ -308,13 +299,10 @@ public static partial class HttpRequestExtensions
 #pragma warning disable CC001
     public static async Task<string> ReadRequestBodyAsStringAsync(this HttpContext httpContext
 #pragma warning restore CC001
-#if !NET_6
         ,
-        CancellationToken cancellationToken = default
-#endif
-    )
+        CancellationToken cancellationToken = default)
     {
-        RequestSanityCheck(httpContext);
+        httpContext.RequestSanityCheck();
         var request = httpContext.Request;
 
         if (request.Body.CanSeek)
@@ -330,11 +318,7 @@ public static partial class HttpRequestExtensions
 
         using var bodyReader = new StreamReader(request.Body, Encoding.UTF8);
 
-#if !NET_6
         var body = await bodyReader.ReadToEndAsync(cancellationToken);
-#else
-        var body = await bodyReader.ReadToEndAsync();
-#endif
 
         // this is required, otherwise model binding will return null
         request.Body.Seek(offset: 0, SeekOrigin.Begin);
@@ -349,18 +333,10 @@ public static partial class HttpRequestExtensions
 #pragma warning disable CC001
     public static async Task<IDictionary<string, string>?> DeserializeRequestJsonBodyAsDictionaryAsync(
 #pragma warning restore CC001
-        this HttpContext httpContext
-#if !NET_6
-        ,
-        CancellationToken cancellationToken = default
-#endif
-    )
+        this HttpContext httpContext,
+        CancellationToken cancellationToken = default)
     {
-        var body = await httpContext.ReadRequestBodyAsStringAsync(
-#if !NET_6
-            cancellationToken
-#endif
-        );
+        var body = await httpContext.ReadRequestBodyAsStringAsync(cancellationToken);
 
         return JsonSerializer.Deserialize<Dictionary<string, string>>(body);
     }
@@ -460,7 +436,7 @@ public static partial class HttpRequestExtensions
 
         return httpRequestPath + queryString;
     }
-#if !NET_6
+
     /// <summary>
     ///     Is this an aspx request?
     ///     These extensions will be checked:
@@ -476,5 +452,4 @@ public static partial class HttpRequestExtensions
         @".*\.aspx|asax|htm|asp|ashx|asmx|axd|master|svc|php|ph|sphp|cfm|ps|stm|htaccess|htpasswd|phtml|cgi|pl|py|rb|sh|jsp|cshtml|vbhtml|swf|xap|asptxt|xamlx(/.*)?",
         RegexOptions.Compiled | RegexOptions.IgnoreCase, matchTimeoutMilliseconds: 3000)]
     private static partial Regex AllNoneAspNetCorePagesRegex();
-#endif
 }

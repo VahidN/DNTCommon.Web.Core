@@ -112,11 +112,7 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
         {
             _isShuttingDown = true;
 
-#if NET_6 || NET_7
-            _cancellationTokenSource.Cancel();
-#else
             await _cancellationTokenSource.CancelAsync();
-#endif
 
             var timeOut = TimeToFinish;
 

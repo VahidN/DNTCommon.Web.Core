@@ -1,4 +1,3 @@
-#if !NET_6
 using System.Numerics;
 
 namespace DNTCommon.Web.Core;
@@ -302,7 +301,7 @@ public static class FileSizeUnitsExtensions
         where T : INumber<T>
     {
         var divisorBase = T.CreateChecked(value: 1024);
-        var divisor = Power(divisorBase, times);
+        var divisor = divisorBase.Power(times);
 
         return number * divisor;
     }
@@ -314,7 +313,7 @@ public static class FileSizeUnitsExtensions
         where T : INumber<T>
     {
         var divisorBase = T.CreateChecked(value: 1024);
-        var divisor = Power(divisorBase, times);
+        var divisor = divisorBase.Power(times);
 
         return number / divisor;
     }
@@ -323,6 +322,13 @@ public static class FileSizeUnitsExtensions
     ///     Returns a specified number raised to the specified power.
     /// </summary>
     public static T Power<T>(this T baseValue, byte exponent)
+        where T : INumber<T>
+        => baseValue.Power((int)exponent);
+
+    /// <summary>
+    ///     Returns a specified number raised to the specified power.
+    /// </summary>
+    public static T Power<T>(this T baseValue, int exponent)
         where T : INumber<T>
     {
         if (exponent == 0)
@@ -340,4 +346,3 @@ public static class FileSizeUnitsExtensions
         return result;
     }
 }
-#endif

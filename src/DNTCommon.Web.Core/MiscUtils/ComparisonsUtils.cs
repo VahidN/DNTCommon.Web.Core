@@ -1,5 +1,4 @@
-﻿#if !NET_6
-using System.Numerics;
+﻿using System.Numerics;
 
 namespace DNTCommon.Web.Core;
 
@@ -128,4 +127,3 @@ public static class ComparisonsUtils
     public static bool IsApproximately(this TimeSpan value, TimeSpan other, TimeSpan tolerance)
         => (value - other).Duration().IsAtMost(tolerance);
 }
-#endif

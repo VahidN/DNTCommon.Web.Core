@@ -381,7 +381,6 @@ public static class CollectionsExtensions
         where T : notnull
         => [.. dict.Where(kvp => predicate(kvp.Value)).Select(kvp => kvp.Key)];
 
-#if !NET_6
     /// <summary>
     ///     Parses a string into a value.
     /// </summary>
@@ -447,5 +446,4 @@ public static class CollectionsExtensions
 
         return results;
     }
-#endif
 }

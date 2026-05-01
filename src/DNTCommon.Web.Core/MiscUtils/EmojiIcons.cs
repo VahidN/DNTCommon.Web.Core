@@ -4,7 +4,6 @@ namespace DNTCommon.Web.Core;
 
 public static class EmojiIcons
 {
-#if !NET_6
     /// <summary>
     ///     Returns an output like ★★★☆☆ for stars = 3, totalStars = 5
     /// </summary>
@@ -18,7 +17,6 @@ public static class EmojiIcons
 
         return new string(c: '★', filled) + new string(c: '☆', totalStars - filled);
     }
-#endif
 
     public static class TimeScheduling
     {

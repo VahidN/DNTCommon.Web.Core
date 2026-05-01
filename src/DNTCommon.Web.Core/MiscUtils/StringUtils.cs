@@ -94,7 +94,7 @@ public static class StringUtils
     public static string? Trim([NotNullIfNotNull(nameof(inputText))] this string? inputText,
         string value,
         StringComparison comparisonType)
-        => TrimStart(TrimEnd(inputText, value, comparisonType), value, comparisonType);
+        => inputText.TrimEnd(value, comparisonType).TrimStart(value, comparisonType);
 
     /// <summary>
     ///     Determines whether two specified String objects have the same value.
@@ -506,7 +506,7 @@ public static class StringUtils
     /// <summary>
     ///     Counts words in the given text based on the available white-spaces.
     /// </summary>
-    public static int CountWordsInText(this string? text) => text is null ? 0 : CountWordsInText(text.AsSpan());
+    public static int CountWordsInText(this string? text) => text?.AsSpan().CountWordsInText() ?? 0;
 
     /// <summary>
     ///     Counts words in the given text based on the available white-spaces.
@@ -577,7 +577,6 @@ public static class StringUtils
         string defaultValue = "")
         => Convert.ToString(value ?? defaultValue, CultureInfo.InvariantCulture);
 
-#if !NET_6 && !NET_7
     /// <summary>
     ///     Creates a string populated with characters chosen at random from choices.
     /// </summary>
@@ -602,5 +601,4 @@ public static class StringUtils
     /// <returns>A string populated with random hexadecimal characters.</returns>
     public static string RandomHexString(this int stringLength, bool lowercase = false)
         => RandomNumberGenerator.GetHexString(stringLength, lowercase);
-#endif
 }

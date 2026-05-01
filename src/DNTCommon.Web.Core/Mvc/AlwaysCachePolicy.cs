@@ -1,4 +1,3 @@
-#if !NET_6
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.Extensions.Primitives;
@@ -77,4 +76,3 @@ public sealed class AlwaysCachePolicy : IOutputCachePolicy
                HttpMethods.IsPost(request.Method);
     }
 }
-#endif

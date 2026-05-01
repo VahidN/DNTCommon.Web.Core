@@ -740,7 +740,7 @@ public static class PathUtils
         byte[] content,
         CancellationToken cancellationToken = default)
     {
-#if NET_8 || NET_7 || NET_6
+#if NET_8
         await using var sourceStream = new MemoryStream(content);
         await using var destStream = path.CreateAsyncFileStream(FileMode.Append, FileAccess.Write);
         await sourceStream.CopyToAsync(destStream, cancellationToken);

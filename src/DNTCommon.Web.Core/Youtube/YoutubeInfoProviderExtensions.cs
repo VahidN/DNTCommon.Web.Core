@@ -76,11 +76,7 @@ public static partial class YoutubeInfoProviderExtensions
             return null;
         }
 
-#if !NET_6
         var match = PlayerResponse().Match(htmlContentResult.TextContent);
-#else
-        var match = PlayerResponse.Match(htmlContentResult.TextContent);
-#endif
 
         if (!match.Success || match.Groups.Count < 2)
         {
@@ -137,12 +133,7 @@ public static partial class YoutubeInfoProviderExtensions
         return data?.Items.FirstOrDefault()?.Snippet;
     }
 
-#if !NET_6
     [GeneratedRegex(pattern: @"var ytInitialPlayerResponse = (\{.+?\});",
         RegexOptions.Compiled | RegexOptions.Singleline, matchTimeoutMilliseconds: 3000)]
     private static partial Regex PlayerResponse();
-#else
-    private static readonly Regex PlayerResponse = new(pattern: @"var ytInitialPlayerResponse = (\{.+?\});",
-        RegexOptions.Compiled | RegexOptions.Singleline, TimeSpan.FromMilliseconds(value: 3000));
-#endif
 }

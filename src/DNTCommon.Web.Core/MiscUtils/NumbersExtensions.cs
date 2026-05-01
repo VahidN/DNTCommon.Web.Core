@@ -167,7 +167,6 @@ public static class NumbersExtensions
             : defaultValue;
     }
 
-#if !NET_6 && !NET_7
     /// <summary>
     ///     Performs an in-place shuffle of a span using cryptographically random number generation.
     /// </summary>
@@ -205,9 +204,7 @@ public static class NumbersExtensions
 
         RandomNumberGenerator.Shuffle(values.ToSpan());
     }
-#endif
 
-#if !NET_6
     /// <summary>
     ///     Shuffles the elements of a collection implementing IList of T in-place using a cryptographically-secure random
     ///     number generator.
@@ -325,6 +322,4 @@ public static class NumbersExtensions
 
         return convertToPersianNumbers ? result.ToPersianNumbers() : result;
     }
-
-#endif
 }

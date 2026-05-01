@@ -38,7 +38,6 @@ public static class GuidExtensions
         public static string CryptographicallySecureSessionToken => string.Format(CultureInfo.InvariantCulture,
             format: "{0}{0}", Guid.CryptographicallySecureApiToken);
 
-#if !NET_6
         /// <summary>
         ///     Tries to parse a string into a value.
         /// </summary>
@@ -58,7 +57,6 @@ public static class GuidExtensions
 
             return Guid.TryParse(value, CultureInfo.InvariantCulture, out var result) ? result : defaultValue;
         }
-#endif
     }
 
     extension(Guid guid)

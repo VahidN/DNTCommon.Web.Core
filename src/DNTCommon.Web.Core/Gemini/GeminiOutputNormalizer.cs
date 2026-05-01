@@ -1,4 +1,3 @@
-#if !NET_6
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -788,5 +787,3 @@ public static partial class GeminiOutputNormalizer
         }
     }
 }
-
-#endif
