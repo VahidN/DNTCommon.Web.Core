@@ -60,7 +60,7 @@ public static class ZipSplitter
                 "-s", string.Create(CultureInfo.InvariantCulture, $"{partSizeMB}m"), "-j", "-q", outputZipPath,
                 filePath
             ],
-            WaitForExit = TimeSpan.FromMinutes(minutes: 2),
+            WaitForExit = TimeSpan.FromMinutes(2),
             KillProcessOnStart = false
         }.ExecuteProcessAsync(cancellationToken);
 
