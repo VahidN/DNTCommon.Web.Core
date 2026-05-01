@@ -57,7 +57,8 @@ public static class ZipSplitter
             ProcessName = "zip",
             ArgumentsList =
             [
-                "-s", string.Create(CultureInfo.InvariantCulture, $"{partSizeMB}m"), "-q", outputZipPath, filePath
+                "-s", string.Create(CultureInfo.InvariantCulture, $"{partSizeMB}m"), "-j", "-q", outputZipPath,
+                filePath
             ],
             WaitForExit = TimeSpan.FromMinutes(minutes: 2),
             KillProcessOnStart = false
