@@ -16,6 +16,11 @@ public class ApplicationStartInfo
     public string? Arguments { set; get; }
 
     /// <summary>
+    ///     Gets or sets the set of command-line arguments to use when starting the application.
+    /// </summary>
+    public ICollection<string>? ArgumentsList { set; get; }
+
+    /// <summary>
     ///     Gets or sets the application or document to start.
     /// </summary>
     public string? AppPath { set; get; }

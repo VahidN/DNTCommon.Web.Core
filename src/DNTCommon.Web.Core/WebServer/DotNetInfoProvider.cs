@@ -17,8 +17,8 @@ public static class DotNetInfoProvider
                 Assembly.GetExecutingAssembly()
                     .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
                     ?.InformationalVersion,
-            SdkCheckInfo = GetSdkCheckInfo(),
-            DotNetInfo = GetDotNetInfo(),
+            SdkCheckInfo = GetSdkCheckInfo().ProcessOutput ?? "",
+            DotNetInfo = GetDotNetInfo().ProcessOutput ?? "",
             FrameworkDescription = RuntimeInformation.FrameworkDescription,
             RuntimeIdentifier = RuntimeInformation.RuntimeIdentifier
         };
@@ -26,7 +26,7 @@ public static class DotNetInfoProvider
     /// <summary>
     ///     Returns output of `dotnet sdk check`
     /// </summary>
-    public static string GetSdkCheckInfo()
+    public static ExecuteProcessInfo GetSdkCheckInfo()
         => new ApplicationStartInfo
         {
             ProcessName = "dotnet",
@@ -39,7 +39,7 @@ public static class DotNetInfoProvider
     /// <summary>
     ///     Returns output of `dotnet --info`
     /// </summary>
-    public static string GetDotNetInfo()
+    public static ExecuteProcessInfo GetDotNetInfo()
         => new ApplicationStartInfo
         {
             ProcessName = "dotnet",
@@ -55,10 +55,11 @@ public static class DotNetInfoProvider
     /// </summary>
     public static (bool Success, string Info) IsNewSdkVersionAvailable()
     {
-        var info = GetSdkCheckInfo();
+        var info = GetSdkCheckInfo().ProcessOutput ?? "";
 
-        return (info.Contains(value: "is available", StringComparison.OrdinalIgnoreCase) ||
-               info.Contains(value: "patch", StringComparison.OrdinalIgnoreCase) || (!OperatingSystem.IsLinux() &&
-                   info.Contains(value: "newest", StringComparison.OrdinalIgnoreCase)), info);
+        return (
+            info.Contains(value: "is available", StringComparison.OrdinalIgnoreCase) ||
+            info.Contains(value: "patch", StringComparison.OrdinalIgnoreCase) || (!OperatingSystem.IsLinux() &&
+                info.Contains(value: "newest", StringComparison.OrdinalIgnoreCase)), info);
     }
 }

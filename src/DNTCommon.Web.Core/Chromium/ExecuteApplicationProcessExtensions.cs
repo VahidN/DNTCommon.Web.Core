@@ -12,7 +12,7 @@ public static class ExecuteApplicationProcessExtensions
     /// <summary>
     ///     A helper method to execute a process
     /// </summary>
-    public static async Task<string> ExecuteProcessAsync(this ApplicationStartInfo startInfo,
+    public static async Task<ExecuteProcessInfo> ExecuteProcessAsync(this ApplicationStartInfo startInfo,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(startInfo);
@@ -55,7 +55,7 @@ public static class ExecuteApplicationProcessExtensions
     /// <summary>
     ///     A helper method to execute a process
     /// </summary>
-    public static string ExecuteProcess(this ApplicationStartInfo startInfo)
+    public static ExecuteProcessInfo ExecuteProcess(this ApplicationStartInfo startInfo)
     {
         ArgumentNullException.ThrowIfNull(startInfo);
 
@@ -87,19 +87,18 @@ public static class ExecuteApplicationProcessExtensions
         void OnProcessOnOutputDataReceived(object o, DataReceivedEventArgs e) => output.AppendLine(e.Data);
     }
 
-    private static string GetProcessOutputData(string errorMessage, Process process)
+    private static ExecuteProcessInfo GetProcessOutputData(string errorMessage, Process process)
     {
         var (exitCode, isExited) = GetProcessExitInfo(process);
 
         if (isExited)
         {
-            return errorMessage;
+            return new ExecuteProcessInfo(exitCode, isExited, errorMessage);
         }
 
         KillThisProcess(process);
 
-        return string.Create(CultureInfo.InvariantCulture,
-            $"{errorMessage}{Environment.NewLine}HasExited: {isExited}, ExitCode: {exitCode}");
+        return new ExecuteProcessInfo(exitCode, isExited, errorMessage);
     }
 
     private static void KillThisProcess(Process process)
@@ -155,6 +154,14 @@ public static class ExecuteApplicationProcessExtensions
         if (!startInfo.Arguments.IsEmpty())
         {
             process.StartInfo.Arguments = startInfo.Arguments;
+        }
+
+        if (!startInfo.ArgumentsList.IsNullOrEmpty())
+        {
+            foreach (var arg in startInfo.ArgumentsList)
+            {
+                process.StartInfo.ArgumentList.Add(arg);
+            }
         }
 
         process.StartInfo.UseShellExecute = false;

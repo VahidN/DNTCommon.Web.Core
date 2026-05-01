@@ -18,7 +18,7 @@ public class ChromeHtmlToPngGenerator(
     ///     High level method that converts HTML to PNG.
     /// </summary>
     /// <returns></returns>
-    public async Task<string> GeneratePngFromHtmlAsync(HtmlToPngGeneratorOptions options,
+    public async Task<ExecuteProcessInfo> GeneratePngFromHtmlAsync(HtmlToPngGeneratorOptions options,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(options);
@@ -35,7 +35,7 @@ public class ChromeHtmlToPngGenerator(
             throw new InvalidOperationException(ErrorMessage);
         }
 
-        var log = await executeApplicationProcess.ExecuteProcessAsync(new ApplicationStartInfo
+        var processInfo = await executeApplicationProcess.ExecuteProcessAsync(new ApplicationStartInfo
         {
             ProcessName = "chrome",
             Arguments = arguments,
@@ -44,16 +44,17 @@ public class ChromeHtmlToPngGenerator(
             KillProcessOnStart = options.KillProcessOnStart
         }, cancellationToken);
 
-        antiXssService.GetSanitizedHtml($"{options}{Environment.NewLine}{log}").LogPossibleErrorsOrWarnings(logger);
+        antiXssService.GetSanitizedHtml($"{options}{Environment.NewLine}{processInfo.ProcessOutput}")
+            .LogPossibleErrorsOrWarnings(logger);
 
         if (!IsValidImageFile(options))
         {
-            return log;
+            return processInfo;
         }
 
         await TryResizeFileAsync(options);
 
-        return log;
+        return processInfo;
     }
 
     private static string CreateArguments(HtmlToPngGeneratorOptions options)

@@ -8,7 +8,7 @@ public class ExecuteApplicationProcess : IExecuteApplicationProcess
     /// <summary>
     ///     A helper method to execute a process
     /// </summary>
-    public async Task<string> ExecuteProcessAsync(ApplicationStartInfo startInfo,
+    public async Task<ExecuteProcessInfo> ExecuteProcessAsync(ApplicationStartInfo startInfo,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(startInfo);
@@ -16,7 +16,7 @@ public class ExecuteApplicationProcess : IExecuteApplicationProcess
         return await startInfo.ExecuteProcessAsync(cancellationToken);
     }
 
-    public string ExecuteProcess(ApplicationStartInfo startInfo)
+    public ExecuteProcessInfo ExecuteProcess(ApplicationStartInfo startInfo)
     {
         ArgumentNullException.ThrowIfNull(startInfo);
 

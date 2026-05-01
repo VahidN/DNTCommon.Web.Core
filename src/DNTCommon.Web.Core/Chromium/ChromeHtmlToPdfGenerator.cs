@@ -18,7 +18,7 @@ public class ChromeHtmlToPdfGenerator(
     ///     High level method that converts HTML to PDF.
     /// </summary>
     /// <returns></returns>
-    public async Task<string> GeneratePdfFromHtmlAsync(HtmlToPdfGeneratorOptions options,
+    public async Task<ExecuteProcessInfo> GeneratePdfFromHtmlAsync(HtmlToPdfGeneratorOptions options,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(options);
@@ -35,7 +35,7 @@ public class ChromeHtmlToPdfGenerator(
             throw new InvalidOperationException(ErrorMessage);
         }
 
-        var log = await executeApplicationProcess.ExecuteProcessAsync(new ApplicationStartInfo
+        var processInfo = await executeApplicationProcess.ExecuteProcessAsync(new ApplicationStartInfo
         {
             ProcessName = "chrome",
             Arguments = arguments,
@@ -44,11 +44,12 @@ public class ChromeHtmlToPdfGenerator(
             KillProcessOnStart = options.KillProcessOnStart
         }, cancellationToken);
 
-        antiXssService.GetSanitizedHtml($"{options}{Environment.NewLine}{log}").LogPossibleErrorsOrWarnings(logger);
+        antiXssService.GetSanitizedHtml($"{options}{Environment.NewLine}{processInfo.ProcessOutput}")
+            .LogPossibleErrorsOrWarnings(logger);
 
         options.OutputFilePath.AddMetadataToPdfFile(options.DocumentMetadata);
 
-        return log;
+        return processInfo;
     }
 
     private static string CreateArguments(HtmlToPdfGeneratorOptions options)

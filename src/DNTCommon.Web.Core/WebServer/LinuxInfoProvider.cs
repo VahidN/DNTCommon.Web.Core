@@ -46,7 +46,7 @@ public static class LinuxInfoProvider
             return [];
         }
 
-        var outputText = new ApplicationStartInfo
+        var processInfo = new ApplicationStartInfo
         {
             ProcessName = "apt",
             Arguments = "search dotnet-sdk*",
@@ -55,14 +55,14 @@ public static class LinuxInfoProvider
             KillProcessOnStart = false
         }.ExecuteProcess();
 
-        if (outputText.IsEmpty())
+        if (processInfo.ProcessOutput.IsEmpty())
         {
             return [];
         }
 
         var versions = new HashSet<Version>();
 
-        foreach (Match line in RegexLine.Matches(outputText))
+        foreach (Match line in RegexLine.Matches(processInfo.ProcessOutput))
         {
             var versionMatch = RegexVersion.Match(line.Value);
 
