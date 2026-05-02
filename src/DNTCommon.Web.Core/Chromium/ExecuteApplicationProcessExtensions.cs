@@ -171,6 +171,11 @@ public static class ExecuteApplicationProcessExtensions
         process.StartInfo.RedirectStandardError = true;
         process.StartInfo.RedirectStandardInput = true;
 
+        if (!startInfo.WorkingDirectory.IsEmpty())
+        {
+            process.StartInfo.WorkingDirectory = startInfo.WorkingDirectory;
+        }
+
         return process;
     }
 }

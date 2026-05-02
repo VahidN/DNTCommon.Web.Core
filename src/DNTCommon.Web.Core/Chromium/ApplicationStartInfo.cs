@@ -16,6 +16,12 @@ public class ApplicationStartInfo
     public string? Arguments { set; get; }
 
     /// <summary>
+    ///     When the UseShellExecute property is false, gets or sets the working directory for the process to be started. When
+    ///     UseShellExecute is true, gets or sets the directory that contains the process to be started.
+    /// </summary>
+    public string? WorkingDirectory { set; get; }
+
+    /// <summary>
     ///     Gets or sets the set of command-line arguments to use when starting the application.
     /// </summary>
     public ICollection<string>? ArgumentsList { set; get; }
