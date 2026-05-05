@@ -1,21 +1,30 @@
+using System.ComponentModel;
 using Microsoft.Extensions.Logging;
 
 namespace DNTCommon.Web.Core;
 
-public static class ZipSplitter
+public static class LinuxZipSplitter
 {
     /// <summary>
     ///     This is a Linux only solution. Use `ZipArchiveExtensions` and `SplitFileToMultiplePartsAsync` for the other
     ///     operating systems.
     /// </summary>
-    public static async Task<IList<string>?> ZipAndSplitFileToMultiplePartsAsync(this string? filePath,
+    public static async Task<IList<string>?> LinuxZipAndSplitFileAsync(this string? filePath,
         int partSizeMB,
+        string? password,
         string? outputDirectory,
         bool overwriteExistingFiles,
-        ILogger logger,
+        ILogger? logger,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(logger);
+        if (!await IsZipInstalledAsync(cancellationToken))
+        {
+            throw new InvalidOperationException(message: """
+                                                         You should install the `zip` application first:
+                                                         sudo apt update && sudo apt install zip    # برای Debian/Ubuntu
+                                                         sudo dnf install zip                       # برای Fedora/RHEL
+                                                         """);
+        }
 
         filePath = filePath.NormalizePath();
 
@@ -47,7 +56,7 @@ public static class ZipSplitter
             }
             else
             {
-                if (logger.IsEnabled(LogLevel.Debug))
+                if (logger?.IsEnabled(LogLevel.Debug) == true)
                 {
                     logger.LogDebug(message: "The zip file already exists.");
                 }
@@ -56,23 +65,25 @@ public static class ZipSplitter
             }
         }
 
+        ICollection<string> argumentsList = password.IsEmpty() ? [] : ["-P", password];
+
+        argumentsList.AddRange([
+            "-s", string.Create(CultureInfo.InvariantCulture, $"{partSizeMB}m"), "-j", "-q", outputZipPath, filePath
+        ]);
+
         var processInfo = await new ApplicationStartInfo
         {
             ProcessName = "zip",
-            ArgumentsList =
-            [
-                "-s", string.Create(CultureInfo.InvariantCulture, $"{partSizeMB}m"), "-j", "-q", outputZipPath,
-                filePath
-            ],
+            ArgumentsList = argumentsList,
             WaitForExit = TimeSpan.FromMinutes(value: 2),
             KillProcessOnStart = false
         }.ExecuteProcessAsync(cancellationToken);
 
         if (processInfo.ExitCode != 0)
         {
-            if (logger.IsEnabled(LogLevel.Debug))
+            if (logger?.IsEnabled(LogLevel.Error) == true)
             {
-                logger.LogDebug(message: "`Error processing zip file: {Error}", processInfo.ProcessOutput);
+                logger.LogError(message: "`Error processing zip file: {Error}", processInfo.ProcessOutput);
             }
 
             return null;
@@ -80,7 +91,7 @@ public static class ZipSplitter
 
         var (createdFiles, _) = GetExistingZipFiles(isFile: true, filePath, outputDirectory);
 
-        if (logger.IsEnabled(LogLevel.Debug))
+        if (logger?.IsEnabled(LogLevel.Debug) == true)
         {
             foreach (var createdFile in createdFiles)
             {
@@ -113,14 +124,22 @@ public static class ZipSplitter
     ///     This is a Linux only solution. Use `ZipArchiveExtensions` and `SplitFileToMultiplePartsAsync` for the other
     ///     operating systems.
     /// </summary>
-    public static async Task<IList<string>?> ZipAndSplitFolderToMultiplePartsAsync(this string? folderPath,
+    public static async Task<IList<string>?> LinuxZipAndSplitFolderAsync(this string? folderPath,
         int partSizeMB,
+        string? password,
         string? outputDirectory,
         bool overwriteExistingFiles,
-        ILogger logger,
+        ILogger? logger,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(logger);
+        if (!await IsZipInstalledAsync(cancellationToken))
+        {
+            throw new InvalidOperationException(message: """
+                                                         You should install the `zip` application first:
+                                                         sudo apt update && sudo apt install zip    # For Debian/Ubuntu
+                                                         sudo dnf install zip                       # For Fedora/RHEL
+                                                         """);
+        }
 
         folderPath = folderPath.NormalizePath();
 
@@ -152,7 +171,7 @@ public static class ZipSplitter
             }
             else
             {
-                if (logger.IsEnabled(LogLevel.Debug))
+                if (logger?.IsEnabled(LogLevel.Debug) == true)
                 {
                     logger.LogDebug(message: "The zip file already exists.");
                 }
@@ -164,14 +183,17 @@ public static class ZipSplitter
         var parentDir = Directory.GetParent(folderPath)?.FullName;
         var folderNameOnly = new DirectoryInfo(folderPath).Name;
 
+        ICollection<string> argumentsList = password.IsEmpty() ? [] : ["-P", password];
+
+        argumentsList.AddRange([
+            "-r", "-s", string.Create(CultureInfo.InvariantCulture, $"{partSizeMB}m"), "-q", outputZipPath,
+            folderNameOnly
+        ]);
+
         var processInfo = await new ApplicationStartInfo
         {
             ProcessName = "zip",
-            ArgumentsList =
-            [
-                "-r", "-s", string.Create(CultureInfo.InvariantCulture, $"{partSizeMB}m"), "-q", outputZipPath,
-                folderNameOnly
-            ],
+            ArgumentsList = argumentsList,
             WaitForExit = TimeSpan.FromMinutes(value: 5),
             KillProcessOnStart = false,
             WorkingDirectory = parentDir
@@ -179,9 +201,9 @@ public static class ZipSplitter
 
         if (processInfo.ExitCode != 0)
         {
-            if (logger.IsEnabled(LogLevel.Debug))
+            if (logger?.IsEnabled(LogLevel.Error) == true)
             {
-                logger.LogDebug(message: "`Error processing zip file: {Error}", processInfo.ProcessOutput);
+                logger.LogError(message: "`Error processing zip file: {Error}", processInfo.ProcessOutput);
             }
 
             return null;
@@ -189,7 +211,7 @@ public static class ZipSplitter
 
         var (createdFiles, _) = GetExistingZipFiles(isFile: false, folderPath, outputDirectory);
 
-        if (logger.IsEnabled(LogLevel.Debug))
+        if (logger?.IsEnabled(LogLevel.Debug) == true)
         {
             foreach (var createdFile in createdFiles)
             {
@@ -199,5 +221,30 @@ public static class ZipSplitter
         }
 
         return createdFiles.Count == 0 ? null : createdFiles;
+    }
+
+    public static async Task<bool> IsZipInstalledAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var processInfo = await new ApplicationStartInfo
+            {
+                ProcessName = "zip",
+                ArgumentsList = ["--version"],
+                WaitForExit = TimeSpan.FromSeconds(value: 15),
+                KillProcessOnStart = false
+            }.ExecuteProcessAsync(cancellationToken);
+
+            return processInfo.ExitCode == 0;
+        }
+        catch (Win32Exception)
+        {
+            // فایل zip پیدا نشد یا اجرا نمی‌شود
+            return false;
+        }
+        catch
+        {
+            return false;
+        }
     }
 }
