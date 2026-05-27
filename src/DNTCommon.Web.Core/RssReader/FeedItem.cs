@@ -8,35 +8,40 @@ public class FeedItem
     /// <summary>
     ///     Item's title
     /// </summary>
-    public string Title { set; get; } = null!;
+    public string? Title { set; get; }
 
     /// <summary>
     ///     Item's Author Name
     /// </summary>
-    public string AuthorName { set; get; } = null!;
+    public string? AuthorName { set; get; }
 
     /// <summary>
-    ///     Item's description
+    ///     Item's content
     /// </summary>
-    public string Content { set; get; } = null!;
+    public string? Content { set; get; }
+
+    /// <summary>
+    ///     Item's summary
+    /// </summary>
+    public string? Summary { set; get; }
 
     /// <summary>
     ///     Item's Categories
     /// </summary>
-    public IEnumerable<string> Categories { set; get; } = [];
+    public IList<string> Categories { set; get; } = [];
 
     /// <summary>
     ///     Item's absolute URL
     /// </summary>
-    public string Url { set; get; } = null!;
+    public string? Url { set; get; }
 
     /// <summary>
     ///     Item's Last Updated Time
     /// </summary>
-    public DateTimeOffset LastUpdatedTime { set; get; }
+    public DateTimeOffset? LastUpdatedTime { set; get; }
 
     /// <summary>
     ///     Item's Publish Date
     /// </summary>
-    public DateTimeOffset PublishDate { set; get; }
+    public DateTimeOffset? PublishDate { set; get; }
 }

@@ -11,21 +11,21 @@ using Microsoft.Extensions.DependencyInjection;
 namespace DNTCommon.Web.Core;
 
 /// <summary>
-///   Represents a custom ActionResult for generating RSS feeds in ASP.NET Core.
-///   This class leverages SyndicationFeed to create and format the feed data.
+///     Represents a custom ActionResult for generating RSS feeds in ASP.NET Core.
+///     This class leverages SyndicationFeed to create and format the feed data.
 /// </summary>
 /// <typeparam name="TFeedItem">
-///   The type of the feed items, which must inherit from the FeedItem base class.
+///     The type of the feed items, which must inherit from the FeedItem base class.
 /// </typeparam>
 /// <param name="feedChannel">
-///   An instance of FeedChannel{TFeedItem} containing the metadata and items for the feed.
+///     An instance of FeedChannel{TFeedItem} containing the metadata and items for the feed.
 /// </param>
 /// <remarks>
-///   This ActionResult is responsible for:
-///   1. Setting the appropriate content type for the response (application/atom+xml).
-///   2. Generating the SyndicationFeed based on the provided FeedChannel.
-///   3. Writing the feed data to the response stream.
-///   It also utilizes an IHttpRequestInfoService to resolve URLs and paths correctly.
+///     This ActionResult is responsible for:
+///     1. Setting the appropriate content type for the response (application/atom+xml).
+///     2. Generating the SyndicationFeed based on the provided FeedChannel.
+///     3. Writing the feed data to the response stream.
+///     It also utilizes an IHttpRequestInfoService to resolve URLs and paths correctly.
 /// </remarks>
 public class FeedResult<TFeedItem>(FeedChannel<TFeedItem> feedChannel) : ActionResult
     where TFeedItem : FeedItem
@@ -63,10 +63,10 @@ public class FeedResult<TFeedItem>(FeedChannel<TFeedItem> feedChannel) : ActionR
         using var memoryStream = new MemoryStream();
 
         using (var xmlWriter = XmlWriter.Create(memoryStream, new XmlWriterSettings
-        {
-            Indent = true,
-            Encoding = Encoding.UTF8
-        }))
+               {
+                   Indent = true,
+                   Encoding = Encoding.UTF8
+               }))
         {
             var feedFormatter = new Atom10FeedFormatter(GetSyndicationFeed(httpContextInfo));
             feedFormatter.WriteTo(xmlWriter);
@@ -125,6 +125,11 @@ public class FeedResult<TFeedItem>(FeedChannel<TFeedItem> feedChannel) : ActionR
 
         foreach (var item in feedChannel.RssItems)
         {
+            if (item.Url.IsEmpty())
+            {
+                continue;
+            }
+
             var uri = new Uri(QueryHelpers.AddQueryString(item.Url,
                 new Dictionary<string, string?>(StringComparer.Ordinal)
                 {
@@ -155,8 +160,8 @@ public class FeedResult<TFeedItem>(FeedChannel<TFeedItem> feedChannel) : ActionR
                 {
                     SyndicationLink.CreateAlternateLink(uri)
                 },
-                PublishDate = item.PublishDate,
-                LastUpdatedTime = item.LastUpdatedTime
+                PublishDate = item.PublishDate ?? item.LastUpdatedTime ?? DateTimeOffset.UtcNow,
+                LastUpdatedTime = item.LastUpdatedTime ?? item.PublishDate ?? DateTimeOffset.UtcNow
             };
 
             if (!string.IsNullOrWhiteSpace(item.AuthorName))

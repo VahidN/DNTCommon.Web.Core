@@ -9,7 +9,7 @@ public sealed class SyndicationRssReaderService(IHttpClientFactory httpClientFac
     ///     Loads a syndication feed from the specified url.
     /// </summary>
     /// <exception cref="InvalidOperationException"></exception>
-    public async Task<FeedChannel<FeedItem>> ReadRssAsync([StringSyntax(syntax: "Uri")] string url,
+    public async Task<FeedChannel<FeedItem>?> ReadRssAsync([StringSyntax(syntax: "Uri")] string url,
         CancellationToken ct = default)
     {
         using var client = httpClientFactory.CreateClient(NamedHttpClient.BaseHttpClient);

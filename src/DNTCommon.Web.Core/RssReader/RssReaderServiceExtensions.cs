@@ -19,10 +19,10 @@ public static class RssReaderServiceExtensions
     }
 
     /// <summary>
-    ///     Loads a syndication feed from the specified url.
+    ///     Loads a syndication feed from the specified url, using System.ServiceModel.Syndication
     /// </summary>
     /// <exception cref="InvalidOperationException"></exception>
-    public static async Task<FeedChannel<FeedItem>> ReadRssAsync(this HttpClient httpClient,
+    public static async Task<FeedChannel<FeedItem>?> ReadRssAsync(this HttpClient httpClient,
         [StringSyntax(syntax: "Uri")] string url,
         CancellationToken cancellationToken = default)
     {
@@ -30,12 +30,25 @@ public static class RssReaderServiceExtensions
 
         var rawXmlResult = await httpClient.SafeFetchAsync(url, cancellationToken: cancellationToken);
 
-        if (rawXmlResult.Kind != FetchResultKind.Success || rawXmlResult.TextContent.IsEmpty())
+        if (rawXmlResult.Kind != FetchResultKind.Success)
         {
             throw new InvalidOperationException($"{url} -> {rawXmlResult.StatusCode} -> {rawXmlResult.Reason}");
         }
 
-        using var stringReader = new StringReader(rawXmlResult.TextContent);
+        return rawXmlResult.TextContent.ReadRss();
+    }
+
+    /// <summary>
+    ///     Loads a syndication feed, using System.ServiceModel.Syndication
+    /// </summary>
+    public static FeedChannel<FeedItem>? ReadRss(this string? xmlContent)
+    {
+        if (xmlContent.IsEmpty())
+        {
+            return null;
+        }
+
+        using var stringReader = new StringReader(xmlContent);
         using var xmlReader = new RssXmlReader(stringReader);
 
         var feed = SyndicationFeed.Load(xmlReader) ?? throw new InvalidOperationException(message: "Invalid RSS feed");

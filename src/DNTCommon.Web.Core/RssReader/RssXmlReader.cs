@@ -10,22 +10,6 @@ namespace DNTCommon.Web.Core;
 /// <param name="reader"></param>
 public sealed class RssXmlReader(TextReader reader) : XmlTextReader(reader)
 {
-    private static readonly string[] DateFormats =
-    [
-        // RFC 822 / 1123
-        "r", "R", "ddd, dd MMM yyyy HH:mm:ss GMT", "ddd, dd MMM yyyy HH:mm:ss UTC", "ddd, dd MMM yyyy HH:mm:ss zzz",
-
-        // ISO / Atom
-        "yyyy-MM-dd'T'HH:mm:ssZ", "yyyy-MM-dd'T'HH:mm:sszzz", "yyyy-MM-dd'T'HH:mm:ss.fffZ",
-        "yyyy-MM-dd'T'HH:mm:ss.fffzzz",
-
-        // رایج ولی غیر استاندارد
-        "yyyy-MM-dd HH:mm:ss", "yyyy/MM/dd HH:mm:ss", "yyyy-MM-dd HH:mm", "yyyy/MM/dd HH:mm",
-
-        // عجیب ولی دیده‌شده
-        "ddd MMM dd HH:mm:ss GMT yyyy", "ddd MMM dd HH:mm:ss zzz yyyy", "ddd MMM dd HH:mm:ss Z yyyy"
-    ];
-
     private bool _readingDate;
 
     public override void ReadStartElement()
@@ -59,27 +43,15 @@ public sealed class RssXmlReader(TextReader reader) : XmlTextReader(reader)
             return raw;
         }
 
-        if (TryParseDate(raw, out var parsed))
+        var parsed = raw.TryParseFeedDate();
+
+        if (parsed.HasValue)
         {
             //  نکته کلیدی: تبدیل به RFC1123 برای Syndication
-            return parsed.ToUniversalTime().ToString(format: "R", CultureInfo.InvariantCulture);
+            return parsed.Value.ToUniversalTime().ToString(format: "R", CultureInfo.InvariantCulture);
         }
 
         // fallback: مقدار اصلی (Syndication ممکن است default بگذارد ولی crash نمی‌کند)
         return raw;
-    }
-
-    private static bool TryParseDate(string value, out DateTimeOffset result)
-    {
-        if (DateTimeOffset.TryParse(value, CultureInfo.InvariantCulture,
-                DateTimeStyles.AllowWhiteSpaces | DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
-                out result))
-        {
-            return true;
-        }
-
-        return DateTimeOffset.TryParseExact(value, DateFormats, CultureInfo.InvariantCulture,
-            DateTimeStyles.AllowWhiteSpaces | DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
-            out result);
     }
 }
