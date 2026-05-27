@@ -10,3 +10,5 @@ M:System.IO.Path.Combine(System.String,System.String); Use Path.Join.
 M:System.IO.Path.Combine(System.String,System.String,System.String); Use Path.Join.
 M:System.IO.Path.Combine(System.String,System.String,System.String,System.String); Use Path.Join.
 M:System.IO.Path.Combine(System.String[]); Use Path.Join.
+M:System.Threading.Thread.Sleep(System.Int32); Use await and 'Task.Delay()' instead of 'Thread.Sleep()' and make method async
+M:System.Threading.Thread.Sleep(System.TimeSpan); Use await and 'Task.Delay()' instead of 'Thread.Sleep()' and make method async
