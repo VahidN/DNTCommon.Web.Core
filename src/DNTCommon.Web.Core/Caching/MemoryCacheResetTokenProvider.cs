@@ -22,7 +22,9 @@ public class MemoryCacheResetTokenProvider : IMemoryCacheResetTokenProvider
     public IChangeToken GetChangeToken(string key)
         => _changeTokens.GetOrAdd(key, _ =>
             {
-                using var cancellationTokenSource = new CancellationTokenSource();
+#pragma warning disable IDISP001
+                var cancellationTokenSource = new CancellationTokenSource();
+#pragma warning restore IDISP001
                 var changeToken = new CancellationChangeToken(cancellationTokenSource.Token);
 
                 return new ChangeTokenInfo(changeToken, cancellationTokenSource);
@@ -36,7 +38,14 @@ public class MemoryCacheResetTokenProvider : IMemoryCacheResetTokenProvider
     {
         if (_changeTokens.TryRemove(key, out var changeTokenInfo))
         {
-            changeTokenInfo.TokenSource.Cancel();
+            if (!changeTokenInfo.TokenSource.IsCancellationRequested)
+            {
+                changeTokenInfo.TokenSource.Cancel();
+            }
+
+#pragma warning disable IDISP007
+            changeTokenInfo.TokenSource.Dispose();
+#pragma warning restore IDISP007
         }
     }
 
@@ -45,9 +54,9 @@ public class MemoryCacheResetTokenProvider : IMemoryCacheResetTokenProvider
     /// </summary>
     public void RemoveAllChangeTokens()
     {
-        foreach (var item in _changeTokens)
+        foreach (var key in GetTags())
         {
-            RemoveChangeToken(item.Key);
+            RemoveChangeToken(key);
         }
     }
 
@@ -55,7 +64,7 @@ public class MemoryCacheResetTokenProvider : IMemoryCacheResetTokenProvider
     ///     Gets all the defined tags. Each tag allows multiple cache entries to be considered as a group.
     /// </summary>
     /// <returns></returns>
-    public IReadOnlyList<string> GetTags() => _changeTokens.Select(x => x.Key).ToList();
+    public IReadOnlyList<string> GetTags() => _changeTokens.Keys.ToList();
 
     private readonly struct ChangeTokenInfo(IChangeToken changeToken, CancellationTokenSource tokenSource)
     {
