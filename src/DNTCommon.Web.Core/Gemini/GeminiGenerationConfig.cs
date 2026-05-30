@@ -72,4 +72,13 @@ public class GeminiGenerationConfig
     [JsonPropertyName(name: "responseMimeType")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string? ResponseMimeType { get; set; }
+
+    /// <summary>
+    ///     Optional. Config for thinking features.
+    ///     An error will be returned if this field is set for models that don't
+    ///     support thinking.
+    /// </summary>
+    [JsonPropertyName(name: "thinkingConfig")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public GeminiThinkingConfiguration? ThinkingConfiguration { get; set; }
 }

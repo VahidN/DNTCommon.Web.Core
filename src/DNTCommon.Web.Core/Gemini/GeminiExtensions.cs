@@ -154,7 +154,12 @@ public static class GeminiExtensions
                 MaxOutputTokens = options.MaxOutputTokens,
                 StopSequences = [],
                 ResponseModalities = options.ResponseModalities,
-                ResponseMimeType = options.ResponseMimeType
+                ResponseMimeType = options.ResponseMimeType,
+                ThinkingConfiguration = new GeminiThinkingConfiguration
+                {
+                    IncludeThoughts = false,
+                    ThinkingBudget = 0
+                }
             },
             SafetySettings =
             [
