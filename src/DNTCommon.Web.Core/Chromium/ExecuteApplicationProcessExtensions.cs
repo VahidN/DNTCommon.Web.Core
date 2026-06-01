@@ -12,6 +12,9 @@ public static class ExecuteApplicationProcessExtensions
     /// <summary>
     ///     A helper method to execute a process
     /// </summary>
+    /// <remarks>
+    ///     If the process does not exit within the specified timeout, it will be forcefully killed.
+    /// </remarks>
     public static async Task<ExecuteProcessInfo> ExecuteProcessAsync(this ApplicationStartInfo startInfo,
         CancellationToken cancellationToken = default)
     {
@@ -22,8 +25,7 @@ public static class ExecuteApplicationProcessExtensions
         var output = new StringBuilder();
 
         using var process = startInfo.CreateProcess();
-        process.OutputDataReceived += OnProcessOnOutputDataReceived;
-        process.ErrorDataReceived += OnProcessOnOutputDataReceived;
+        SetupProcessEventHandlers(process, output);
 
         try
         {
@@ -43,18 +45,18 @@ public static class ExecuteApplicationProcessExtensions
         }
         finally
         {
-            process.OutputDataReceived -= OnProcessOnOutputDataReceived;
-            process.ErrorDataReceived -= OnProcessOnOutputDataReceived;
+            TeardownProcessEventHandlers(process, output);
         }
 
         return GetProcessOutputData(output.ToString().Trim(), process);
-
-        void OnProcessOnOutputDataReceived(object o, DataReceivedEventArgs e) => output.AppendLine(e.Data);
     }
 
     /// <summary>
     ///     A helper method to execute a process
     /// </summary>
+    /// <remarks>
+    ///     If the process does not exit within the specified timeout, it will be forcefully killed.
+    /// </remarks>
     public static ExecuteProcessInfo ExecuteProcess(this ApplicationStartInfo startInfo)
     {
         ArgumentNullException.ThrowIfNull(startInfo);
@@ -64,8 +66,7 @@ public static class ExecuteApplicationProcessExtensions
         var output = new StringBuilder();
 
         using var process = startInfo.CreateProcess();
-        process.OutputDataReceived += OnProcessOnOutputDataReceived;
-        process.ErrorDataReceived += OnProcessOnOutputDataReceived;
+        SetupProcessEventHandlers(process, output);
 
         try
         {
@@ -73,32 +74,43 @@ public static class ExecuteApplicationProcessExtensions
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
 
-            process.WaitForExit((int)(startInfo.WaitForExit?.TotalMilliseconds ??
-                                      DefaultWaitForExit.TotalMilliseconds));
+            var waitTimeMs = (int)(startInfo.WaitForExit?.TotalMilliseconds ?? DefaultWaitForExit.TotalMilliseconds);
+            process.WaitForExit(waitTimeMs);
         }
         finally
         {
-            process.OutputDataReceived -= OnProcessOnOutputDataReceived;
-            process.ErrorDataReceived -= OnProcessOnOutputDataReceived;
+            TeardownProcessEventHandlers(process, output);
         }
 
         return GetProcessOutputData(output.ToString().Trim(), process);
-
-        void OnProcessOnOutputDataReceived(object o, DataReceivedEventArgs e) => output.AppendLine(e.Data);
     }
 
-    private static ExecuteProcessInfo GetProcessOutputData(string errorMessage, Process process)
+    private static void SetupProcessEventHandlers(Process process, StringBuilder output)
+    {
+        void OnProcessOnOutputDataReceived(object sender, DataReceivedEventArgs e) => output.AppendLine(e.Data);
+
+        process.OutputDataReceived += OnProcessOnOutputDataReceived;
+        process.ErrorDataReceived += OnProcessOnOutputDataReceived;
+    }
+
+    private static void TeardownProcessEventHandlers(Process process, StringBuilder output)
+    {
+        void OnProcessOnOutputDataReceived(object sender, DataReceivedEventArgs e) => output.AppendLine(e.Data);
+
+        process.OutputDataReceived -= OnProcessOnOutputDataReceived;
+        process.ErrorDataReceived -= OnProcessOnOutputDataReceived;
+    }
+
+    private static ExecuteProcessInfo GetProcessOutputData(string outputMessage, Process process)
     {
         var (exitCode, isExited) = GetProcessExitInfo(process);
 
-        if (isExited)
+        if (!isExited)
         {
-            return new ExecuteProcessInfo(exitCode, isExited, errorMessage);
+            KillThisProcess(process);
         }
 
-        KillThisProcess(process);
-
-        return new ExecuteProcessInfo(exitCode, isExited, errorMessage);
+        return new ExecuteProcessInfo(exitCode, isExited, outputMessage);
     }
 
     private static void KillThisProcess(Process process)
@@ -107,9 +119,10 @@ public static class ExecuteApplicationProcessExtensions
         {
             process.Kill(entireProcessTree: true);
         }
-        catch
+        catch (Exception ex)
         {
-            // It's not important!
+            // Process may have already exited or access denied - not critical for operation
+            Debug.WriteLine($"Failed to kill process: {ex.Message}");
         }
     }
 
@@ -120,11 +133,19 @@ public static class ExecuteApplicationProcessExtensions
             return;
         }
 
-        var processes = Process.GetProcessesByName(startInfo.ProcessName);
-
-        foreach (var process in processes)
+        try
         {
-            KillThisProcess(process);
+            var processes = Process.GetProcessesByName(startInfo.ProcessName);
+
+            foreach (var process in processes)
+            {
+                KillThisProcess(process);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Failed to retrieve or kill processes - not critical for operation
+            Debug.WriteLine($"Failed to kill processes: {ex.Message}");
         }
     }
 
@@ -134,9 +155,10 @@ public static class ExecuteApplicationProcessExtensions
         {
             return (process.ExitCode, process.HasExited);
         }
-        catch
+        catch (Exception ex)
         {
-            // It's not important!
+            // Process may have already exited - not critical, return default values
+            Debug.WriteLine($"Failed to get process exit info: {ex.Message}");
         }
 
         return (-1, false);
@@ -146,9 +168,21 @@ public static class ExecuteApplicationProcessExtensions
     {
         var process = new Process();
 
+        process.StartInfo.UseShellExecute = false;
+
         if (!startInfo.AppPath.IsEmpty())
         {
             process.StartInfo.FileName = startInfo.AppPath;
+        }
+        else if (!startInfo.ProcessName.IsEmpty())
+        {
+            process.StartInfo.FileName = startInfo.ProcessName;
+
+            // On Linux/Unix systems with UseShellExecute = false, the system cannot find the executable
+            // using just the process name from the PATH environment variable. It needs either:
+            // The full absolute path to the executable, or
+            // UseShellExecute = true to let the shell resolve the command from PATH
+            process.StartInfo.UseShellExecute = OperatingSystem.IsLinux() || OperatingSystem.IsMacOS();
         }
 
         if (!startInfo.Arguments.IsEmpty())
@@ -164,7 +198,6 @@ public static class ExecuteApplicationProcessExtensions
             }
         }
 
-        process.StartInfo.UseShellExecute = false;
         process.StartInfo.CreateNoWindow = true;
         process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
         process.StartInfo.RedirectStandardOutput = true;
