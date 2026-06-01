@@ -74,6 +74,7 @@ public static class LinuxZipSplitter
         var processInfo = await new ApplicationStartInfo
         {
             ProcessName = "zip",
+            AppPath = "zip",			
             ArgumentsList = argumentsList,
             WaitForExit = TimeSpan.FromMinutes(value: 2),
             KillProcessOnStart = false
@@ -193,6 +194,7 @@ public static class LinuxZipSplitter
         var processInfo = await new ApplicationStartInfo
         {
             ProcessName = "zip",
+            AppPath = "zip",			
             ArgumentsList = argumentsList,
             WaitForExit = TimeSpan.FromMinutes(value: 5),
             KillProcessOnStart = false,
@@ -230,6 +232,7 @@ public static class LinuxZipSplitter
             var processInfo = await new ApplicationStartInfo
             {
                 ProcessName = "zip",
+                AppPath = "zip",				
                 ArgumentsList = ["--version"],
                 WaitForExit = TimeSpan.FromSeconds(value: 15),
                 KillProcessOnStart = false
@@ -237,13 +240,9 @@ public static class LinuxZipSplitter
 
             return processInfo.ExitCode == 0;
         }
-        catch (Win32Exception)
-        {
-            // فایل zip پیدا نشد یا اجرا نمی‌شود
-            return false;
-        }
         catch
         {
+            // فایل zip پیدا نشد یا اجرا نمی‌شود
             return false;
         }
     }
