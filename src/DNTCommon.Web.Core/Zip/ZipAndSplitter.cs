@@ -10,6 +10,8 @@ public static class ZipAndSplitter
         string outputDirectory,
         int partSizeMB,
         bool appendSecureGuidToOutputName = true,
+        bool appendDateTimeToOutputName = true,
+        string namePartsSeparator = "_",
         bool overwriteExistingFiles = true,
         string? password = null,
         ILogger? logger = null,
@@ -21,12 +23,19 @@ public static class ZipAndSplitter
                 overwriteExistingFiles, logger, cancellationToken);
         }
 
+        logger?.LogCritical(message: "Zip is not installed on this server.");
+
         var salt = appendSecureGuidToOutputName
-            ? string.Create(CultureInfo.InvariantCulture,
-                $".{DateTime.UtcNow:yyyyMMdd_HHmmss}.{Guid.CryptographicallySecureGuid:N}")
+            ? string.Create(CultureInfo.InvariantCulture, $"{namePartsSeparator}{Guid.CryptographicallySecureGuid:N}")
             : "";
 
-        var dataBackupFileName = string.Create(CultureInfo.InvariantCulture, $"{filePath.GetFileName()}{salt}.zip");
+        salt += appendDateTimeToOutputName
+            ? string.Create(CultureInfo.InvariantCulture, $"{namePartsSeparator}{DateTime.UtcNow:yyyyMMdd_HHmmss}")
+            : "";
+
+        var dataBackupFileName = string.Create(CultureInfo.InvariantCulture,
+            $"{filePath.GetFileName()}{salt}{namePartsSeparator}zip");
+
         var backupZipFilePath = outputDirectory.SafePathCombine(dataBackupFileName)!;
 
         backupZipFilePath.CompressFilesToZipFile(filePath);
@@ -49,6 +58,8 @@ public static class ZipAndSplitter
         string outputDirectory,
         int partSizeMB,
         bool appendSecureGuidToOutputName = true,
+        bool appendDateTimeToOutputName = true,
+        string namePartsSeparator = "_",
         bool overwriteExistingFiles = true,
         string? password = null,
         ILogger? logger = null,
@@ -60,13 +71,18 @@ public static class ZipAndSplitter
                 overwriteExistingFiles, logger, cancellationToken);
         }
 
+        logger?.LogCritical(message: "Zip is not installed on this server.");
+
         var salt = appendSecureGuidToOutputName
-            ? string.Create(CultureInfo.InvariantCulture,
-                $".{DateTime.UtcNow:yyyyMMdd_HHmmss}.{Guid.CryptographicallySecureGuid:N}")
+            ? string.Create(CultureInfo.InvariantCulture, $"{namePartsSeparator}{Guid.CryptographicallySecureGuid:N}")
+            : "";
+
+        salt += appendDateTimeToOutputName
+            ? string.Create(CultureInfo.InvariantCulture, $"{namePartsSeparator}{DateTime.UtcNow:yyyyMMdd_HHmmss}")
             : "";
 
         var dataBackupFileName = string.Create(CultureInfo.InvariantCulture,
-            $"{new DirectoryInfo(folderPath).Name}{salt}.zip");
+            $"{new DirectoryInfo(folderPath).Name}{salt}{namePartsSeparator}zip");
 
         var outputZipFilePath = outputDirectory.SafePathCombine(dataBackupFileName)!;
 
