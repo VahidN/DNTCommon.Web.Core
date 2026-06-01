@@ -15,11 +15,13 @@ public static class LinuxInfoProvider
     private static readonly Regex RegexVersion = new(pattern: @"\s(\d+\.\d+\.\d+)-",
         RegexOptions.Compiled | RegexOptions.IgnoreCase, MatchTimeout);
 
-    public static LinuxWebServerInfo GetLinuxWebServerInfo()
+    public static async Task<LinuxWebServerInfo> GetLinuxWebServerInfoAsync(CancellationToken cancellationToken =
+        default)
         => new()
         {
             EnvironmentVariables = GetEnvironmentVariables(),
-            AvailableSdkVersions = GetAvailableSdkVersions()
+            AvailableSdkVersions = GetAvailableSdkVersions(),
+            IsZipInstalled = await LinuxZipSplitter.IsZipInstalledAsync(cancellationToken)
         };
 
     public static IList<string> GetEnvironmentVariables()

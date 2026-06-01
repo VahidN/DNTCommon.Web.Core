@@ -50,6 +50,6 @@ public static class WebServerInfoProvider
             DriveInfo = PCDriveInfoProvider.GetDriveInfo(),
             TimeZone = WebServerTimeZoneInfoProvider.GetTimezoneDetails(),
             Hardware = await WebServerHardwareInfoProvider.GetWebServerHardwareAsync(cancellationToken),
-            LinuxInfo = LinuxInfoProvider.GetLinuxWebServerInfo()
+            LinuxInfo = await LinuxInfoProvider.GetLinuxWebServerInfoAsync(cancellationToken)
         };
 }
