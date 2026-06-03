@@ -7,6 +7,10 @@ public static partial class GeminiOutputNormalizer
 {
     private const string CodeHighlightingLineSeperator = " $$CHLS$$ ";
 
+    [GeneratedRegex(pattern: @"(\r?\n|\r)+", RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase,
+        matchTimeoutMilliseconds: 3000)]
+    private static partial Regex NewLines();
+
     [GeneratedRegex(pattern: @"!\[(.*?)\]\((.*?)(\s*""[^""]*"")?(\s*=\s*(\d*)x?(\d*))?\)",
         RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase, matchTimeoutMilliseconds: 3000)]
     private static partial Regex ImageRegex();
@@ -97,6 +101,7 @@ public static partial class GeminiOutputNormalizer
         }
 
         var markup = text.GetMarkup();
+        markup = markup.NormalizeNewLines();
         markup = markup.ConvertMakdownHeadersToHtml();
         markup = markup.ConvertMarkdownBlockquotesToHtml();
         markup = markup.ConvertMarkdownHorizontalRulesToHtml();
@@ -685,6 +690,9 @@ public static partial class GeminiOutputNormalizer
 
         return string.Concat(htmlLines);
     }
+
+    public static string? NormalizeNewLines([NotNullIfNotNull(nameof(input))] this string? input)
+        => input.IsEmpty() ? input : NewLines().Replace(input, replacement: "\n");
 
     private static void ProcessUnorderedList(Stack<string> listStack,
         Stack<int> indentStack,
