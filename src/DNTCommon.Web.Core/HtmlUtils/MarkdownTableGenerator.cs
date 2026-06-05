@@ -1,12 +1,17 @@
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace DNTCommon.Web.Core;
 
 /// <summary>
 ///     تولید جدول Markdown از روی سرستون‌ها و ردیف‌ها
 /// </summary>
-public static class MarkdownTableGenerator
+public static partial class MarkdownTableGenerator
 {
+    [GeneratedRegex(pattern: @"([_*\[\]()~`>#+\-=|{}.!])",
+        RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex MarkdownV2();
+
     /// <summary>
     ///     تولید جدول Markdown از روی سرستون‌ها و ردیف‌ها
     /// </summary>
@@ -60,6 +65,8 @@ public static class MarkdownTableGenerator
     }
 
     public static string EscapeMarkdownTableCell(this string? cell)
-        => cell?.Replace(oldValue: "|", newValue: "\\|", StringComparison.Ordinal)
-            .Replace(oldValue: "\n", newValue: "<br>", StringComparison.Ordinal) ?? string.Empty;
+        => cell.EscapeMarkdownV2()?.Replace(oldValue: "\n", newValue: "<br>", StringComparison.Ordinal) ?? string.Empty;
+
+    public static string? EscapeMarkdownV2([NotNullIfNotNull(nameof(text))] this string? text)
+        => text.IsEmpty() ? text : MarkdownV2().Replace(text, replacement: @"\$1");
 }
