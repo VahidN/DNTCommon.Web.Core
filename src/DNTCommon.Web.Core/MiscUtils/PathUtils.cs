@@ -113,6 +113,32 @@ public static class PathUtils
         return !dirPath.IsEmpty() && Directory.Exists(dirPath);
     }
 
+    public static void TryDeleteFiles(this ICollection<FileInfo>? files, ILogger? logger = null)
+    {
+        if (files.IsNullOrEmpty())
+        {
+            return;
+        }
+
+        foreach (var file in files)
+        {
+            file.FullName.TryDeleteFile(logger);
+        }
+    }
+
+    public static void TryDeleteFiles(this ICollection<string>? files, ILogger? logger = null)
+    {
+        if (files.IsNullOrEmpty())
+        {
+            return;
+        }
+
+        foreach (var file in files)
+        {
+            file.TryDeleteFile(logger);
+        }
+    }
+
     /// <summary>
     ///     Tries to delete a file without throwing an exception
     /// </summary>
@@ -854,5 +880,32 @@ public static class PathUtils
 
         // Return Safe Relative Path: Only returns the portion after the root
         return Path.GetRelativePath(fullRoot, resolvedPath);
+    }
+
+    public static IEnumerable<FileInfo> GetFilesByExtensions(this DirectoryInfo dir, params string[] extensions)
+    {
+        ArgumentNullException.ThrowIfNull(dir);
+        ArgumentNullException.ThrowIfNull(extensions);
+
+        var fileInfos = dir.EnumerateFiles();
+
+        if (extensions.Length == 1 && string.Equals(extensions[0].Trim(), b: "*.*", StringComparison.Ordinal))
+        {
+            return fileInfos;
+        }
+
+        var pathExtensions = extensions.Select(Path.GetExtension).Distinct().ToArray();
+
+        return fileInfos.Where(f => pathExtensions.Contains(f.Extension, StringComparer.OrdinalIgnoreCase));
+    }
+
+    public static IEnumerable<FileInfo> GetFilesByExtensions(this string directory, params string[] extensions)
+    {
+        ArgumentNullException.ThrowIfNull(directory);
+        ArgumentNullException.ThrowIfNull(extensions);
+
+        directory = directory.NormalizePath()!;
+
+        return new DirectoryInfo(directory).GetFilesByExtensions(extensions);
     }
 }
