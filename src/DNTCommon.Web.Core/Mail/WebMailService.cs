@@ -1,9 +1,7 @@
 using DNTPersianUtils.Core;
 using MailKit.Net.Smtp;
-using MimeKit;
-#if NET_10 || NET_9 || NET_8
 using Microsoft.AspNetCore.Components;
-#endif
+using MimeKit;
 
 namespace DNTCommon.Web.Core;
 
@@ -15,37 +13,14 @@ namespace DNTCommon.Web.Core;
 /// </remarks>
 public class WebMailService(
     IBackgroundQueueService backgroundQueueService,
-    IViewRendererService viewRendererService
-#if NET_10 || NET_9 || NET_8
-    ,
-    IBlazorStaticRendererService blazorStaticRendererService
-#endif
-) : IWebMailService
+    IViewRendererService viewRendererService,
+    IBlazorStaticRendererService blazorStaticRendererService) : IWebMailService
 {
-#if NET_10 || NET_9 || NET_8
     private readonly IBlazorStaticRendererService _blazorStaticRendererService = blazorStaticRendererService ??
         throw new ArgumentNullException(nameof(blazorStaticRendererService));
-#endif
+
     private readonly IViewRendererService _viewRendererService =
         viewRendererService ?? throw new ArgumentNullException(nameof(viewRendererService));
-
-    /// <summary>
-    ///     Queues sending an email using the `MailKit` library.
-    /// </summary>
-    public ValueTask BackgroundQueueSendEmailAsync(SmtpConfig smtpConfig,
-        IEnumerable<MailAddress> emails,
-        string subject,
-        string message,
-        IEnumerable<MailAddress>? blindCarpbonCopies = null,
-        IEnumerable<MailAddress>? carpbonCopies = null,
-        IEnumerable<MailAddress>? replyTos = null,
-        DelayDelivery? delayDelivery = null,
-        IEnumerable<string>? attachmentFiles = null,
-        MailHeaders? headers = null,
-        bool shouldValidateServerCertificate = true)
-        => backgroundQueueService.QueueBackgroundWorkItemAsync(nameof(WebMailService),
-            (_, _) => SendEmailAsync(smtpConfig, emails, subject, message, blindCarpbonCopies, carpbonCopies, replyTos,
-                delayDelivery, attachmentFiles, headers, shouldValidateServerCertificate));
 
     /// <summary>
     ///     Sends an email using the `MailKit` library.
@@ -70,26 +45,6 @@ public class WebMailService(
         await SendEmailAsync(smtpConfig, emails, subject, message, blindCarpbonCopies, carpbonCopies, replyTos,
             delayDelivery, attachmentFiles, headers, shouldValidateServerCertificate, cancellationToken);
     }
-
-    /// <summary>
-    ///     Queues sending an email using the `MailKit` library.
-    ///     This method converts a razor template file to a string and then uses it as the email's message.
-    /// </summary>
-    public ValueTask BackgroundQueueSendEmailAsync<T>(SmtpConfig smtpConfig,
-        IEnumerable<MailAddress> emails,
-        string subject,
-        string viewNameOrPath,
-        T viewModel,
-        IEnumerable<MailAddress>? blindCarpbonCopies = null,
-        IEnumerable<MailAddress>? carpbonCopies = null,
-        IEnumerable<MailAddress>? replyTos = null,
-        DelayDelivery? delayDelivery = null,
-        IEnumerable<string>? attachmentFiles = null,
-        MailHeaders? headers = null,
-        bool shouldValidateServerCertificate = true)
-        => backgroundQueueService.QueueBackgroundWorkItemAsync(nameof(WebMailService),
-            (_, _) => SendEmailAsync(smtpConfig, emails, subject, viewNameOrPath, viewModel, blindCarpbonCopies,
-                carpbonCopies, replyTos, delayDelivery, attachmentFiles, headers, shouldValidateServerCertificate));
 
     /// <summary>
     ///     Sends an email using the `MailKit` library.
@@ -123,6 +78,94 @@ public class WebMailService(
                 shouldValidateServerCertificate, cancellationToken);
         }
     }
+
+    /// <summary>
+    ///     Sends an email using the `MailKit` library.
+    ///     This method converts a Blazor .razor template file to an string and then uses it as the email's message.
+    /// </summary>
+    public async Task SendEmailAsync<T>(SmtpConfig smtpConfig,
+        IEnumerable<MailAddress> emails,
+        string subject,
+        IDictionary<string, object?> viewModel,
+        IEnumerable<MailAddress>? blindCarpbonCopies = null,
+        IEnumerable<MailAddress>? carpbonCopies = null,
+        IEnumerable<MailAddress>? replyTos = null,
+        DelayDelivery? delayDelivery = null,
+        IEnumerable<string>? attachmentFiles = null,
+        MailHeaders? headers = null,
+        bool shouldValidateServerCertificate = true,
+        CancellationToken cancellationToken = default)
+        where T : IComponent
+    {
+        var message = await _blazorStaticRendererService.StaticRenderComponentAsync<T>(viewModel);
+
+        await SendEmailAsync(smtpConfig, emails, subject, message, blindCarpbonCopies, carpbonCopies, replyTos,
+            delayDelivery, attachmentFiles, headers, shouldValidateServerCertificate, cancellationToken);
+    }
+
+    /// <summary>
+    ///     Queues sending an email using the `MailKit` library.
+    /// </summary>
+    public ValueTask BackgroundQueueSendEmailAsync(SmtpConfig smtpConfig,
+        IEnumerable<MailAddress> emails,
+        string subject,
+        string message,
+        IEnumerable<MailAddress>? blindCarpbonCopies = null,
+        IEnumerable<MailAddress>? carpbonCopies = null,
+        IEnumerable<MailAddress>? replyTos = null,
+        DelayDelivery? delayDelivery = null,
+        IEnumerable<string>? attachmentFiles = null,
+        MailHeaders? headers = null,
+        bool shouldValidateServerCertificate = true,
+        CancellationToken cancellationToken = default)
+        => backgroundQueueService.QueueBackgroundWorkItemAsync(nameof(WebMailService),
+            (_, _) => SendEmailAsync(smtpConfig, emails, subject, message, blindCarpbonCopies, carpbonCopies, replyTos,
+                delayDelivery, attachmentFiles, headers, shouldValidateServerCertificate, cancellationToken),
+            cancellationToken);
+
+    /// <summary>
+    ///     Queues sending an email using the `MailKit` library.
+    ///     This method converts a razor template file to a string and then uses it as the email's message.
+    /// </summary>
+    public ValueTask BackgroundQueueSendEmailAsync<T>(SmtpConfig smtpConfig,
+        IEnumerable<MailAddress> emails,
+        string subject,
+        string viewNameOrPath,
+        T viewModel,
+        IEnumerable<MailAddress>? blindCarpbonCopies = null,
+        IEnumerable<MailAddress>? carpbonCopies = null,
+        IEnumerable<MailAddress>? replyTos = null,
+        DelayDelivery? delayDelivery = null,
+        IEnumerable<string>? attachmentFiles = null,
+        MailHeaders? headers = null,
+        bool shouldValidateServerCertificate = true,
+        CancellationToken cancellationToken = default)
+        => backgroundQueueService.QueueBackgroundWorkItemAsync(nameof(WebMailService),
+            (_, _) => SendEmailAsync(smtpConfig, emails, subject, viewNameOrPath, viewModel, blindCarpbonCopies,
+                carpbonCopies, replyTos, delayDelivery, attachmentFiles, headers, shouldValidateServerCertificate,
+                cancellationToken), cancellationToken);
+
+    /// <summary>
+    ///     Queues sending an email using the `MailKit` library.
+    ///     This method converts a blazor .razor template file to a string and then uses it as the email's message.
+    /// </summary>
+    public ValueTask BackgroundQueueSendEmailAsync<T>(SmtpConfig smtpConfig,
+        IEnumerable<MailAddress> emails,
+        string subject,
+        IDictionary<string, object?> viewModel,
+        IEnumerable<MailAddress>? blindCarpbonCopies = null,
+        IEnumerable<MailAddress>? carpbonCopies = null,
+        IEnumerable<MailAddress>? replyTos = null,
+        DelayDelivery? delayDelivery = null,
+        IEnumerable<string>? attachmentFiles = null,
+        MailHeaders? headers = null,
+        bool shouldValidateServerCertificate = true,
+        CancellationToken cancellationToken = default)
+        where T : IComponent
+        => backgroundQueueService.QueueBackgroundWorkItemAsync(nameof(WebMailService),
+            (_, _) => SendEmailAsync<T>(smtpConfig, emails, subject, viewModel, blindCarpbonCopies, carpbonCopies,
+                replyTos, delayDelivery, attachmentFiles, headers, shouldValidateServerCertificate, cancellationToken),
+            cancellationToken);
 
     private static async Task SendThisEmailAsync(SmtpConfig smtpConfig,
         ICollection<MailAddress> emails,
@@ -333,51 +376,4 @@ public class WebMailService(
 
         return builder.ToMessageBody();
     }
-
-#if NET_10 || NET_9 || NET_8
-    /// <summary>
-    ///     Sends an email using the `MailKit` library.
-    ///     This method converts a Blazor .razor template file to an string and then uses it as the email's message.
-    /// </summary>
-    public async Task SendEmailAsync<T>(SmtpConfig smtpConfig,
-        IEnumerable<MailAddress> emails,
-        string subject,
-        IDictionary<string, object?> viewModel,
-        IEnumerable<MailAddress>? blindCarpbonCopies = null,
-        IEnumerable<MailAddress>? carpbonCopies = null,
-        IEnumerable<MailAddress>? replyTos = null,
-        DelayDelivery? delayDelivery = null,
-        IEnumerable<string>? attachmentFiles = null,
-        MailHeaders? headers = null,
-        bool shouldValidateServerCertificate = true,
-        CancellationToken cancellationToken = default)
-        where T : IComponent
-    {
-        var message = await _blazorStaticRendererService.StaticRenderComponentAsync<T>(viewModel);
-
-        await SendEmailAsync(smtpConfig, emails, subject, message, blindCarpbonCopies, carpbonCopies, replyTos,
-            delayDelivery, attachmentFiles, headers, shouldValidateServerCertificate, cancellationToken);
-    }
-
-    /// <summary>
-    ///     Queues sending an email using the `MailKit` library.
-    ///     This method converts a blazor .razor template file to a string and then uses it as the email's message.
-    /// </summary>
-    public ValueTask BackgroundQueueSendEmailAsync<T>(SmtpConfig smtpConfig,
-        IEnumerable<MailAddress> emails,
-        string subject,
-        IDictionary<string, object?> viewModel,
-        IEnumerable<MailAddress>? blindCarpbonCopies = null,
-        IEnumerable<MailAddress>? carpbonCopies = null,
-        IEnumerable<MailAddress>? replyTos = null,
-        DelayDelivery? delayDelivery = null,
-        IEnumerable<string>? attachmentFiles = null,
-        MailHeaders? headers = null,
-        bool shouldValidateServerCertificate = true)
-        where T : IComponent
-        => backgroundQueueService.QueueBackgroundWorkItemAsync(nameof(WebMailService),
-            (_, _) => SendEmailAsync<T>(smtpConfig, emails, subject, viewModel, blindCarpbonCopies, carpbonCopies,
-                replyTos, delayDelivery, attachmentFiles, headers, shouldValidateServerCertificate));
-
-#endif
 }

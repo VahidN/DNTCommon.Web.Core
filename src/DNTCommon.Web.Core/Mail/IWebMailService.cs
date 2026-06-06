@@ -20,7 +20,8 @@ public interface IWebMailService
         DelayDelivery? delayDelivery = null,
         IEnumerable<string>? attachmentFiles = null,
         MailHeaders? headers = null,
-        bool shouldValidateServerCertificate = true);
+        bool shouldValidateServerCertificate = true,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Sends an email using the `MailKit` library immediately.
@@ -53,7 +54,8 @@ public interface IWebMailService
         DelayDelivery? delayDelivery = null,
         IEnumerable<string>? attachmentFiles = null,
         MailHeaders? headers = null,
-        bool shouldValidateServerCertificate = true);
+        bool shouldValidateServerCertificate = true,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Sends an email using the `MailKit` library immediately.
@@ -73,7 +75,6 @@ public interface IWebMailService
         bool shouldValidateServerCertificate = true,
         CancellationToken cancellationToken = default);
 
-#if NET_10 || NET_9 || NET_8
     /// <summary>
     ///     Sends an email using the `MailKit` library immediately.
     ///     This method converts a blazor .razor template file to a string and then uses it as the email's message.
@@ -106,8 +107,7 @@ public interface IWebMailService
         DelayDelivery? delayDelivery = null,
         IEnumerable<string>? attachmentFiles = null,
         MailHeaders? headers = null,
-        bool shouldValidateServerCertificate = true)
+        bool shouldValidateServerCertificate = true,
+        CancellationToken cancellationToken = default)
         where T : IComponent;
-
-#endif
 }

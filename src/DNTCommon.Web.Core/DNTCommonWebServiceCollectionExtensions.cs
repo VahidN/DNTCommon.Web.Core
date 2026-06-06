@@ -10,7 +10,6 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public static class DntCommonWebServiceCollectionExtensions
 {
-#if NET_10 || NET_9 || NET_8
     /// <summary>
     ///     Sets ServicesStartConcurrently and ServicesStopConcurrently to true
     /// </summary>
@@ -20,7 +19,6 @@ public static class DntCommonWebServiceCollectionExtensions
             options.ServicesStartConcurrently = true;
             options.ServicesStopConcurrently = true;
         });
-#endif
 
     /// <summary>
     ///     Sets ForwardedHeaders to ForwardedHeaders.All
@@ -84,9 +82,7 @@ public static class DntCommonWebServiceCollectionExtensions
             services.AddDNTScheduler(scheduledTasksOptions);
         }
 
-#if NET_10 || NET_9 || NET_8
         services.AddBlazorStaticRendererService();
-#endif
         services.AddBlazorRenderingContextService();
 
         return services;

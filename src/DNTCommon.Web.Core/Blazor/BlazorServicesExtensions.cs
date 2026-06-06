@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -8,18 +9,16 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public static class BlazorServicesExtensions
 {
-#if NET_10 || NET_9 || NET_8
     /// <summary>
     ///     Adds services to IServiceCollection.
     /// </summary>
     public static IServiceCollection AddBlazorStaticRendererService(this IServiceCollection services)
     {
-        services.TryAddScoped<Microsoft.AspNetCore.Components.Web.HtmlRenderer>();
+        services.TryAddScoped<HtmlRenderer>();
         services.TryAddScoped<IBlazorStaticRendererService, BlazorStaticRendererService>();
 
         return services;
     }
-#endif
 
     /// <summary>
     ///     Adds services to IServiceCollection.

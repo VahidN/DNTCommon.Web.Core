@@ -1,5 +1,4 @@
-﻿#if NET_10 || NET_9 || NET_8
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 
 namespace DNTCommon.Web.Core;
 
@@ -30,4 +29,3 @@ public interface IBlazorStaticRendererService
     /// </summary>
     Task<string> StaticRenderComponentAsync(Type componentType, IDictionary<string, object?>? dictionary);
 }
-#endif
