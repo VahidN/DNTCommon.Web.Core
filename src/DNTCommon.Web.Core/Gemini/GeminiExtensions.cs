@@ -155,11 +155,13 @@ public static class GeminiExtensions
                 StopSequences = [],
                 ResponseModalities = options.ResponseModalities,
                 ResponseMimeType = options.ResponseMimeType,
-                ThinkingConfiguration = new GeminiThinkingConfiguration
-                {
-                    IncludeThoughts = false,
-                    ThinkingBudget = 0
-                }
+                ThinkingConfiguration = options.DisableThinking
+                    ? new GeminiThinkingConfiguration
+                    {
+                        IncludeThoughts = false,
+                        ThinkingBudget = 0
+                    }
+                    : null
             },
             SafetySettings =
             [

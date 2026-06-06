@@ -18,7 +18,7 @@ public sealed class GeminiClientOptions
     /// <summary>
     ///     Supported modalities of the response.
     /// </summary>
-    public ICollection<GeminiResponseModality>? ResponseModalities { set; get; }
+    public ICollection<GeminiResponseModality>? ResponseModalities { get; set; }
 
     /// <summary>
     ///     The maximum number of tokens to include in a response candidate.
@@ -35,4 +35,10 @@ public sealed class GeminiClientOptions
     ///     for a list of all supported text MIME types.
     /// </summary>
     public string? ResponseMimeType { get; set; }
+
+    /// <summary>
+    ///     Optional. Config for thinking features. An error will be returned if this field is set for models that don't
+    ///     support thinking.
+    /// </summary>
+    public bool DisableThinking { get; set; }
 }
