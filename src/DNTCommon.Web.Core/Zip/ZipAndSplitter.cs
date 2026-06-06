@@ -9,9 +9,7 @@ public static class ZipAndSplitter
     public static async Task<IList<string>?> ZipAndSplitFileToMultiplePartsAsync(this string filePath,
         string outputDirectory,
         int partSizeMB,
-        bool appendSecureGuidToOutputName = true,
-        bool appendDateTimeToOutputName = true,
-        string namePartsSeparator = "_",
+        string? outputFileName,
         bool overwriteExistingFiles = true,
         string? password = null,
         ILogger? logger = null,
@@ -19,22 +17,17 @@ public static class ZipAndSplitter
     {
         if (await LinuxZipSplitter.IsZipInstalledAsync(cancellationToken))
         {
-            return await filePath.LinuxZipAndSplitFileAsync(partSizeMB, password, outputDirectory,
+            return await filePath.LinuxZipAndSplitFileAsync(partSizeMB, password, outputDirectory, outputFileName,
                 overwriteExistingFiles, logger, cancellationToken);
         }
 
         logger?.LogCritical(message: "Zip is not installed on this server.");
 
-        var salt = appendSecureGuidToOutputName
-            ? string.Create(CultureInfo.InvariantCulture, $"{namePartsSeparator}{Guid.CryptographicallySecureGuid:N}")
-            : "";
+        var name = outputFileName?.IsEmpty() == false
+            ? outputFileName.GetFileNameWithoutExtension()
+            : filePath.GetFileNameWithoutExtension();
 
-        salt += appendDateTimeToOutputName
-            ? string.Create(CultureInfo.InvariantCulture, $"{namePartsSeparator}{DateTime.UtcNow:yyyyMMdd_HHmmss}")
-            : "";
-
-        var dataBackupFileName = string.Create(CultureInfo.InvariantCulture,
-            $"{filePath.GetFileName()}{salt}{namePartsSeparator}zip");
+        var dataBackupFileName = string.Create(CultureInfo.InvariantCulture, $"{name}.zip");
 
         var backupZipFilePath = outputDirectory.SafePathCombine(dataBackupFileName)!;
 
@@ -46,7 +39,7 @@ public static class ZipAndSplitter
             var totalWidth = partsInfo.TotalParts.CountDigits();
             var number = partsInfo.PartNumber.ToStringPadLeft(totalWidth);
 
-            return string.Create(CultureInfo.InvariantCulture, $"{dataBackupFileName}_{number}.part");
+            return string.Create(CultureInfo.InvariantCulture, $"{dataBackupFileName}{number}.part");
         }, partSizeMB.ToBytes(FileSizeUnit.Megabyte), cancellationToken);
 
         backupZipFilePath.TryDeleteFile(logger);
@@ -57,9 +50,7 @@ public static class ZipAndSplitter
     public static async Task<IList<string>?> ZipAndSplitFolderToMultiplePartsAsync(this string folderPath,
         string outputDirectory,
         int partSizeMB,
-        bool appendSecureGuidToOutputName = true,
-        bool appendDateTimeToOutputName = true,
-        string namePartsSeparator = "_",
+        string? outputFileName,
         bool overwriteExistingFiles = true,
         string? password = null,
         ILogger? logger = null,
@@ -67,22 +58,17 @@ public static class ZipAndSplitter
     {
         if (await LinuxZipSplitter.IsZipInstalledAsync(cancellationToken))
         {
-            return await folderPath.LinuxZipAndSplitFolderAsync(partSizeMB, password, outputDirectory,
+            return await folderPath.LinuxZipAndSplitFolderAsync(partSizeMB, password, outputDirectory, outputFileName,
                 overwriteExistingFiles, logger, cancellationToken);
         }
 
         logger?.LogCritical(message: "Zip is not installed on this server.");
 
-        var salt = appendSecureGuidToOutputName
-            ? string.Create(CultureInfo.InvariantCulture, $"{namePartsSeparator}{Guid.CryptographicallySecureGuid:N}")
-            : "";
+        var name = outputFileName?.IsEmpty() == false
+            ? outputFileName.GetFileNameWithoutExtension()
+            : new DirectoryInfo(folderPath).Name;
 
-        salt += appendDateTimeToOutputName
-            ? string.Create(CultureInfo.InvariantCulture, $"{namePartsSeparator}{DateTime.UtcNow:yyyyMMdd_HHmmss}")
-            : "";
-
-        var dataBackupFileName = string.Create(CultureInfo.InvariantCulture,
-            $"{new DirectoryInfo(folderPath).Name}{salt}{namePartsSeparator}zip");
+        var dataBackupFileName = string.Create(CultureInfo.InvariantCulture, $"{name}.zip");
 
         var outputZipFilePath = outputDirectory.SafePathCombine(dataBackupFileName)!;
 
@@ -94,7 +80,7 @@ public static class ZipAndSplitter
             var totalWidth = partsInfo.TotalParts.CountDigits();
             var number = partsInfo.PartNumber.ToStringPadLeft(totalWidth);
 
-            return string.Create(CultureInfo.InvariantCulture, $"{dataBackupFileName}_{number}.part");
+            return string.Create(CultureInfo.InvariantCulture, $"{dataBackupFileName}{number}.part");
         }, partSizeMB.ToBytes(FileSizeUnit.Megabyte), cancellationToken);
 
         outputZipFilePath.TryDeleteFile(logger);

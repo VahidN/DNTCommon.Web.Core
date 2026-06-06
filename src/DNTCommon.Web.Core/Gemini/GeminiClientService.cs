@@ -160,7 +160,7 @@ public class GeminiClientService(IHttpClientFactory httpClientFactory) : IGemini
         {
             file = new
             {
-                display_name = Path.GetFileNameWithoutExtension(localFilePath)
+                display_name = localFilePath.GetFileNameWithoutExtension()
             }
         }), Encoding.UTF8, mediaType: "application/json");
 

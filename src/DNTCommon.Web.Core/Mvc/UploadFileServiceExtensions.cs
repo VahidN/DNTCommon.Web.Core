@@ -38,7 +38,7 @@ public static class UploadFileServiceExtensions
             return filePath;
         }
 
-        var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
+        var fileNameWithoutExtension = fileName.GetFileNameWithoutExtension();
         var extension = Path.GetExtension(fileName);
 
         return uploadsRootFolder.SafePathCombine(

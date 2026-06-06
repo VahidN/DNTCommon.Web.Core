@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using Microsoft.Extensions.Logging;
 
 namespace DNTCommon.Web.Core;
@@ -13,6 +12,7 @@ public static class LinuxZipSplitter
         int partSizeMB,
         string? password,
         string? outputDirectory,
+        string? outputFileName,
         bool overwriteExistingFiles,
         ILogger? logger,
         CancellationToken cancellationToken = default)
@@ -43,7 +43,8 @@ public static class LinuxZipSplitter
         outputDirectory.TryCreateDirectory();
 
         // پاکسازی فایل‌های قبلی با همان نام (برای جلوگیری از تداخل)
-        var (existingFiles, outputZipPath) = GetExistingZipFiles(isFile: true, filePath, outputDirectory);
+        var (existingFiles, outputZipPath) =
+            GetExistingZipFiles(isFile: true, filePath, outputDirectory, outputFileName);
 
         if (existingFiles.Count > 0)
         {
@@ -74,7 +75,7 @@ public static class LinuxZipSplitter
         var processInfo = await new ApplicationStartInfo
         {
             ProcessName = "zip",
-            AppPath = "zip",			
+            AppPath = "zip",
             ArgumentsList = argumentsList,
             WaitForExit = TimeSpan.FromMinutes(value: 2),
             KillProcessOnStart = false
@@ -90,7 +91,7 @@ public static class LinuxZipSplitter
             return null;
         }
 
-        var (createdFiles, _) = GetExistingZipFiles(isFile: true, filePath, outputDirectory);
+        var (createdFiles, _) = GetExistingZipFiles(isFile: true, filePath, outputDirectory, outputFileName);
 
         if (logger?.IsEnabled(LogLevel.Debug) == true)
         {
@@ -106,17 +107,32 @@ public static class LinuxZipSplitter
 
     public static (List<string> Parts, string OutputZipPath) GetExistingZipFiles(bool isFile,
         string path,
-        string outputDirectory)
+        string outputDirectory,
+        string? outputFileName)
     {
-        var name = isFile ? Path.GetFileNameWithoutExtension(path) : new DirectoryInfo(path).Name;
+        string name;
+
+        if (outputFileName?.IsEmpty() == false)
+        {
+            name = outputFileName.GetFileNameWithoutExtension()!;
+        }
+        else if (isFile)
+        {
+            name = path.GetFileNameWithoutExtension()!;
+        }
+        else
+        {
+            name = new DirectoryInfo(path).Name;
+        }
+
         var outputZipName = $"{name}.zip";
         var outputZipPath = outputDirectory.SafePathCombine(outputZipName)!;
         var outputBase = outputDirectory.SafePathCombine(name)!;
 
         return (
             Directory.GetFiles(outputDirectory, $"{name}.*")
-                .Where(f => string.Equals(f, outputZipPath, StringComparison.OrdinalIgnoreCase) ||
-                            f.StartsWith($"{outputBase}.z", StringComparison.OrdinalIgnoreCase))
+                .Where(filePath => string.Equals(filePath, outputZipPath, StringComparison.OrdinalIgnoreCase) ||
+                                   filePath.StartsWith($"{outputBase}.z", StringComparison.OrdinalIgnoreCase))
                 .OrderBy(f => f, StringComparer.Ordinal)
                 .ToList(), outputZipPath);
     }
@@ -129,6 +145,7 @@ public static class LinuxZipSplitter
         int partSizeMB,
         string? password,
         string? outputDirectory,
+        string? outputFileName,
         bool overwriteExistingFiles,
         ILogger? logger,
         CancellationToken cancellationToken = default)
@@ -159,7 +176,8 @@ public static class LinuxZipSplitter
         outputDirectory.TryCreateDirectory();
 
         // پاکسازی فایل‌های قبلی با همان نام (برای جلوگیری از تداخل)
-        var (existingFiles, outputZipPath) = GetExistingZipFiles(isFile: false, folderPath, outputDirectory);
+        var (existingFiles, outputZipPath) =
+            GetExistingZipFiles(isFile: false, folderPath, outputDirectory, outputFileName);
 
         if (existingFiles.Count > 0)
         {
@@ -194,7 +212,7 @@ public static class LinuxZipSplitter
         var processInfo = await new ApplicationStartInfo
         {
             ProcessName = "zip",
-            AppPath = "zip",			
+            AppPath = "zip",
             ArgumentsList = argumentsList,
             WaitForExit = TimeSpan.FromMinutes(value: 5),
             KillProcessOnStart = false,
@@ -211,7 +229,7 @@ public static class LinuxZipSplitter
             return null;
         }
 
-        var (createdFiles, _) = GetExistingZipFiles(isFile: false, folderPath, outputDirectory);
+        var (createdFiles, _) = GetExistingZipFiles(isFile: false, folderPath, outputDirectory, outputFileName);
 
         if (logger?.IsEnabled(LogLevel.Debug) == true)
         {
@@ -232,7 +250,7 @@ public static class LinuxZipSplitter
             var processInfo = await new ApplicationStartInfo
             {
                 ProcessName = "zip",
-                AppPath = "zip",				
+                AppPath = "zip",
                 ArgumentsList = ["--version"],
                 WaitForExit = TimeSpan.FromSeconds(value: 15),
                 KillProcessOnStart = false

@@ -408,6 +408,18 @@ public static class PathUtils
     }
 
     /// <summary>
+    ///     Returns the file name of the specified path string without the extension.
+    /// </summary>
+    /// <param name="filePath"></param>
+    /// <returns></returns>
+    public static string? GetFileNameWithoutExtension([NotNullIfNotNull(nameof(filePath))] this string? filePath)
+    {
+        filePath = filePath.NormalizePath();
+
+        return Path.GetFileNameWithoutExtension(filePath);
+    }
+
+    /// <summary>
     ///     Returns the directory information for the specified path.
     /// </summary>
     /// <param name="dirPath"></param>

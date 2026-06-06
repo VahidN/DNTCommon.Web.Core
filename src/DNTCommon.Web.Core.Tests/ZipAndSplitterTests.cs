@@ -12,7 +12,7 @@ public class ZipAndSplitterTests : TestsBase
         var file = @"C:\file.zip";
         var temp = @"C:\bin";
 
-        var parts = await file.ZipAndSplitFileToMultiplePartsAsync(temp, partSizeMB: 1);
+        var parts = await file.ZipAndSplitFileToMultiplePartsAsync(temp, partSizeMB: 1, outputFileName: "test.zip");
         Assert.IsTrue(parts?.Count > 0);
     }
 
@@ -22,7 +22,7 @@ public class ZipAndSplitterTests : TestsBase
         var folder = @"C:\wwwroot";
         var temp = @"C:\bin";
 
-        var parts = await folder.ZipAndSplitFolderToMultiplePartsAsync(temp, partSizeMB: 1);
+        var parts = await folder.ZipAndSplitFolderToMultiplePartsAsync(temp, partSizeMB: 1, outputFileName: "test.zip");
         Assert.IsTrue(parts?.Count > 0);
     }
 }

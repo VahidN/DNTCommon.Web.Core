@@ -508,6 +508,8 @@ dotnet_diagnostic.CS1591.severity = none
 dotnet_diagnostic.CS8618.severity = warning
 dotnet_diagnostic.CS9035.severity = none #this should be warning or error
 
+dotnet_diagnostic.CC009.severity = suggestion
+
 dotnet_diagnostic.ENUM0001.severity = error
 dotnet_diagnostic.ENUM0002.severity = warning
 dotnet_diagnostic.ENUM0003.severity = warning
