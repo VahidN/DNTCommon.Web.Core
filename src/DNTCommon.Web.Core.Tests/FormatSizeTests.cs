@@ -17,4 +17,17 @@ public class FormatSizeTests
         // Assert
         Assert.AreEqual(expected: "2 KB", actual);
     }
+
+    [TestMethod]
+    public void ToFormattedFileSizeShouldReturnCorrectValueFor45MB()
+    {
+        // Arrange
+        long size = 47_185_920;
+
+        // Act
+        var actual = size.ToFormattedFileSize();
+
+        // Assert
+        Assert.AreEqual(expected: "45 MB", actual);
+    }
 }

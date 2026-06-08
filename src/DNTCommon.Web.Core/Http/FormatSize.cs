@@ -7,6 +7,7 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public static class FormatSize
 {
+    private const int BinaryDivisor = 1024;
     private static readonly string[] SizeSuffixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
 
     /// <summary>
@@ -23,10 +24,10 @@ public static class FormatSize
         }
 
         var absSize = T.Abs(size);
-        var fpPower = Math.Log(double.CreateChecked(absSize), newBase: 1000);
+        var fpPower = Math.Log(double.CreateChecked(absSize), BinaryDivisor);
         var intPower = (int)fpPower;
         var iUnit = intPower >= SizeSuffixes.Length ? SizeSuffixes.Length - 1 : intPower;
-        var divisor = T.CreateChecked(value: 1000).Power(iUnit);
+        var divisor = T.CreateChecked(BinaryDivisor).Power(iUnit);
         var normSize = absSize / divisor;
 
         return string.Format(CultureInfo.InvariantCulture, FormatTemplate, size.IsNegative() ? "-" : null, normSize,
