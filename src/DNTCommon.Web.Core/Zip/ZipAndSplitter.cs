@@ -12,13 +12,14 @@ public static class ZipAndSplitter
         string? outputFileName,
         bool overwriteExistingFiles = true,
         string? password = null,
+        ZipCompressionLevel compressionLevel = ZipCompressionLevel.Maximum,
         ILogger? logger = null,
         CancellationToken cancellationToken = default)
     {
         if (await LinuxZipSplitter.IsZipInstalledAsync(cancellationToken))
         {
             return await filePath.LinuxZipAndSplitFileAsync(partSizeMB, password, outputDirectory, outputFileName,
-                overwriteExistingFiles, logger, cancellationToken);
+                overwriteExistingFiles, compressionLevel, logger, cancellationToken);
         }
 
         logger?.LogCritical(message: "Zip is not installed on this server.");
@@ -53,13 +54,14 @@ public static class ZipAndSplitter
         string? outputFileName,
         bool overwriteExistingFiles = true,
         string? password = null,
+        ZipCompressionLevel compressionLevel = ZipCompressionLevel.Maximum,
         ILogger? logger = null,
         CancellationToken cancellationToken = default)
     {
         if (await LinuxZipSplitter.IsZipInstalledAsync(cancellationToken))
         {
             return await folderPath.LinuxZipAndSplitFolderAsync(partSizeMB, password, outputDirectory, outputFileName,
-                overwriteExistingFiles, logger, cancellationToken);
+                overwriteExistingFiles, compressionLevel, logger, cancellationToken);
         }
 
         logger?.LogCritical(message: "Zip is not installed on this server.");

@@ -14,7 +14,8 @@ public static class LinuxZipSplitter
         string? outputDirectory,
         string? outputFileName,
         bool overwriteExistingFiles,
-        ILogger? logger,
+        ZipCompressionLevel compressionLevel = ZipCompressionLevel.Maximum,
+        ILogger? logger = null,
         CancellationToken cancellationToken = default)
     {
         if (!await IsZipInstalledAsync(cancellationToken))
@@ -69,7 +70,8 @@ public static class LinuxZipSplitter
         ICollection<string> argumentsList = password.IsEmpty() ? [] : ["-P", password];
 
         argumentsList.AddRange([
-            "-s", string.Create(CultureInfo.InvariantCulture, $"{partSizeMB}m"), "-j", "-q", outputZipPath, filePath
+            string.Create(CultureInfo.InvariantCulture, $"-{(int)compressionLevel}"), "-s",
+            string.Create(CultureInfo.InvariantCulture, $"{partSizeMB}m"), "-j", "-q", outputZipPath, filePath
         ]);
 
         var processInfo = await new ApplicationStartInfo
@@ -147,7 +149,8 @@ public static class LinuxZipSplitter
         string? outputDirectory,
         string? outputFileName,
         bool overwriteExistingFiles,
-        ILogger? logger,
+        ZipCompressionLevel compressionLevel = ZipCompressionLevel.Maximum,
+        ILogger? logger = null,
         CancellationToken cancellationToken = default)
     {
         if (!await IsZipInstalledAsync(cancellationToken))
@@ -205,8 +208,8 @@ public static class LinuxZipSplitter
         ICollection<string> argumentsList = password.IsEmpty() ? [] : ["-P", password];
 
         argumentsList.AddRange([
-            "-r", "-s", string.Create(CultureInfo.InvariantCulture, $"{partSizeMB}m"), "-q", outputZipPath,
-            folderNameOnly
+            string.Create(CultureInfo.InvariantCulture, $"-{(int)compressionLevel}"), "-r", "-s",
+            string.Create(CultureInfo.InvariantCulture, $"{partSizeMB}m"), "-q", outputZipPath, folderNameOnly
         ]);
 
         var processInfo = await new ApplicationStartInfo
