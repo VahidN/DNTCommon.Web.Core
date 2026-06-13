@@ -25,7 +25,7 @@ public static class ExecuteApplicationProcessExtensions
         var output = new StringBuilder();
 
         using var process = startInfo.CreateProcess();
-        SetupProcessEventHandlers(process, output);
+        SetupProcessEventHandlers(process, OnProcessOnOutputDataReceived);
 
         try
         {
@@ -45,10 +45,12 @@ public static class ExecuteApplicationProcessExtensions
         }
         finally
         {
-            TeardownProcessEventHandlers(process, output);
+            TeardownProcessEventHandlers(process, OnProcessOnOutputDataReceived);
         }
 
         return GetProcessOutputData(output.ToString().Trim(), process);
+
+        void OnProcessOnOutputDataReceived(object sender, DataReceivedEventArgs e) => output.AppendLine(e.Data);
     }
 
     /// <summary>
@@ -66,7 +68,8 @@ public static class ExecuteApplicationProcessExtensions
         var output = new StringBuilder();
 
         using var process = startInfo.CreateProcess();
-        SetupProcessEventHandlers(process, output);
+
+        SetupProcessEventHandlers(process, OnProcessOnOutputDataReceived);
 
         try
         {
@@ -79,26 +82,24 @@ public static class ExecuteApplicationProcessExtensions
         }
         finally
         {
-            TeardownProcessEventHandlers(process, output);
+            TeardownProcessEventHandlers(process, OnProcessOnOutputDataReceived);
         }
 
         return GetProcessOutputData(output.ToString().Trim(), process);
+
+        void OnProcessOnOutputDataReceived(object sender, DataReceivedEventArgs e) => output.AppendLine(e.Data);
     }
 
-    private static void SetupProcessEventHandlers(Process process, StringBuilder output)
+    private static void SetupProcessEventHandlers(Process process, DataReceivedEventHandler? handler)
     {
-        void OnProcessOnOutputDataReceived(object sender, DataReceivedEventArgs e) => output.AppendLine(e.Data);
-
-        process.OutputDataReceived += OnProcessOnOutputDataReceived;
-        process.ErrorDataReceived += OnProcessOnOutputDataReceived;
+        process.OutputDataReceived += handler;
+        process.ErrorDataReceived += handler;
     }
 
-    private static void TeardownProcessEventHandlers(Process process, StringBuilder output)
+    private static void TeardownProcessEventHandlers(Process process, DataReceivedEventHandler? handler)
     {
-        void OnProcessOnOutputDataReceived(object sender, DataReceivedEventArgs e) => output.AppendLine(e.Data);
-
-        process.OutputDataReceived -= OnProcessOnOutputDataReceived;
-        process.ErrorDataReceived -= OnProcessOnOutputDataReceived;
+        process.OutputDataReceived -= handler;
+        process.ErrorDataReceived -= handler;
     }
 
     private static ExecuteProcessInfo GetProcessOutputData(string outputMessage, Process process)
