@@ -6,28 +6,9 @@ namespace DNTCommon.Web.Core.Tests;
 public class FormatSizeTests
 {
     [TestMethod]
-    public void ToFormattedFileSizeShouldReturnCorrectValue()
-    {
-        // Arrange
-        long size = 2048;
-
-        // Act
-        var actual = size.ToFormattedFileSize();
-
-        // Assert
-        Assert.AreEqual(expected: "2 KB", actual);
-    }
-
-    [TestMethod]
-    public void ToFormattedFileSizeShouldReturnCorrectValueFor45MB()
-    {
-        // Arrange
-        long size = 47_185_920;
-
-        // Act
-        var actual = size.ToFormattedFileSize();
-
-        // Assert
-        Assert.AreEqual(expected: "45 MB", actual);
-    }
+    [DataRow(2048, "2 KB")]
+    [DataRow(47_185_920, "45 MB")]
+    [DataRow(4_106_104_832, "3.8 GB")]
+    public void ToFormattedFileSizeShouldReturnCorrectValue(long size, string expected)
+        => Assert.AreEqual(expected, size.ToFormattedFileSize());
 }

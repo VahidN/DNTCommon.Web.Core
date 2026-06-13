@@ -8,29 +8,34 @@ namespace DNTCommon.Web.Core;
 public static class FormatSize
 {
     private const int BinaryDivisor = 1024;
+
     private static readonly string[] SizeSuffixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
 
     /// <summary>
-    ///     Returns the file's size in KB/MB format
+    ///     Returns the file size formatted as B/KB/MB/GB...
+    ///     If you need more control and precision, change the formatTemplate to `{0}{1:0.##} {2}`
     /// </summary>
-    public static string ToFormattedFileSize<T>(this T size)
+    public static string ToFormattedFileSize<T>(this T size, string formatTemplate = "{0}{1:0.#} {2}")
         where T : INumber<T>
     {
-        const string FormatTemplate = "{0}{1:0.#} {2}";
-
         if (size.IsZero())
         {
-            return string.Format(CultureInfo.InvariantCulture, FormatTemplate, arg0: null, arg1: 0, SizeSuffixes[0]);
+            return string.Format(CultureInfo.InvariantCulture, formatTemplate, arg0: null, arg1: 0, SizeSuffixes[0]);
         }
 
         var absSize = T.Abs(size);
-        var fpPower = Math.Log(double.CreateChecked(absSize), BinaryDivisor);
-        var intPower = (int)fpPower;
-        var iUnit = intPower >= SizeSuffixes.Length ? SizeSuffixes.Length - 1 : intPower;
-        var divisor = T.CreateChecked(BinaryDivisor).Power(iUnit);
-        var normSize = absSize / divisor;
 
-        return string.Format(CultureInfo.InvariantCulture, FormatTemplate, size.IsNegative() ? "-" : null, normSize,
-            SizeSuffixes[iUnit]);
+        var value = double.CreateChecked(absSize);
+
+        var unitIndex = 0;
+
+        while (value >= BinaryDivisor && unitIndex < SizeSuffixes.Length - 1)
+        {
+            value /= BinaryDivisor;
+            unitIndex++;
+        }
+
+        return string.Format(CultureInfo.InvariantCulture, formatTemplate, size.IsNegative() ? "-" : null, value,
+            SizeSuffixes[unitIndex]);
     }
 }
