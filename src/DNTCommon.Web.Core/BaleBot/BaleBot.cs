@@ -1,16 +1,23 @@
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace DNTCommon.Web.Core;
 
 public static class BaleBot
 {
+    private static readonly JsonSerializerOptions JsonSerializerOptions = new()
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
+
     public static async Task<BaleApiResponseStatus?> SendFileToBaleChannelAsync(this HttpClient baleClient,
         string baleBotToken,
         string channelId,
         BaleFileType fileType,
         string filePath,
         string? caption,
+        BaleParseMode parseMode,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(baleClient);
@@ -24,16 +31,25 @@ public static class BaleBot
 
         using var multipartContent = new MultipartFormDataContent();
 
-        var readAllBytes = await File.ReadAllBytesAsync(filePath, cancellationToken);
-        using var fileContent = new ByteArrayContent(readAllBytes);
+        await using var fileStream = File.OpenRead(filePath);
+        using var fileContent = new StreamContent(fileStream);
+
         var fileName = filePath.GetFileName()!;
+
         multipartContent.Add(fileContent, fileType.ToString().ToLowerInvariant(), fileName);
+        multipartContent.Add(new StringContent(channelId), name: "chat_id");
+        multipartContent.Add(new StringContent(caption ?? fileName), name: "caption");
 
-        using var channelIdStr = new StringContent(channelId);
-        multipartContent.Add(channelIdStr, name: "chat_id");
-
-        using var captionStr = new StringContent(caption ?? fileName);
-        multipartContent.Add(captionStr, name: "caption");
+        if (parseMode != BaleParseMode.None)
+        {
+            multipartContent.Add(new StringContent(parseMode switch
+            {
+                BaleParseMode.Markdown => "Markdown",
+                BaleParseMode.MarkdownV2 => "MarkdownV2",
+                BaleParseMode.Html => "HTML",
+                _ => throw new ArgumentOutOfRangeException(nameof(parseMode))
+            }), name: "parse_mode");
+        }
 
         var endpoint = fileType switch
         {
@@ -54,17 +70,32 @@ public static class BaleBot
         string baleBotToken,
         string channelId,
         string message,
+        BaleParseMode parseMode,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(baleClient);
         ArgumentNullException.ThrowIfNull(baleBotToken);
         ArgumentNullException.ThrowIfNull(channelId);
 
-        using var content = new StringContent(JsonSerializer.Serialize(new
+        var request = new Dictionary<string, object?>
         {
-            chat_id = channelId,
-            text = message
-        }), Encoding.UTF8, mediaType: "application/json");
+            [key: "chat_id"] = channelId,
+            [key: "text"] = message
+        };
+
+        if (parseMode != BaleParseMode.None)
+        {
+            request[key: "parse_mode"] = parseMode switch
+            {
+                BaleParseMode.Markdown => "Markdown",
+                BaleParseMode.MarkdownV2 => "MarkdownV2",
+                BaleParseMode.Html => "HTML",
+                _ => null
+            };
+        }
+
+        using var content = new StringContent(JsonSerializer.Serialize(request, JsonSerializerOptions), Encoding.UTF8,
+            mediaType: "application/json");
 
         using var response = await baleClient.PostAsync($"https://tapi.bale.ai/bot{baleBotToken}/sendMessage", content,
             cancellationToken);
