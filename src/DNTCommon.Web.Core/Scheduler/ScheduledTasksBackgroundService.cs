@@ -12,7 +12,7 @@ public class ScheduledTasksBackgroundService(IScheduledTasksCoordinator schedule
     /// </summary>
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        scheduledTasksCoordinator.StartTasks();
+        scheduledTasksCoordinator.StartTasks(stoppingToken);
 
         return Task.CompletedTask;
     }

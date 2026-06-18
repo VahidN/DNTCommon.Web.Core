@@ -48,7 +48,7 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
     /// <summary>
     ///     Starts the scheduler.
     /// </summary>
-    public void StartTasks()
+    public void StartTasks(CancellationToken stoppingToken = default)
     {
         if (_jobsRunnerTimer.IsRunning)
         {
@@ -57,34 +57,44 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
 
         _jobsRunnerTimer.OnThreadPoolTimerCallback = () =>
         {
-            var now = DateTime.UtcNow;
-
-            var tasks = new List<Task>();
-
-            foreach (var taskStatus in _tasksStorage.Value.Tasks.Where(x => x.RunAt(now)).OrderBy(x => x.Order))
+            try
             {
-                if (_isShuttingDown)
-                {
-                    return;
-                }
+                var now = DateTime.UtcNow;
 
-                if (taskStatus.IsRunning)
+                var tasks = new List<Task>();
+
+                foreach (var taskStatus in _tasksStorage.Value.Tasks.Where(x => x.RunAt(now)).OrderBy(x => x.Order))
                 {
-                    if (_logger.IsEnabled(LogLevel.Information))
+                    if (_isShuttingDown || stoppingToken.IsCancellationRequested)
                     {
-                        _logger.LogInformation(message: "Ignoring `{TaskStatus}` task. It's still running.",
-                            taskStatus);
+                        return;
                     }
 
-                    continue;
+                    if (taskStatus.IsRunning)
+                    {
+                        if (_logger.IsEnabled(LogLevel.Information))
+                        {
+                            _logger.LogInformation(message: "Ignoring `{TaskStatus}` task. It's still running.",
+                                taskStatus);
+                        }
+
+                        continue;
+                    }
+
+                    tasks.Add(Task.Run(() => RunTask(taskStatus, now), stoppingToken));
                 }
 
-                tasks.Add(Task.Run(() => RunTask(taskStatus, now)));
+                if (tasks.Count != 0)
+                {
+                    Task.WaitAll([.. tasks], stoppingToken);
+                }
             }
-
-            if (tasks.Count != 0)
+            catch (Exception ex)
             {
-                Task.WaitAll([.. tasks]);
+                if (_logger.IsEnabled(LogLevel.Critical))
+                {
+                    _logger.LogCritical(eventId: 0, ex.Demystify(), message: "Failed running tasks.");
+                }
             }
         };
 

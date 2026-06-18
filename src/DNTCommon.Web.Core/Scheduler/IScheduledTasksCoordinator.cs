@@ -8,7 +8,7 @@ public interface IScheduledTasksCoordinator : IDisposable
     /// <summary>
     ///     Starts the scheduler.
     /// </summary>
-    void StartTasks();
+    void StartTasks(CancellationToken stoppingToken = default);
 
     /// <summary>
     ///     Stops the scheduler.
