@@ -53,6 +53,6 @@ public class LlmsTxtResult<TFeedItem>(FeedChannel<TFeedItem> feedChannel) : Acti
             }
         }
 
-        return builder.ToString().ToBytes()!;
+        return builder.ToString().ToBytes();
     }
 }

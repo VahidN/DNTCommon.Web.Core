@@ -17,7 +17,7 @@ public static class TextToImageExtensions
     {
         ArgumentNullException.ThrowIfNull(text);
 
-        return text.TextToImage(options).BytesToBase64DataImage(contentType)!;
+        return text.TextToImage(options).BytesToBase64DataImage(contentType);
     }
 
     /// <summary>

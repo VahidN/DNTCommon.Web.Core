@@ -64,6 +64,6 @@ public class LlmsFullTxtResult<TFeedItem>(FeedChannel<TFeedItem> feedChannel) : 
             }
         }
 
-        return builder.ToString().ToBytes()!;
+        return builder.ToString().ToBytes();
     }
 }
