@@ -2,17 +2,24 @@
 
 public static class MegaNzUploadService
 {
-    public static async Task<string> UploadFileToMegaNzAsync(this HttpClient httpClient,
+    public static async Task<ICollection<string>> UploadFilesToMegaNzAsync(this HttpClient httpClient,
         string email,
         string password,
-        string localFilePath,
+        ICollection<string> localFilesPath,
         string uploadFolderNameOnMegaNz,
-        int keepLastNFilesOnMegaNz,
+        int? keepLastNFilesOnMegaNz = null,
         CancellationToken cancellationToken = default)
     {
-        if (!File.Exists(localFilePath))
+        if (localFilesPath.IsNullOrEmpty())
         {
-            throw new FileNotFoundException($"`{localFilePath}` not found.");
+            throw new FileNotFoundException(message: "localFilesPath is null or empty.");
+        }
+
+        var filesPath = localFilesPath.Where(file => file.FileExists()).ToList();
+
+        if (filesPath.IsNullOrEmpty())
+        {
+            throw new FileNotFoundException(message: "localFilesPath has no actual file in it.");
         }
 
         var client = new MegaClient(httpClient);
@@ -25,11 +32,22 @@ public static class MegaNzUploadService
 
         await DeleteOldFilesAsync(client, keepLastNFilesOnMegaNz, allNodes, uploadFolder, cancellationToken);
 
-        var uploadUri = await UploadFileAsync(client, localFilePath, uploadFolder, cancellationToken);
+        List<string> uploadUris = [];
+
+        foreach (var localFilePath in filesPath)
+        {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                break;
+            }
+
+            var uploadUri = await UploadFileAsync(client, localFilePath, uploadFolder, cancellationToken);
+            uploadUris.Add(uploadUri);
+        }
 
         await client.LogoutAsync(cancellationToken);
 
-        return uploadUri;
+        return uploadUris;
     }
 
     private static async Task<string> UploadFileAsync(MegaClient client,
@@ -62,20 +80,25 @@ public static class MegaNzUploadService
     }
 
     private static async Task DeleteOldFilesAsync(MegaClient client,
-        int keepLastNFilesOnMegaNz,
+        int? keepLastNFilesOnMegaNz,
         IList<MegaNode> allNodes,
         MegaNode uploadFolder,
         CancellationToken cancellationToken)
     {
+        if (!keepLastNFilesOnMegaNz.HasValue)
+        {
+            return;
+        }
+
         var availableFiles = allNodes.Where(node => node.Type == MegaNodeType.File &&
                                                     string.Equals(node.ParentId, uploadFolder.Id,
                                                         StringComparison.Ordinal))
             .OrderByDescending(node => node.CreationDate)
             .ToList();
 
-        if (availableFiles.Count > keepLastNFilesOnMegaNz)
+        if (availableFiles.Count > keepLastNFilesOnMegaNz.Value)
         {
-            foreach (var oldFile in availableFiles.Skip(keepLastNFilesOnMegaNz))
+            foreach (var oldFile in availableFiles.Skip(keepLastNFilesOnMegaNz.Value))
             {
                 await client.DeleteAsync(oldFile.Id, cancellationToken);
             }
