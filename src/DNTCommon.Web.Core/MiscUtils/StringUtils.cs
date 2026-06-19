@@ -17,7 +17,8 @@ public static class StringUtils
     ///     Converts the specified string to title case (except for words that are entirely in uppercase, which are considered
     ///     to be acronyms).
     /// </summary>
-    public static string? ToTitleCase([NotNullIfNotNull(nameof(input))] string? input, CultureInfo? cultureInfo = null)
+    [return: NotNullIfNotNull(nameof(input))]
+    public static string? ToTitleCase(string? input, CultureInfo? cultureInfo = null)
     {
         cultureInfo ??= CultureInfo.InvariantCulture;
 
@@ -45,15 +46,14 @@ public static class StringUtils
     /// </summary>
     /// <param name="str"></param>
     /// <returns></returns>
-    public static string? NullIfEmptyOrWhiteSpace([NotNullIfNotNull(nameof(str))] this string? str)
-        => !string.IsNullOrWhiteSpace(str) ? str : null;
+    [return: NotNullIfNotNull(nameof(str))]
+    public static string? NullIfEmptyOrWhiteSpace(this string? str) => !string.IsNullOrWhiteSpace(str) ? str : null;
 
     /// <summary>
     ///     Removes a substring from the start of the string
     /// </summary>
-    public static string? TrimStart([NotNullIfNotNull(nameof(inputText))] this string? inputText,
-        string value,
-        StringComparison comparisonType)
+    [return: NotNullIfNotNull(nameof(inputText))]
+    public static string? TrimStart(this string? inputText, string value, StringComparison comparisonType)
     {
         if (string.IsNullOrEmpty(value))
         {
@@ -71,9 +71,8 @@ public static class StringUtils
     /// <summary>
     ///     Removes a substring from the end of the string
     /// </summary>
-    public static string? TrimEnd([NotNullIfNotNull(nameof(inputText))] this string? inputText,
-        string value,
-        StringComparison comparisonType)
+    [return: NotNullIfNotNull(nameof(inputText))]
+    public static string? TrimEnd(this string? inputText, string value, StringComparison comparisonType)
     {
         if (string.IsNullOrEmpty(value))
         {
@@ -91,9 +90,8 @@ public static class StringUtils
     /// <summary>
     ///     Removes a substring from the end and start of the string
     /// </summary>
-    public static string? Trim([NotNullIfNotNull(nameof(inputText))] this string? inputText,
-        string value,
-        StringComparison comparisonType)
+    [return: NotNullIfNotNull(nameof(inputText))]
+    public static string? Trim(this string? inputText, string value, StringComparison comparisonType)
         => inputText.TrimEnd(value, comparisonType).TrimStart(value, comparisonType);
 
     /// <summary>
@@ -124,37 +122,36 @@ public static class StringUtils
     /// <summary>
     ///     Uses string.Split method to split given string by a given separator.
     /// </summary>
-    public static string[]? Split([NotNullIfNotNull(nameof(str))] this string? str, string separator)
+    [return: NotNullIfNotNull(nameof(str))]
+    public static string[]? Split(this string? str, string separator)
         => str?.Split([separator], StringSplitOptions.RemoveEmptyEntries);
 
     /// <summary>
     ///     Uses string.Split method to split given string by a given separator.
     /// </summary>
-    public static string[]? Split([NotNullIfNotNull(nameof(str))] this string? str, char separator)
+    [return: NotNullIfNotNull(nameof(str))]
+    public static string[]? Split(this string? str, char separator)
         => str?.Split(separator, StringSplitOptions.RemoveEmptyEntries);
 
     /// <summary>
     ///     Uses string.Split method to split given string by a given separator.
     /// </summary>
-    public static string[]? Split([NotNullIfNotNull(nameof(str))] this string? str,
-        string separator,
-        StringSplitOptions options)
+    [return: NotNullIfNotNull(nameof(str))]
+    public static string[]? Split(this string? str, string separator, StringSplitOptions options)
         => str?.Split([separator], options);
 
     /// <summary>
     ///     Uses string.Split method to split given string by a given separator.
     /// </summary>
-    public static string[]? Split([NotNullIfNotNull(nameof(str))] this string? str,
-        char separator,
-        StringSplitOptions options)
+    [return: NotNullIfNotNull(nameof(str))]
+    public static string[]? Split(this string? str, char separator, StringSplitOptions options)
         => str?.Split(separator, options);
 
     /// <summary>
     ///     Converts string to enum value.
     /// </summary>
-    public static T ToEnum<T>([NotNullIfNotNull(nameof(value))] this string? value,
-        T defaultValue = default,
-        bool ignoreCase = true)
+    [return: NotNullIfNotNull(nameof(value))]
+    public static T ToEnum<T>(this string? value, T defaultValue = default, bool ignoreCase = true)
         where T : struct
     {
         if (value.IsEmpty())
@@ -168,7 +165,8 @@ public static class StringUtils
     /// <summary>
     ///     Converts line endings in the string to <see cref="Environment.NewLine" />.
     /// </summary>
-    public static string? NormalizeLineEndings([NotNullIfNotNull(nameof(text))] this string? text)
+    [return: NotNullIfNotNull(nameof(text))]
+    public static string? NormalizeLineEndings(this string? text)
         => text?.Replace(oldValue: "\r\n", newValue: "\n", StringComparison.Ordinal)
             .Replace(oldChar: '\r', newChar: '\n')
             .Replace(oldValue: "\n", Environment.NewLine, StringComparison.Ordinal);
@@ -307,14 +305,14 @@ public static class StringUtils
     /// <summary>
     ///     Concatenates the given elements
     /// </summary>
-    public static string? ConcatItems([NotNullIfNotNull(nameof(items))] this IEnumerable<string>? items)
-        => items is null ? null : string.Concat(items);
+    [return: NotNullIfNotNull(nameof(items))]
+    public static string? ConcatItems(this IEnumerable<string>? items) => items is null ? null : string.Concat(items);
 
     /// <summary>
     ///     Concatenates the given elements
     /// </summary>
-    public static string? ConcatItems<T>([NotNullIfNotNull(nameof(items))] this IEnumerable<T>? items,
-        Func<T, string> toStringFunc)
+    [return: NotNullIfNotNull(nameof(items))]
+    public static string? ConcatItems<T>(this IEnumerable<T>? items, Func<T, string> toStringFunc)
     {
         ArgumentNullException.ThrowIfNull(toStringFunc);
 
@@ -371,7 +369,8 @@ public static class StringUtils
     /// <summary>
     ///     Tries to return the first character of the given input
     /// </summary>
-    public static string? GetFirstChar([NotNullIfNotNull(nameof(input))] this string? input)
+    [return: NotNullIfNotNull(nameof(input))]
+    public static string? GetFirstChar(this string? input)
     {
         if (string.IsNullOrEmpty(input))
         {
@@ -384,7 +383,8 @@ public static class StringUtils
     /// <summary>
     ///     Tries to return the last character of the given input
     /// </summary>
-    public static string? GetLastChar([NotNullIfNotNull(nameof(input))] this string? input)
+    [return: NotNullIfNotNull(nameof(input))]
+    public static string? GetLastChar(this string? input)
     {
         if (string.IsNullOrEmpty(input))
         {
@@ -397,8 +397,10 @@ public static class StringUtils
     /// <summary>
     ///     Returns a sub-str after the given value in the provided input
     /// </summary>
-    public static string? SubStrAfter([NotNullIfNotNull(nameof(input))] this string? input,
-        [NotNullIfNotNull(nameof(value))] string? value,
+    [return: NotNullIfNotNull(nameof(input))]
+    [return: NotNullIfNotNull(nameof(value))]
+    public static string? SubStrAfter(this string? input,
+        string? value,
         StringComparison comparison = StringComparison.Ordinal)
     {
         if (value is null || input is null)
@@ -408,14 +410,16 @@ public static class StringUtils
 
         var indexOf = input.IndexOf(value, comparison);
 
-        return indexOf == -1 ? null : input[(indexOf + value.Length)..];
+        return indexOf == -1 ? string.Empty : input[(indexOf + value.Length)..];
     }
 
     /// <summary>
     ///     Returns a sub-str before the given value in the provided input
     /// </summary>
-    public static string? SubStrBefore([NotNullIfNotNull(nameof(input))] this string? input,
-        [NotNullIfNotNull(nameof(value))] string? value,
+    [return: NotNullIfNotNull(nameof(input))]
+    [return: NotNullIfNotNull(nameof(value))]
+    public static string? SubStrBefore(this string? input,
+        string? value,
         StringComparison comparison = StringComparison.Ordinal)
     {
         if (value is null || input is null)
@@ -425,39 +429,40 @@ public static class StringUtils
 
         var indexOf = input.IndexOf(value, comparison);
 
-        return indexOf == -1 ? null : input[..indexOf];
+        return indexOf == -1 ? string.Empty : input[..indexOf];
     }
 
     /// <summary>
     ///     Concatenates the members of a constructed IEnumerable collection of type String, using the specified separator
     ///     between each member.
     /// </summary>
-    public static string? Join([NotNullIfNotNull(nameof(values))] this IEnumerable<string?>? values, string? separator)
+    [return: NotNullIfNotNull(nameof(values))]
+    public static string? Join(this IEnumerable<string?>? values, string? separator)
         => values is null ? null : string.Join(separator, values);
 
     /// <summary>
     ///     Tries to take n chars from the beginning of the given string safely
     /// </summary>
-    public static string? TakeFirstNChars([NotNullIfNotNull(nameof(input))] this string? input, int length)
-        => input?[..Math.Min(length, input.Length)];
+    [return: NotNullIfNotNull(nameof(input))]
+    public static string? TakeFirstNChars(this string? input, int length) => input?[..Math.Min(length, input.Length)];
 
     /// <summary>
     ///     Tries to take n chars from the end of the given string safely
     /// </summary>
-    public static string? TakeLastNChars([NotNullIfNotNull(nameof(input))] this string? input, int length)
-        => input?[^Math.Min(length, input.Length)..];
+    [return: NotNullIfNotNull(nameof(input))]
+    public static string? TakeLastNChars(this string? input, int length) => input?[^Math.Min(length, input.Length)..];
 
     /// <summary>
     ///     Tries to remove n chars from the beginning of the given string safely
     /// </summary>
-    public static string? RemoveFirstNChars([NotNullIfNotNull(nameof(input))] this string? input, int length)
-        => input?[Math.Min(length, input.Length)..];
+    [return: NotNullIfNotNull(nameof(input))]
+    public static string? RemoveFirstNChars(this string? input, int length) => input?[Math.Min(length, input.Length)..];
 
     /// <summary>
     ///     Tries to remove n chars from the end of the given string safely
     /// </summary>
-    public static string? RemoveLastNChars([NotNullIfNotNull(nameof(input))] this string? input, int length)
-        => input?[..^Math.Min(length, input.Length)];
+    [return: NotNullIfNotNull(nameof(input))]
+    public static string? RemoveLastNChars(this string? input, int length) => input?[..^Math.Min(length, input.Length)];
 
     /// <summary>
     ///     Reads lines of characters from the current string and returns the data as a string.
@@ -480,7 +485,8 @@ public static class StringUtils
     /// <summary>
     ///     Returns a new string in which all occurrences of specified values are replaced with "".
     /// </summary>
-    public static string? RemoveAllValues([NotNullIfNotNull(nameof(text))] this string? text,
+    [return: NotNullIfNotNull(nameof(text))]
+    public static string? RemoveAllValues(this string? text,
         StringComparison comparison,
         params ICollection<string>? values)
     {
@@ -500,8 +506,8 @@ public static class StringUtils
     /// <summary>
     ///     Inverts the order of the elements in a sequence.
     /// </summary>
-    public static string? ReverseChars([NotNullIfNotNull(nameof(input))] this string? input)
-        => input is null ? null : string.Concat(input.Reverse());
+    [return: NotNullIfNotNull(nameof(input))]
+    public static string? ReverseChars(this string? input) => input is null ? null : string.Concat(input.Reverse());
 
     /// <summary>
     ///     Counts words in the given text based on the available white-spaces.
@@ -548,10 +554,8 @@ public static class StringUtils
     ///     Returns a new string in which the occurrence of a specified string in the current instance is replaced with another
     ///     specified string
     /// </summary>
-    public static string? ReplaceAt([NotNullIfNotNull(nameof(input))] this string? input,
-        int index,
-        int length,
-        string? replacement)
+    [return: NotNullIfNotNull(nameof(input))]
+    public static string? ReplaceAt(this string? input, int index, int length, string? replacement)
     {
         if (length == 0 || input is null || replacement is null)
         {
@@ -573,8 +577,8 @@ public static class StringUtils
     /// <summary>
     ///     Converts the given object to an InvariantCulture string.
     /// </summary>
-    public static string? ToInvariantString([NotNullIfNotNull(nameof(value))] this object? value,
-        string defaultValue = "")
+    [return: NotNullIfNotNull(nameof(value))]
+    public static string? ToInvariantString(this object? value, string defaultValue = "")
         => Convert.ToString(value ?? defaultValue, CultureInfo.InvariantCulture);
 
     /// <summary>

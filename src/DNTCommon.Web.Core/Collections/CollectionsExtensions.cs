@@ -297,7 +297,8 @@ public static class CollectionsExtensions
     /// </summary>
     /// <param name="buffer"></param>
     /// <returns></returns>
-    public static string? ToHex([NotNullIfNotNull(nameof(buffer))] this byte[]? buffer)
+    [return: NotNullIfNotNull(nameof(buffer))]
+    public static string? ToHex(this byte[]? buffer)
     {
         if (buffer is null)
         {

@@ -691,7 +691,8 @@ public static partial class GeminiOutputNormalizer
         return string.Concat(htmlLines);
     }
 
-    public static string? NormalizeNewLines([NotNullIfNotNull(nameof(input))] this string? input)
+    [return: NotNullIfNotNull(nameof(input))]
+    public static string? NormalizeNewLines(this string? input)
         => input.IsEmpty() ? input : NewLines().Replace(input, replacement: "\n");
 
     private static void ProcessUnorderedList(Stack<string> listStack,

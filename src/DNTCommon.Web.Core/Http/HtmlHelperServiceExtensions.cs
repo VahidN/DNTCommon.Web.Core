@@ -314,7 +314,8 @@ public static class HtmlHelperServiceExtensions
     /// </summary>
     /// <param name="src"></param>
     /// <returns></returns>
-    public static byte[]? GetBase64EncodedImageData([NotNullIfNotNull(nameof(src))] this string? src)
+    [return: NotNullIfNotNull(nameof(src))]
+    public static byte[]? GetBase64EncodedImageData(this string? src)
     {
         if (!src.IsBase64EncodedImage())
         {

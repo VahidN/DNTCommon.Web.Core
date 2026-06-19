@@ -11,8 +11,8 @@ public static class NumbersExtensions
     /// <summary>
     ///     Returns a random char from the given text
     /// </summary>
-    public static char? GetRandomCharacter([NotNullIfNotNull(nameof(text))] this string? text)
-        => text?[RandomNumberGenerator.GetInt32(text.Length)];
+    [return: NotNullIfNotNull(nameof(text))]
+    public static char? GetRandomCharacter(this string? text) => text?[RandomNumberGenerator.GetInt32(text.Length)];
 
     /// <summary>
     ///     Creates an array of bytes with a cryptographically strong random sequence of values.
@@ -40,7 +40,8 @@ public static class NumbersExtensions
     /// <typeparam name="T">The type of the elements in the array.</typeparam>
     /// <param name="values">The array to get a random item from.</param>
     /// <returns>A random item from the array, or default(T) if the array is null or empty.</returns>
-    public static T? GetRandomItem<T>([NotNullIfNotNull(nameof(values))] this T[]? values)
+    [return: NotNullIfNotNull(nameof(values))]
+    public static T? GetRandomItem<T>(this T[]? values)
         => values is null || values.Length == 0 ? default : values[RandomNumberGenerator.GetInt32(values.Length)];
 
     /// <summary>
@@ -49,7 +50,8 @@ public static class NumbersExtensions
     /// <typeparam name="T">The type of the elements in the list.</typeparam>
     /// <param name="values">The list to get a random item from.</param>
     /// <returns>A random item from the list, or default(T) if the list is null or empty.</returns>
-    public static T? GetRandomItem<T>([NotNullIfNotNull(nameof(values))] this List<T>? values)
+    [return: NotNullIfNotNull(nameof(values))]
+    public static T? GetRandomItem<T>(this List<T>? values)
         => values is null || values.Count == 0 ? default : values[RandomNumberGenerator.GetInt32(values.Count)];
 
     /// <summary>
@@ -58,7 +60,8 @@ public static class NumbersExtensions
     /// <typeparam name="T">The type of the elements in the list.</typeparam>
     /// <param name="values">The read-only list to get a random item from.</param>
     /// <returns>A random item from the list, or default(T) if the list is null or empty.</returns>
-    public static T? GetRandomItem<T>([NotNullIfNotNull(nameof(values))] this IReadOnlyList<T>? values)
+    [return: NotNullIfNotNull(nameof(values))]
+    public static T? GetRandomItem<T>(this IReadOnlyList<T>? values)
         => values is null || values.Count == 0 ? default : values[RandomNumberGenerator.GetInt32(values.Count)];
 
     /// <summary>
@@ -87,7 +90,8 @@ public static class NumbersExtensions
     /// <typeparam name="T">The type of the elements in the sequence.</typeparam>
     /// <param name="values">The sequence to get a random item from.</param>
     /// <returns>A random item from the sequence, or default(T) if the sequence is null or empty.</returns>
-    public static T? GetRandomItem<T>([NotNullIfNotNull(nameof(values))] this IEnumerable<T>? values)
+    [return: NotNullIfNotNull(nameof(values))]
+    public static T? GetRandomItem<T>(this IEnumerable<T>? values)
     {
         if (values is null)
         {
@@ -103,6 +107,8 @@ public static class NumbersExtensions
         T? result = default;
         var count = 0;
 
+        List<T> items = [];
+
         foreach (var item in values)
         {
             count++;
@@ -112,9 +118,11 @@ public static class NumbersExtensions
             {
                 result = item;
             }
+
+            items.Add(item);
         }
 
-        return result;
+        return result ?? items.GetRandomItem();
     }
 
     /// <summary>

@@ -23,7 +23,8 @@ public static class TextToImageExtensions
     /// <summary>
     ///     returns data as a data:image/png;base64.
     /// </summary>
-    public static string? BytesToBase64DataImage([NotNullIfNotNull(nameof(imageBytes))] this byte[]? imageBytes,
+    [return: NotNullIfNotNull(nameof(imageBytes))]
+    public static string? BytesToBase64DataImage(this byte[]? imageBytes,
         string? imageSrcValue = null,
         string? contentType = null)
     {

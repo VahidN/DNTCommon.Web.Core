@@ -34,7 +34,8 @@ public static class PathUtils
     /// </summary>
     /// <param name="filePath"></param>
     /// <returns>A string representation that is encoded with uppercase hex characters</returns>
-    public static string? GetContentsSHA256([NotNullIfNotNull(nameof(filePath))] this string? filePath)
+    [return: NotNullIfNotNull(nameof(filePath))]
+    public static string? GetContentsSHA256(this string? filePath)
     {
         filePath = filePath.NormalizePath();
 
@@ -54,8 +55,8 @@ public static class PathUtils
     /// <param name="filePath"></param>
     /// <param name="hashAlgorithm">Such as `using var sha256 = SHA256.Create();`</param>
     /// <returns>A string representation that is encoded with uppercase hex characters</returns>
-    public static string? GetContentsHash([NotNullIfNotNull(nameof(filePath))] this string? filePath,
-        HashAlgorithm hashAlgorithm)
+    [return: NotNullIfNotNull(nameof(filePath))]
+    public static string? GetContentsHash(this string? filePath, HashAlgorithm hashAlgorithm)
     {
         ArgumentNullException.ThrowIfNull(hashAlgorithm);
 
@@ -77,7 +78,8 @@ public static class PathUtils
     /// </summary>
     /// <param name="filePath"></param>
     /// <returns>A string representation that is encoded with uppercase hex characters</returns>
-    public static string? GetContentsSHA1([NotNullIfNotNull(nameof(filePath))] this string? filePath)
+    [return: NotNullIfNotNull(nameof(filePath))]
+    public static string? GetContentsSHA1(this string? filePath)
     {
         filePath = filePath.NormalizePath();
 
@@ -388,7 +390,8 @@ public static class PathUtils
     /// </summary>
     /// <param name="filePath"></param>
     /// <returns></returns>
-    public static string? GetExtension([NotNullIfNotNull(nameof(filePath))] this string? filePath)
+    [return: NotNullIfNotNull(nameof(filePath))]
+    public static string? GetExtension(this string? filePath)
     {
         filePath = filePath.NormalizePath();
 
@@ -400,7 +403,8 @@ public static class PathUtils
     /// </summary>
     /// <param name="filePath"></param>
     /// <returns></returns>
-    public static string? GetFileName([NotNullIfNotNull(nameof(filePath))] this string? filePath)
+    [return: NotNullIfNotNull(nameof(filePath))]
+    public static string? GetFileName(this string? filePath)
     {
         filePath = filePath.NormalizePath();
 
@@ -412,7 +416,8 @@ public static class PathUtils
     /// </summary>
     /// <param name="filePath"></param>
     /// <returns></returns>
-    public static string? GetFileNameWithoutExtension([NotNullIfNotNull(nameof(filePath))] this string? filePath)
+    [return: NotNullIfNotNull(nameof(filePath))]
+    public static string? GetFileNameWithoutExtension(this string? filePath)
     {
         filePath = filePath.NormalizePath();
 
@@ -437,7 +442,8 @@ public static class PathUtils
     /// <summary>
     ///     Initializes a new instance of the DirectoryInfo class on the specified path.
     /// </summary>
-    public static DirectoryInfo? ToDirectoryInfo([NotNullIfNotNull(nameof(dirPath))] this string? dirPath)
+    [return: NotNullIfNotNull(nameof(dirPath))]
+    public static DirectoryInfo? ToDirectoryInfo(this string? dirPath)
     {
         dirPath = dirPath.NormalizePath();
 
@@ -447,7 +453,8 @@ public static class PathUtils
     /// <summary>
     ///     Initializes a new instance of the FileInfo class, which acts as a wrapper for a file path.
     /// </summary>
-    public static FileInfo? ToFileInfo([NotNullIfNotNull(nameof(fileName))] this string? fileName)
+    [return: NotNullIfNotNull(nameof(fileName))]
+    public static FileInfo? ToFileInfo(this string? fileName)
     {
         fileName = fileName.NormalizePath();
 
@@ -644,7 +651,8 @@ public static class PathUtils
     /// </summary>
     /// <param name="path"></param>
     /// <returns></returns>
-    public static string? NormalizePath([NotNullIfNotNull(nameof(path))] this string? path)
+    [return: NotNullIfNotNull(nameof(path))]
+    public static string? NormalizePath(this string? path)
         => path.IsEmpty()
             ? path
             : Path.DirectorySeparatorChar switch
@@ -662,7 +670,8 @@ public static class PathUtils
     /// </summary>
     /// <param name="dirPath">the full path of the directory.</param>
     /// <returns>the full path of the directory.</returns>
-    public static string? CreateSafeDir([NotNullIfNotNull(nameof(dirPath))] this string? dirPath)
+    [return: NotNullIfNotNull(nameof(dirPath))]
+    public static string? CreateSafeDir(this string? dirPath)
     {
         dirPath = dirPath.NormalizePath();
 
@@ -832,8 +841,8 @@ public static class PathUtils
     /// <param name="rootDir"></param>
     /// <param name="subDirs"></param>
     /// <returns></returns>
-    public static string? SafePathCombine([NotNullIfNotNull(nameof(rootDir))] this string? rootDir,
-        params string[] subDirs)
+    [return: NotNullIfNotNull(nameof(rootDir))]
+    public static string? SafePathCombine(this string? rootDir, params string[] subDirs)
     {
         rootDir = rootDir.NormalizePath();
 

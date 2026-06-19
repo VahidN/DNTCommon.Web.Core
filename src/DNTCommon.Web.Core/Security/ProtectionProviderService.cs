@@ -59,14 +59,14 @@ public class ProtectionProviderService : IProtectionProviderService
     /// <summary>
     ///     Encrypts the message
     /// </summary>
-    public string? Encrypt([NotNullIfNotNull(nameof(inputText))] string? inputText)
-        => inputText is null ? null : _dataProtector.Protect(inputText);
+    [return: NotNullIfNotNull(nameof(inputText))]
+    public string? Encrypt(string? inputText) => inputText is null ? null : _dataProtector.Protect(inputText);
 
     /// <summary>
     ///     It will serialize an object as a JSON string and then encrypt it as a Base64UrlEncode string.
     /// </summary>
-    public string? EncryptObject([NotNullIfNotNull(nameof(data))] object? data)
-        => data is null ? null : Encrypt(_serializationProvider.Serialize(data));
+    [return: NotNullIfNotNull(nameof(data))]
+    public string? EncryptObject(object? data) => data is null ? null : Encrypt(_serializationProvider.Serialize(data));
 
     /// <summary>
     ///     It will decrypt a Base64UrlEncode encrypted JSON string and then deserialize it as an object.

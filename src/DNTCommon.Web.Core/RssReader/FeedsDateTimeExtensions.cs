@@ -102,7 +102,8 @@ public static partial class FeedsDateTimeExtensions
     /// <remarks>
     ///     See also W3C note at: http://www.w3.org/TR/NOTE-datetime
     /// </remarks>
-    public static DateTime? ToIso8601DateTime([NotNullIfNotNull(nameof(dateTime))] string? dateTime)
+    [return: NotNullIfNotNull(nameof(dateTime))]
+    public static DateTime? ToIso8601DateTime(string? dateTime)
     {
         if (string.IsNullOrEmpty(dateTime))
         {
@@ -266,7 +267,7 @@ public static partial class FeedsDateTimeExtensions
     /// </summary>
     /// <param name="date">The date.</param>
     /// <returns>int</returns>
-    public static int DateAsInteger(DateTime date) => date.Year * 10000 + date.Month * 100 + date.Day;
+    public static int DateAsInteger(DateTime date) => (date.Year * 10000) + (date.Month * 100) + date.Day;
 
     [GeneratedRegex(
         pattern:

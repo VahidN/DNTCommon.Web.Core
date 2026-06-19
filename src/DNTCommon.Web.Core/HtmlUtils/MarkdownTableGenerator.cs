@@ -67,6 +67,7 @@ public static partial class MarkdownTableGenerator
     public static string EscapeMarkdownTableCell(this string? cell)
         => cell.EscapeMarkdownV2()?.Replace(oldValue: "\n", newValue: "<br>", StringComparison.Ordinal) ?? string.Empty;
 
-    public static string? EscapeMarkdownV2([NotNullIfNotNull(nameof(text))] this string? text)
+    [return: NotNullIfNotNull(nameof(text))]
+    public static string? EscapeMarkdownV2(this string? text)
         => text.IsEmpty() ? text : MarkdownV2().Replace(text, replacement: @"\$1");
 }

@@ -130,8 +130,8 @@ public static class XmlUtils
     /// <summary>
     ///     Converts an XmlDocument to a string
     /// </summary>
-    public static string? ToXmlString([NotNullIfNotNull(nameof(document))] this XmlDocument? document,
-        Encoding? encoding = null)
+    [return: NotNullIfNotNull(nameof(document))]
+    public static string? ToXmlString(this XmlDocument? document, Encoding? encoding = null)
     {
         if (document is null)
         {
@@ -157,7 +157,8 @@ public static class XmlUtils
     /// <summary>
     ///     Uses XmlSerializer to serialize the given object into an XML document
     /// </summary>
-    public static XmlDocument? ToXmlDocument<T>([NotNullIfNotNull(nameof(value))] this T? value)
+    [return: NotNullIfNotNull(nameof(value))]
+    public static XmlDocument? ToXmlDocument<T>(this T? value)
         where T : class
     {
         if (value is null)
@@ -184,19 +185,20 @@ public static class XmlUtils
     /// <param name="rsaKeys">An RSA key information from an XML string.</param>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
-    public static string? ToSignedXmlDocumentString<T>([NotNullIfNotNull(nameof(value))] this T? value, RsaKeys rsaKeys)
+    [return: NotNullIfNotNull(nameof(value))]
+    public static string? ToSignedXmlDocumentString<T>(this T? value, RsaKeys rsaKeys)
         where T : class
     {
         ArgumentNullException.ThrowIfNull(rsaKeys);
 
         if (rsaKeys.PrivateKey is not null)
         {
-            return ToSignedXmlDocumentString(value, rsaKeys.PrivateKey);
+            return value.ToSignedXmlDocumentString(rsaKeys.PrivateKey);
         }
 
         if (rsaKeys.PrivateKeyXml is not null)
         {
-            return ToSignedXmlDocumentString(value, rsaKeys.PrivateKeyXml);
+            return value.ToSignedXmlDocumentString(rsaKeys.PrivateKeyXml);
         }
 
         return null;
@@ -209,8 +211,8 @@ public static class XmlUtils
     /// <param name="rsaPrivateKeyXml">An RSA key information from an XML string.</param>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
-    public static string? ToSignedXmlDocumentString<T>([NotNullIfNotNull(nameof(value))] this T? value,
-        string rsaPrivateKeyXml)
+    [return: NotNullIfNotNull(nameof(value))]
+    public static string? ToSignedXmlDocumentString<T>(this T? value, string rsaPrivateKeyXml)
         where T : class
     {
         ArgumentNullException.ThrowIfNull(rsaPrivateKeyXml);
@@ -223,7 +225,7 @@ public static class XmlUtils
         using var rsa = RSA.Create();
         rsa.FromXmlString(rsaPrivateKeyXml);
 
-        return ToSignedXmlDocumentString(value, rsa);
+        return value.ToSignedXmlDocumentString(rsa);
     }
 
     /// <summary>
@@ -233,7 +235,8 @@ public static class XmlUtils
     /// <param name="rsa">An RSA key information with private key.</param>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
-    public static string? ToSignedXmlDocumentString<T>([NotNullIfNotNull(nameof(value))] this T? value, RSA rsa)
+    [return: NotNullIfNotNull(nameof(value))]
+    public static string? ToSignedXmlDocumentString<T>(this T? value, RSA rsa)
         where T : class
     {
         ArgumentNullException.ThrowIfNull(rsa);
@@ -244,12 +247,6 @@ public static class XmlUtils
         }
 
         var xmlDocument = value.ToXmlDocument();
-
-        if (xmlDocument is null)
-        {
-            return null;
-        }
-
         var xmlDigitalSignature = GetXmlDigitalSignature(xmlDocument, rsa);
         AppendDigitalSignature(xmlDocument, xmlDigitalSignature);
 
@@ -270,12 +267,12 @@ public static class XmlUtils
 
         if (rsaKeys.PublicKey is not null)
         {
-            return DeserializeSignedXmlDocumentString<T>(signedXml, rsaKeys.PublicKey);
+            return signedXml.DeserializeSignedXmlDocumentString<T>(rsaKeys.PublicKey);
         }
 
         if (rsaKeys.PublicKeyXml is not null)
         {
-            return DeserializeSignedXmlDocumentString<T>(signedXml, rsaKeys.PublicKeyXml);
+            return signedXml.DeserializeSignedXmlDocumentString<T>(rsaKeys.PublicKeyXml);
         }
 
         return ("PublicKey is null", OperationStat.Failed, null);
@@ -302,7 +299,7 @@ public static class XmlUtils
         using var rsa = RSA.Create();
         rsa.FromXmlString(rsaPublicKeyXml);
 
-        return DeserializeSignedXmlDocumentString<T>(signedXml, rsa);
+        return signedXml.DeserializeSignedXmlDocumentString<T>(rsa);
     }
 
     /// <summary>

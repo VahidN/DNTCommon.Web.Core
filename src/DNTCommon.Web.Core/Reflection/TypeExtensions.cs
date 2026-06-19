@@ -29,7 +29,7 @@ public static class TypeExtensions
     /// <summary>
     ///     Returns the default value of a given type
     /// </summary>
-    public static object? GetDefaultValue<T>() => GetDefaultValue(typeof(T));
+    public static object? GetDefaultValue<T>() => typeof(T).GetDefaultValue();
 
     /// <summary>
     ///     Determines if the type implements the given interface.
@@ -177,14 +177,15 @@ public static class TypeExtensions
     /// <summary>
     ///     Gets the underlying type if the type is Nullable, otherwise just returns the type.
     /// </summary>
-    public static Type? GetTrueType([NotNullIfNotNull(nameof(type))] this Type? type)
+    [return: NotNullIfNotNull(nameof(type))]
+    public static Type? GetTrueType(this Type? type)
     {
         if (type is null)
         {
             return null;
         }
 
-        return IsDerivedFromGenericType(type, typeof(Nullable<>)) ? type.GetGenericArguments()[0] : type;
+        return type.IsDerivedFromGenericType(typeof(Nullable<>)) ? type.GetGenericArguments()[0] : type;
     }
 
     /// <summary>
@@ -321,7 +322,7 @@ public static class TypeExtensions
             case TypeCode.Object:
                 if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
                 {
-                    return IsNumericType(Nullable.GetUnderlyingType(type));
+                    return Nullable.GetUnderlyingType(type).IsNumericType();
                 }
 
                 return false;

@@ -14,12 +14,14 @@ public interface IProtectionProviderService
     /// <summary>
     ///     Encrypts the message
     /// </summary>
-    string? Encrypt([NotNullIfNotNull(nameof(inputText))] string? inputText);
+    [return: NotNullIfNotNull(nameof(inputText))]
+    string? Encrypt(string? inputText);
 
     /// <summary>
     ///     It will serialize an object as a JSON string and then encrypt it as a Base64UrlEncode string.
     /// </summary>
-    string? EncryptObject([NotNullIfNotNull(nameof(data))] object? data);
+    [return: NotNullIfNotNull(nameof(data))]
+    string? EncryptObject(object? data);
 
     /// <summary>
     ///     It will decrypt a Base64UrlEncode encrypted JSON string and then deserialize it as an object.

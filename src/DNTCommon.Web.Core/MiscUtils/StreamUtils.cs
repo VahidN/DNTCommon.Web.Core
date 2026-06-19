@@ -26,7 +26,8 @@ public static class StreamUtils
     ///     The rest of the stream as a string, from the beginning to the end.
     ///     Or null if the stream is a null reference or not readable.
     /// </returns>
-    public static string? ToText([NotNullIfNotNull(nameof(stream))] this Stream? stream,
+    [return: NotNullIfNotNull(nameof(stream))]
+    public static string? ToText(this Stream? stream,
         int offset = 0,
         int readChunkBufferLength = 4096,
         Encoding? encoding = null)
@@ -74,9 +75,8 @@ public static class StreamUtils
     /// <returns>
     ///     A byte array containing the data from the stream, or null if the stream is null or not readable.
     /// </returns>
-    public static byte[]? ToBytes([NotNullIfNotNull(nameof(stream))] this Stream? stream,
-        int offset = 0,
-        int readChunkBufferLength = 4096)
+    [return: NotNullIfNotNull(nameof(stream))]
+    public static byte[]? ToBytes(this Stream? stream, int offset = 0, int readChunkBufferLength = 4096)
     {
         if (stream?.IsReadableStream() != true)
         {
@@ -166,7 +166,8 @@ public static class StreamUtils
     ///     Initializes a new instance of the FileStream class with the specified path, creation mode, read/write and sharing
     ///     permission, and buffer size.
     /// </summary>
-    public static FileStream? ToFileStream([NotNullIfNotNull(nameof(filePath))] this string? filePath,
+    [return: NotNullIfNotNull(nameof(filePath))]
+    public static FileStream? ToFileStream(this string? filePath,
         FileMode openOrCreateMode,
         FileAccess fileAccess,
         FileShare fileShare = FileShare.None,
@@ -184,7 +185,8 @@ public static class StreamUtils
     ///     The byte array representation of the string, or <see langword="null" /> if the input string is
     ///     <see langword="null" /> or empty.
     /// </returns>
-    public static byte[]? ToBytes([NotNullIfNotNull(nameof(text))] this string? text, Encoding? inputEncoding = null)
+    [return: NotNullIfNotNull(nameof(text))]
+    public static byte[]? ToBytes(this string? text, Encoding? inputEncoding = null)
     {
         if (text.IsEmpty())
         {
@@ -205,8 +207,8 @@ public static class StreamUtils
     ///     The MemoryStream representation of the string, or <see langword="null" /> if the input string is
     ///     <see langword="null" /> or empty.
     /// </returns>
-    public static MemoryStream? ToMemoryStream([NotNullIfNotNull(nameof(text))] this string? text,
-        Encoding? inputEncoding = null)
+    [return: NotNullIfNotNull(nameof(text))]
+    public static MemoryStream? ToMemoryStream(this string? text, Encoding? inputEncoding = null)
     {
         if (text.IsEmpty())
         {
@@ -223,7 +225,8 @@ public static class StreamUtils
     /// </summary>
     /// <param name="text">The string to convert. If null or empty, null is returned.</param>
     /// <returns>A read-only byte span representing the string, or null if the input string is null or empty.</returns>
-    public static ReadOnlySpan<byte> ToByteSpan([NotNullIfNotNull(nameof(text))] this string? text)
+    [return: NotNullIfNotNull(nameof(text))]
+    public static ReadOnlySpan<byte> ToByteSpan(this string? text)
         => text.IsEmpty() ? null : MemoryMarshal.Cast<char, byte>(text);
 
     /// <summary>
@@ -240,7 +243,7 @@ public static class StreamUtils
     /// <summary>
     ///     Tries to find the encoding of the given file based on its BOM.
     /// </summary>
-    public static Encoding? GetFileEncoding([NotNullIfNotNull(nameof(filePath))] this string? filePath)
+    public static Encoding? GetFileEncoding(this string? filePath)
     {
         if (filePath.IsEmpty())
         {

@@ -8,15 +8,15 @@ public static class CharUtils
     /// <summary>
     ///     Extracts a set of chars from the given text based on the provided predicate
     /// </summary>
-    public static string? ExtractCharsWhere([NotNullIfNotNull(nameof(text))] this string? text,
-        Predicate<char> predicate)
+    [return: NotNullIfNotNull(nameof(text))]
+    public static string? ExtractCharsWhere(this string? text, Predicate<char> predicate)
         => text is null ? null : string.Concat(text.Where(c => predicate(c)));
 
     /// <summary>
     ///     Removes a set of chars from the given text based on the provided predicate
     /// </summary>
-    public static string? RemoveCharsWhere([NotNullIfNotNull(nameof(text))] this string? text,
-        Predicate<char> predicate)
+    [return: NotNullIfNotNull(nameof(text))]
+    public static string? RemoveCharsWhere(this string? text, Predicate<char> predicate)
         => text is null ? null : string.Concat(text.Where(c => !predicate(c)));
 
     /// <summary>
@@ -34,8 +34,8 @@ public static class CharUtils
     /// <summary>
     ///     Extracts Unicode letters from the given text.
     /// </summary>
-    public static string? ExtractLetters([NotNullIfNotNull(nameof(text))] this string? text)
-        => text.ExtractCharsWhere(char.IsLetter);
+    [return: NotNullIfNotNull(nameof(text))]
+    public static string? ExtractLetters(this string? text) => text.ExtractCharsWhere(char.IsLetter);
 
     /// <summary>
     ///     Indicates whether the specified text is consists of letters or decimal digits.
@@ -143,36 +143,36 @@ public static class CharUtils
     /// <summary>
     ///     Extracts a set of chars from the given text based on the provided predicate (char.IsLetterOrDigit).
     /// </summary>
-    public static string? ExtractLettersOrDigits([NotNullIfNotNull(nameof(text))] this string? text)
-        => text.ExtractCharsWhere(char.IsLetterOrDigit);
+    [return: NotNullIfNotNull(nameof(text))]
+    public static string? ExtractLettersOrDigits(this string? text) => text.ExtractCharsWhere(char.IsLetterOrDigit);
 
     /// <summary>
     ///     Removes a set of chars from the given text based on the provided predicate (char.IsControl).
     /// </summary>
-    public static string? RemoveControlCharacters([NotNullIfNotNull(nameof(text))] this string? text)
-        => text.RemoveCharsWhere(char.IsControl);
+    [return: NotNullIfNotNull(nameof(text))]
+    public static string? RemoveControlCharacters(this string? text) => text.RemoveCharsWhere(char.IsControl);
 
     /// <summary>
     ///     Removes a set of chars from the given text based on the provided predicate (char.IsLetter).
     /// </summary>
-    public static string? RemoveLetters([NotNullIfNotNull(nameof(text))] this string? text)
-        => text.RemoveCharsWhere(char.IsLetter);
+    [return: NotNullIfNotNull(nameof(text))]
+    public static string? RemoveLetters(this string? text) => text.RemoveCharsWhere(char.IsLetter);
 
     /// <summary>
     ///     Removes a set of chars from the given text based on the provided predicate (char.IsDigit).
     /// </summary>
-    public static string? RemoveDigits([NotNullIfNotNull(nameof(text))] this string? text)
-        => text.RemoveCharsWhere(char.IsDigit);
+    [return: NotNullIfNotNull(nameof(text))]
+    public static string? RemoveDigits(this string? text) => text.RemoveCharsWhere(char.IsDigit);
 
     /// <summary>
     ///     Removes a set of chars from the given text based on the provided predicate (char.IsNumber).
     /// </summary>
-    public static string? RemoveNumbers([NotNullIfNotNull(nameof(text))] this string? text)
-        => text.RemoveCharsWhere(char.IsNumber);
+    [return: NotNullIfNotNull(nameof(text))]
+    public static string? RemoveNumbers(this string? text) => text.RemoveCharsWhere(char.IsNumber);
 
     /// <summary>
     ///     Removes a set of chars from the given text based on the provided predicate (char.IsWhiteSpace).
     /// </summary>
-    public static string? RemoveWhiteSpaces([NotNullIfNotNull(nameof(text))] this string? text)
-        => text.RemoveCharsWhere(char.IsWhiteSpace);
+    [return: NotNullIfNotNull(nameof(text))]
+    public static string? RemoveWhiteSpaces(this string? text) => text.RemoveCharsWhere(char.IsWhiteSpace);
 }

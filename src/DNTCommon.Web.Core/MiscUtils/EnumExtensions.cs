@@ -67,9 +67,8 @@ public static class EnumExtensions
         ///     equivalent enumerated object. A parameter specifies whether the operation is case-sensitive. The return value
         ///     indicates whether the conversion succeeded.
         /// </summary>
-        public static T FromValue([NotNullIfNotNull(nameof(value))] string? value,
-            T defaultValue = default,
-            bool ignoreCase = true)
+        [return: NotNullIfNotNull(nameof(value))]
+        public static T FromValue(string? value, T defaultValue = default, bool ignoreCase = true)
             => value.ToEnum(defaultValue, ignoreCase);
 
         /// <summary>

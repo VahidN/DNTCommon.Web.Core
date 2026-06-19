@@ -10,8 +10,8 @@ public static class TextObfuscator
     /// <summary>
     ///     Adds invisible chars to the inputText
     /// </summary>
-    public static string? ObfuscateWithHiddenMarkers([NotNullIfNotNull(nameof(inputText))] this string? inputText,
-        int injectionLevel = 1)
+    [return: NotNullIfNotNull(nameof(inputText))]
+    public static string? ObfuscateWithHiddenMarkers(this string? inputText, int injectionLevel = 1)
     {
         if (inputText.IsEmpty())
         {

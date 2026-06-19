@@ -48,14 +48,15 @@ public static class GuidExtensions
         ///     Converts the string representation of the input value to an
         ///     equivalent Guid object.
         /// </summary>
-        public static Guid? FromValue([NotNullIfNotNull(nameof(value))] string? value, Guid? defaultValue = null)
+        [return: NotNullIfNotNull(nameof(value))]
+        public static Guid? FromValue(string? value, Guid? defaultValue = null)
         {
             if (value.IsEmpty())
             {
                 return defaultValue;
             }
 
-            return Guid.TryParse(value, CultureInfo.InvariantCulture, out var result) ? result : defaultValue;
+            return Guid.TryParse(value, CultureInfo.InvariantCulture, out var result) ? result : Guid.Empty;
         }
     }
 
