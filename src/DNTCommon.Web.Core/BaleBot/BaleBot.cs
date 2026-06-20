@@ -34,7 +34,7 @@ public static class BaleBot
         await using var fileStream = File.OpenRead(filePath);
         using var fileContent = new StreamContent(fileStream);
 
-        var fileName = filePath.GetFileName()!;
+        var fileName = filePath.GetFileName();
 
         multipartContent.Add(fileContent, fileType.ToString().ToLowerInvariant(), fileName);
         multipartContent.Add(new StringContent(channelId), name: "chat_id");

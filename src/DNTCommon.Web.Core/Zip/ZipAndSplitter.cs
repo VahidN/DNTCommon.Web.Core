@@ -8,7 +8,7 @@ public static class ZipAndSplitter
 
     public static async Task<IList<string>?> ZipAndSplitFileToMultiplePartsAsync(this string filePath,
         string outputDirectory,
-        int partSizeMB,
+        int? partSizeMB,
         string? outputFileName,
         bool overwriteExistingFiles = true,
         string? password = null,
@@ -16,13 +16,11 @@ public static class ZipAndSplitter
         ILogger? logger = null,
         CancellationToken cancellationToken = default)
     {
-        if (await LinuxZipSplitter.IsZipInstalledAsync(cancellationToken))
+        if (partSizeMB.HasValue && await LinuxZipSplitter.IsZipInstalledAsync(cancellationToken))
         {
-            return await filePath.LinuxZipAndSplitFileAsync(partSizeMB, password, outputDirectory, outputFileName,
+            return await filePath.LinuxZipAndSplitFileAsync(partSizeMB.Value, password, outputDirectory, outputFileName,
                 overwriteExistingFiles, compressionLevel, logger, cancellationToken);
         }
-
-        logger?.LogCritical(message: "Zip is not installed on this server.");
 
         var name = outputFileName?.IsEmpty() == false
             ? outputFileName.GetFileNameWithoutExtension()
@@ -30,10 +28,15 @@ public static class ZipAndSplitter
 
         var dataBackupFileName = string.Create(CultureInfo.InvariantCulture, $"{name}.zip");
 
-        var backupZipFilePath = outputDirectory.SafePathCombine(dataBackupFileName)!;
+        var backupZipFilePath = outputDirectory.SafePathCombine(dataBackupFileName);
 
         backupZipFilePath.CompressFilesToZipFile(filePath);
         await Task.Delay(Delay, cancellationToken);
+
+        if (!partSizeMB.HasValue)
+        {
+            return [backupZipFilePath];
+        }
 
         var parts = await backupZipFilePath.SplitFileAsync(outputDirectory, partsInfo =>
         {
@@ -41,7 +44,7 @@ public static class ZipAndSplitter
             var number = partsInfo.PartNumber.ToStringPadLeft(totalWidth);
 
             return string.Create(CultureInfo.InvariantCulture, $"{dataBackupFileName}{number}.part");
-        }, partSizeMB.ToBytes(FileSizeUnit.Megabyte), cancellationToken);
+        }, partSizeMB.Value.ToBytes(FileSizeUnit.Megabyte), cancellationToken);
 
         backupZipFilePath.TryDeleteFile(logger);
 
@@ -50,7 +53,7 @@ public static class ZipAndSplitter
 
     public static async Task<IList<string>?> ZipAndSplitFolderToMultiplePartsAsync(this string folderPath,
         string outputDirectory,
-        int partSizeMB,
+        int? partSizeMB,
         string? outputFileName,
         bool overwriteExistingFiles = true,
         string? password = null,
@@ -58,13 +61,11 @@ public static class ZipAndSplitter
         ILogger? logger = null,
         CancellationToken cancellationToken = default)
     {
-        if (await LinuxZipSplitter.IsZipInstalledAsync(cancellationToken))
+        if (partSizeMB.HasValue && await LinuxZipSplitter.IsZipInstalledAsync(cancellationToken))
         {
-            return await folderPath.LinuxZipAndSplitFolderAsync(partSizeMB, password, outputDirectory, outputFileName,
-                overwriteExistingFiles, compressionLevel, logger, cancellationToken);
+            return await folderPath.LinuxZipAndSplitFolderAsync(partSizeMB.Value, password, outputDirectory,
+                outputFileName, overwriteExistingFiles, compressionLevel, logger, cancellationToken);
         }
-
-        logger?.LogCritical(message: "Zip is not installed on this server.");
 
         var name = outputFileName?.IsEmpty() == false
             ? outputFileName.GetFileNameWithoutExtension()
@@ -72,10 +73,15 @@ public static class ZipAndSplitter
 
         var dataBackupFileName = string.Create(CultureInfo.InvariantCulture, $"{name}.zip");
 
-        var outputZipFilePath = outputDirectory.SafePathCombine(dataBackupFileName)!;
+        var outputZipFilePath = outputDirectory.SafePathCombine(dataBackupFileName);
 
         folderPath.CompressFolderToZipFile(outputZipFilePath);
         await Task.Delay(Delay, cancellationToken);
+
+        if (!partSizeMB.HasValue)
+        {
+            return [outputZipFilePath];
+        }
 
         var partPaths = await outputZipFilePath.SplitFileAsync(outputDirectory, partsInfo =>
         {
@@ -83,7 +89,7 @@ public static class ZipAndSplitter
             var number = partsInfo.PartNumber.ToStringPadLeft(totalWidth);
 
             return string.Create(CultureInfo.InvariantCulture, $"{dataBackupFileName}{number}.part");
-        }, partSizeMB.ToBytes(FileSizeUnit.Megabyte), cancellationToken);
+        }, partSizeMB.Value.ToBytes(FileSizeUnit.Megabyte), cancellationToken);
 
         outputZipFilePath.TryDeleteFile(logger);
 

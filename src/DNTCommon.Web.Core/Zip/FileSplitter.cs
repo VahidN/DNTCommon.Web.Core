@@ -51,7 +51,7 @@ public static class FileSplitter
         {
             var partNumber = i + 1;
             var fileName = partFileName((partNumber, totalParts));
-            var outputPartFilePath = outputDir.SafePathCombine(fileName)!;
+            var outputPartFilePath = outputDir.SafePathCombine(fileName);
 
             await using var outputStream = new FileStream(outputPartFilePath, FileMode.Create, FileAccess.Write,
                 FileShare.None, MaxBufferSize, useAsync: true);

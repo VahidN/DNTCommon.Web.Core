@@ -925,7 +925,7 @@ public static class PathUtils
         ArgumentNullException.ThrowIfNull(directory);
         ArgumentNullException.ThrowIfNull(extensions);
 
-        directory = directory.NormalizePath()!;
+        directory = directory.NormalizePath();
 
         return new DirectoryInfo(directory).GetFilesByExtensions(extensions);
     }

@@ -116,11 +116,11 @@ public static class LinuxZipSplitter
 
         if (outputFileName?.IsEmpty() == false)
         {
-            name = outputFileName.GetFileNameWithoutExtension()!;
+            name = outputFileName.GetFileNameWithoutExtension();
         }
         else if (isFile)
         {
-            name = path.GetFileNameWithoutExtension()!;
+            name = path.GetFileNameWithoutExtension();
         }
         else
         {
@@ -128,8 +128,8 @@ public static class LinuxZipSplitter
         }
 
         var outputZipName = $"{name}.zip";
-        var outputZipPath = outputDirectory.SafePathCombine(outputZipName)!;
-        var outputBase = outputDirectory.SafePathCombine(name)!;
+        var outputZipPath = outputDirectory.SafePathCombine(outputZipName);
+        var outputBase = outputDirectory.SafePathCombine(name);
 
         return (
             Directory.GetFiles(outputDirectory, $"{name}.*")
