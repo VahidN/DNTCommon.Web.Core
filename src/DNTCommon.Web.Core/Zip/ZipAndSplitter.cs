@@ -16,9 +16,9 @@ public static class ZipAndSplitter
         ILogger? logger = null,
         CancellationToken cancellationToken = default)
     {
-        if (partSizeMB.HasValue && await LinuxZipSplitter.IsZipInstalledAsync(cancellationToken))
+        if (await LinuxZipSplitter.IsZipInstalledAsync(cancellationToken))
         {
-            return await filePath.LinuxZipAndSplitFileAsync(partSizeMB.Value, password, outputDirectory, outputFileName,
+            return await filePath.LinuxZipAndSplitFileAsync(partSizeMB, password, outputDirectory, outputFileName,
                 overwriteExistingFiles, compressionLevel, logger, cancellationToken);
         }
 
@@ -61,10 +61,10 @@ public static class ZipAndSplitter
         ILogger? logger = null,
         CancellationToken cancellationToken = default)
     {
-        if (partSizeMB.HasValue && await LinuxZipSplitter.IsZipInstalledAsync(cancellationToken))
+        if (await LinuxZipSplitter.IsZipInstalledAsync(cancellationToken))
         {
-            return await folderPath.LinuxZipAndSplitFolderAsync(partSizeMB.Value, password, outputDirectory,
-                outputFileName, overwriteExistingFiles, compressionLevel, logger, cancellationToken);
+            return await folderPath.LinuxZipAndSplitFolderAsync(partSizeMB, password, outputDirectory, outputFileName,
+                overwriteExistingFiles, compressionLevel, logger, cancellationToken);
         }
 
         var name = outputFileName?.IsEmpty() == false

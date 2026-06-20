@@ -9,7 +9,7 @@ public static class LinuxZipSplitter
     ///     operating systems.
     /// </summary>
     public static async Task<IList<string>?> LinuxZipAndSplitFileAsync(this string? filePath,
-        int partSizeMB,
+        int? partSizeMB,
         string? password,
         string? outputDirectory,
         string? outputFileName,
@@ -68,11 +68,14 @@ public static class LinuxZipSplitter
         }
 
         ICollection<string> argumentsList = password.IsEmpty() ? [] : ["-P", password];
+        argumentsList.Add(string.Create(CultureInfo.InvariantCulture, $"-{(int)compressionLevel}"));
 
-        argumentsList.AddRange([
-            string.Create(CultureInfo.InvariantCulture, $"-{(int)compressionLevel}"), "-s",
-            string.Create(CultureInfo.InvariantCulture, $"{partSizeMB}m"), "-j", "-q", outputZipPath, filePath
-        ]);
+        if (partSizeMB.HasValue)
+        {
+            argumentsList.AddRange(["-s", string.Create(CultureInfo.InvariantCulture, $"{partSizeMB}m")]);
+        }
+
+        argumentsList.AddRange(["-j", "-q", outputZipPath, filePath]);
 
         var processInfo = await new ApplicationStartInfo
         {
@@ -144,7 +147,7 @@ public static class LinuxZipSplitter
     ///     operating systems.
     /// </summary>
     public static async Task<IList<string>?> LinuxZipAndSplitFolderAsync(this string? folderPath,
-        int partSizeMB,
+        int? partSizeMB,
         string? password,
         string? outputDirectory,
         string? outputFileName,
@@ -206,11 +209,15 @@ public static class LinuxZipSplitter
         var folderNameOnly = new DirectoryInfo(folderPath).Name;
 
         ICollection<string> argumentsList = password.IsEmpty() ? [] : ["-P", password];
+        argumentsList.Add(string.Create(CultureInfo.InvariantCulture, $"-{(int)compressionLevel}"));
+        argumentsList.Add(item: "-r");
 
-        argumentsList.AddRange([
-            string.Create(CultureInfo.InvariantCulture, $"-{(int)compressionLevel}"), "-r", "-s",
-            string.Create(CultureInfo.InvariantCulture, $"{partSizeMB}m"), "-q", outputZipPath, folderNameOnly
-        ]);
+        if (partSizeMB.HasValue)
+        {
+            argumentsList.AddRange(["-s", string.Create(CultureInfo.InvariantCulture, $"{partSizeMB}m")]);
+        }
+
+        argumentsList.AddRange(["-q", outputZipPath, folderNameOnly]);
 
         var processInfo = await new ApplicationStartInfo
         {
