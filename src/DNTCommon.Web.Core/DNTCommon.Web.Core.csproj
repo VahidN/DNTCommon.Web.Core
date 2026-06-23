@@ -112,7 +112,7 @@
     <PackageReference Include="MailKit" Version="4.17.0"/>
     <PackageReference Include="HtmlAgilityPack" Version="1.12.4"/>
     <PackageReference Include="IPAddressRange" Version="6.3.0"/>
-    <PackageReference Include="SkiaSharp" Version="3.119.4"/>
+    <PackageReference Include="SkiaSharp" Version="4.148.0"/>
     <PackageReference Include="SkiaSharp.HarfBuzz" Version="3.119.4"/>
     <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.4"/>
     <PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" Version="8.3.1.5"/>
