@@ -11,12 +11,12 @@ public class SkiaPieChart : SkiaChart
     /// <summary>
     ///     Its default value is `200`
     /// </summary>
-    public float PieRadius { set; get; } = 200f;
+    public float PieRadius { get; set; } = 200f;
 
     /// <summary>
     ///     Its default value is 220.
     /// </summary>
-    public float LabelPieRadius { set; get; } = 220;
+    public float LabelPieRadius { get; set; } = 220;
 
     /// <summary>
     ///     Draws a pie-chart and returns it as a .png byte array by default
@@ -93,13 +93,22 @@ public class SkiaPieChart : SkiaChart
         var sweepAngle = chartItem.Value / totalSum * 360;
         piePaint.Color = chartItem.Color ?? RandomSKColorProvider.RandomSkColor;
 
-        using var piePath = new SKPath();
-        piePath.MoveTo(centerX, centerY);
+        // Build the pie slice path using SKPathBuilder (replacement for obsolete SKPath APIs)
+        using var builder = new SKPathBuilder();
+        builder.MoveTo(centerX, centerY);
 
-        piePath.ArcTo(new SKRect(centerX - PieRadius, centerY - PieRadius, centerX + PieRadius, centerY + PieRadius),
+        // Move to the arc start point on the circle's circumference
+        var startRad = startAngle * Math.PI / 180.0;
+        var startX = centerX + (PieRadius * (float)Math.Cos(startRad));
+        var startY = centerY + (PieRadius * (float)Math.Sin(startRad));
+        builder.LineTo(startX, startY);
+
+        builder.ArcTo(new SKRect(centerX - PieRadius, centerY - PieRadius, centerX + PieRadius, centerY + PieRadius),
             startAngle, sweepAngle, forceMoveTo: false);
 
-        piePath.Close();
+        builder.Close();
+
+        using var piePath = builder.Snapshot();
         canvas.DrawPath(piePath, piePaint);
 
         return sweepAngle;
@@ -132,9 +141,9 @@ public class SkiaPieChart : SkiaChart
             labelX -= textWidth + (2 * (LabelPieRadius - PieRadius));
         }
 
-        canvas.DrawShapedText(labelShaper, chartItem.Label, labelX, labelY, labelFont, labelPaint);
+        canvas.DrawShapedText(labelShaper, chartItem.Label, labelX, labelY, SKTextAlign.Left, labelFont, labelPaint);
 
         canvas.DrawShapedText(labelShaper, $" ({GetFormattedNumber(chartItem.Value)})", labelX + textWidth, labelY,
-            labelFont, labelPaint);
+            SKTextAlign.Left, labelFont, labelPaint);
     }
 }

@@ -891,7 +891,7 @@ public sealed class MegaClient(HttpClient httpClient)
     {
         await FillDefaultNodesAsync(cancellationToken);
 
-        var node = Find(item);
+        var node = FindItem(item);
 
         if (node is null)
         {
@@ -919,7 +919,7 @@ public sealed class MegaClient(HttpClient httpClient)
 
         await FillDefaultNodesAsync(cancellationToken);
 
-        var node = Find(item) ?? throw new ArgumentOutOfRangeException(nameof(item), message: "Entry not found.");
+        var node = FindItem(item) ?? throw new ArgumentOutOfRangeException(nameof(item), message: "Entry not found.");
 
         await DownloadAsync(node, stream, new ProgressHandler(progress), cancellationToken);
     }
@@ -935,7 +935,7 @@ public sealed class MegaClient(HttpClient httpClient)
 
         await FillDefaultNodesAsync(cancellationToken);
 
-        var parent = (item.Parent is null ? GetRoot() : Find(item.Parent)) ??
+        var parent = (item.Parent is null ? GetRoot() : FindItem(item.Parent)) ??
                      throw new ArgumentOutOfRangeException(nameof(item), message: "Parent entry not found.");
 
         var node = await UploadAsync(parent.Id, item.Name, stream, modificationDate: null,
@@ -949,7 +949,7 @@ public sealed class MegaClient(HttpClient httpClient)
         ArgumentNullException.ThrowIfNull(item);
         await FillDefaultNodesAsync(cancellationToken);
 
-        var node = Find(item) ?? throw new ArgumentOutOfRangeException(nameof(item), message: "Entry not found.");
+        var node = FindItem(item) ?? throw new ArgumentOutOfRangeException(nameof(item), message: "Entry not found.");
 
         item.LastModified = node.ModificationDate ?? node.CreationDate ?? default;
         item.Size = node.Size;
@@ -968,7 +968,7 @@ public sealed class MegaClient(HttpClient httpClient)
 
         await FillDefaultNodesAsync(cancellationToken);
 
-        var node = Find(item) ?? throw new ArgumentOutOfRangeException(nameof(item), message: "Entry not found.");
+        var node = FindItem(item) ?? throw new ArgumentOutOfRangeException(nameof(item), message: "Entry not found.");
 
         var url = await PublishAsync(node, cancellationToken);
 
@@ -982,7 +982,7 @@ public sealed class MegaClient(HttpClient httpClient)
     {
         await FillDefaultNodesAsync(cancellationToken);
 
-        var node = Find(item);
+        var node = FindItem(item);
 
         if (node is null)
         {
@@ -1004,7 +1004,7 @@ public sealed class MegaClient(HttpClient httpClient)
         return _nodes;
     }
 
-    private MegaNode? Find(MegaItem? item)
+    private MegaNode? FindItem(MegaItem? item)
     {
         if (item is null)
         {
@@ -1053,7 +1053,7 @@ public sealed class MegaClient(HttpClient httpClient)
     {
         await FillDefaultNodesAsync(cancellationToken);
 
-        var pe = parent is null ? GetRoot() : Find(parent);
+        var pe = parent is null ? GetRoot() : FindItem(parent);
 
         if (pe is null)
         {
