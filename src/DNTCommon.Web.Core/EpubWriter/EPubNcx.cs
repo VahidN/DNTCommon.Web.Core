@@ -4,7 +4,7 @@ namespace DNTCommon.Web.Core;
 
 public class EPubNcx
 {
-    public static readonly XNamespace NcxNS = "http://www.daisy.org/z3986/2005/ncx/";
+    public static readonly XNamespace NcxNS = "https://www.daisy.org/z3986/2005/ncx/";
     private readonly List<string> _authors = [];
     private readonly List<EPubNavPoint> _navPoints = [];
     private string _title = string.Empty;
@@ -21,7 +21,7 @@ public class EPubNcx
     public XDocument ToXmlDocument()
     {
         var doc = new XDocument(new XDocumentType(name: "ncx", publicId: "-//NISO//DTD ncx 2005-1//EN",
-            systemId: "http://www.daisy.org/z3986/2005/ncx-2005-1.dtd", internalSubset: null));
+            systemId: "https://www.daisy.org/z3986/2005/ncx-2005-1.dtd", internalSubset: null));
 
         var ncx = new XElement(NcxNS + "ncx");
         ncx.Add(CreateHeadElement());

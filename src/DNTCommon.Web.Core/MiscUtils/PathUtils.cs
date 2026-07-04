@@ -88,7 +88,9 @@ public static class PathUtils
             return null;
         }
 
+#pragma warning disable S4790
         using var sha1 = SHA1.Create();
+#pragma warning restore S4790
 
         return filePath.GetContentsHash(sha1);
     }
@@ -220,6 +222,20 @@ public static class PathUtils
     /// <summary>
     ///     Determines whether the given path refers to an existing directory on disk.
     /// </summary>
+    public static void CheckFileDirExists(this string? filePath)
+    {
+        if (filePath.IsEmpty())
+        {
+            return;
+        }
+
+        var dir = filePath.GetDirectoryName();
+        dir.CreateSafeDir();
+    }
+
+    /// <summary>
+    ///     Determines whether the given path refers to an existing directory on disk.
+    /// </summary>
     /// <param name="path"></param>
     public static void TryCreateDirectory(this string? path) => path.CheckDirExists();
 
@@ -286,7 +302,9 @@ public static class PathUtils
     /// </summary>
     public static string? GetTempFilePath(this string? extension)
     {
+#pragma warning disable S5443
         var path = Path.GetTempPath();
+#pragma warning restore S5443
         var ext = extension.IsEmpty() ? ".tmp" : $".{extension.TrimStart(trimChar: '.')}";
         var fileName = $"{Guid.NewGuid():N}{ext}";
 
@@ -849,6 +867,16 @@ public static class PathUtils
         if (rootDir.IsEmpty())
         {
             return null;
+        }
+
+        if (subDirs.IsNullOrEmpty())
+        {
+            return rootDir;
+        }
+
+        for (var index = 0; index < subDirs.Length; index++)
+        {
+            subDirs[index] = subDirs[index].NormalizePath();
         }
 
         var fullRoot = Path.GetFullPath(rootDir).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);

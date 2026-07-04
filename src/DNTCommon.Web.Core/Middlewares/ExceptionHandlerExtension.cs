@@ -81,7 +81,9 @@ public static class ExceptionHandlerExtension
         {
             if (!context.Response.Headers.ContainsKey(key: "Access-Control-Allow-Origin"))
             {
+#pragma warning disable S5122
                 context.Response.Headers.Append(key: "Access-Control-Allow-Origin", value: "*");
+#pragma warning restore S5122
             }
 
             if (!context.Response.Headers.ContainsKey(key: "Access-Control-Allow-Headers"))

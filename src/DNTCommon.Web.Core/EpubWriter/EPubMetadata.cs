@@ -62,8 +62,8 @@ public class EPubMetadata
 
     public XElement ToElement()
     {
-        XNamespace dc = "http://purl.org/dc/elements/1.1/";
-        XNamespace opf = "http://www.idpf.org/2007/opf";
+        XNamespace dc = "https://purl.org/dc/elements/1.1/";
+        XNamespace opf = "https://www.idpf.org/2007/opf";
 
         var element = new XElement(EPubDocument.OpfNS + "metadata", new XAttribute(XNamespace.Xmlns + "dc", dc),
             new XAttribute(XNamespace.Xmlns + "opf", opf));

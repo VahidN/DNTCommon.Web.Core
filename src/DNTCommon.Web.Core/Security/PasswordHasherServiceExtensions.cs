@@ -56,7 +56,9 @@ public static class PasswordHasherServiceExtensions
     /// </summary>
     public static string GetSha1Hash(this byte[] input)
     {
+#pragma warning disable S4790
         var byteHash = SHA1.HashData(input);
+#pragma warning restore S4790
 
         return Convert.ToHexString(byteHash);
     }

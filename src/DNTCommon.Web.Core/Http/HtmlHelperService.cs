@@ -121,7 +121,7 @@ public class HtmlHelperService(
                     .TrimStart(trimChar: '/')
                     .Trim();
 
-                var newUrl = $"http://{originalUrl}";
+                var newUrl = $"https://{originalUrl}";
                 var (urlDomain, hasBestMatch) = newUrl.GetUrlDomain();
 
                 if (!string.IsNullOrWhiteSpace(urlDomain) && hasBestMatch)

@@ -14,7 +14,9 @@ public static class Md5CryptoExtensions
     /// <returns></returns>
     public static string FileMd5(this string path)
     {
+#pragma warning disable S4790
         using var md5 = MD5.Create();
+#pragma warning restore S4790
         using var file = new FileStream(path, FileMode.Open, FileAccess.Read);
         var retVal = md5.ComputeHash(file);
 
@@ -29,7 +31,9 @@ public static class Md5CryptoExtensions
     public static string Md5Hash(this byte[] inputBytes)
     {
         // step 1, calculate MD5 hash from input
+#pragma warning disable S4790
         var hash = MD5.HashData(inputBytes);
+#pragma warning restore S4790
 
         // step 2, convert byte array to hex string
         var sb = new StringBuilder(2 * hash.Length);
@@ -56,6 +60,6 @@ public static class Md5CryptoExtensions
 
         var data = Encoding.UTF8.GetBytes(input);
 
-        return Md5Hash(data);
+        return data.Md5Hash();
     }
 }

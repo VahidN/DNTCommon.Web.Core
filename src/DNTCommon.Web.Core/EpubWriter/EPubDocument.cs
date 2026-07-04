@@ -9,9 +9,8 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public sealed class EPubDocument : IDisposable
 {
-    public static readonly XNamespace DcNS = "http://purl.org/dc/elements/1.1/";
-    public static readonly XNamespace OpfNS = "http://www.idpf.org/2007/opf";
-
+    public static readonly XNamespace DcNS = "https://purl.org/dc/elements/1.1/";
+    public static readonly XNamespace OpfNS = "https://www.idpf.org/2007/opf";
     private readonly EPubContainer _ePubContainer = new();
     private readonly EPubGuide _ePubGuide = new();
     private readonly EPubManifest _ePubManifest = new();
@@ -19,14 +18,23 @@ public sealed class EPubDocument : IDisposable
     private readonly EPubNcx _ePubNcx = new();
     private readonly EPubSpine _ePubSpine = new();
     private readonly Dictionary<string, int> _ids = [];
+
+    private readonly string? _tempDirPath;
     private readonly ZipArchive _zipArchive;
     private bool _disposed;
 
     /// <summary>
     ///     Creates new instance of .EPUB document
     /// </summary>
-    public EPubDocument(string ebookFilePath)
+    public EPubDocument(string ebookFilePath, string? tempDirPath = null)
     {
+        _tempDirPath = tempDirPath;
+
+        if (!_tempDirPath.IsEmpty())
+        {
+            _tempDirPath.CheckDirExists();
+        }
+
         ebookFilePath.TryDeleteFile();
 
         _zipArchive = ZipFile.Open(ebookFilePath, ZipArchiveMode.Create, Encoding.UTF8);
@@ -341,7 +349,12 @@ public sealed class EPubDocument : IDisposable
     }
 
     private void CopyFile(string path, string epubPath)
-        => _zipArchive.AddToZipArchive("OPF/" + epubPath, new FileInfo(path));
+    {
+        var entryName = $"OPF/{epubPath}";
+        var fileInfo = new FileInfo(path);
+        _zipArchive.AddToZipArchive(entryName, fileInfo);
+        WriteToTempFile(entryName, File.ReadAllBytes(fileInfo.FullName));
+    }
 
     private string GetNextID(string kind)
     {
@@ -381,7 +394,10 @@ public sealed class EPubDocument : IDisposable
                     new XElement(name: "option", new XAttribute(name: "name", value: "specified-fonts"), true)))
             .Save(memoryStream);
 
-        _zipArchive.AddToZipArchive(entryName: "META-INF/com.apple.ibooks.display-options.xml", memoryStream.ToArray());
+        const string EntryName = "META-INF/com.apple.ibooks.display-options.xml";
+        var data = memoryStream.ToArray();
+        _zipArchive.AddToZipArchive(EntryName, data);
+        WriteToTempFile(EntryName, data);
     }
 
     private void WriteContainer()
@@ -389,21 +405,44 @@ public sealed class EPubDocument : IDisposable
         using var memoryStream = new MemoryStream();
 
         _ePubContainer.ToElement().Save(memoryStream);
-        _zipArchive.AddToZipArchive(entryName: "META-INF/container.xml", memoryStream.ToArray());
+        const string EntryName = "META-INF/container.xml";
+        var data = memoryStream.ToArray();
+        _zipArchive.AddToZipArchive(EntryName, data);
+        WriteToTempFile(EntryName, data);
     }
 
-    private void WriteFile(string epubPath, byte[] content) => _zipArchive.AddToZipArchive("OPF/" + epubPath, content);
+    private void WriteFile(string epubPath, byte[] content)
+    {
+        var entryName = $"OPF/{epubPath}";
+        _zipArchive.AddToZipArchive(entryName, content);
+        WriteToTempFile(entryName, content);
+    }
 
-    private void WriteFile(string epubPath, string content) => _zipArchive.AddToZipArchive("OPF/" + epubPath, content);
+    private void WriteFile(string epubPath, string content)
+    {
+        var entryName = $"OPF/{epubPath}";
+        _zipArchive.AddToZipArchive(entryName, content);
+        WriteToTempFile(entryName, content);
+    }
 
-    private void WriteMimetype() => _zipArchive.AddToZipArchive(entryName: "mimetype", data: "application/epub+zip");
+    private void WriteMimetype()
+    {
+        const string EntryName = "mimetype";
+        const string Data = "application/epub+zip";
+        _zipArchive.AddToZipArchive(EntryName, Data);
+        WriteToTempFile(EntryName, Data);
+    }
 
     private void WriteNcx(string ncxFilePath)
     {
         using var memoryStream = new MemoryStream();
 
         _ePubNcx.ToXmlDocument().Save(memoryStream);
-        _zipArchive.AddToZipArchive("OPF/" + ncxFilePath, memoryStream.ToArray());
+
+        var entryName = $"OPF/{ncxFilePath}";
+        var data = memoryStream.ToArray();
+        _zipArchive.AddToZipArchive(entryName, data);
+        WriteToTempFile(entryName, data);
     }
 
     private void WriteOpf(string opfFilePath)
@@ -418,6 +457,30 @@ public sealed class EPubDocument : IDisposable
         packageElement.Add(_ePubSpine.ToElement());
         packageElement.Add(_ePubGuide.ToElement());
         packageElement.Save(memoryStream);
-        _zipArchive.AddToZipArchive($"OPF/{opfFilePath}", memoryStream.ToArray());
+
+        var entryName = $"OPF/{opfFilePath}";
+        var data = memoryStream.ToArray();
+        _zipArchive.AddToZipArchive(entryName, data);
+        WriteToTempFile(entryName, data);
+    }
+
+    private void WriteToTempFile(string entryName, byte[] data)
+    {
+        if (!_tempDirPath.IsEmpty())
+        {
+            var filePath = _tempDirPath.SafePathCombine(entryName);
+            filePath.CheckFileDirExists();
+            File.WriteAllBytes(filePath, data);
+        }
+    }
+
+    private void WriteToTempFile(string entryName, string data)
+    {
+        if (!_tempDirPath.IsEmpty())
+        {
+            var filePath = _tempDirPath.SafePathCombine(entryName);
+            filePath.CheckFileDirExists();
+            File.WriteAllText(filePath, data);
+        }
     }
 }

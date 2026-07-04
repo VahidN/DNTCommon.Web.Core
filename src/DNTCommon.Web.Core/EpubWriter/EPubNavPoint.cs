@@ -12,14 +12,14 @@ public class EPubNavPoint(string label, string id, string content, int playOrder
     /// <summary>
     ///     Add TOC entry as a direct child of this NavPoint
     /// </summary>
-    /// <param name="label">Text of TOC entry</param>
-    /// <param name="content">Link to TOC entry</param>
-    /// <param name="playOrder">play order counter</param>
+    /// <param name="navPointLabel">Text of TOC entry</param>
+    /// <param name="navPointContent">Link to TOC entry</param>
+    /// <param name="navPointPlayOrder">play order counter</param>
     /// <returns>newly created NavPoint </returns>
-    public EPubNavPoint AddNavPoint(string label, string content, int playOrder)
+    public EPubNavPoint AddNavPoint(string navPointLabel, string navPointContent, int navPointPlayOrder)
     {
         var id1 = string.Create(CultureInfo.InvariantCulture, $"{id}x{_navPoints.Count + 1}");
-        var nav = new EPubNavPoint(label, id1, content, playOrder);
+        var nav = new EPubNavPoint(navPointLabel, id1, navPointContent, navPointPlayOrder);
         _navPoints.Add(nav);
 
         return nav;
