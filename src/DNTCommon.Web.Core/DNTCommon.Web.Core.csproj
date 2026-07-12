@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>DNTCommon.Web.Core provides common scenarios' solutions for ASP.NET Core applications.</Description>
-    <VersionPrefix>14.8.5</VersionPrefix>
+    <VersionPrefix>14.9.0</VersionPrefix>
     <Authors>Vahid Nasiri</Authors>
     <TargetFrameworks>net10.0;net9.0;net8.0;</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -67,7 +67,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Meziantou.Analyzer" Version="3.0.119">
+    <PackageReference Include="Meziantou.Analyzer" Version="3.0.122">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -83,7 +83,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="SonarAnalyzer.CSharp" Version="10.28.0.143324">
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="10.29.0.143774">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -112,10 +112,10 @@
     <PackageReference Include="MailKit" Version="4.17.0"/>
     <PackageReference Include="HtmlAgilityPack" Version="1.12.4"/>
     <PackageReference Include="IPAddressRange" Version="6.3.0"/>
-    <PackageReference Include="SkiaSharp" Version="4.148.0"/>
-    <PackageReference Include="SkiaSharp.HarfBuzz" Version="4.148.0"/>
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="4.148.0"/>
-    <PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" Version="14.2.0"/>
+    <PackageReference Include="SkiaSharp" Version="4.150.0"/>
+    <PackageReference Include="SkiaSharp.HarfBuzz" Version="4.150.0"/>
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="4.150.0"/>
+    <PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" Version="14.2.1"/>
     <PackageReference Include="Ben.Demystifier" Version="0.4.1"/>
     <PackageReference Include="UAParser" Version="3.1.47"/>
     <PackageReference Include="AsyncKeyedLock" Version="8.0.2"/>
