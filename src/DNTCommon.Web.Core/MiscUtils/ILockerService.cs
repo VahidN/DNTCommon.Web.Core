@@ -26,4 +26,17 @@ public interface ILockerService : IDisposable
     /// </summary>
     ValueTask<IDisposable?> LockAsync<T>(TimeSpan timeout, CancellationToken cancellationToken = default)
         where T : notnull;
+
+    /// <summary>
+    ///     Synchronously locks and executes the action
+    /// </summary>
+    T ExecuteWithLock<T>(string lockKey, TimeSpan timeout, Func<T> func, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///     Asynchronously locks and executes the action
+    /// </summary>
+    Task<T> ExecuteWithLockAsync<T>(string lockKey,
+        TimeSpan timeout,
+        Func<CancellationToken, Task<T>> func,
+        CancellationToken cancellationToken = default);
 }

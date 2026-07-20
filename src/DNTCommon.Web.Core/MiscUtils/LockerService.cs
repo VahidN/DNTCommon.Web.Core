@@ -8,6 +8,7 @@ namespace DNTCommon.Web.Core;
 /// </summary>
 public class LockerService : ILockerService
 {
+    private readonly AsyncKeyedLocker<string> _keyedLocker = new(StringComparer.Ordinal);
     private readonly AsyncKeyedLocker<Type> _lock = new(new AsyncKeyedLockOptions());
     private bool _isDisposed;
 
@@ -65,11 +66,54 @@ public class LockerService : ILockerService
             if (disposing)
             {
                 _lock.Dispose();
+                _keyedLocker.Dispose();
             }
         }
         finally
         {
             _isDisposed = true;
+        }
+    }
+
+    /// <summary>
+    ///     Asynchronously locks and executes the action
+    /// </summary>
+    public async Task<T> ExecuteWithLockAsync<T>(string lockKey,
+        TimeSpan timeout,
+        Func<CancellationToken, Task<T>> func,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(func);
+
+        if (string.IsNullOrWhiteSpace(lockKey))
+        {
+            throw new ArgumentNullException(nameof(lockKey));
+        }
+
+        using (await _keyedLocker.LockOrNullAsync(lockKey, timeout, cancellationToken))
+        {
+            return await func(cancellationToken);
+        }
+    }
+
+    /// <summary>
+    ///     Synchronously locks and executes the action
+    /// </summary>
+    public T ExecuteWithLock<T>(string lockKey,
+        TimeSpan timeout,
+        Func<T> func,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(func);
+
+        if (string.IsNullOrWhiteSpace(lockKey))
+        {
+            throw new ArgumentNullException(nameof(lockKey));
+        }
+
+        using (_keyedLocker.LockOrNull(lockKey, timeout, cancellationToken))
+        {
+            return func();
         }
     }
 }
