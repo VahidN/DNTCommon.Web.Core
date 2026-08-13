@@ -43,7 +43,7 @@ public class PageSeoMetadata
     /// <summary>
     ///     Show llms.txt meta tags (https://llmstxt.org/)
     /// </summary>
-    public bool ShowLlmsTxt { get; set; } = true;
+    public bool ShowLlmsTxt { get; set; }
 
     /// <summary>
     ///     Name of the writer of the document
