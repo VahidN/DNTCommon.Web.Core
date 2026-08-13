@@ -62,7 +62,7 @@ public static class ExceptionHandlerExtension
             {
                 StatusCode = (int)statusCode,
                 Message = message + Environment.NewLine + exceptionMessage
-            }), Encoding.UTF8);
+            }), Encoding.UTF8, context.RequestAborted);
         }
 
         Task ShowProductionErrorAsync(HttpStatusCode statusCode, string message)
@@ -75,7 +75,7 @@ public static class ExceptionHandlerExtension
                 {
                     StatusCode = (int)statusCode,
                     Message = message
-                }), Encoding.UTF8);
+                }), Encoding.UTF8, context.RequestAborted);
 
         void addCorsHeaders()
         {

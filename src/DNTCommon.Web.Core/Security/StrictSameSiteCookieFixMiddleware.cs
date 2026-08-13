@@ -60,7 +60,7 @@ public class StrictSameSiteCookieFixMiddleware(RequestDelegate next)
                         </html>
                         """;
 
-            await ctx.Response.WriteAsync(html);
+            await ctx.Response.WriteAsync(html, ctx.RequestAborted);
 
             return;
         }

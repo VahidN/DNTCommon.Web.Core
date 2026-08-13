@@ -41,7 +41,7 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
         applicationLifetime.ApplicationStopping.Register(() =>
         {
             _logger.LogWarning(message: "Application is stopping ... .");
-            DisposeResourcesAsync().Wait();
+            DisposeResourcesAsync().Wait(applicationLifetime.ApplicationStopping);
         });
     }
 
@@ -129,7 +129,7 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
             while (_tasksStorage.Value.Tasks.Any(x => x.IsRunning) && timeOut >= 0)
             {
                 // still running ...
-                await Task.Delay(millisecondsDelay: 50);
+                await Task.Delay(millisecondsDelay: 50, _cancellationTokenSource.Token);
                 timeOut -= 50;
             }
         }
@@ -148,7 +148,7 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
 
         if (mySitePingClient is not null)
         {
-            await mySitePingClient.WakeUpAsync();
+            await mySitePingClient.WakeUpAsync(_cancellationTokenSource.Token);
         }
     }
 
@@ -180,7 +180,7 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
                 _logger.LogInformation(message: "Start running `{Name}` task @ {Now}.", name, now);
             }
 
-            scheduledTask.RunAsync(_cancellationTokenSource.Token).Wait();
+            scheduledTask.RunAsync(_cancellationTokenSource.Token).Wait(_cancellationTokenSource.Token);
 
             if (_logger.IsEnabled(LogLevel.Information))
             {
@@ -224,7 +224,7 @@ public sealed class ScheduledTasksCoordinator : IScheduledTasksCoordinator
         {
             if (disposing)
             {
-                StopTasksAsync().Wait();
+                StopTasksAsync().Wait(_cancellationTokenSource.Token);
             }
         }
         finally

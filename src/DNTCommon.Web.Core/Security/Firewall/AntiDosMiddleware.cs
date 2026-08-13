@@ -90,7 +90,8 @@ public sealed class AntiDosMiddleware : IDisposable
     {
         context.Response.StatusCode = (int)HttpStatusCode.TooManyRequests;
 
-        return context.Response.WriteAsync(_antiDosConfig?.ErrorMessage ?? "The server is busy!");
+        return context.Response.WriteAsync(_antiDosConfig?.ErrorMessage ?? "The server is busy!",
+            context.RequestAborted);
     }
 
     private void AddResetHeaders(HttpContext context, ThrottleInfo? throttleInfo)
