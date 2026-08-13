@@ -6,6 +6,7 @@ jobs:
   build:
 
     runs-on: windows-2022
+    environment: release
     permissions:
       contents: read
       id-token: write
@@ -24,7 +25,7 @@ jobs:
       id: login
       uses: NuGet/login@v1
       with:
-        user: ${{ secrets.NUGET_USER }}
+        username: ${{ secrets.NUGET_USER }}
 
     - name: Push Package to NuGet.org
       if: github.event_name == 'push'
