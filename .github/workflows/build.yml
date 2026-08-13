@@ -25,7 +25,7 @@ jobs:
       id: login
       uses: NuGet/login@v1
       with:
-        username: ${{ secrets.NUGET_USER }}
+        user: ${{ secrets.NUGET_USER }}
 
     - name: Push Package to NuGet.org
       if: github.event_name == 'push'
