@@ -32,6 +32,24 @@ public static class LocalIp
     }
 
     /// <summary>
+    ///     Determines whether the given string is a valid IP version 4 or 6 address.
+    /// </summary>
+    public static bool IsValidIp(this IPAddress? ipAddress)
+    {
+        if (ipAddress is null)
+        {
+            return false;
+        }
+
+        return ipAddress.AddressFamily switch
+        {
+            //Address for IP version 4 or 6
+            AddressFamily.InterNetwork or AddressFamily.InterNetworkV6 => true,
+            _ => false
+        };
+    }
+
+    /// <summary>
     ///     Determines whether the given string is a valid IP version 4 address.
     /// </summary>
     public static bool IsValidIpV4(this string? ip)
@@ -137,4 +155,67 @@ public static class LocalIp
     ///     Indicates whether the specified IP address is the loopback address.
     /// </summary>
     public static bool IsLoopback(this IPAddress? address) => address is not null && IPAddress.IsLoopback(address);
+
+    public static bool IsPublicIp(this IPAddress? address)
+    {
+        if (address is null)
+        {
+            return false;
+        }
+		
+        if (IPAddress.IsLoopback(address))
+        {
+            return false;
+        }
+
+        if (address.AddressFamily == AddressFamily.InterNetwork) // IPv4
+        {
+            var bytes = address.GetAddressBytes();
+
+            // 10.0.0.0/8
+            if (bytes[0] == 10)
+            {
+                return false;
+            }
+
+            // 172.16.0.0/12
+            if (bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31)
+            {
+                return false;
+            }
+
+            // 192.168.0.0/16
+            if (bytes[0] == 192 && bytes[1] == 168)
+            {
+                return false;
+            }
+
+            // 169.254.0.0/16 (link-local)
+            if (bytes[0] == 169 && bytes[1] == 254)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        else // IPv6
+        {
+            var bytes = address.GetAddressBytes();
+
+            // fc00::/7 Unique local addresses
+            if ((bytes[0] & 0xfe) == 0xfc)
+            {
+                return false;
+            }
+
+            // fe80::/10 link-local
+            if (bytes[0] == 0xfe && (bytes[1] & 0xc0) == 0x80)
+            {
+                return false;
+            }
+
+            // ::1 loopback handled above
+            return true;
+        }
+    }
 }

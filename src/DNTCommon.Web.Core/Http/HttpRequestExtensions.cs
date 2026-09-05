@@ -126,21 +126,79 @@ public static partial class HttpRequestExtensions
             return null;
         }
 
-        var ip = string.Empty;
+        string? ip = null;
 
-        // todo support new "Forwarded" header (2014) https://en.wikipedia.org/wiki/X-Forwarded-For
-
-        // X-Forwarded-For (csv list):  Using the First entry in the list seems to work
-        // for 99% of cases however it has been suggested that a better (although tedious)
-        // approach might be to read each IP from right to left and use the first public static IP.
-        // http://stackoverflow.com/a/43554000/538763
-        //
+        // Prefer X-Forwarded-For but pick the rightmost *public* address if possible
         if (tryUseXForwardHeader)
         {
-            ip = SplitCsv(httpContext.GetHeaderValue(headerName: "X-Forwarded-For")).FirstOrDefault();
+            var xff = httpContext.GetHeaderValue(headerName: "X-Forwarded-For");
+
+            if (!string.IsNullOrWhiteSpace(xff))
+            {
+                // SplitCsv already exists in your file; it returns entries trimmed.
+                var entries = SplitCsv(xff)
+                    .Select(s => s.Trim())
+                    .Where(s => !string.IsNullOrWhiteSpace(s))
+
+                    // strip port if present: "1.2.3.4:1234"
+                    .Select(s => s.Contains(value: ':', StringComparison.Ordinal) &&
+                                 s.Where(c => c == ':').Take(count: 2).Count() == 1 // IPv4:port
+                        ? s.Split(separator: ':')[0]
+                        : s)
+                    .ToArray();
+
+                // iterate from right to left and pick first public IP
+                for (var i = entries.Length - 1; i >= 0; i--)
+                {
+                    var candidate = entries[i];
+
+                    if (IPAddress.TryParse(candidate, out var addr))
+                    {
+                        if (addr.IsIPv4MappedToIPv6)
+                        {
+                            addr = addr.MapToIPv4();
+                        }
+
+                        if (addr.IsPublicIp())
+                        {
+                            ip = addr.ToString();
+
+                            break;
+                        }
+                    }
+                }
+
+                // as a fallback, take the left-most entry (original behavior) if nothing public found
+                if (ip is null && entries.Length > 0 && IPAddress.TryParse(entries[0], out var firstAddr))
+                {
+                    if (firstAddr.IsIPv4MappedToIPv6)
+                    {
+                        firstAddr = firstAddr.MapToIPv4();
+                    }
+
+                    ip = firstAddr.ToString();
+                }
+            }
         }
 
-        if (string.IsNullOrWhiteSpace(ip) && httpContext.Connection?.RemoteIpAddress is not null)
+        // fallback to X-Real-IP
+        if (string.IsNullOrWhiteSpace(ip))
+        {
+            var xReal = httpContext.GetHeaderValue(headerName: "X-Real-IP");
+
+            if (!string.IsNullOrWhiteSpace(xReal) && IPAddress.TryParse(xReal.Trim(), out var xr))
+            {
+                if (xr.IsIPv4MappedToIPv6)
+                {
+                    xr = xr.MapToIPv4();
+                }
+
+                ip = xr.ToString();
+            }
+        }
+
+        // Connection.RemoteIpAddress
+        if (string.IsNullOrWhiteSpace(ip) && httpContext.Connection.RemoteIpAddress is not null)
         {
             var remoteIpAddress = httpContext.Connection.RemoteIpAddress;
 
@@ -152,12 +210,15 @@ public static partial class HttpRequestExtensions
             ip = remoteIpAddress.ToString();
         }
 
+        // last header fallback
         if (string.IsNullOrWhiteSpace(ip))
         {
             ip = httpContext.GetHeaderValue(headerName: "REMOTE_ADDR");
         }
 
-        return ip.IsValidIp() ? ip : null;
+        return !string.IsNullOrWhiteSpace(ip) && IPAddress.TryParse(ip, out var finalAddr) && finalAddr.IsValidIp()
+            ? ip
+            : null;
     }
 
     /// <summary>
