@@ -17,7 +17,7 @@ public static class AutoInjectServicesExtensions
     /// <param name="services">The service collection</param>
     /// <returns>The service collection</returns>
     public static IServiceCollection AutoInjectAllServices(this IServiceCollection services)
-        => AutoInjectAllServices(services, Assembly.GetCallingAssembly());
+        => services.AutoInjectAllServices(Assembly.GetCallingAssembly());
 
     /// <summary>
     ///     Adds services which implement IScopedService, ISingletonService, IMiddleware, ITransientService and
@@ -27,8 +27,13 @@ public static class AutoInjectServicesExtensions
     /// <param name="assemblies">The preferred services assemblies</param>
     /// <returns>The service collection</returns>
     public static IServiceCollection AutoInjectAllServices(this IServiceCollection services,
-        params ICollection<Assembly> assemblies)
+        params ICollection<Assembly>? assemblies)
     {
+        if (assemblies is null || assemblies.Count == 0)
+        {
+            assemblies = [Assembly.GetCallingAssembly()];
+        }
+
         // Using the `Scrutor` to add all the application's services at once.
         services.Scan(scan => scan.FromAssemblies(assemblies)
             .AddClasses(classes => classes.AssignableTo<ISingletonService>())

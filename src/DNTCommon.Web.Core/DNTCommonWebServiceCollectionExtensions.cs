@@ -41,8 +41,18 @@ public static class DntCommonWebServiceCollectionExtensions
     /// <summary>
     ///     Adds all the default providers of DNTCommon.Web.Core at once.
     /// </summary>
+    /// <param name="services"></param>
+    /// <param name="scheduledTasksOptions">Scheduled Tasks Storage options</param>
+    /// <param name="autoInjectAllServices">
+    ///     Adds services which implement IScopedService, ISingletonService, IMiddleware, ITransientService and
+    ///     BackgroundService to the service collection from the specified assemblies.
+    /// </param>
+    /// <param name="injectServicesFromAssemblies">The preferred services assemblies</param>
+    /// <returns></returns>
     public static IServiceCollection AddDNTCommonWeb(this IServiceCollection services,
-        Action<ScheduledTasksStorage>? scheduledTasksOptions = null)
+        Action<ScheduledTasksStorage>? scheduledTasksOptions = null,
+        bool autoInjectAllServices = false,
+        params ICollection<Assembly>? injectServicesFromAssemblies)
     {
         services.AddBackgroundQueueService();
         services.AddHttpRequestInfoService();
@@ -84,6 +94,11 @@ public static class DntCommonWebServiceCollectionExtensions
 
         services.AddBlazorStaticRendererService();
         services.AddBlazorRenderingContextService();
+
+        if (autoInjectAllServices)
+        {
+            services.AutoInjectAllServices(injectServicesFromAssemblies);
+        }
 
         return services;
     }
