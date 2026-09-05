@@ -43,7 +43,11 @@ public static class HtmlHelperServiceExtensions
         foreach (var item in items)
         {
             htmlDocument = item.HtmlDocument;
-            var newUrl = imageUrlBuilder(item.Attribute.Value);
+            var attributeValue = item.Attribute.Value;
+
+            if (attributeValue.IsEmpty()) { continue; }
+
+            var newUrl = imageUrlBuilder(attributeValue);
 
             if (newUrl is null)
             {
@@ -73,7 +77,11 @@ public static class HtmlHelperServiceExtensions
         foreach (var item in items)
         {
             htmlDocument = item.HtmlDocument;
-            var newUrl = await imageUrlBuilder(item.Attribute.Value, cancellationToken);
+            var attributeValue = item.Attribute.Value;
+
+            if (attributeValue.IsEmpty()) { continue; }
+
+            var newUrl = await imageUrlBuilder(attributeValue, cancellationToken);
 
             if (newUrl is null)
             {
@@ -102,7 +110,11 @@ public static class HtmlHelperServiceExtensions
         foreach (var item in items)
         {
             htmlDocument = item.HtmlDocument;
-            var newUrl = urlBuilder(item.Attribute.Value);
+            var attributeValue = item.Attribute.Value;
+
+            if (attributeValue.IsEmpty()) { continue; }
+
+            var newUrl = urlBuilder(attributeValue);
 
             if (newUrl is null)
             {
@@ -132,7 +144,11 @@ public static class HtmlHelperServiceExtensions
         foreach (var item in items)
         {
             htmlDocument = item.HtmlDocument;
-            var newUrl = await urlBuilder(item.Attribute.Value, cancellationToken);
+            var attributeValue = item.Attribute.Value;
+
+            if (attributeValue.IsEmpty()) { continue; }
+
+            var newUrl = await urlBuilder(attributeValue, cancellationToken);
 
             if (newUrl is null)
             {
@@ -163,6 +179,9 @@ public static class HtmlHelperServiceExtensions
         {
             htmlDocument = item.HtmlDocument;
             var imageSrcValue = item.Attribute.Value;
+
+            if (imageSrcValue.IsEmpty()) { continue; }
+
             var imageBytes = imageBuilder(imageSrcValue);
             var newSrc = imageBytes.BytesToBase64DataImage(imageSrcValue);
 
@@ -194,6 +213,9 @@ public static class HtmlHelperServiceExtensions
         {
             htmlDocument = item.HtmlDocument;
             var imageSrcValue = item.Attribute.Value;
+
+            if (imageSrcValue.IsEmpty()) { continue; }
+
             var imageBytes = await imageBuilder(imageSrcValue, cancellationToken);
             var newSrc = imageBytes.BytesToBase64DataImage(imageSrcValue);
 
@@ -460,8 +482,8 @@ public static class HtmlHelperServiceExtensions
         foreach (var node in document.DocumentNode.DescendantsAndSelf())
         {
             if (node.NodeType == HtmlNodeType.Text &&
-                !string.Equals(node.ParentNode.Name, b: "script", StringComparison.OrdinalIgnoreCase) &&
-                !string.Equals(node.ParentNode.Name, b: "style", StringComparison.OrdinalIgnoreCase))
+                !string.Equals(node.ParentNode?.Name, b: "script", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(node.ParentNode?.Name, b: "style", StringComparison.OrdinalIgnoreCase))
             {
                 var text = node.InnerText;
 

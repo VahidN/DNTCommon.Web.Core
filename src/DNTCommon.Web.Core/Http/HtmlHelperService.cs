@@ -30,13 +30,13 @@ public class HtmlHelperService(
     /// <summary>
     ///     Returns the src list of img tags.
     /// </summary>
-    public IEnumerable<string> ExtractImagesLinks(string html)
+    public IEnumerable<string?> ExtractImagesLinks(string html)
         => html.ExtractImagesLinks(includeBase64EncodedImages: false, _logger).Select(x => x.Attribute.Value);
 
     /// <summary>
     ///     Returns the href list of anchor tags.
     /// </summary>
-    public IEnumerable<string> ExtractLinks(string html) => html.ExtractLinks(_logger).Select(x => x.Attribute.Value);
+    public IEnumerable<string?> ExtractLinks(string html) => html.ExtractLinks(_logger).Select(x => x.Attribute.Value);
 
     /// <summary>
     ///     Parses an HTML content and tries to convert its relative URLs to absolute urls based on the siteBaseUrl.
@@ -76,7 +76,7 @@ public class HtmlHelperService(
                 if (originalUrl.StartsWith(value: "http", StringComparison.OrdinalIgnoreCase) ||
                     originalUrl.StartsWith(value: "https", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (!attribute.Value.Equals(originalUrl, StringComparison.OrdinalIgnoreCase))
+                    if (attribute.Value?.Equals(originalUrl, StringComparison.OrdinalIgnoreCase) == false)
                     {
                         _logger.LogWarning(message: "Changed URL: '{AttributeValue}' to '{OriginalUrl}'.",
                             antiXssService.GetSanitizedHtml(attribute.Value),
@@ -94,7 +94,7 @@ public class HtmlHelperService(
                 {
                     var newImage = originalUrl[idx..];
 
-                    if (!attribute.Value.Equals(newImage, StringComparison.OrdinalIgnoreCase))
+                    if (attribute.Value?.Equals(newImage, StringComparison.OrdinalIgnoreCase) == false)
                     {
                         attribute.Value = newImage;
 

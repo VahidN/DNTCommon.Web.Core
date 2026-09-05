@@ -679,6 +679,7 @@ dotnet_diagnostic.JSON001.severity = suggestion
 dotnet_diagnostic.JSON002.severity = suggestion
 
 dotnet_diagnostic.MA0002.severity = suggestion
+dotnet_diagnostic.MA0219.severity = suggestion
 dotnet_diagnostic.MA0003.severity = none
 dotnet_diagnostic.MA0004.severity = none
 dotnet_diagnostic.MA0006.severity = suggestion

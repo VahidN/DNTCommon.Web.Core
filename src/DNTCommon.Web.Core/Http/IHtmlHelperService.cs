@@ -8,12 +8,12 @@ public interface IHtmlHelperService
     /// <summary>
     ///     Returns the src list of img tags.
     /// </summary>
-    IEnumerable<string> ExtractImagesLinks(string html);
+    IEnumerable<string?> ExtractImagesLinks(string html);
 
     /// <summary>
     ///     Returns the href list of anchor tags.
     /// </summary>
-    IEnumerable<string> ExtractLinks(string html);
+    IEnumerable<string?> ExtractLinks(string html);
 
     /// <summary>
     ///     Parses an HTML content and tries to convert its relative URLs to absolute urls based on the siteBaseUrl.

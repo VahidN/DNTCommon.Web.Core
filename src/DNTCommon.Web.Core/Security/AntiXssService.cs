@@ -330,7 +330,7 @@ public sealed class AntiXssService : IAntiXssService
                 continue;
             }
 
-            result = CheckAttributeValue(attribute.DeEntitizeValue);
+            result = CheckAttributeValue(attribute.DeEntitizeValue ?? "");
 
             if (result.HasUnsafeValue)
             {
