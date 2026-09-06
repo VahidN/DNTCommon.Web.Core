@@ -330,4 +330,15 @@ public static class NumbersExtensions
 
         return convertToPersianNumbers ? result.ToPersianNumbers() : result;
     }
+
+    /// <summary>
+    ///     Rounds a value to a specified number of fractional digits using the specified rounding mode.
+    ///     متد جنریک برای گردکردن با الگوریتم بانکی (MidpointRounding.ToEven)
+    /// </summary>
+    /// <param name="value"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static T RoundToCents<T>(T value)
+        where T : IFloatingPoint<T>
+        => T.Round(value, digits: 2, MidpointRounding.ToEven);
 }
