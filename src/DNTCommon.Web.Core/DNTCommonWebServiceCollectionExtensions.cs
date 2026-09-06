@@ -24,8 +24,34 @@ public static class DntCommonWebServiceCollectionExtensions
     ///     Sets ForwardedHeaders to ForwardedHeaders.All
     /// </summary>
     /// <param name="services"></param>
-    public static void AddForwardedHeadersOptions(this IServiceCollection services)
-        => services.Configure<ForwardedHeadersOptions>(options => { options.ForwardedHeaders = ForwardedHeaders.All; });
+    /// <param name="trustLocalNginx">
+    ///     Configure ForwardedHeaders to trust the local nginx (localhost). The local nginx proxy
+    ///     running on the same machine.
+    /// </param>
+    /// <param name="trustedNginxHosts">Addresses of known proxies to accept forwarded headers from.</param>
+    public static void AddForwardedHeadersOptions(this IServiceCollection services,
+        bool trustLocalNginx = true,
+        params ICollection<IPAddress>? trustedNginxHosts)
+        => services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            // We want X-Forwarded-For (client IP chain) and X-Forwarded-Proto (scheme)
+            options.ForwardedHeaders = ForwardedHeaders.All;
+
+            if (trustLocalNginx)
+            {
+                // Trust the local nginx proxy running on the same machine.
+                options.KnownProxies.Add(IPAddress.Loopback); // 127.0.0.1
+                options.KnownProxies.Add(IPAddress.IPv6Loopback); // ::1
+            }
+
+            if (trustedNginxHosts?.Count > 0)
+            {
+                foreach (var trustedNginxHost in trustedNginxHosts)
+                {
+                    options.KnownProxies.Add(trustedNginxHost);
+                }
+            }
+        });
 
     /// <summary>
     ///     Performs check verifying that scoped services never gets resolved from root provider.
