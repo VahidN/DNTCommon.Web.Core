@@ -8,23 +8,21 @@ namespace DNTCommon.Web.Core.TestWebApp;
 
 public class Startup
 {
-    public Startup(IConfiguration configuration)
-    {
-        Configuration = configuration;
-    }
+    public Startup(IConfiguration configuration) => Configuration = configuration;
 
     public IConfiguration Configuration { get; }
 
     // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
-        services.Configure<SmtpConfig>(options => Configuration.GetSection("SmtpConfig").Bind(options));
-        services.Configure<AntiDosConfig>(options => Configuration.GetSection("AntiDosConfig").Bind(options));
-        services.Configure<AntiXssConfig>(options => Configuration.GetSection("AntiXssConfig").Bind(options));
-        services.Configure<ContentSecurityPolicyConfig>(options =>
-            Configuration.GetSection("ContentSecurityPolicyConfig").Bind(options));
+        services.Configure<SmtpConfig>(options => Configuration.GetSection(key: "SmtpConfig").Bind(options));
+        services.Configure<AntiDosConfig>(options => Configuration.GetSection(key: "AntiDosConfig").Bind(options));
+        services.Configure<AntiXssConfig>(options => Configuration.GetSection(key: "AntiXssConfig").Bind(options));
 
-        services.AddDNTCommonWeb();
+        services.Configure<ContentSecurityPolicyConfig>(options
+            => Configuration.GetSection(key: "ContentSecurityPolicyConfig").Bind(options));
+
+        services.AddDNTCommonWeb(autoInjectAllServices: true);
 
         services.AddControllersWithViews(options =>
         {
@@ -32,25 +30,23 @@ public class Startup
             options.UseYeKeModelBinder();
             options.Filters.Add(typeof(ApplyCorrectYeKeFilterAttribute));
         });
+
         services.AddRazorPages();
 
         services.AddDNTScheduler(options =>
         {
             // DNTScheduler needs a ping service to keep it alive.
             // If you don't need it, don't add it!
-            options.AddPingTask("https://localhost:5001");
+            options.AddPingTask(siteRootUrl: "https://localhost:5001");
 
-            options.AddScheduledTask<DoBackupTask>(
-                utcNow =>
-                {
-                    var now = utcNow.AddHours(3.5);
-                    return now.Day % 3 == 0 && now.Hour == 0 && now.Minute == 1 && now.Second == 1;
-                },
-                2);
+            options.AddScheduledTask<DoBackupTask>(utcNow =>
+            {
+                var now = utcNow.AddHours(value: 3.5);
 
-            options.AddScheduledTask<SendEmailsTask>(
-                utcNow => utcNow.Second == 1,
-                1);
+                return now.Day % 3 == 0 && now.Hour == 0 && now.Minute == 1 && now.Second == 1;
+            }, order: 2);
+
+            options.AddScheduledTask<SendEmailsTask>(utcNow => utcNow.Second == 1, order: 1);
 
             options.AddScheduledTask<ExceptionalTask>(utcNow => utcNow.Second == 1);
             options.AddScheduledTask<LongRunningTask>(utcNow => utcNow.Second == 1);
@@ -66,7 +62,7 @@ public class Startup
         }
         else
         {
-            app.UseExceptionHandler("/Home/Error");
+            app.UseExceptionHandler(errorHandlingPath: "/Home/Error");
             app.UseHsts();
         }
 
@@ -82,10 +78,9 @@ public class Startup
 
         app.UseEndpoints(endpoints =>
         {
-            endpoints.MapControllerRoute(
-                "default",
-                "{controller=Home}/{action=Index}/{id?}");
+            endpoints.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
             endpoints.MapRazorPages();
         });
     }
 }
+

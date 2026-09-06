@@ -1,17 +1,17 @@
+using DNTCommon.Web.Core.TestWebApp.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DNTCommon.Web.Core.TestWebApp.Controllers;
 
-public class AjaxExtensionsController : Controller
+public class AjaxExtensionsController(IAutoRegisterService autoRegisterService) : Controller
 {
-    public IActionResult Index()
-    {
-        return View();
-    }
+    public IActionResult Index() => View();
 
     [AjaxOnly]
     public IActionResult AjaxOnlyRequest()
-    {
-        return Json(new { IsAjaxRequest = this.HttpContext.Request.IsAjaxRequest() });
-    }
+        => Json(new
+        {
+            IsAjaxRequest = HttpContext.Request.IsAjaxRequest(),
+            Data = autoRegisterService.GetDate()
+        });
 }
