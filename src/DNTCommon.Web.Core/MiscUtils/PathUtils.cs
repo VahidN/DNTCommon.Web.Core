@@ -881,7 +881,7 @@ public static class PathUtils
 
         var fullRoot = Path.GetFullPath(rootDir).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
-        return Path.GetFullPath(Path.Join([fullRoot, ..subDirs.Select(fullRoot.GetSanitizedRelativePath)]));
+        return Path.GetFullPath(Path.Join([fullRoot, .. subDirs.Select(fullRoot.GetSanitizedRelativePath)]));
     }
 
     /// <summary>
@@ -948,13 +948,15 @@ public static class PathUtils
         return fileInfos.Where(f => pathExtensions.Contains(f.Extension, StringComparer.OrdinalIgnoreCase));
     }
 
-    public static IEnumerable<FileInfo> GetFilesByExtensions(this string directory, params string[] extensions)
+    public static IEnumerable<FileInfo> GetFilesByExtensions(this string directory,
+        SearchOption searchOption,
+        params string[] extensions)
     {
         ArgumentNullException.ThrowIfNull(directory);
         ArgumentNullException.ThrowIfNull(extensions);
 
         directory = directory.NormalizePath();
 
-        return new DirectoryInfo(directory).GetFilesByExtensions(extensions);
+        return new DirectoryInfo(directory).GetFilesByExtensions(searchOption, extensions);
     }
 }
