@@ -119,106 +119,21 @@ public static partial class HttpRequestExtensions
     /// <summary>
     ///     Gets the current HttpContext.Request's IP.
     /// </summary>
-    public static string? GetIP(this HttpContext? httpContext, bool tryUseXForwardHeader = true)
+    public static string? GetIP(this HttpContext? httpContext)
     {
-        if (httpContext is null)
+        var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
+
+        if (remoteIpAddress is null)
         {
             return null;
         }
 
-        string? ip = null;
-
-        // Prefer X-Forwarded-For but pick the rightmost *public* address if possible
-        if (tryUseXForwardHeader)
+        if (remoteIpAddress.IsIPv4MappedToIPv6)
         {
-            var xff = httpContext.GetHeaderValue(headerName: "X-Forwarded-For");
-
-            if (!string.IsNullOrWhiteSpace(xff))
-            {
-                // SplitCsv already exists in your file; it returns entries trimmed.
-                var entries = SplitCsv(xff)
-                    .Select(s => s.Trim())
-                    .Where(s => !string.IsNullOrWhiteSpace(s))
-
-                    // strip port if present: "1.2.3.4:1234"
-                    .Select(s => s.Contains(value: ':', StringComparison.Ordinal) &&
-                                 s.Where(c => c == ':').Take(count: 2).Count() == 1 // IPv4:port
-                        ? s.Split(separator: ':')[0]
-                        : s)
-                    .ToArray();
-
-                // iterate from right to left and pick first public IP
-                for (var i = entries.Length - 1; i >= 0; i--)
-                {
-                    var candidate = entries[i];
-
-                    if (IPAddress.TryParse(candidate, out var addr))
-                    {
-                        if (addr.IsIPv4MappedToIPv6)
-                        {
-                            addr = addr.MapToIPv4();
-                        }
-
-                        if (addr.IsPublicIp())
-                        {
-                            ip = addr.ToString();
-
-                            break;
-                        }
-                    }
-                }
-
-                // as a fallback, take the left-most entry (original behavior) if nothing public found
-                if (ip is null && entries.Length > 0 && IPAddress.TryParse(entries[0], out var firstAddr))
-                {
-                    if (firstAddr.IsIPv4MappedToIPv6)
-                    {
-                        firstAddr = firstAddr.MapToIPv4();
-                    }
-
-                    ip = firstAddr.ToString();
-                }
-            }
+            remoteIpAddress = remoteIpAddress.MapToIPv4();
         }
 
-        // fallback to X-Real-IP
-        if (string.IsNullOrWhiteSpace(ip))
-        {
-            var xReal = httpContext.GetHeaderValue(headerName: "X-Real-IP");
-
-            if (!string.IsNullOrWhiteSpace(xReal) && IPAddress.TryParse(xReal.Trim(), out var xr))
-            {
-                if (xr.IsIPv4MappedToIPv6)
-                {
-                    xr = xr.MapToIPv4();
-                }
-
-                ip = xr.ToString();
-            }
-        }
-
-        // Connection.RemoteIpAddress
-        if (string.IsNullOrWhiteSpace(ip) && httpContext.Connection.RemoteIpAddress is not null)
-        {
-            var remoteIpAddress = httpContext.Connection.RemoteIpAddress;
-
-            if (remoteIpAddress.IsIPv4MappedToIPv6)
-            {
-                remoteIpAddress = remoteIpAddress.MapToIPv4();
-            }
-
-            ip = remoteIpAddress.ToString();
-        }
-
-        // last header fallback
-        if (string.IsNullOrWhiteSpace(ip))
-        {
-            ip = httpContext.GetHeaderValue(headerName: "REMOTE_ADDR");
-        }
-
-        return !string.IsNullOrWhiteSpace(ip) && IPAddress.TryParse(ip, out var finalAddr) && finalAddr.IsValidIp()
-            ? ip
-            : null;
+        return remoteIpAddress.IsValidIp() ? remoteIpAddress.ToString() : null;
     }
 
     /// <summary>
