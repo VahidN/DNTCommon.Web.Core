@@ -39,6 +39,6 @@ public sealed class AsyncFileLogger(string categoryName, LogQueueProcessor proce
             logEntry += $"{Environment.NewLine}{exception.Demystify()}";
         }
 
-        processor.EnqueueLog(logEntry);
+        processor.EnqueueLog(logEntry + Environment.NewLine);
     }
 }

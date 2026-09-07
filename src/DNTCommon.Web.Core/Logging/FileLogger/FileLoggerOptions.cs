@@ -6,10 +6,14 @@ public class FileLoggerOptions
 {
     public FileLoggerOptions() { }
 
-    public FileLoggerOptions(string logsDirectoryPath, LogLevel minLevel = LogLevel.Warning)
+    public FileLoggerOptions(string logsDirectoryPath, string secretKey, LogLevel minLevel = LogLevel.Warning)
     {
         ArgumentNullException.ThrowIfNull(logsDirectoryPath);
+        ArgumentNullException.ThrowIfNull(secretKey);
+
         LogsDirectoryPath = logsDirectoryPath;
+        SecretKey = secretKey;
+
         MinLevel = minLevel;
     }
 
@@ -19,4 +23,6 @@ public class FileLoggerOptions
     public LogLevel MinLevel { get; set; }
 
     public string? LogsDirectoryPath { get; set; }
+
+    public string? SecretKey { get; set; }
 }

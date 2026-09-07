@@ -8,20 +8,18 @@ namespace DNTCommon.Web.Core.TestWebAPI.Controllers;
 
 [ApiController]
 [Route(template: "[controller]")]
-public class WeatherForecastController : ControllerBase
+public class WeatherForecastController(ILogger<WeatherForecastController> logger) : ControllerBase
 {
     private static readonly string[] Summaries =
     [
         "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
     ];
 
-    private readonly ILogger<WeatherForecastController> _logger;
-
-    public WeatherForecastController(ILogger<WeatherForecastController> logger) => _logger = logger;
-
     [HttpGet]
     public IEnumerable<WeatherForecast> Get()
     {
+        logger.LogError(message: "This is just a test for `logging.AddAsyncFileLogger`.");
+
         var rng = new Random();
 
         return Enumerable.Range(start: 1, count: 5)

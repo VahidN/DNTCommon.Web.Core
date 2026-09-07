@@ -138,4 +138,15 @@ public static class PasswordHasherServiceExtensions
 
         return (characterCount * 3 / 4) - paddingCount;
     }
+
+    public static string GenerateConstantDailyHash(this string secretKey, int length = 8)
+    {
+        ArgumentNullException.ThrowIfNull(secretKey);
+
+        var today = DateTime.UtcNow.ToString(format: "yyyy-MM-dd", CultureInfo.InvariantCulture);
+        using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(secretKey));
+        var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(today));
+
+        return Convert.ToHexString(hash)[..length].ToLowerInvariant();
+    }
 }

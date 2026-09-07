@@ -21,7 +21,12 @@ public sealed class LogQueueProcessor
             {
                 try
                 {
-                    var fileName = string.Create(CultureInfo.InvariantCulture, $"log-{DateTime.UtcNow:yyyy-MM-dd}.txt");
+                    var today = DateTime.UtcNow.ToString(format: "yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+                    var fileName = _fileLoggerOptions.SecretKey.IsEmpty()
+                        ? $"log-{today}.txt"
+                        : $"log-{today}.{_fileLoggerOptions.SecretKey.GenerateConstantDailyHash()}.txt";
+
                     var filePath = _fileLoggerOptions.LogsDirectoryPath.SafePathCombine(fileName);
 
                     if (filePath.IsEmpty())
