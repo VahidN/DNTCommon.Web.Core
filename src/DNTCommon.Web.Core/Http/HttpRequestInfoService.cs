@@ -28,8 +28,7 @@ public class HttpRequestInfoService(IHttpContextAccessor httpContextAccessor, IU
     /// <summary>
     ///     Gets the current HttpContext.Request's IP.
     /// </summary>
-    public string? GetIP(bool tryUseXForwardHeader = true)
-        => httpContextAccessor.HttpContext?.GetIP(tryUseXForwardHeader);
+    public string? GetIP() => httpContextAccessor.HttpContext?.GetIP();
 
     /// <summary>
     ///     Gets a current HttpContext.Request's header value.

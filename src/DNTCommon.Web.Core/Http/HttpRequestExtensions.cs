@@ -159,7 +159,7 @@ public static partial class HttpRequestExtensions
         return string.Empty;
     }
 
-    private static List<string> SplitCsv(string csvList)
+    public static IList<string> SplitCsv(this string csvList)
         => string.IsNullOrWhiteSpace(csvList)
             ? []
             : [.. csvList.TrimEnd(trimChar: ',').Split(separator: ',').AsEnumerable().Select(s => s.Trim())];

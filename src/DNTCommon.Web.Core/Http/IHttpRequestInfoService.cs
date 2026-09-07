@@ -10,7 +10,7 @@ public interface IHttpRequestInfoService
     /// <summary>
     ///     Gets the current HttpContext.Request's IP.
     /// </summary>
-    string? GetIP(bool tryUseXForwardHeader = true);
+    string? GetIP();
 
     /// <summary>
     ///     Gets a current HttpContext.Request's header value.
@@ -82,3 +82,4 @@ public interface IHttpRequestInfoService
     /// </summary>
     Task<IDictionary<string, string>?> DeserializeRequestJsonBodyAsDictionaryAsync();
 }
+

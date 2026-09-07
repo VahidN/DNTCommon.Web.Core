@@ -624,4 +624,13 @@ public static class HttpClientExtensions
             return (ex as HttpRequestException)?.StatusCode;
         }
     }
+
+    public static bool RequestUriIsEqualTo(this HttpRequestMessage? request, string url)
+        => request?.RequestUri?.ToString().Equals(url, StringComparison.OrdinalIgnoreCase) == true;
+
+    public static bool RequestUriEndsWith(this HttpRequestMessage? request, string text)
+        => request?.RequestUri?.ToString().EndsWith(text, StringComparison.OrdinalIgnoreCase) == true;
+
+    public static bool RequestUriStartsWith(this HttpRequestMessage? request, string text)
+        => request?.RequestUri?.ToString().StartsWith(text, StringComparison.OrdinalIgnoreCase) == true;
 }
