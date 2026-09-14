@@ -245,3 +245,4 @@ ModelManifest.xml
 # FAKE - F# Make
 .fake/
 src/DNTCommon.Web.Core.TestWebApp/wwwroot/lib
+/logs
