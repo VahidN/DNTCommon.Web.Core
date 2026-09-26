@@ -246,3 +246,4 @@ ModelManifest.xml
 .fake/
 src/DNTCommon.Web.Core.TestWebApp/wwwroot/lib
 /logs
+/app-logs
