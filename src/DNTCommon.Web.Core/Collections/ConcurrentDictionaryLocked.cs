@@ -30,7 +30,7 @@ public class ConcurrentDictionaryLocked<TKey, TValue>(IEqualityComparer<TKey> co
     ///     in the ConcurrentDictionary by using the specified function if the key already exists.
     /// </summary>
     public TValue LockedAddOrUpdate(TKey key, TValue addValue, Func<TKey, TValue, TValue> updateValueFactory)
-        => AddOrUpdate(key, new Lazy<TValue>(() => addValue),
+        => AddOrUpdate(key, _ => new Lazy<TValue>(() => addValue),
                 (k, currentValue) => new Lazy<TValue>(() => updateValueFactory(k, currentValue.Value),
                     LazyThreadSafetyMode.ExecutionAndPublication))
             .Value;

@@ -162,7 +162,7 @@ public static class LocalIp
         {
             return false;
         }
-		
+
         if (IPAddress.IsLoopback(address))
         {
             return false;
@@ -198,24 +198,23 @@ public static class LocalIp
 
             return true;
         }
-        else // IPv6
+
+        // IPv6
+        var ipv6Bytes = address.GetAddressBytes();
+
+        // fc00::/7 Unique local addresses
+        if ((ipv6Bytes[0] & 0xfe) == 0xfc)
         {
-            var bytes = address.GetAddressBytes();
-
-            // fc00::/7 Unique local addresses
-            if ((bytes[0] & 0xfe) == 0xfc)
-            {
-                return false;
-            }
-
-            // fe80::/10 link-local
-            if (bytes[0] == 0xfe && (bytes[1] & 0xc0) == 0x80)
-            {
-                return false;
-            }
-
-            // ::1 loopback handled above
-            return true;
+            return false;
         }
+
+        // fe80::/10 link-local
+        if (ipv6Bytes[0] == 0xfe && (ipv6Bytes[1] & 0xc0) == 0x80)
+        {
+            return false;
+        }
+
+        // ::1 loopback handled above
+        return true;
     }
 }
