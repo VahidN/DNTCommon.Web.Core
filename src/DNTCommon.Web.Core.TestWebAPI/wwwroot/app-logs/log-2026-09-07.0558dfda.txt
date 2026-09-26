@@ -10,3 +10,6 @@ This is just a test for `logging.AddAsyncFileLogger`.
 [2026-09-07 09:34:52.622] [Error] [DNTCommon.Web.Core.TestWebAPI.Controllers.WeatherForecastController]
 This is just a test for `logging.AddAsyncFileLogger`.
 
+[2026-09-07 10:42:55.188] [Error] [DNTCommon.Web.Core.TestWebAPI.Controllers.WeatherForecastController]
+This is just a test for `logging.AddAsyncFileLogger`.
+

@@ -1,2 +1,2 @@
-dotnet test --filter "FullyQualifiedName=DNTCommon.Web.Core.Tests.FormatSizeTests.ToFormattedFileSizeShouldReturnCorrectValue" 
+dotnet test --filter "FullyQualifiedName=DNTCommon.Web.Core.Tests.SimpleXlsxReaderTests.VerifySimpleXlsxReaderWorks" 
 pause
