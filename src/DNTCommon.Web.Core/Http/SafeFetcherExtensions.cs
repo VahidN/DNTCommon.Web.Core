@@ -4,7 +4,7 @@ public static class SafeFetcherExtensions
 {
     private const int MaxRedirects = 5;
 
-    public static async Task<FetchResult> SafeFetchAsync(this HttpClient httpClient,
+    public static Task<FetchResult> SafeFetchAsync(this HttpClient httpClient,
         [StringSyntax(syntax: "Uri")] string uri,
         bool downloadBinaryContent = false,
         int maxAllowedSizeContentInBytes = 15 * 1024 * 1024,
@@ -13,11 +13,11 @@ public static class SafeFetcherExtensions
         ArgumentNullException.ThrowIfNull(httpClient);
         ArgumentNullException.ThrowIfNull(uri);
 
-        return await httpClient.SafeFetchAsync(new Uri(uri), downloadBinaryContent, maxAllowedSizeContentInBytes,
+        return httpClient.SafeFetchAsync(new Uri(uri), downloadBinaryContent, maxAllowedSizeContentInBytes,
             cancellationToken);
     }
 
-    public static async Task<FetchResult> SafeFetchAsync(this HttpClient httpClient,
+    public static Task<FetchResult> SafeFetchAsync(this HttpClient httpClient,
         Uri uri,
         bool downloadBinaryContent = false,
         int maxAllowedSizeContentInBytes = 15 * 1024 * 1024,
@@ -26,7 +26,7 @@ public static class SafeFetcherExtensions
         ArgumentNullException.ThrowIfNull(httpClient);
         ArgumentNullException.ThrowIfNull(uri);
 
-        return await FetchInternalAsync(httpClient, uri, downloadBinaryContent, maxAllowedSizeContentInBytes,
+        return FetchInternalAsync(httpClient, uri, downloadBinaryContent, maxAllowedSizeContentInBytes,
             redirectCount: 0, cancellationToken);
     }
 

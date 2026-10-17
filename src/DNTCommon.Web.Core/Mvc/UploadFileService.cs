@@ -22,14 +22,14 @@ public class UploadFileService(IWebHostEnvironment environment) : IUploadFileSer
     /// <param name="cancellationToken"></param>
     /// <param name="destinationDirectoryNames">Directory names in the wwwroot directory.</param>
     /// <returns></returns>
-    public async Task<(bool IsSaved, string SavedFilePath)> SavePostedFileAsync(IFormFile? formFile,
+    public Task<(bool IsSaved, string SavedFilePath)> SavePostedFileAsync(IFormFile? formFile,
         bool allowOverwrite,
         ICollection<string>? destinationDirectoryNames = null,
         CancellationToken cancellationToken = default)
     {
         if (formFile is null || formFile.Length == 0)
         {
-            return (false, string.Empty);
+            return Task.FromResult<(bool, string )>((false, string.Empty));
         }
 
         var uploadsRootFolder = _environment.WebRootPath;
@@ -42,7 +42,7 @@ public class UploadFileService(IWebHostEnvironment environment) : IUploadFileSer
             }
         }
 
-        return await SavePostedFileAsync(formFile, uploadsRootFolder, allowOverwrite, cancellationToken);
+        return SavePostedFileAsync(formFile, uploadsRootFolder, allowOverwrite, cancellationToken);
     }
 
     /// <summary>

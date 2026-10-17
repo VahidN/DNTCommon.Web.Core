@@ -11,13 +11,8 @@ public class PingTask(MySitePingClient pingClient) : IScheduledTask
     /// <summary>
     ///     Scheduled task's logic.
     /// </summary>
-    public async Task RunAsync(CancellationToken cancellationToken)
-    {
-        if (cancellationToken.IsCancellationRequested)
-        {
-            return;
-        }
-
-        await pingClient.WakeUpAsync(cancellationToken);
-    }
+    public Task RunAsync(CancellationToken cancellationToken)
+        => cancellationToken.IsCancellationRequested
+            ? Task.FromCanceled(cancellationToken)
+            : pingClient.WakeUpAsync(cancellationToken);
 }

@@ -11,20 +11,16 @@ public static partial class YoutubeInfoProviderExtensions
         PropertyNameCaseInsensitive = true
     };
 
-    public static async Task<byte[]?> GetYoutubeVideoThumbnailDataAsync(this HttpClient httpClient,
+    public static Task<byte[]?> GetYoutubeVideoThumbnailDataAsync(this HttpClient httpClient,
         string? videoId,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(httpClient);
 
-        if (videoId.IsEmpty())
-        {
-            return null;
-        }
-
-        var thumbnailUrl = $"https://i.ytimg.com/vi/{videoId}/hqdefault.jpg";
-
-        return await httpClient.DownloadDataAsync(thumbnailUrl, cancellationToken: cancellationToken);
+        return videoId.IsEmpty()
+            ? Task.FromResult<byte[]?>(result: null)
+            : httpClient.DownloadDataAsync($"https://i.ytimg.com/vi/{videoId}/hqdefault.jpg",
+                cancellationToken: cancellationToken);
     }
 
     public static (bool Success, string? VideoId) IsYoutubeVideo(this string? url)

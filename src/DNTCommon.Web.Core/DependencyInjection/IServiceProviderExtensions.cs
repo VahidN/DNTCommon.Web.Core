@@ -16,7 +16,7 @@ public static class IServiceProviderExtensions
         where T : notnull
     {
         using var serviceScope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
-        RunScopedService(serviceScope, callback);
+        serviceScope.RunScopedService(callback);
     }
 
     /// <summary>
@@ -45,7 +45,7 @@ public static class IServiceProviderExtensions
 
         using var serviceScope = serviceScopeFactory.CreateScope();
 
-        return RunScopedService(serviceScope, callback);
+        return serviceScope.RunScopedService(callback);
     }
 
     /// <summary>
@@ -57,7 +57,7 @@ public static class IServiceProviderExtensions
     {
         using var serviceScope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
 
-        return RunScopedService(serviceScope, callback);
+        return serviceScope.RunScopedService(callback);
     }
 
     /// <summary>
@@ -95,7 +95,7 @@ public static class IServiceProviderExtensions
         ArgumentNullException.ThrowIfNull(serviceScopeFactory);
 
         using var serviceScope = serviceScopeFactory.CreateScope();
-        RunScopedService(serviceScope, callback);
+        serviceScope.RunScopedService(callback);
     }
 
     /// <summary>
@@ -106,7 +106,7 @@ public static class IServiceProviderExtensions
         where TS : notnull
     {
         using var serviceScope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
-        RunScopedService(serviceScope, callback);
+        serviceScope.RunScopedService(callback);
     }
 
     /// <summary>
@@ -146,7 +146,7 @@ public static class IServiceProviderExtensions
         ArgumentNullException.ThrowIfNull(serviceScopeFactory);
 
         using var serviceScope = serviceScopeFactory.CreateScope();
-        RunScopedService(serviceScope, callback);
+        serviceScope.RunScopedService(callback);
     }
 
     /// <summary>
@@ -160,7 +160,7 @@ public static class IServiceProviderExtensions
         where T : notnull
     {
         await using var serviceScope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateAsyncScope();
-        await RunScopedServiceAsync(serviceScope, callback, cancellationToken);
+        await serviceScope.RunScopedServiceAsync(callback, cancellationToken);
     }
 
     /// <summary>
@@ -176,7 +176,7 @@ public static class IServiceProviderExtensions
         ArgumentNullException.ThrowIfNull(serviceScopeFactory);
 
         await using var serviceScope = serviceScopeFactory.CreateAsyncScope();
-        await RunScopedServiceAsync(serviceScope, callback, cancellationToken);
+        await serviceScope.RunScopedServiceAsync(callback, cancellationToken);
     }
 
     /// <summary>
@@ -217,7 +217,7 @@ public static class IServiceProviderExtensions
         where TS : notnull
     {
         await using var serviceScope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateAsyncScope();
-        await RunScopedServiceAsync(serviceScope, callback, cancellationToken);
+        await serviceScope.RunScopedServiceAsync(callback, cancellationToken);
     }
 
     /// <summary>
@@ -232,7 +232,7 @@ public static class IServiceProviderExtensions
         ArgumentNullException.ThrowIfNull(serviceScopeFactory);
 
         await using var serviceScope = serviceScopeFactory.CreateAsyncScope();
-        await RunScopedServiceAsync(serviceScope, callback, cancellationToken);
+        await serviceScope.RunScopedServiceAsync(callback, cancellationToken);
     }
 
     /// <summary>
@@ -273,7 +273,7 @@ public static class IServiceProviderExtensions
     {
         await using var serviceScope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateAsyncScope();
 
-        return await RunScopedServiceAsync(serviceScope, callback, cancellationToken);
+        return await serviceScope.RunScopedServiceAsync(callback, cancellationToken);
     }
 
     /// <summary>
@@ -289,14 +289,14 @@ public static class IServiceProviderExtensions
 
         await using var serviceScope = serviceScopeFactory.CreateAsyncScope();
 
-        return await RunScopedServiceAsync(serviceScope, callback, cancellationToken);
+        return await serviceScope.RunScopedServiceAsync(callback, cancellationToken);
     }
 
     /// <summary>
     ///     Creates an IServiceScope which contains an IServiceProvider used to resolve dependencies from a newly created scope
     ///     and then runs an associated callback.
     /// </summary>
-    public static async Task<T> RunScopedServiceAsync<TS, T>(this IServiceScope serviceScope,
+    public static Task<T> RunScopedServiceAsync<TS, T>(this IServiceScope serviceScope,
         Func<TS, CancellationToken, Task<T>> callback,
         CancellationToken cancellationToken = default)
         where TS : notnull
@@ -306,6 +306,6 @@ public static class IServiceProviderExtensions
 
         var context = serviceScope.ServiceProvider.GetRequiredService<TS>();
 
-        return await callback(context, cancellationToken);
+        return callback(context, cancellationToken);
     }
 }

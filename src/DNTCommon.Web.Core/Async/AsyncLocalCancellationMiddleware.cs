@@ -10,7 +10,7 @@ public class AsyncLocalCancellationMiddleware(
     IAsyncLocalCancellationContext asyncLocalCancellationContext)
 {
 #pragma warning disable CC001,MA0137
-    public async Task Invoke(HttpContext context)
+    public Task Invoke(HttpContext context)
 #pragma warning restore CC001, MA0137
     {
         ArgumentNullException.ThrowIfNull(context);
@@ -18,6 +18,6 @@ public class AsyncLocalCancellationMiddleware(
         // توکن مربوط به این درخواست را درون کانتینر سراسری می‌ریزیم
         asyncLocalCancellationContext.SetToken(context.RequestAborted);
 
-        await next(context);
+        return next(context);
     }
 }

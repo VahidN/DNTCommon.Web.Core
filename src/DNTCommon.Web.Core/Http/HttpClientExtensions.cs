@@ -273,7 +273,7 @@ public static class HttpClientExtensions
     /// <summary>
     ///     Downloads a URL as a binary file.
     /// </summary>
-    public static async Task<byte[]> DownloadDataAsync(this HttpClient httpClient,
+    public static async Task<byte[]?> DownloadDataAsync(this HttpClient httpClient,
         [StringSyntax(syntax: "Uri")] string url,
         bool ensureSuccess = true,
         Action<HttpRequestMessage>? configRequest = null,
@@ -294,7 +294,7 @@ public static class HttpClientExtensions
 
         if (response.Content is null)
         {
-            throw new InvalidOperationException($"`response.Content` of `{url}` is null!");
+            return null;
         }
 
         await using var inputStream = await response.Content.ReadAsStreamAsync(cancellationToken);

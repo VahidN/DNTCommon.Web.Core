@@ -801,7 +801,12 @@ public static class PathUtils
     ///     Asynchronously appends the specified byte array to the end of the file at the given path.  If the file doesn't
     ///     exist, this method creates a new file. If the operation is canceled, the task will return in a canceled state.
     /// </summary>
-    public static async Task AppendBytesToFileAsync(this string path,
+#if NET_8
+    public static async Task AppendBytesToFileAsync(
+#else
+    public static Task AppendBytesToFileAsync(
+#endif
+        this string path,
         byte[] content,
         CancellationToken cancellationToken = default)
     {
@@ -810,7 +815,7 @@ public static class PathUtils
         await using var destStream = path.CreateAsyncFileStream(FileMode.Append, FileAccess.Write);
         await sourceStream.CopyToAsync(destStream, cancellationToken);
 #else
-        await File.AppendAllBytesAsync(path, content, cancellationToken);
+        return File.AppendAllBytesAsync(path, content, cancellationToken);
 #endif
     }
 

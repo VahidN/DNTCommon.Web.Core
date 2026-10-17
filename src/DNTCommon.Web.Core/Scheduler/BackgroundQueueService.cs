@@ -194,7 +194,7 @@ public class BackgroundQueueService(IServiceProvider serviceProvider) : Backgrou
         => [.. _asyncTasksChannels.Values.Select(c => c.Value)];
 
     private List<Channel<Action<CancellationToken, IServiceProvider>>> GetSyncTasksChannelsList()
-        => [.._syncTasksChannels.Values.Select(c => c.Value)];
+        => [.. _syncTasksChannels.Values.Select(c => c.Value)];
 
     private static Channel<Func<CancellationToken, IServiceProvider, Task>> CreateAsyncTasksQueue()
         => Channel.CreateBounded<Func<CancellationToken, IServiceProvider, Task>>(BoundedChannelOptions);
@@ -206,11 +206,11 @@ public class BackgroundQueueService(IServiceProvider serviceProvider) : Backgrou
         => serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateAsyncScope();
 
 #pragma warning disable CC001,CC002
-    private async Task ProcessSyncTasksAsync(CancellationToken stoppingToken)
+    private Task ProcessSyncTasksAsync(CancellationToken stoppingToken)
     {
         var syncTasksChannelsList = GetSyncTasksChannelsList();
 
-        await Parallel.ForEachAsync(syncTasksChannelsList, new ParallelOptions
+        return Parallel.ForEachAsync(syncTasksChannelsList, new ParallelOptions
         {
             CancellationToken = stoppingToken,
             MaxDegreeOfParallelism = Environment.ProcessorCount
@@ -233,11 +233,11 @@ public class BackgroundQueueService(IServiceProvider serviceProvider) : Backgrou
         });
     }
 
-    private async Task ProcessAsyncTasksAsync(CancellationToken stoppingToken)
+    private Task ProcessAsyncTasksAsync(CancellationToken stoppingToken)
     {
         var asyncTasksChannelsList = GetAsyncTasksChannelsList();
 
-        await Parallel.ForEachAsync(asyncTasksChannelsList, new ParallelOptions
+        return Parallel.ForEachAsync(asyncTasksChannelsList, new ParallelOptions
         {
             CancellationToken = stoppingToken,
             MaxDegreeOfParallelism = Environment.ProcessorCount
