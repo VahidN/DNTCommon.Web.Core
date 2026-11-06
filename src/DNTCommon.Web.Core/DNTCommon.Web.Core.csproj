@@ -113,10 +113,10 @@
 	<PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
     <PackageReference Include="HtmlAgilityPack" Version="1.13.1"/>
     <PackageReference Include="IPAddressRange" Version="6.3.0"/>
-    <PackageReference Include="SkiaSharp" Version="4.154.0"/>
-    <PackageReference Include="SkiaSharp.HarfBuzz" Version="4.154.0"/>
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="4.154.0"/>
-    <PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" Version="14.2.1.400"/>
+    <PackageReference Include="SkiaSharp" Version="4.155.0"/>
+    <PackageReference Include="SkiaSharp.HarfBuzz" Version="4.155.0"/>
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="4.155.0"/>
+    <PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" Version="14.4.0"/>
     <PackageReference Include="Ben.Demystifier" Version="0.4.1"/>
     <PackageReference Include="UAParser" Version="3.1.47"/>
     <PackageReference Include="AsyncKeyedLock" Version="8.1.2"/>
