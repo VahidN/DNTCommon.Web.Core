@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net11.0</TargetFramework>
     <AssemblyName>DNTCommon.Web.Core.Tests</AssemblyName>
     <PackageId>DNTCommon.Web.Core.Tests</PackageId>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
@@ -19,9 +19,9 @@
   </ItemGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App"/>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.11.0"/>
-    <PackageReference Include="MSTest.TestFramework" Version="4.5.2"/>
-    <PackageReference Include="MSTest.TestAdapter" Version="4.5.2"/>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.12.0"/>
+    <PackageReference Include="MSTest.TestFramework" Version="4.5.3"/>
+    <PackageReference Include="MSTest.TestAdapter" Version="4.5.3"/>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}"/>

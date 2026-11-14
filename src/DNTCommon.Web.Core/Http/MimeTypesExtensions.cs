@@ -29,7 +29,11 @@ public static class MimeTypesExtensions
             return "application/octet-stream";
         }
 
-        if (extension.StartsWith(value: '.'))
+        if (extension.StartsWith(value: '.'
+#if NET_11
+                , StringComparison.Ordinal
+#endif
+                ))
         {
             extension = extension[1..];
         }

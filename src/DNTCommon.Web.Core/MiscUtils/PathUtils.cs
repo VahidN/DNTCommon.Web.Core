@@ -202,8 +202,7 @@ public static class PathUtils
     /// <param name="searchOption"></param>
     /// <param name="extensions"></param>
     /// <returns></returns>
-    public static IEnumerable<FileInfo> GetFilesByExtensions(this DirectoryInfo dirInfo,
-        SearchOption searchOption,
+    public static IEnumerable<FileInfo> GetFilesByExtensions(this DirectoryInfo dirInfo, SearchOption searchOption,
         params string[] extensions)
     {
         ArgumentNullException.ThrowIfNull(dirInfo);
@@ -278,8 +277,7 @@ public static class PathUtils
     /// <summary>
     ///     Removes InvalidFileNameChars and InvalidPathChars from the given input
     /// </summary>
-    public static string RemoveIllegalCharactersFromFileName(this string? fileName,
-        string replacement = ".",
+    public static string RemoveIllegalCharactersFromFileName(this string? fileName, string replacement = ".",
         bool applySlugCleanup = true)
     {
         if (fileName.IsEmpty())
@@ -487,9 +485,7 @@ public static class PathUtils
     /// <param name="copySubDirectories"></param>
     /// <param name="forceOverWrite"></param>
     /// <returns></returns>
-    public static bool CopyDirectory(this string? sourceDirPath,
-        string? destDirPath,
-        bool copySubDirectories = true,
+    public static bool CopyDirectory(this string? sourceDirPath, string? destDirPath, bool copySubDirectories = true,
         bool forceOverWrite = true)
     {
         sourceDirPath = sourceDirPath.NormalizePath();
@@ -583,9 +579,7 @@ public static class PathUtils
     /// <param name="forceOverWrite"></param>
     /// <param name="logger"></param>
     /// <returns></returns>
-    public static bool TryCopyFileTo(this string? sourceFilePath,
-        string? destFilePath,
-        bool forceOverWrite,
+    public static bool TryCopyFileTo(this string? sourceFilePath, string? destFilePath, bool forceOverWrite,
         ILogger? logger = null)
     {
         try
@@ -610,7 +604,8 @@ public static class PathUtils
         }
         catch (Exception ex)
         {
-            logger?.LogError(ex.Demystify(), message: "TryCopyFileTo(`{Path}`,`{To}`)", sourceFilePath, destFilePath);
+            logger?.LogError(ex.Demystify(), message: "TryCopyFileTo(`{Path}`,`{To}`)", sourceFilePath,
+                destFilePath);
 
             return false;
         }
@@ -720,9 +715,7 @@ public static class PathUtils
     ///     Asynchronously creates a new file, writes the specified string to the file using the specified encoding, and then
     ///     closes the file. If the target file already exists, it is truncated and overwritten.
     /// </summary>
-    public static Task CreateTextFileAsync(this string? path,
-        string content,
-        Encoding? encoding = null,
+    public static Task CreateTextFileAsync(this string? path, string content, Encoding? encoding = null,
         CancellationToken cancellationToken = default)
     {
         path = path.NormalizePath();
@@ -732,14 +725,14 @@ public static class PathUtils
             return Task.FromException(new ArgumentNullException(nameof(path)));
         }
 
-        return File.WriteAllTextAsync(path, content, encoding ?? Encoding.UTF8, cancellationToken);
+        return File.WriteAllTextAsync(path, content, encoding ?? Encoding.UTF8,
+            cancellationToken);
     }
 
     /// <summary>
     ///     Asynchronously opens a text file, reads all text in the file with the specified encoding, and then closes the file.
     /// </summary>
-    public static Task<string> ReadTextFileAsync(this string path,
-        Encoding? encoding = null,
+    public static Task<string> ReadTextFileAsync(this string path, Encoding? encoding = null,
         CancellationToken cancellationToken = default)
         => File.ReadAllTextAsync(path, encoding ?? Encoding.UTF8, cancellationToken);
 
@@ -753,8 +746,7 @@ public static class PathUtils
     ///     Asynchronously opens a text file, reads all lines of the file with the specified encoding, and then closes the
     ///     file.
     /// </summary>
-    public static Task<string[]> ReadTextFileLinesAsync(this string path,
-        Encoding? encoding = null,
+    public static Task<string[]> ReadTextFileLinesAsync(this string path, Encoding? encoding = null,
         CancellationToken cancellationToken = default)
         => File.ReadAllLinesAsync(path, encoding ?? Encoding.UTF8, cancellationToken);
 
@@ -762,18 +754,16 @@ public static class PathUtils
     ///     Asynchronously creates a new file, write the specified lines to the file by using the specified encoding, and then
     ///     closes the file.
     /// </summary>
-    public static Task CreateTextFileAsync(this string path,
-        IEnumerable<string> lines,
-        Encoding? encoding = null,
+    public static Task CreateTextFileAsync(this string path, IEnumerable<string> lines, Encoding? encoding = null,
         CancellationToken cancellationToken = default)
-        => File.WriteAllLinesAsync(path, lines, encoding ?? Encoding.UTF8, cancellationToken);
+        => File.WriteAllLinesAsync(path, lines, encoding ?? Encoding.UTF8,
+            cancellationToken);
 
     /// <summary>
     ///     Asynchronously creates a new file, writes the specified byte array to the file, and then closes the file. If the
     ///     target file already exists, it is truncated and overwritten.
     /// </summary>
-    public static Task CreateBinaryFileAsync(this string path,
-        byte[] data,
+    public static Task CreateBinaryFileAsync(this string path, byte[] data,
         CancellationToken cancellationToken = default)
         => File.WriteAllBytesAsync(path, data, cancellationToken);
 
@@ -781,52 +771,34 @@ public static class PathUtils
     ///     Asynchronously opens a file or creates the file if it does not already exist, appends the specified string to the
     ///     file using the specified encoding, and then closes the file.
     /// </summary>
-    public static Task AppendTextToFileAsync(this string path,
-        string content,
-        Encoding? encoding = null,
+    public static Task AppendTextToFileAsync(this string path, string content, Encoding? encoding = null,
         CancellationToken cancellationToken = default)
-        => File.AppendAllTextAsync(path, content, encoding ?? Encoding.UTF8, cancellationToken);
+        => File.AppendAllTextAsync(path, content, encoding ?? Encoding.UTF8,
+            cancellationToken);
 
     /// <summary>
     ///     Asynchronously appends lines to a file by using a specified encoding, and then closes the file. If the specified
     ///     file does not exist, this method creates a file, writes the specified lines to the file, and then closes the file.
     /// </summary>
-    public static Task AppendTextToFileAsync(this string path,
-        IEnumerable<string> lines,
-        Encoding? encoding = null,
+    public static Task AppendTextToFileAsync(this string path, IEnumerable<string> lines, Encoding? encoding = null,
         CancellationToken cancellationToken = default)
-        => File.AppendAllLinesAsync(path, lines, encoding ?? Encoding.UTF8, cancellationToken);
+        => File.AppendAllLinesAsync(path, lines, encoding ?? Encoding.UTF8,
+            cancellationToken);
 
     /// <summary>
     ///     Asynchronously appends the specified byte array to the end of the file at the given path.  If the file doesn't
     ///     exist, this method creates a new file. If the operation is canceled, the task will return in a canceled state.
     /// </summary>
-#if NET_8
-    public static async Task AppendBytesToFileAsync(
-#else
-    public static Task AppendBytesToFileAsync(
-#endif
-        this string path,
-        byte[] content,
+    public static Task AppendBytesToFileAsync(this string path, byte[] content,
         CancellationToken cancellationToken = default)
-    {
-#if NET_8
-        await using var sourceStream = new MemoryStream(content);
-        await using var destStream = path.CreateAsyncFileStream(FileMode.Append, FileAccess.Write);
-        await sourceStream.CopyToAsync(destStream, cancellationToken);
-#else
-        return File.AppendAllBytesAsync(path, content, cancellationToken);
-#endif
-    }
+        => File.AppendAllBytesAsync(path, content, cancellationToken);
 
     /// <summary>
     ///     Asynchronously reads the bytes from the current stream and writes them to another stream. Both streams positions
     ///     are advanced by the number of bytes copied.
     /// </summary>
-    public static async Task CopyFileAsync(this string sourcePath,
-        string destPath,
-        FileMode destFileMode = FileMode.Create,
-        CancellationToken cancellationToken = default)
+    public static async Task CopyFileAsync(this string sourcePath, string destPath,
+        FileMode destFileMode = FileMode.Create, CancellationToken cancellationToken = default)
     {
         await using var sourceStream = sourcePath.CreateAsyncFileStream(FileMode.Open, FileAccess.Read);
         await using var destStream = destPath.CreateAsyncFileStream(destFileMode, FileAccess.Write);
@@ -953,8 +925,7 @@ public static class PathUtils
         return fileInfos.Where(f => pathExtensions.Contains(f.Extension, StringComparer.OrdinalIgnoreCase));
     }
 
-    public static IEnumerable<FileInfo> GetFilesByExtensions(this string directory,
-        SearchOption searchOption,
+    public static IEnumerable<FileInfo> GetFilesByExtensions(this string directory, SearchOption searchOption,
         params string[] extensions)
     {
         ArgumentNullException.ThrowIfNull(directory);

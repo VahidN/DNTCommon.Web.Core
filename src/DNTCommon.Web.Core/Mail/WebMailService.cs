@@ -26,41 +26,29 @@ public class WebMailService(
     ///     Sends an email using the `MailKit` library.
     ///     This method converts a .chtml razor template file to an string and then uses it as the email's message.
     /// </summary>
-    public async Task SendEmailAsync<T>(SmtpConfig smtpConfig,
-        IEnumerable<MailAddress> emails,
-        string subject,
-        string viewNameOrPath,
-        T viewModel,
-        IEnumerable<MailAddress>? blindCarpbonCopies = null,
-        IEnumerable<MailAddress>? carpbonCopies = null,
-        IEnumerable<MailAddress>? replyTos = null,
-        DelayDelivery? delayDelivery = null,
-        IEnumerable<string>? attachmentFiles = null,
-        MailHeaders? headers = null,
-        bool shouldValidateServerCertificate = true,
-        CancellationToken cancellationToken = default)
+    public async Task SendEmailAsync<T>(SmtpConfig smtpConfig, IEnumerable<MailAddress> emails, string subject,
+        string viewNameOrPath, T viewModel, IEnumerable<MailAddress>? blindCarpbonCopies = null,
+        IEnumerable<MailAddress>? carpbonCopies = null, IEnumerable<MailAddress>? replyTos = null,
+        DelayDelivery? delayDelivery = null, IEnumerable<string>? attachmentFiles = null, MailHeaders? headers = null,
+        bool shouldValidateServerCertificate = true, CancellationToken cancellationToken = default)
     {
         var message = await _viewRendererService.RenderViewToStringAsync(viewNameOrPath, viewModel);
 
-        await SendEmailAsync(smtpConfig, emails, subject, message, blindCarpbonCopies, carpbonCopies, replyTos,
-            delayDelivery, attachmentFiles, headers, shouldValidateServerCertificate, cancellationToken);
+        await SendEmailAsync(smtpConfig, emails, subject,
+            message, blindCarpbonCopies, carpbonCopies,
+            replyTos, delayDelivery, attachmentFiles,
+            headers, shouldValidateServerCertificate, cancellationToken);
     }
 
     /// <summary>
     ///     Sends an email using the `MailKit` library.
     /// </summary>
-    public async Task SendEmailAsync(SmtpConfig smtpConfig,
-        IEnumerable<MailAddress> emails,
-        string subject,
-        string message,
-        IEnumerable<MailAddress>? blindCarpbonCopies = null,
+    public async Task SendEmailAsync(SmtpConfig smtpConfig, IEnumerable<MailAddress> emails, string subject,
+        string message, IEnumerable<MailAddress>? blindCarpbonCopies = null,
         IEnumerable<MailAddress>? carpbonCopies = null,
-        IEnumerable<MailAddress>? replyTos = null,
-        DelayDelivery? delayDelivery = null,
-        IEnumerable<string>? attachmentFiles = null,
-        MailHeaders? headers = null,
-        bool shouldValidateServerCertificate = true,
-        CancellationToken cancellationToken = default)
+        IEnumerable<MailAddress>? replyTos = null, DelayDelivery? delayDelivery = null,
+        IEnumerable<string>? attachmentFiles = null, MailHeaders? headers = null,
+        bool shouldValidateServerCertificate = true, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(smtpConfig);
 
@@ -68,14 +56,17 @@ public class WebMailService(
 
         if (smtpConfig.UsePickupFolder && !string.IsNullOrWhiteSpace(smtpConfig.PickupFolder))
         {
-            await UsePickupFolderAsync(smtpConfig, emails.ToArray(), subject, message, blindCarpbonCopies?.ToArray(),
-                carpbonCopies?.ToArray(), replyTos?.ToArray(), attachmentFiles?.ToArray(), headers, cancellationToken);
+            await UsePickupFolderAsync(smtpConfig, emails.ToArray(), subject,
+                message, blindCarpbonCopies?.ToArray(), carpbonCopies?.ToArray(),
+                replyTos?.ToArray(), attachmentFiles?.ToArray(), headers,
+                cancellationToken);
         }
         else
         {
-            await SendThisEmailAsync(smtpConfig, emails.ToArray(), subject, message, blindCarpbonCopies?.ToArray(),
-                carpbonCopies?.ToArray(), replyTos?.ToArray(), delayDelivery, attachmentFiles?.ToArray(), headers,
-                shouldValidateServerCertificate, cancellationToken);
+            await SendThisEmailAsync(smtpConfig, emails.ToArray(), subject,
+                message, blindCarpbonCopies?.ToArray(), carpbonCopies?.ToArray(),
+                replyTos?.ToArray(), delayDelivery, attachmentFiles?.ToArray(),
+                headers, shouldValidateServerCertificate, cancellationToken);
         }
     }
 
@@ -83,108 +74,80 @@ public class WebMailService(
     ///     Sends an email using the `MailKit` library.
     ///     This method converts a Blazor .razor template file to an string and then uses it as the email's message.
     /// </summary>
-    public async Task SendEmailAsync<T>(SmtpConfig smtpConfig,
-        IEnumerable<MailAddress> emails,
-        string subject,
-        IDictionary<string, object?> viewModel,
-        IEnumerable<MailAddress>? blindCarpbonCopies = null,
-        IEnumerable<MailAddress>? carpbonCopies = null,
-        IEnumerable<MailAddress>? replyTos = null,
-        DelayDelivery? delayDelivery = null,
-        IEnumerable<string>? attachmentFiles = null,
-        MailHeaders? headers = null,
-        bool shouldValidateServerCertificate = true,
-        CancellationToken cancellationToken = default)
+    public async Task SendEmailAsync<T>(SmtpConfig smtpConfig, IEnumerable<MailAddress> emails, string subject,
+        IDictionary<string, object?> viewModel, IEnumerable<MailAddress>? blindCarpbonCopies = null,
+        IEnumerable<MailAddress>? carpbonCopies = null, IEnumerable<MailAddress>? replyTos = null,
+        DelayDelivery? delayDelivery = null, IEnumerable<string>? attachmentFiles = null, MailHeaders? headers = null,
+        bool shouldValidateServerCertificate = true, CancellationToken cancellationToken = default)
         where T : IComponent
     {
         var message = await _blazorStaticRendererService.StaticRenderComponentAsync<T>(viewModel);
 
-        await SendEmailAsync(smtpConfig, emails, subject, message, blindCarpbonCopies, carpbonCopies, replyTos,
-            delayDelivery, attachmentFiles, headers, shouldValidateServerCertificate, cancellationToken);
+        await SendEmailAsync(smtpConfig, emails, subject,
+            message, blindCarpbonCopies, carpbonCopies,
+            replyTos, delayDelivery, attachmentFiles,
+            headers, shouldValidateServerCertificate, cancellationToken);
     }
 
     /// <summary>
     ///     Queues sending an email using the `MailKit` library.
     /// </summary>
-    public ValueTask BackgroundQueueSendEmailAsync(SmtpConfig smtpConfig,
-        IEnumerable<MailAddress> emails,
-        string subject,
-        string message,
-        IEnumerable<MailAddress>? blindCarpbonCopies = null,
-        IEnumerable<MailAddress>? carpbonCopies = null,
-        IEnumerable<MailAddress>? replyTos = null,
-        DelayDelivery? delayDelivery = null,
-        IEnumerable<string>? attachmentFiles = null,
-        MailHeaders? headers = null,
-        bool shouldValidateServerCertificate = true,
-        CancellationToken cancellationToken = default)
+    public ValueTask BackgroundQueueSendEmailAsync(SmtpConfig smtpConfig, IEnumerable<MailAddress> emails,
+        string subject, string message, IEnumerable<MailAddress>? blindCarpbonCopies = null,
+        IEnumerable<MailAddress>? carpbonCopies = null, IEnumerable<MailAddress>? replyTos = null,
+        DelayDelivery? delayDelivery = null, IEnumerable<string>? attachmentFiles = null, MailHeaders? headers = null,
+        bool shouldValidateServerCertificate = true, CancellationToken cancellationToken = default)
         => backgroundQueueService.QueueBackgroundWorkItemAsync(nameof(WebMailService),
-            (_, _) => SendEmailAsync(smtpConfig, emails, subject, message, blindCarpbonCopies, carpbonCopies, replyTos,
-                delayDelivery, attachmentFiles, headers, shouldValidateServerCertificate, cancellationToken),
-            cancellationToken);
+            (_, _) => SendEmailAsync(smtpConfig, emails, subject,
+                message, blindCarpbonCopies, carpbonCopies,
+                replyTos, delayDelivery, attachmentFiles,
+                headers, shouldValidateServerCertificate, cancellationToken), cancellationToken);
 
     /// <summary>
     ///     Queues sending an email using the `MailKit` library.
     ///     This method converts a razor template file to a string and then uses it as the email's message.
     /// </summary>
-    public ValueTask BackgroundQueueSendEmailAsync<T>(SmtpConfig smtpConfig,
-        IEnumerable<MailAddress> emails,
-        string subject,
-        string viewNameOrPath,
-        T viewModel,
-        IEnumerable<MailAddress>? blindCarpbonCopies = null,
-        IEnumerable<MailAddress>? carpbonCopies = null,
-        IEnumerable<MailAddress>? replyTos = null,
-        DelayDelivery? delayDelivery = null,
-        IEnumerable<string>? attachmentFiles = null,
-        MailHeaders? headers = null,
-        bool shouldValidateServerCertificate = true,
-        CancellationToken cancellationToken = default)
+    public ValueTask BackgroundQueueSendEmailAsync<T>(SmtpConfig smtpConfig, IEnumerable<MailAddress> emails,
+        string subject, string viewNameOrPath, T viewModel,
+        IEnumerable<MailAddress>? blindCarpbonCopies = null, IEnumerable<MailAddress>? carpbonCopies = null,
+        IEnumerable<MailAddress>? replyTos = null, DelayDelivery? delayDelivery = null,
+        IEnumerable<string>? attachmentFiles = null, MailHeaders? headers = null,
+        bool shouldValidateServerCertificate = true, CancellationToken cancellationToken = default)
         => backgroundQueueService.QueueBackgroundWorkItemAsync(nameof(WebMailService),
-            (_, _) => SendEmailAsync(smtpConfig, emails, subject, viewNameOrPath, viewModel, blindCarpbonCopies,
-                carpbonCopies, replyTos, delayDelivery, attachmentFiles, headers, shouldValidateServerCertificate,
+            (_, _) => SendEmailAsync(smtpConfig, emails, subject,
+                viewNameOrPath, viewModel, blindCarpbonCopies,
+                carpbonCopies, replyTos, delayDelivery,
+                attachmentFiles, headers, shouldValidateServerCertificate,
                 cancellationToken), cancellationToken);
 
     /// <summary>
     ///     Queues sending an email using the `MailKit` library.
     ///     This method converts a blazor .razor template file to a string and then uses it as the email's message.
     /// </summary>
-    public ValueTask BackgroundQueueSendEmailAsync<T>(SmtpConfig smtpConfig,
-        IEnumerable<MailAddress> emails,
-        string subject,
-        IDictionary<string, object?> viewModel,
-        IEnumerable<MailAddress>? blindCarpbonCopies = null,
-        IEnumerable<MailAddress>? carpbonCopies = null,
-        IEnumerable<MailAddress>? replyTos = null,
-        DelayDelivery? delayDelivery = null,
-        IEnumerable<string>? attachmentFiles = null,
-        MailHeaders? headers = null,
-        bool shouldValidateServerCertificate = true,
-        CancellationToken cancellationToken = default)
+    public ValueTask BackgroundQueueSendEmailAsync<T>(SmtpConfig smtpConfig, IEnumerable<MailAddress> emails,
+        string subject, IDictionary<string, object?> viewModel, IEnumerable<MailAddress>? blindCarpbonCopies = null,
+        IEnumerable<MailAddress>? carpbonCopies = null, IEnumerable<MailAddress>? replyTos = null,
+        DelayDelivery? delayDelivery = null, IEnumerable<string>? attachmentFiles = null, MailHeaders? headers = null,
+        bool shouldValidateServerCertificate = true, CancellationToken cancellationToken = default)
         where T : IComponent
         => backgroundQueueService.QueueBackgroundWorkItemAsync(nameof(WebMailService),
-            (_, _) => SendEmailAsync<T>(smtpConfig, emails, subject, viewModel, blindCarpbonCopies, carpbonCopies,
-                replyTos, delayDelivery, attachmentFiles, headers, shouldValidateServerCertificate, cancellationToken),
-            cancellationToken);
+            (_, _) => SendEmailAsync<T>(smtpConfig, emails, subject,
+                viewModel, blindCarpbonCopies, carpbonCopies,
+                replyTos, delayDelivery, attachmentFiles,
+                headers, shouldValidateServerCertificate, cancellationToken), cancellationToken);
 
-    private static async Task SendThisEmailAsync(SmtpConfig smtpConfig,
-        ICollection<MailAddress> emails,
-        string subject,
-        string message,
-        ICollection<MailAddress>? blindCarpbonCopies,
-        ICollection<MailAddress>? carpbonCopies,
-        ICollection<MailAddress>? replyTos,
-        DelayDelivery? delayDelivery,
-        ICollection<string>? attachmentFiles,
-        MailHeaders? headers,
-        bool shouldValidateServerCertificate,
-        CancellationToken cancellationToken)
+    private static async Task SendThisEmailAsync(SmtpConfig smtpConfig, ICollection<MailAddress> emails, string subject,
+        string message, ICollection<MailAddress>? blindCarpbonCopies, ICollection<MailAddress>? carpbonCopies,
+        ICollection<MailAddress>? replyTos, DelayDelivery? delayDelivery, ICollection<string>? attachmentFiles,
+        MailHeaders? headers, bool shouldValidateServerCertificate, CancellationToken cancellationToken)
     {
-        using var client = new SmtpClient();
+        await using var client = new SmtpClient();
 
         if (!shouldValidateServerCertificate)
         {
-            client.ServerCertificateValidationCallback = (_, _, _, _) => true;
+            client.ServerCertificateValidationCallback = (_, _, _,
+                _) => true;
+
             client.CheckCertificateRevocation = false;
         }
 
@@ -204,10 +167,12 @@ public class WebMailService(
 
         foreach (var email in emails)
         {
-            using (var emailMessage = GetEmailMessage(email.ToName, email.ToAddress, subject, message, attachmentFiles,
-                       smtpConfig, headers, blindCarpbonCopies, carpbonCopies, replyTos))
+            using (var emailMessage = GetEmailMessage(email.ToName, email.ToAddress, subject,
+                       message, attachmentFiles, smtpConfig,
+                       headers, blindCarpbonCopies, carpbonCopies,
+                       replyTos))
             {
-                await client.SendAsync(emailMessage, cancellationToken);
+                await client.SendAsync(new SmtpSendRequest(emailMessage), cancellationToken);
             }
 
             count++;
@@ -221,16 +186,10 @@ public class WebMailService(
         await client.DisconnectAsync(quit: true, cancellationToken);
     }
 
-    private static async Task UsePickupFolderAsync(SmtpConfig smtpConfig,
-        ICollection<MailAddress> emails,
-        string subject,
-        string message,
-        ICollection<MailAddress>? blindCarpbonCopies,
-        ICollection<MailAddress>? carpbonCopies,
-        ICollection<MailAddress>? replyTos,
-        ICollection<string>? attachmentFiles,
-        MailHeaders? headers,
-        CancellationToken cancellationToken)
+    private static async Task UsePickupFolderAsync(SmtpConfig smtpConfig, ICollection<MailAddress> emails,
+        string subject, string message, ICollection<MailAddress>? blindCarpbonCopies,
+        ICollection<MailAddress>? carpbonCopies, ICollection<MailAddress>? replyTos,
+        ICollection<string>? attachmentFiles, MailHeaders? headers, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(smtpConfig.PickupFolder))
         {
@@ -241,21 +200,17 @@ public class WebMailService(
 
         foreach (var email in emails)
         {
-            await SaveFileAsync(smtpConfig, subject, message, blindCarpbonCopies, carpbonCopies, replyTos,
-                attachmentFiles, headers, email, cancellationToken);
+            await SaveFileAsync(smtpConfig, subject, message,
+                blindCarpbonCopies, carpbonCopies, replyTos,
+                attachmentFiles, headers, email,
+                cancellationToken);
         }
     }
 
-    private static async Task SaveFileAsync(SmtpConfig smtpConfig,
-        string subject,
-        string message,
-        ICollection<MailAddress>? blindCarpbonCopies,
-        ICollection<MailAddress>? carpbonCopies,
-        ICollection<MailAddress>? replyTos,
-        ICollection<string>? attachmentFiles,
-        MailHeaders? headers,
-        MailAddress email,
-        CancellationToken cancellationToken)
+    private static async Task SaveFileAsync(SmtpConfig smtpConfig, string subject, string message,
+        ICollection<MailAddress>? blindCarpbonCopies, ICollection<MailAddress>? carpbonCopies,
+        ICollection<MailAddress>? replyTos, ICollection<string>? attachmentFiles, MailHeaders? headers,
+        MailAddress email, CancellationToken cancellationToken)
     {
         if (smtpConfig?.PickupFolder is null)
         {
@@ -271,21 +226,17 @@ public class WebMailService(
 
         await using var stream = path.CreateAsyncFileStream(FileMode.CreateNew, FileAccess.Write);
 
-        using var emailMessage = GetEmailMessage(email.ToName, email.ToAddress, subject, message, attachmentFiles,
-            smtpConfig, headers, blindCarpbonCopies, carpbonCopies, replyTos);
+        using var emailMessage = GetEmailMessage(email.ToName, email.ToAddress, subject,
+            message, attachmentFiles, smtpConfig,
+            headers, blindCarpbonCopies, carpbonCopies,
+            replyTos);
 
         await emailMessage.WriteToAsync(stream, cancellationToken);
     }
 
-    private static MimeMessage GetEmailMessage(string toName,
-        string toAddress,
-        string subject,
-        string message,
-        ICollection<string>? attachmentFiles,
-        SmtpConfig smtpConfig,
-        MailHeaders? headers,
-        ICollection<MailAddress>? blindCarpbonCopies,
-        ICollection<MailAddress>? carpbonCopies,
+    private static MimeMessage GetEmailMessage(string toName, string toAddress, string subject,
+        string message, ICollection<string>? attachmentFiles, SmtpConfig smtpConfig,
+        MailHeaders? headers, ICollection<MailAddress>? blindCarpbonCopies, ICollection<MailAddress>? carpbonCopies,
         ICollection<MailAddress>? replyTos)
     {
         var emailMessage = new MimeMessage();

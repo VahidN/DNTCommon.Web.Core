@@ -13,7 +13,11 @@ public static class DomainHelperExtensions
     private static readonly Lazy<List<string>> TldsBuilder = new(DefaultTlds,
         LazyThreadSafetyMode.ExecutionAndPublication);
 
-    private static readonly string[] FeedKeys = ["utm_source", "utm_medium", "utm_campaign", "utm_updated", "updated"];
+    private static readonly string[] FeedKeys =
+    [
+        "utm_source", "utm_medium", "utm_campaign",
+        "utm_updated", "updated"
+    ];
 
     /// <summary>
     ///     Tld Patterns
@@ -115,8 +119,17 @@ public static class DomainHelperExtensions
             return null;
         }
 
-        var lastIndex = host.LastIndexOf(value: '.');
-        var index = host.LastIndexOf(value: '.', lastIndex - 1);
+        var lastIndex = host.LastIndexOf(value: '.'
+#if NET_11
+            , StringComparison.Ordinal
+#endif
+        );
+
+        var index = host.LastIndexOf(value: '.', lastIndex - 1
+#if NET_11
+            , StringComparison.Ordinal
+#endif
+        );
 
         return host[..index];
     }

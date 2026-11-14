@@ -108,7 +108,7 @@ public class MvcActionsDiscoveryService : IMvcActionsDiscoveryService
                     controller.MvcActions.AddRange(securedOnes);
                 }
 
-                return [.. controllers.Where(model => model.MvcActions.Any())];
+                return [.. controllers.Where(model => model.MvcActions.Count > 0)];
             }));
 
         return getter.Value;

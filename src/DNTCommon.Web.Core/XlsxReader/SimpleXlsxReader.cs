@@ -178,7 +178,11 @@ public sealed class SimpleXlsxReader : IDisposable
 
         target = target.Replace(oldChar: '\\', newChar: '/');
 
-        if (target.StartsWith(value: '/'))
+        if (target.StartsWith(value: '/'
+#if NET_11
+                , StringComparison.Ordinal
+#endif
+            ))
         {
             return target.TrimStart(trimChar: '/');
         }
@@ -224,7 +228,8 @@ public sealed class SimpleXlsxReader : IDisposable
 
         foreach (var cellElement in rowElement.Elements(MainNs + "c"))
         {
-            var cell = ReadCell(cellElement, rowNumber, nextColumn, sharedStrings);
+            var cell = ReadCell(cellElement, rowNumber, nextColumn,
+                sharedStrings);
 
             result.Add(cell);
 
@@ -234,9 +239,7 @@ public sealed class SimpleXlsxReader : IDisposable
         return result;
     }
 
-    private static XlsxCell ReadCell(XElement cellElement,
-        int rowNumber,
-        int sequentialColumn,
+    private static XlsxCell ReadCell(XElement cellElement, int rowNumber, int sequentialColumn,
         Dictionary<int, string> sharedStrings)
     {
         var address = (string?)cellElement.Attribute(name: "r");

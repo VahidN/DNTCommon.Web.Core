@@ -17,8 +17,7 @@ public sealed class AntiDosFirewall : IAntiDosFirewall
     /// <summary>
     ///     Anti Dos Firewall
     /// </summary>
-    public AntiDosFirewall(IOptionsMonitor<AntiDosConfig> antiDosConfig,
-        ICacheService cacheService,
+    public AntiDosFirewall(IOptionsMonitor<AntiDosConfig> antiDosConfig, ICacheService cacheService,
         ILogger<AntiDosFirewall> logger)
     {
         ArgumentNullException.ThrowIfNull(antiDosConfig);
@@ -44,13 +43,13 @@ public sealed class AntiDosFirewall : IAntiDosFirewall
             return false;
         }
 
-        if (_antiDosConfig.GoodBotsUserAgents?.Any() != true)
+        if (_antiDosConfig.GoodBotsUserAgents?.Count == 0)
         {
             return true;
         }
 
-        return _antiDosConfig.GoodBotsUserAgents.Any(goodBot
-            => requestInfo.UserAgent.Contains(goodBot, StringComparison.OrdinalIgnoreCase));
+        return _antiDosConfig.GoodBotsUserAgents?.Any(goodBot
+            => requestInfo.UserAgent.Contains(goodBot, StringComparison.OrdinalIgnoreCase)) == true;
     }
 
     /// <summary>
@@ -118,12 +117,12 @@ public sealed class AntiDosFirewall : IAntiDosFirewall
             });
         }
 
-        if (_antiDosConfig.UrlAttackVectors?.Any() != true)
+        if (_antiDosConfig.UrlAttackVectors?.Count == 0)
         {
             return (false, null);
         }
 
-        var vector = _antiDosConfig.UrlAttackVectors.FirstOrDefault(attackVector
+        var vector = _antiDosConfig.UrlAttackVectors?.FirstOrDefault(attackVector
             => requestInfo.RawUrl.Contains(attackVector, StringComparison.OrdinalIgnoreCase));
 
         if (!string.IsNullOrWhiteSpace(vector))
@@ -157,7 +156,7 @@ public sealed class AntiDosFirewall : IAntiDosFirewall
             });
         }
 
-        if (_antiDosConfig.BadBotsRequestHeaders?.Any() != true || requestInfo.RequestHeaders is null)
+        if (_antiDosConfig.BadBotsRequestHeaders?.Count == 0 || requestInfo.RequestHeaders is null)
         {
             return (false, null);
         }
@@ -171,7 +170,7 @@ public sealed class AntiDosFirewall : IAntiDosFirewall
                 continue;
             }
 
-            var botHeader = _antiDosConfig.BadBotsRequestHeaders.FirstOrDefault(badBotHeader
+            var botHeader = _antiDosConfig.BadBotsRequestHeaders?.FirstOrDefault(badBotHeader
                 => headerValue.ToString().Contains(badBotHeader, StringComparison.OrdinalIgnoreCase) ||
                    headerkey.Contains(badBotHeader, StringComparison.OrdinalIgnoreCase));
 
@@ -202,12 +201,12 @@ public sealed class AntiDosFirewall : IAntiDosFirewall
             return (false, null); // for ping-backs validations
         }
 
-        if (_antiDosConfig.BadBotsUserAgents?.Any() != true)
+        if (_antiDosConfig.BadBotsUserAgents?.Count == 0)
         {
             return (false, null);
         }
 
-        var userAgent = _antiDosConfig.BadBotsUserAgents.FirstOrDefault(badBot
+        var userAgent = _antiDosConfig.BadBotsUserAgents?.FirstOrDefault(badBot
             => requestInfo.UserAgent.Contains(badBot, StringComparison.OrdinalIgnoreCase));
 
         if (!string.IsNullOrWhiteSpace(userAgent))
@@ -291,7 +290,7 @@ public sealed class AntiDosFirewall : IAntiDosFirewall
     {
         ArgumentNullException.ThrowIfNull(requestInfo);
 
-        if (_antiDosConfig.BannedIPAddressRanges?.Any() != true)
+        if (_antiDosConfig.BannedIPAddressRanges is null || _antiDosConfig.BannedIPAddressRanges.Count == 0)
         {
             return (false, null);
         }
@@ -337,7 +336,8 @@ public sealed class AntiDosFirewall : IAntiDosFirewall
                 ExpiresAt = expiresAt
             };
 
-            _cacheService.Add(key, nameof(AntiDosFirewall), clientThrottleInfo, expiresAt);
+            _cacheService.Add(key, nameof(AntiDosFirewall), clientThrottleInfo,
+                expiresAt);
 
             return (false, clientThrottleInfo);
         }
@@ -345,13 +345,17 @@ public sealed class AntiDosFirewall : IAntiDosFirewall
         if (clientThrottleInfo.RequestsCount > _antiDosConfig.AllowedRequests)
         {
             clientThrottleInfo.BanReason = "IsDosAttack";
-            _cacheService.Add(key, nameof(AntiDosFirewall), clientThrottleInfo, expiresAt);
+
+            _cacheService.Add(key, nameof(AntiDosFirewall), clientThrottleInfo,
+                expiresAt);
 
             return (true, clientThrottleInfo);
         }
 
         clientThrottleInfo.RequestsCount++;
-        _cacheService.Add(key, nameof(AntiDosFirewall), clientThrottleInfo, expiresAt);
+
+        _cacheService.Add(key, nameof(AntiDosFirewall), clientThrottleInfo,
+            expiresAt);
 
         return (false, clientThrottleInfo);
     }
@@ -404,7 +408,9 @@ public sealed class AntiDosFirewall : IAntiDosFirewall
                     requestInfo.IP, requestInfo.UserAgent, throttleInfo);
 
                 throttleInfo.IsLogged = true;
-                _cacheService.Add(GetCacheKey(requestInfo), nameof(AntiDosFirewall), throttleInfo, GetCacheExpiresAt());
+
+                _cacheService.Add(GetCacheKey(requestInfo), nameof(AntiDosFirewall), throttleInfo,
+                    GetCacheExpiresAt());
 
                 return $"{requestInfo.IP}_{requestInfo.UserAgent}";
             }, DateTimeOffset.UtcNow.AddDays(days: 1));

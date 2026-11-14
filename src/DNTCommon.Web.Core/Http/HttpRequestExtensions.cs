@@ -260,8 +260,7 @@ public static partial class HttpRequestExtensions
 #pragma warning disable CC001
     public static async Task<T?> DeserializeRequestJsonBodyAsAsync<T>(this HttpContext httpContext
 #pragma warning restore CC001
-        ,
-        CancellationToken cancellationToken = default)
+        , CancellationToken cancellationToken = default)
     {
         var body = await httpContext.ReadRequestBodyAsStringAsync(cancellationToken);
 
@@ -275,8 +274,7 @@ public static partial class HttpRequestExtensions
 #pragma warning disable CC001
     public static async Task<string> ReadRequestBodyAsStringAsync(this HttpContext httpContext
 #pragma warning restore CC001
-        ,
-        CancellationToken cancellationToken = default)
+        , CancellationToken cancellationToken = default)
     {
         httpContext.RequestSanityCheck();
         var request = httpContext.Request;
@@ -309,8 +307,7 @@ public static partial class HttpRequestExtensions
 #pragma warning disable CC001
     public static async Task<IDictionary<string, string>?> DeserializeRequestJsonBodyAsDictionaryAsync(
 #pragma warning restore CC001
-        this HttpContext httpContext,
-        CancellationToken cancellationToken = default)
+        this HttpContext httpContext, CancellationToken cancellationToken = default)
     {
         var body = await httpContext.ReadRequestBodyAsStringAsync(cancellationToken);
 
@@ -356,7 +353,7 @@ public static partial class HttpRequestExtensions
                 httpRequest.Query.Select(header => (List<string>)[header.Key, $"<pre>{header.Value}</pre>"]).ToList()));
         }
 
-        if (httpRequest.Headers.Any())
+        if (httpRequest.Headers.Count > 0)
         {
             sb.AppendLine(HtmlExtensions.CreateHtmlTable(caption: "Request Headers", ["Key", "Value"],
                 httpRequest.Headers.Select(header => (List<string>)[header.Key, $"<pre>{header.Value}</pre>"])

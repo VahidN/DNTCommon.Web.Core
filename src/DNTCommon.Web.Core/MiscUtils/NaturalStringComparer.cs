@@ -1,4 +1,3 @@
-#if NET_10
 namespace DNTCommon.Web.Core;
 
 /// <summary>
@@ -62,4 +61,3 @@ public static class NaturalStringComparer
             => CachedInvariantCultureNumericOrderingIgnoreWidth;
     }
 }
-#endif

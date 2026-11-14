@@ -13,14 +13,16 @@ public static partial class FeedsDateTimeExtensions
     private static readonly string[] DateFormats =
     [
         // RFC 822 / 1123
-        "r", "R", "ddd, dd MMM yyyy HH:mm:ss GMT", "ddd, dd MMM yyyy HH:mm:ss UTC", "ddd, dd MMM yyyy HH:mm:ss zzz",
+        "r", "R", "ddd, dd MMM yyyy HH:mm:ss GMT",
+        "ddd, dd MMM yyyy HH:mm:ss UTC", "ddd, dd MMM yyyy HH:mm:ss zzz",
 
         // ISO / Atom
         "yyyy-MM-dd'T'HH:mm:ssZ", "yyyy-MM-dd'T'HH:mm:sszzz", "yyyy-MM-dd'T'HH:mm:ss.fffZ",
         "yyyy-MM-dd'T'HH:mm:ss.fffzzz",
 
         // رایج ولی غیر استاندارد
-        "yyyy-MM-dd HH:mm:ss", "yyyy/MM/dd HH:mm:ss", "yyyy-MM-dd HH:mm", "yyyy/MM/dd HH:mm",
+        "yyyy-MM-dd HH:mm:ss", "yyyy/MM/dd HH:mm:ss", "yyyy-MM-dd HH:mm",
+        "yyyy/MM/dd HH:mm",
 
         // عجیب ولی دیده‌شده
         "ddd MMM dd HH:mm:ss GMT yyyy", "ddd MMM dd HH:mm:ss zzz yyyy", "ddd MMM dd HH:mm:ss Z yyyy"
@@ -30,20 +32,27 @@ public static partial class FeedsDateTimeExtensions
 
     private static readonly List<string> Months =
     [
-        "ZeroIndex", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        "ZeroIndex", "Jan", "Feb",
+        "Mar", "Apr", "May",
+        "Jun", "Jul", "Aug",
+        "Sep", "Oct", "Nov",
+        "Dec"
     ];
 
     private static readonly Tzb[] ZoneBias =
     [
-        new(Zone: "GMT", Bias: 0), new(Zone: "UT", Bias: 0), new(Zone: "EST", -5 * 60), new(Zone: "EDT", -4 * 60),
-        new(Zone: "CST", -6 * 60), new(Zone: "CDT", -5 * 60), new(Zone: "MST", -7 * 60), new(Zone: "MDT", -6 * 60),
-        new(Zone: "PST", -8 * 60), new(Zone: "PDT", -7 * 60), new(Zone: "Z", Bias: 0), new(Zone: "A", -1 * 60),
-        new(Zone: "B", -2 * 60), new(Zone: "C", -3 * 60), new(Zone: "D", -4 * 60), new(Zone: "E", -5 * 60),
-        new(Zone: "F", -6 * 60), new(Zone: "G", -7 * 60), new(Zone: "H", -8 * 60), new(Zone: "I", -9 * 60),
-        new(Zone: "K", -10 * 60), new(Zone: "L", -11 * 60), new(Zone: "M", -12 * 60), new(Zone: "N", 1 * 60),
-        new(Zone: "O", 2 * 60), new(Zone: "P", 3 * 60), new(Zone: "Q", 4 * 60), new(Zone: "R", 3 * 60),
-        new(Zone: "S", 6 * 60), new(Zone: "T", 3 * 60), new(Zone: "U", 8 * 60), new(Zone: "V", 3 * 60),
-        new(Zone: "W", 10 * 60), new(Zone: "X", 3 * 60), new(Zone: "Y", 12 * 60)
+        new(Zone: "GMT", Bias: 0), new(Zone: "UT", Bias: 0), new(Zone: "EST", -5 * 60),
+        new(Zone: "EDT", -4 * 60), new(Zone: "CST", -6 * 60), new(Zone: "CDT", -5 * 60),
+        new(Zone: "MST", -7 * 60), new(Zone: "MDT", -6 * 60), new(Zone: "PST", -8 * 60),
+        new(Zone: "PDT", -7 * 60), new(Zone: "Z", Bias: 0), new(Zone: "A", -1 * 60),
+        new(Zone: "B", -2 * 60), new(Zone: "C", -3 * 60), new(Zone: "D", -4 * 60),
+        new(Zone: "E", -5 * 60), new(Zone: "F", -6 * 60), new(Zone: "G", -7 * 60),
+        new(Zone: "H", -8 * 60), new(Zone: "I", -9 * 60), new(Zone: "K", -10 * 60),
+        new(Zone: "L", -11 * 60), new(Zone: "M", -12 * 60), new(Zone: "N", 1 * 60),
+        new(Zone: "O", 2 * 60), new(Zone: "P", 3 * 60), new(Zone: "Q", 4 * 60),
+        new(Zone: "R", 3 * 60), new(Zone: "S", 6 * 60), new(Zone: "T", 3 * 60),
+        new(Zone: "U", 8 * 60), new(Zone: "V", 3 * 60), new(Zone: "W", 10 * 60),
+        new(Zone: "X", 3 * 60), new(Zone: "Y", 12 * 60)
     ];
 
     private static readonly char[] Separator = [':'];
@@ -111,17 +120,33 @@ public static partial class FeedsDateTimeExtensions
         }
 
         //strip trailing 'Z' since we assume UTC
-        dateTime = dateTime.EndsWith(value: 'Z') ? dateTime[..^1] : dateTime;
+        dateTime = dateTime.EndsWith(value: 'Z'
+#if NET_11
+            , StringComparison.Ordinal
+#endif
+
+        )
+            ? dateTime[..^1]
+            : dateTime;
 
         var timeIndex = dateTime.IndexOf(value: ':', StringComparison.OrdinalIgnoreCase);
 
         if (timeIndex != -1)
         {
-            var tzoneIndex = dateTime.IndexOf(value: '-', timeIndex);
+            var tzoneIndex = dateTime.IndexOf(value: '-', timeIndex
+#if NET_11
+                , StringComparison.Ordinal
+#endif
+
+            );
 
             if (tzoneIndex == -1)
             {
-                tzoneIndex = dateTime.IndexOf(value: '+', timeIndex);
+                tzoneIndex = dateTime.IndexOf(value: '+', timeIndex
+#if NET_11
+                    , StringComparison.Ordinal
+#endif
+                );
 
                 if (tzoneIndex != -1)
                 {
@@ -138,7 +163,11 @@ public static partial class FeedsDateTimeExtensions
             }
         }
 
-        if (timeIndex == dateTime.LastIndexOf(value: ':'))
+        if (timeIndex == dateTime.LastIndexOf(value: ':'
+#if NET_11
+                , StringComparison.Ordinal
+#endif
+            ))
         {
             //check if seconds part is missing
             dateTime += ":00";
@@ -193,7 +222,9 @@ public static partial class FeedsDateTimeExtensions
 
         var zone = m.Groups[groupnum: 7].Value;
 
-        var xd = new DateTime(year, month, day, hour, minute, second, DateTimeKind.Utc);
+        var xd = new DateTime(year, month, day,
+            hour, minute, second,
+            DateTimeKind.Utc);
 
         return xd.AddHours(RfcTimeZoneToGmtBias(zone) * -1);
     }
@@ -233,7 +264,11 @@ public static partial class FeedsDateTimeExtensions
 
         datetime = datetime[..tzoneIndex];
 
-        if (datetime.IndexOf(value: ':', StringComparison.OrdinalIgnoreCase) == datetime.LastIndexOf(value: ':'))
+        if (datetime.IndexOf(value: ':', StringComparison.OrdinalIgnoreCase) == datetime.LastIndexOf(value: ':'
+#if NET_11
+                , StringComparison.Ordinal
+#endif
+            ))
         {
             //check if seconds part is missing
             datetime += ":00";
@@ -275,5 +310,7 @@ public static partial class FeedsDateTimeExtensions
         RegexOptions.Compiled, matchTimeoutMilliseconds: 3000)]
     private static partial Regex Rfc2822Regex();
 
-    private sealed record Tzb(string Zone, int Bias);
+    private sealed record Tzb(
+        string Zone,
+        int Bias);
 }
